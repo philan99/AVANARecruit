@@ -105,12 +105,12 @@
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 54 72% 95%;
 
-  --sidebar: 228 21% 29%;
+  --sidebar: 229 20% 29%;
   --sidebar-foreground: 54 72% 91%;
-  --sidebar-border: 228 21% 22%;
+  --sidebar-border: 229 20% 23%;
   --sidebar-primary: 54 72% 91%;
-  --sidebar-primary-foreground: 228 21% 29%;
-  --sidebar-accent: 228 21% 24%;
+  --sidebar-primary-foreground: 229 20% 29%;
+  --sidebar-accent: 229 20% 25%;
   --sidebar-accent-foreground: 54 60% 88%;
   --sidebar-ring: 54 72% 91%;
 
