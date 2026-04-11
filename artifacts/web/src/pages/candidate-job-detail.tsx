@@ -1,11 +1,12 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function CandidateJobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
@@ -57,6 +58,9 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             )}
           </div>
         </div>
+        <Button size="lg" className="font-mono tracking-tight shrink-0">
+          <Send className="w-4 h-4 mr-2" /> APPLY
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
