@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft, Target, Calendar } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft, Target, Calendar, FileText, Download } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -94,6 +94,43 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
               <div className="text-muted-foreground">
                 {candidate.education}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <FileText className="w-5 h-5 mr-2" /> CV / Resume
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(candidate as any)?.cvFile ? (
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <FileText className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{(candidate as any).cvFileName || "CV Document"}</p>
+                      <p className="text-xs text-muted-foreground">Uploaded by candidate</p>
+                    </div>
+                  </div>
+                  <a
+                    href={`${import.meta.env.BASE_URL}api/storage${(candidate as any).cvFile}`.replace(/\/\//g, "/")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </a>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center py-6 text-muted-foreground">
+                  <FileText className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                  <p className="text-sm">No CV uploaded by this candidate.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
