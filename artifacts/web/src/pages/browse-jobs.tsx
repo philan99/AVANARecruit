@@ -6,12 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, MapPin, Building, Briefcase, PoundSterling, Heart } from "lucide-react";
 
 export default function BrowseJobs() {
   const searchString = useSearch();
   const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
   const [search, setSearch] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [showFavourites, setShowFavourites] = useState(params.get("favourites") === "1");
   const { candidateProfileId } = useRole();
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
@@ -61,9 +69,22 @@ export default function BrowseJobs() {
     query: { queryKey: getListJobsQueryKey(queryParams) },
   });
 
-  const displayedJobs = showFavourites
-    ? jobs?.filter((job) => favouriteJobIds.has(job.id))
-    : jobs;
+  const uniqueCompanies = useMemo(() => {
+    if (!jobs) return [];
+    const companies = new Set(jobs.map(j => j.company).filter(Boolean));
+    return Array.from(companies).sort();
+  }, [jobs]);
+
+  const displayedJobs = useMemo(() => {
+    let result = jobs;
+    if (showFavourites) {
+      result = result?.filter((job) => favouriteJobIds.has(job.id));
+    }
+    if (companyFilter !== "all") {
+      result = result?.filter((job) => job.company === companyFilter);
+    }
+    return result;
+  }, [jobs, showFavourites, favouriteJobIds, companyFilter]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -85,14 +106,28 @@ export default function BrowseJobs() {
         </Button>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search jobs by title, company, or location..."
-          className="pl-9 bg-card"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[250px] max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search jobs by title, company, or location..."
+            className="pl-9 bg-card"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <Select value={companyFilter} onValueChange={setCompanyFilter}>
+          <SelectTrigger className="w-[200px] bg-card">
+            <Building className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="All Companies" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Companies</SelectItem>
+            {uniqueCompanies.map(company => (
+              <SelectItem key={company} value={company}>{company}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
