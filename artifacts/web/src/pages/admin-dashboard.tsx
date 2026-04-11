@@ -63,7 +63,7 @@ export default function AdminDashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "companies" | "candidates">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "companies" | "jobs" | "candidates">("overview");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -102,6 +102,7 @@ export default function AdminDashboard() {
         {[
           { key: "overview" as const, label: "Overview", icon: LayoutDashboard },
           { key: "companies" as const, label: `Companies (${companies.length})`, icon: Building2 },
+          { key: "jobs" as const, label: `Jobs (${jobs.length})`, icon: Briefcase },
           { key: "candidates" as const, label: `Candidates (${candidates.length})`, icon: Users },
         ].map((tab) => (
           <button
@@ -121,7 +122,7 @@ export default function AdminDashboard() {
 
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Companies</CardTitle>
@@ -157,18 +158,6 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
-                <Users className="w-4 h-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-primary">
-                  {candidates.filter(c => c.status === "active").length}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Currently active</p>
-              </CardContent>
-            </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -329,6 +318,68 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">No companies registered yet.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {activeTab === "jobs" && (
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle>All Jobs</CardTitle>
+            <CardDescription>Complete list of job requisitions across the platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {jobs.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">ID</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Title</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Company</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Location</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Level</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Skills</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Matches</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jobs.map((job) => (
+                      <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                        <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{job.id}</td>
+                        <td className="py-3 px-4 font-medium">{job.title}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{job.company}</td>
+                        <td className="py-3 px-4 text-muted-foreground">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className="text-[9px] uppercase">{job.experienceLevel}</Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {job.skills.slice(0, 3).map((skill) => (
+                              <Badge key={skill} variant="secondary" className="text-[9px] px-1.5 py-0">{skill}</Badge>
+                            ))}
+                            {job.skills.length > 3 && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0">+{job.skills.length - 3}</Badge>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-xs font-bold text-primary">{job.matchCount}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant={job.status === "open" ? "default" : "secondary"} className="text-[9px] uppercase">{job.status}</Badge>
+                        </td>
+                        <td className="py-3 px-4 text-muted-foreground text-xs">{new Date(job.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">No jobs posted yet.</p>
             )}
           </CardContent>
         </Card>
