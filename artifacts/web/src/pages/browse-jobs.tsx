@@ -4,7 +4,8 @@ import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Building, Briefcase, PoundSterling } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, MapPin, Building, Briefcase, PoundSterling, Heart } from "lucide-react";
 
 export default function BrowseJobs() {
   const [search, setSearch] = useState("");
@@ -20,11 +21,16 @@ export default function BrowseJobs() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Briefcase className="mr-3 text-primary" /> Browse Opportunities
-        </h1>
-        <p className="text-muted-foreground mt-1">Explore open positions from companies on the platform.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Briefcase className="mr-3 text-primary" /> Browse Opportunities
+          </h1>
+          <p className="text-muted-foreground mt-1">Explore open positions from companies on the platform.</p>
+        </div>
+        <Button variant="outline" size="sm" className="font-mono tracking-tight">
+          <Heart className="w-4 h-4 mr-2" /> Show Favourites
+        </Button>
       </div>
 
       <div className="relative max-w-md">
