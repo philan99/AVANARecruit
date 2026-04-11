@@ -52,23 +52,25 @@ export default function CandidateDashboard() {
     query: { queryKey: ["open-jobs"] },
   });
 
-  const [favouritesCount, setFavouritesCount] = useState(0);
+  const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
-  const fetchFavouritesCount = useCallback(async () => {
+  const fetchFavourites = useCallback(async () => {
     if (!candidateProfileId) return;
     try {
       const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`);
       if (res.ok) {
         const data = await res.json();
-        setFavouritesCount(data.length);
+        setFavouriteJobIds(new Set(data.map((f: any) => f.jobId)));
       }
     } catch {}
   }, [candidateProfileId, apiBase]);
 
   useEffect(() => {
-    fetchFavouritesCount();
-  }, [fetchFavouritesCount]);
+    fetchFavourites();
+  }, [fetchFavourites]);
+
+  const favouritesCount = favouriteJobIds.size;
 
   if (!candidateProfileId) {
     return (
@@ -389,7 +391,10 @@ export default function CandidateDashboard() {
                 <Link key={match.id} href={`/jobs/${match.jobId}`}>
                   <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
                     <div className="overflow-hidden flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{match.jobTitle}</p>
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(match.jobId) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                        {match.jobTitle}
+                      </p>
                       <div className="flex items-center gap-3 mt-0.5">
                         <p className="text-xs text-muted-foreground truncate flex items-center">
                           <Building className="w-3 h-3 mr-1 shrink-0" />
@@ -441,7 +446,10 @@ export default function CandidateDashboard() {
                 <Link key={job.id} href={`/jobs/${job.id}`}>
                   <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
                     <div className="overflow-hidden flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(job.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                        {job.title}
+                      </p>
                       <div className="flex items-center gap-3 mt-0.5">
                         <p className="text-xs text-muted-foreground truncate flex items-center">
                           <Building className="w-3 h-3 mr-1 shrink-0" />
