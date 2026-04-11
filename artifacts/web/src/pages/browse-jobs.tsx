@@ -28,7 +28,7 @@ export default function BrowseJobs() {
           </h1>
           <p className="text-muted-foreground mt-1">Explore open positions from companies on the platform.</p>
         </div>
-        <Button variant="outline" size="sm" className="font-mono tracking-tight">
+        <Button size="lg" className="font-mono tracking-tight">
           <Heart className="w-4 h-4 mr-2" /> Show Favourites
         </Button>
       </div>
