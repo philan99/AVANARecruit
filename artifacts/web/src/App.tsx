@@ -21,6 +21,7 @@ import CompanyProfile from "@/pages/company-profile";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCompanies from "@/pages/admin-companies";
 import AdminCandidates from "@/pages/admin-candidates";
+import AdminJobs from "@/pages/admin-jobs";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -71,6 +72,7 @@ function AdminRoutes() {
         <Route path="/" component={AdminDashboard} />
         <Route path="/companies" component={AdminCompanies} />
         <Route path="/candidates" component={AdminCandidates} />
+        <Route path="/jobs" component={AdminJobs} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
