@@ -143,7 +143,7 @@ export default function CandidateDashboard() {
             )}
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground">{candidate?.name}</p>
-              <p className="text-xs text-muted-foreground">{candidate?.currentTitle}</p>
+              <p className="text-xs text-muted-foreground capitalize">{candidate?.status || "active"}</p>
             </div>
           </div>
         </Link>
