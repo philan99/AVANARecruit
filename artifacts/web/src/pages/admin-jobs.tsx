@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Briefcase, MapPin, Building, Calendar } from "lucide-react";
+import { Briefcase, MapPin, Building } from "lucide-react";
 
 interface Job {
   id: number;
@@ -32,10 +24,6 @@ interface Job {
 export default function AdminJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [experienceFilter, setExperienceFilter] = useState("all");
-  const [companyFilter, setCompanyFilter] = useState("all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -53,156 +41,88 @@ export default function AdminJobs() {
     fetchData();
   }, [basePath]);
 
-  const companies = [...new Set(jobs.map(j => j.company))].sort();
-
-  const filteredJobs = jobs.filter((job) => {
-    if (statusFilter !== "all" && job.status !== statusFilter) return false;
-    if (experienceFilter !== "all" && job.experienceLevel !== experienceFilter) return false;
-    if (companyFilter !== "all" && job.company !== companyFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return (
-        job.title.toLowerCase().includes(q) ||
-        job.company.toLowerCase().includes(q) ||
-        job.location.toLowerCase().includes(q) ||
-        job.skills.some(s => s.toLowerCase().includes(q))
-      );
-    }
-    return true;
-  });
-
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading jobs data...</div>;
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Briefcase className="mr-3 text-primary" /> All Jobs
+          <Briefcase className="mr-3 text-primary" /> Jobs
         </h1>
-        <p className="text-muted-foreground mt-1">Complete list of all job requisitions across the platform.</p>
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search jobs, companies, skills..."
-            className="pl-9 bg-card"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px] bg-card">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={experienceFilter} onValueChange={setExperienceFilter}>
-          <SelectTrigger className="w-[160px] bg-card">
-            <SelectValue placeholder="Experience" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Levels</SelectItem>
-            <SelectItem value="junior">Junior</SelectItem>
-            <SelectItem value="mid">Mid-Level</SelectItem>
-            <SelectItem value="senior">Senior</SelectItem>
-            <SelectItem value="lead">Lead</SelectItem>
-            <SelectItem value="executive">Executive</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={companyFilter} onValueChange={setCompanyFilter}>
-          <SelectTrigger className="w-[180px] bg-card">
-            <SelectValue placeholder="Company" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Companies</SelectItem>
-            {companies.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <p className="text-muted-foreground mt-1">{jobs.length} job requisitions on the platform.</p>
       </div>
 
       <Card className="bg-card">
-        <CardHeader>
-          <CardTitle>Jobs ({filteredJobs.length})</CardTitle>
-          <CardDescription>
-            {filteredJobs.length === jobs.length
-              ? `Showing all ${jobs.length} jobs`
-              : `Showing ${filteredJobs.length} of ${jobs.length} jobs`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredJobs.length > 0 ? (
+        <CardContent className="pt-6">
+          {jobs.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Title</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Company</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Location</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Level</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Salary</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Skills</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Matches</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Job</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Company</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Level</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Salary</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Matches</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredJobs.map((job) => (
+                  {jobs.map((job) => (
                     <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{job.id}</td>
-                      <td className="py-3 px-4 font-medium">{job.title}</td>
-                      <td className="py-3 px-4 text-muted-foreground">
+                      <td className="py-2 px-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <Briefcase className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-xs text-foreground truncate">{job.title}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">ID: {job.id}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground">
                         <span className="flex items-center gap-1"><Building className="w-3 h-3" />{job.company}</span>
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground">
+                      <td className="py-2 px-2 text-muted-foreground">
                         <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</span>
                       </td>
-                      <td className="py-3 px-4">
-                        <Badge variant="outline" className="text-[9px] uppercase">{job.experienceLevel}</Badge>
+                      <td className="py-2 px-2">
+                        <Badge variant="outline" className="text-[8px] uppercase px-1 py-0">{job.experienceLevel}</Badge>
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground font-mono text-xs">
+                      <td className="py-2 px-2 text-muted-foreground font-mono">
                         {job.salaryMin || job.salaryMax
                           ? `£${(job.salaryMin || 0).toLocaleString()} - £${(job.salaryMax || 0).toLocaleString()}`
                           : "—"}
                       </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {job.skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-[9px] px-1.5 py-0">
+                      <td className="py-2 px-2">
+                        <div className="flex flex-wrap gap-1">
+                          {job.skills.slice(0, 2).map((skill) => (
+                            <Badge key={skill} variant="secondary" className="text-[8px] px-1 py-0">
                               {skill}
                             </Badge>
                           ))}
-                          {job.skills.length > 3 && (
-                            <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                              +{job.skills.length - 3}
+                          {job.skills.length > 2 && (
+                            <Badge variant="outline" className="text-[8px] px-1 py-0">
+                              +{job.skills.length - 2}
                             </Badge>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="font-mono text-xs font-bold text-primary">{job.matchCount}</span>
+                      <td className="py-2 px-2">
+                        <span className="font-mono font-bold text-primary">{job.matchCount}</span>
                       </td>
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant={job.status === "open" ? "default" : "secondary"}
-                          className="text-[9px] uppercase"
-                        >
+                      <td className="py-2 px-2">
+                        <Badge variant={job.status === "open" ? "default" : "secondary"} className="text-[8px] uppercase">
                           {job.status}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground text-xs">
+                      <td className="py-2 px-2 text-muted-foreground">
                         {new Date(job.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -211,7 +131,7 @@ export default function AdminJobs() {
               </table>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">No jobs found matching your filters.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">No jobs on the platform yet.</p>
           )}
         </CardContent>
       </Card>
