@@ -33,13 +33,23 @@ Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores bas
 - **Education matching** (15% weight): Parses education levels from requirements text
 - **Location matching** (20% weight): Handles remote, exact match, and partial matches
 
-### Pages
-- `/` — Dashboard with stats, skill demand chart, recent matches, top candidates
+### Role-Based Portal
+Users select their role on first visit: **Company** or **Candidate**. The selection is stored in localStorage and determines which portal (routes + sidebar navigation) is shown. Users can switch roles via the "Switch Role" button in the sidebar.
+
+### Pages — Company Portal
+- `/` — Company dashboard with recruitment pipeline stats, skill demand chart, recent matches, top candidates
 - `/jobs` — Job listings with search/filter, create new
 - `/jobs/:id` — Job detail, run AI matching, view match results
 - `/candidates` — Candidate listings with search/filter, create new
 - `/candidates/:id` — Candidate detail, view match history
 - `/matches` — All match results management
+
+### Pages — Candidate Portal
+- `/` — Candidate dashboard with personalized job match overview
+- `/profile` — Create/select/view candidate profile
+- `/my-matches` — View AI-generated job matches with detailed scoring breakdown
+- `/browse-jobs` — Browse all open positions
+- `/jobs/:id` — Job detail (read-only view)
 
 ## Key Commands
 
@@ -56,5 +66,7 @@ Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores bas
 - `artifacts/api-server/src/routes/` — API route handlers
 - `artifacts/api-server/src/lib/matching.ts` — AI matching engine
 - `artifacts/web/src/` — React frontend
+- `artifacts/web/src/contexts/role-context.tsx` — Role selection context (company/candidate) with localStorage persistence
+- `artifacts/web/src/pages/role-select.tsx` — Role selection landing page
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

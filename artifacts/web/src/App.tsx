@@ -3,8 +3,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
+import { RoleProvider, useRole } from "@/contexts/role-context";
 
+import RoleSelect from "@/pages/role-select";
 import Dashboard from "@/pages/dashboard";
+import CandidateDashboard from "@/pages/candidate-dashboard";
+import CandidateProfile from "@/pages/candidate-profile";
+import CandidateMatches from "@/pages/candidate-matches";
+import BrowseJobs from "@/pages/browse-jobs";
 import JobsList from "@/pages/jobs/list";
 import JobDetail from "@/pages/jobs/detail";
 import CandidatesList from "@/pages/candidates/list";
@@ -21,7 +27,7 @@ const queryClient = new QueryClient({
   },
 });
 
-function Router() {
+function CompanyRoutes() {
   return (
     <Layout>
       <Switch>
@@ -37,14 +43,45 @@ function Router() {
   );
 }
 
+function CandidateRoutes() {
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/" component={CandidateDashboard} />
+        <Route path="/profile" component={CandidateProfile} />
+        <Route path="/my-matches" component={CandidateMatches} />
+        <Route path="/browse-jobs" component={BrowseJobs} />
+        <Route path="/jobs/:id" component={JobDetail} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  );
+}
+
+function AppRouter() {
+  const { role } = useRole();
+
+  if (!role) {
+    return <RoleSelect />;
+  }
+
+  if (role === "candidate") {
+    return <CandidateRoutes />;
+  }
+
+  return <CompanyRoutes />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
+        <RoleProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <AppRouter />
+          </WouterRouter>
+          <Toaster />
+        </RoleProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
