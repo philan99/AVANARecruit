@@ -129,7 +129,7 @@ export default function JobsList() {
               <Plus className="w-4 h-4 mr-2" /> New Requisition
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
             <DialogHeader>
               <DialogTitle>Create New Requisition</DialogTitle>
             </DialogHeader>
@@ -153,7 +153,7 @@ export default function JobsList() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Company/Department</FormLabel>
-                        <FormControl><Input {...field} /></FormControl>
+                        <FormControl><Input {...field} readOnly className="bg-muted cursor-default" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
