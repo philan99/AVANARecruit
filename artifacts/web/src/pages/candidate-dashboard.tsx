@@ -1,5 +1,5 @@
 import { useRole } from "@/contexts/role-context";
-import { useGetCandidate, useGetCandidateMatches, useListJobs } from "@workspace/api-client-react";
+import { useGetCandidate, useGetCandidateMatches, useListJobs, getGetCandidateQueryKey, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,11 @@ export default function CandidateDashboard() {
   const { candidateProfileId } = useRole();
 
   const { data: candidate } = useGetCandidate(candidateProfileId!, {
-    query: { enabled: !!candidateProfileId, queryKey: ["candidate", candidateProfileId] },
+    query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
   });
 
   const { data: matches } = useGetCandidateMatches(candidateProfileId!, {
-    query: { enabled: !!candidateProfileId, queryKey: ["candidate-matches", candidateProfileId] },
+    query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
   });
 
   const { data: openJobs } = useListJobs({ status: "open" }, {
