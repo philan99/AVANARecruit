@@ -193,27 +193,31 @@ export default function CandidateDashboard() {
           </Card>
         </Link>
 
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Open Positions</CardTitle>
-            <Briefcase className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{openJobs?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Available opportunities</p>
-          </CardContent>
-        </Card>
+        <Link href="/browse-jobs">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Open Positions</CardTitle>
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{openJobs?.length || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Available opportunities</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Job Matches</CardTitle>
-            <Target className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">{matches?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{highMatches} strong matches (75%+)</p>
-          </CardContent>
-        </Card>
+        <Link href="/my-matches">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Job Matches</CardTitle>
+              <Target className="w-4 h-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{matches?.length || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">{highMatches} strong matches (75%+)</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
