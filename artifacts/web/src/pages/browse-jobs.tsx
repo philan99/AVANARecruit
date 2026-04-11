@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ export default function BrowseJobs() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [showFavourites, setShowFavourites] = useState(params.get("favourites") === "1");
+  const [, navigate] = useLocation();
   const { candidateProfileId } = useRole();
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
 
@@ -231,63 +232,68 @@ export default function BrowseJobs() {
               </thead>
               <tbody>
                 {displayedJobs?.map((job) => (
-                  <Link key={job.id} href={`/jobs/${job.id}`}>
-                    <tr className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer">
-                      <td className="py-3 px-3">
-                        <p className="text-sm font-medium text-foreground">{job.title}</p>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Building className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{job.company}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <MapPin className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{job.location}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
-                          {job.experienceLevel}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-3 text-sm text-muted-foreground font-mono">
-                        {job.salaryMin || job.salaryMax
-                          ? `£${(job.salaryMin || 0).toLocaleString()} - £${(job.salaryMax || 0).toLocaleString()}`
-                          : "—"}
-                      </td>
-                      <td className="py-3 px-3">
-                        <div className="flex flex-wrap gap-1">
-                          {job.skills.slice(0, 3).map(skill => (
-                            <Badge key={skill} variant="outline" className="text-[10px] py-0 px-1.5 h-4">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {job.skills.length > 3 && (
-                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4">
-                              +{job.skills.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <button
-                          onClick={(e) => toggleFavourite(e, job.id)}
-                          className="p-1 rounded-full hover:bg-muted transition-colors"
-                        >
-                          <Heart
-                            className={`w-4 h-4 transition-colors ${
-                              favouriteJobIds.has(job.id)
-                                ? "fill-red-500 text-red-500"
-                                : "text-muted-foreground/40 hover:text-red-400"
-                            }`}
-                          />
-                        </button>
-                      </td>
-                    </tr>
-                  </Link>
+                  <tr
+                    key={job.id}
+                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest("button")) return;
+                      navigate(`/jobs/${job.id}`);
+                    }}
+                  >
+                    <td className="py-3 px-3">
+                      <p className="text-sm font-medium text-foreground">{job.title}</p>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Building className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{job.company}</span>
+                      </span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{job.location}</span>
+                      </span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
+                        {job.experienceLevel}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-3 text-sm text-muted-foreground font-mono">
+                      {job.salaryMin || job.salaryMax
+                        ? `£${(job.salaryMin || 0).toLocaleString()} - £${(job.salaryMax || 0).toLocaleString()}`
+                        : "—"}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex flex-wrap gap-1">
+                        {job.skills.slice(0, 3).map(skill => (
+                          <Badge key={skill} variant="outline" className="text-[10px] py-0 px-1.5 h-4">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {job.skills.length > 3 && (
+                          <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4">
+                            +{job.skills.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        onClick={(e) => toggleFavourite(e, job.id)}
+                        className="p-1 rounded-full hover:bg-muted transition-colors"
+                      >
+                        <Heart
+                          className={`w-4 h-4 transition-colors ${
+                            favouriteJobIds.has(job.id)
+                              ? "fill-red-500 text-red-500"
+                              : "text-muted-foreground/40 hover:text-red-400"
+                          }`}
+                        />
+                      </button>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
