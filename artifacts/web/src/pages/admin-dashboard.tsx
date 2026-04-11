@@ -123,7 +123,7 @@ export default function AdminDashboard() {
       {activeTab === "overview" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-card">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("companies")}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Companies</CardTitle>
                 <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("candidates")}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
                 <Users className="w-4 h-4 text-muted-foreground" />
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("jobs")}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
                 <Briefcase className="w-4 h-4 text-muted-foreground" />
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-3">
                   {companies.length > 0 ? companies.slice(0, 5).map((company) => (
-                    <div key={company.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50">
+                    <div key={company.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => setActiveTab("companies")}>
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                           {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-3">
                   {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
-                    <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50">
+                    <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => setActiveTab("candidates")}>
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                           {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-3">
                   {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
-                    <div key={job.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50">
+                    <div key={job.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => setActiveTab("jobs")}>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
                         <p className="text-xs text-muted-foreground truncate">
