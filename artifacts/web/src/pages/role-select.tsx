@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Building2, UserCircle, LogIn, Sparkles, Target, Users, BarChart3, Shield } from "lucide-react";
-import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775916708818.png";
-import faviconUrl from "@assets/YouTube_1775916896475.png";
+import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775917058507.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
@@ -82,7 +81,6 @@ export default function RoleSelect() {
       <div className="hidden lg:flex lg:w-1/2 bg-sidebar flex-col justify-between p-12">
         <div>
           <div className="flex items-center mb-2">
-            <img src={faviconUrl} alt="" className="h-8 w-8 mr-2" />
             <img src={logoUrl} alt="Avana Talent" className="h-8" />
           </div>
         </div>
@@ -117,7 +115,6 @@ export default function RoleSelect() {
       <div className="flex-1 bg-background flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center justify-center mb-8">
-            <img src={faviconUrl} alt="" className="h-8 w-8 mr-2" />
             <img src={logoUrl} alt="Avana Talent" className="h-8" />
           </div>
 
