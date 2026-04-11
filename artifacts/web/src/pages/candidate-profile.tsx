@@ -37,6 +37,7 @@ interface EditFormState {
   skills: string;
   experienceYears: number;
   education: string;
+  educationDetails: string;
   location: string;
 }
 
@@ -143,7 +144,7 @@ export default function CandidateProfile() {
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
-    summary: "", skills: "", experienceYears: 0, education: "", location: "",
+    summary: "", skills: "", experienceYears: 0, education: "", educationDetails: "", location: "",
   });
 
   useEffect(() => {
@@ -157,6 +158,7 @@ export default function CandidateProfile() {
         skills: candidate.skills.join(", "),
         experienceYears: candidate.experienceYears,
         education: candidate.education,
+        educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
       });
       const exp = (candidate as any).experience;
@@ -177,6 +179,7 @@ export default function CandidateProfile() {
         skills: candidate.skills.join(", "),
         experienceYears: candidate.experienceYears,
         education: candidate.education,
+        educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
       });
     }
@@ -229,6 +232,7 @@ export default function CandidateProfile() {
       skills: editForm.skills.split(",").map(s => s.trim()).filter(Boolean),
       experienceYears: editForm.experienceYears,
       education: editForm.education,
+      educationDetails: editForm.educationDetails || null,
       location: editForm.location,
       experience: experienceList,
     };
@@ -631,26 +635,42 @@ export default function CandidateProfile() {
         </CardHeader>
         <CardContent>
           {isEditing ? (
-            <Select value={editForm.education} onValueChange={(val) => updateField("education", val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select education level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="GCSE">GCSE</SelectItem>
-                <SelectItem value="A-Level">A-Level</SelectItem>
-                <SelectItem value="HND/HNC">HND/HNC</SelectItem>
-                <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
-                <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
-                <SelectItem value="Master's Degree">Master's Degree</SelectItem>
-                <SelectItem value="PhD">PhD</SelectItem>
-                <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-4">
+              <Select value={editForm.education} onValueChange={(val) => updateField("education", val)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select education level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GCSE">GCSE</SelectItem>
+                  <SelectItem value="A-Level">A-Level</SelectItem>
+                  <SelectItem value="HND/HNC">HND/HNC</SelectItem>
+                  <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
+                  <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                  <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+                  <SelectItem value="PhD">PhD</SelectItem>
+                  <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Details (optional)</label>
+                <Textarea
+                  value={editForm.educationDetails}
+                  onChange={e => updateField("educationDetails", e.target.value)}
+                  placeholder="e.g. BSc Computer Science, University of Manchester, 2018-2021"
+                  className="min-h-[80px]"
+                />
+              </div>
+            </div>
           ) : (
-            <div className="flex items-center text-muted-foreground">
-              <GraduationCap className="w-5 h-5 mr-2" />
-              <span>{candidate.education}</span>
+            <div className="space-y-2">
+              <div className="flex items-center text-muted-foreground">
+                <GraduationCap className="w-5 h-5 mr-2" />
+                <span>{candidate.education}</span>
+              </div>
+              {(candidate as any).educationDetails && (
+                <p className="text-sm text-muted-foreground ml-7 whitespace-pre-wrap">{(candidate as any).educationDetails}</p>
+              )}
             </div>
           )}
         </CardContent>

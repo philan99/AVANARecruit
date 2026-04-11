@@ -13,6 +13,7 @@ export const candidatesTable = pgTable("candidates", {
   skills: text("skills").array().notNull(),
   experienceYears: integer("experience_years").notNull(),
   education: text("education").notNull(),
+  educationDetails: text("education_details"),
   location: text("location").notNull(),
   profileImage: text("profile_image"),
   cvFile: text("cv_file"),

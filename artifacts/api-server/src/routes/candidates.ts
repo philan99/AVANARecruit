@@ -180,7 +180,7 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const { profileImage, cvFile, cvFileName, experience, ...rest } = req.body;
+  const { profileImage, cvFile, cvFileName, experience, educationDetails, ...rest } = req.body;
   const parsed = UpdateCandidateBody.safeParse(rest);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -199,6 +199,9 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
   }
   if (experience !== undefined) {
     updateData.experience = experience;
+  }
+  if (educationDetails !== undefined) {
+    updateData.educationDetails = educationDetails;
   }
 
   const [candidate] = await db
