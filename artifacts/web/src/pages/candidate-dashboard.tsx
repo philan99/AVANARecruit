@@ -22,7 +22,7 @@ import {
   Mail,
   Heart,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -132,11 +132,13 @@ export default function CandidateDashboard() {
     { metric: "Location", score: avgLocScore },
   ];
 
+  const [, navigate] = useLocation();
+
   const scoreDistribution = [
-    { range: "90-100%", count: matches?.filter(m => m.overallScore >= 90).length || 0 },
-    { range: "75-89%", count: matches?.filter(m => m.overallScore >= 75 && m.overallScore < 90).length || 0 },
-    { range: "50-74%", count: matches?.filter(m => m.overallScore >= 50 && m.overallScore < 75).length || 0 },
-    { range: "<50%", count: matches?.filter(m => m.overallScore < 50).length || 0 },
+    { range: "90-100%", rangeKey: "90-100", count: matches?.filter(m => m.overallScore >= 90).length || 0 },
+    { range: "75-89%", rangeKey: "75-89", count: matches?.filter(m => m.overallScore >= 75 && m.overallScore < 90).length || 0 },
+    { range: "50-74%", rangeKey: "50-74", count: matches?.filter(m => m.overallScore >= 50 && m.overallScore < 75).length || 0 },
+    { range: "<50%", rangeKey: "0-49", count: matches?.filter(m => m.overallScore < 50).length || 0 },
   ];
 
   return (
@@ -342,7 +344,17 @@ export default function CandidateDashboard() {
                   <RechartsTooltip
                     contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
                   />
-                  <Bar dataKey="count" name="Matches" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} maxBarSize={30} />
+                  <Bar
+                    dataKey="count"
+                    name="Matches"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={30}
+                    cursor="pointer"
+                    onClick={(data: any) => {
+                      if (data?.rangeKey) navigate(`/my-matches?scoreRange=${data.rangeKey}`);
+                    }}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

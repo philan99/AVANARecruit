@@ -1,19 +1,30 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles } from "lucide-react";
-import { Link } from "wouter";
+import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles, X } from "lucide-react";
+import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+
+const SCORE_RANGES: Record<string, { label: string; min: number; max: number }> = {
+  "90-100": { label: "90-100%", min: 90, max: 100 },
+  "75-89": { label: "75-89%", min: 75, max: 89 },
+  "50-74": { label: "50-74%", min: 50, max: 74 },
+  "0-49": { label: "Below 50%", min: 0, max: 49 },
+};
 
 export default function CandidateMatches() {
   const { candidateProfileId } = useRole();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
+  const searchString = useSearch();
+  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
+  const scoreRangeKey = params.get("scoreRange");
+  const activeRange = scoreRangeKey ? SCORE_RANGES[scoreRangeKey] : null;
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
@@ -54,7 +65,10 @@ export default function CandidateMatches() {
     );
   }
 
-  const sortedMatches = matches?.sort((a, b) => b.overallScore - a.overallScore) || [];
+  const allSorted = matches?.sort((a, b) => b.overallScore - a.overallScore) || [];
+  const sortedMatches = activeRange
+    ? allSorted.filter(m => m.overallScore >= activeRange.min && m.overallScore <= activeRange.max)
+    : allSorted;
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -64,6 +78,18 @@ export default function CandidateMatches() {
             <Target className="mr-3 text-primary" /> My Job Matches
           </h1>
           <p className="text-muted-foreground mt-1">Jobs that match your skills and experience, ranked by AI scoring.</p>
+          {activeRange && (
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary" className="text-xs">
+                Filtered: {activeRange.label}
+              </Badge>
+              <Link href="/my-matches">
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground">
+                  <X className="w-3 h-3 mr-1" /> Clear filter
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
         <Button onClick={handleRunMatching} disabled={isRunning} className="shrink-0">
           <Sparkles className="w-4 h-4 mr-2" />
