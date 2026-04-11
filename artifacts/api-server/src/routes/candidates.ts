@@ -51,6 +51,7 @@ router.get("/candidates", async (req, res): Promise<void> => {
       experienceYears: candidatesTable.experienceYears,
       education: candidatesTable.education,
       location: candidatesTable.location,
+      profileImage: candidatesTable.profileImage,
       status: candidatesTable.status,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
@@ -68,7 +69,7 @@ router.get("/candidates", async (req, res): Promise<void> => {
   }
 
   const candidates = await query;
-  res.json(ListCandidatesResponse.parse(candidates));
+  res.json(candidates);
 });
 
 router.post("/candidates/login", async (req, res): Promise<void> => {
@@ -122,7 +123,7 @@ router.post("/candidates", async (req, res): Promise<void> => {
   const [candidate] = await db.insert(candidatesTable).values(insertData).returning();
 
   const result = { ...candidate, matchCount: 0 };
-  res.status(201).json(GetCandidateResponse.parse(result));
+  res.status(201).json(result);
 });
 
 router.get("/candidates/:id", async (req, res): Promise<void> => {
@@ -150,6 +151,7 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       experienceYears: candidatesTable.experienceYears,
       education: candidatesTable.education,
       location: candidatesTable.location,
+      profileImage: candidatesTable.profileImage,
       status: candidatesTable.status,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
@@ -164,7 +166,7 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(GetCandidateResponse.parse(candidate));
+  res.json(candidate);
 });
 
 router.patch("/candidates/:id", async (req, res): Promise<void> => {
@@ -174,15 +176,21 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const parsed = UpdateCandidateBody.safeParse(req.body);
+  const { profileImage, ...rest } = req.body;
+  const parsed = UpdateCandidateBody.safeParse(rest);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
 
+  const updateData: any = { ...parsed.data };
+  if (profileImage !== undefined) {
+    updateData.profileImage = profileImage;
+  }
+
   const [candidate] = await db
     .update(candidatesTable)
-    .set(parsed.data)
+    .set(updateData)
     .where(eq(candidatesTable.id, params.data.id))
     .returning();
 
@@ -192,7 +200,7 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
   }
 
   const result = { ...candidate, matchCount: 0 };
-  res.json(UpdateCandidateResponse.parse(result));
+  res.json(result);
 });
 
 router.delete("/candidates/:id", async (req, res): Promise<void> => {

@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, useUpdateCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUpload } from "@workspace/object-storage-web";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface EditFormState {
@@ -28,12 +29,47 @@ export default function CandidateProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: candidate, isLoading: profileLoading } = useGetCandidate(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
   });
 
   const updateCandidate = useUpdateCandidate();
+
+  const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
+  const { uploadFile, isUploading } = useUpload({
+    basePath,
+    onSuccess: async (response) => {
+      if (!candidateProfileId) return;
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileImage: response.objectPath }),
+      });
+      queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+      toast({ title: "Photo updated", description: "Your profile photo has been saved." });
+    },
+    onError: () => {
+      toast({ title: "Upload failed", description: "Could not upload photo.", variant: "destructive" });
+    },
+  });
+
+  function handlePhotoClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+    await uploadFile(file);
+    e.target.value = "";
+  }
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
@@ -163,6 +199,13 @@ export default function CandidateProfile() {
           <CardTitle className="text-lg">Personal Information</CardTitle>
         </CardHeader>
         <CardContent>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
           {isEditing ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -192,8 +235,28 @@ export default function CandidateProfile() {
             </div>
           ) : (
             <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl shrink-0">
-                {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              <div
+                className="w-20 h-20 rounded-full shrink-0 relative group cursor-pointer"
+                onClick={handlePhotoClick}
+              >
+                {(candidate as any).profileImage ? (
+                  <img
+                    src={`${import.meta.env.BASE_URL}api/storage${(candidate as any).profileImage}`.replace(/\/\//g, "/")}
+                    alt={candidate.name}
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl">
+                    {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {isUploading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-white" />
+                  )}
+                </div>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
