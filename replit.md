@@ -25,6 +25,7 @@ AI-powered recruitment platform that matches job descriptions with candidate pro
 - **Jobs**: Job descriptions with title, company, location, skills, experience level, salary range, status
 - **Candidates**: Candidate profiles with name, skills, experience years, education, location, status
 - **Matches**: AI-generated match results with overall score, skill/experience/education/location sub-scores, assessment text
+- **Company Profiles**: Company information with name, industry, website, location, description, logo (via object storage), size, founded year
 
 ### AI Matching Engine
 Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores based on:
@@ -43,6 +44,7 @@ Users select their role on first visit: **Company** or **Candidate**. The select
 - `/candidates` — Candidate listings with search/filter, create new
 - `/candidates/:id` — Candidate detail, view match history
 - `/matches` — All match results management
+- `/company-profile` — Company profile with logo upload (object storage)
 
 ### Pages — Candidate Portal
 - `/` — Candidate dashboard with personalized job match overview
@@ -62,7 +64,7 @@ Users select their role on first visit: **Company** or **Candidate**. The select
 ## Key Files
 
 - `lib/api-spec/openapi.yaml` — OpenAPI specification (source of truth for API contracts)
-- `lib/db/src/schema/` — Database schema (jobs.ts, candidates.ts, matches.ts)
+- `lib/db/src/schema/` — Database schema (jobs.ts, candidates.ts, matches.ts, companyProfiles.ts)
 - `artifacts/api-server/src/routes/` — API route handlers
 - `artifacts/api-server/src/lib/matching.ts` — AI matching engine
 - `artifacts/web/src/` — React frontend

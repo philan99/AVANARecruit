@@ -27,6 +27,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/matches", label: "Matches", icon: Network },
+    { href: "/company-profile", label: "Company Profile", icon: Settings },
   ];
 
   const candidateNavItems = [

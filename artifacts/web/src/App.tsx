@@ -16,6 +16,7 @@ import JobDetail from "@/pages/jobs/detail";
 import CandidatesList from "@/pages/candidates/list";
 import CandidateDetail from "@/pages/candidates/detail";
 import MatchesList from "@/pages/matches/list";
+import CompanyProfile from "@/pages/company-profile";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ function CompanyRoutes() {
         <Route path="/candidates" component={CandidatesList} />
         <Route path="/candidates/:id" component={CandidateDetail} />
         <Route path="/matches" component={MatchesList} />
+        <Route path="/company-profile" component={CompanyProfile} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

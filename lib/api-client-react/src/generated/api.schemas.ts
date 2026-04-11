@@ -321,6 +321,64 @@ export interface SkillDemand {
   candidateCount: number;
 }
 
+export interface CompanyProfile {
+  id: number;
+  name: string;
+  /** @nullable */
+  industry?: string | null;
+  /** @nullable */
+  website?: string | null;
+  /** @nullable */
+  location?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
+  size?: string | null;
+  /** @nullable */
+  founded?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyProfileBody {
+  name: string;
+  /** @nullable */
+  industry?: string | null;
+  /** @nullable */
+  website?: string | null;
+  /** @nullable */
+  location?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
+  size?: string | null;
+  /** @nullable */
+  founded?: string | null;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata?: UploadUrlRequest;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
 export type ListJobsParams = {
   status?: ListJobsStatus;
   search?: string;

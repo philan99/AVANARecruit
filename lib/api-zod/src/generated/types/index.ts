@@ -8,12 +8,15 @@
 
 export * from "./candidate";
 export * from "./candidateStatus";
+export * from "./companyProfile";
+export * from "./companyProfileBody";
 export * from "./createCandidateBody";
 export * from "./createCandidateBodyStatus";
 export * from "./createJobBody";
 export * from "./createJobBodyExperienceLevel";
 export * from "./createJobBodyStatus";
 export * from "./dashboardStats";
+export * from "./errorEnvelope";
 export * from "./getRecentMatchesParams";
 export * from "./getTopCandidatesParams";
 export * from "./healthStatus";
@@ -40,3 +43,5 @@ export * from "./updateJobBodyExperienceLevel";
 export * from "./updateJobBodyStatus";
 export * from "./updateMatchStatusBody";
 export * from "./updateMatchStatusBodyStatus";
+export * from "./uploadUrlRequest";
+export * from "./uploadUrlResponse";

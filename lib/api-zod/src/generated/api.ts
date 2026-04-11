@@ -396,6 +396,80 @@ export const GetTopCandidatesResponseItem = zod.object({
 export const GetTopCandidatesResponse = zod.array(GetTopCandidatesResponseItem);
 
 /**
+ * @summary Get the company profile
+ */
+export const GetCompanyProfileResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  industry: zod.string().nullish(),
+  website: zod.string().nullish(),
+  location: zod.string().nullish(),
+  description: zod.string().nullish(),
+  logoUrl: zod.string().nullish(),
+  size: zod.string().nullish(),
+  founded: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Create or update company profile
+ */
+export const CreateCompanyProfileBody = zod.object({
+  name: zod.string(),
+  industry: zod.string().nullish(),
+  website: zod.string().nullish(),
+  location: zod.string().nullish(),
+  description: zod.string().nullish(),
+  logoUrl: zod.string().nullish(),
+  size: zod.string().nullish(),
+  founded: zod.string().nullish(),
+});
+
+export const CreateCompanyProfileResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  industry: zod.string().nullish(),
+  website: zod.string().nullish(),
+  location: zod.string().nullish(),
+  description: zod.string().nullish(),
+  logoUrl: zod.string().nullish(),
+  size: zod.string().nullish(),
+  founded: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string().min(1),
+  size: zod.number().min(1),
+  contentType: zod.string().min(1),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string().url(),
+  objectPath: zod.string(),
+  metadata: zod
+    .object({
+      name: zod.string().min(1),
+      size: zod.number().min(1),
+      contentType: zod.string().min(1),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Serve an object entity from storage
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});
+
+/**
  * @summary Get most in-demand skills across jobs
  */
 export const GetSkillDemandResponseItem = zod.object({

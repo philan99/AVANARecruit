@@ -1,0 +1,54 @@
+import { Router, type IRouter } from "express";
+import { db, companyProfiles } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
+import { CreateCompanyProfileBody } from "@workspace/api-zod";
+
+const router: IRouter = Router();
+
+router.get("/company-profile", async (req, res) => {
+  try {
+    const [profile] = await db.select().from(companyProfiles).limit(1);
+    if (!profile) {
+      return res.status(404).json({ error: "No company profile found" });
+    }
+    res.json(profile);
+  } catch (err) {
+    req.log.error(err, "Failed to get company profile");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/company-profile", async (req, res) => {
+  try {
+    const parsed = CreateCompanyProfileBody.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "Company name is required" });
+    }
+    const body = parsed.data;
+
+    const [existing] = await db.select().from(companyProfiles).limit(1);
+
+    if (existing) {
+      const [updated] = await db
+        .update(companyProfiles)
+        .set({
+          ...body,
+          updatedAt: sql`now()`,
+        })
+        .where(eq(companyProfiles.id, existing.id))
+        .returning();
+      return res.json(updated);
+    }
+
+    const [created] = await db
+      .insert(companyProfiles)
+      .values(body)
+      .returning();
+    res.json(created);
+  } catch (err) {
+    req.log.error(err, "Failed to save company profile");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+export default router;
