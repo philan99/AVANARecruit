@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface EditFormState {
@@ -30,6 +30,7 @@ export default function CandidateProfile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cvInputRef = useRef<HTMLInputElement>(null);
 
   const { data: candidate, isLoading: profileLoading } = useGetCandidate(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
@@ -69,6 +70,56 @@ export default function CandidateProfile() {
     }
     await uploadFile(file);
     e.target.value = "";
+  }
+
+  const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
+    basePath,
+    onSuccess: async (response) => {
+      if (!candidateProfileId || !lastCvFileName) return;
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvFile: response.objectPath, cvFileName: lastCvFileName }),
+      });
+      queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+      toast({ title: "CV uploaded", description: "Your CV has been saved." });
+      setLastCvFileName("");
+    },
+    onError: () => {
+      toast({ title: "Upload failed", description: "Could not upload CV.", variant: "destructive" });
+    },
+  });
+
+  const [lastCvFileName, setLastCvFileName] = useState("");
+
+  async function handleCvChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Invalid file", description: "Please upload a PDF or Word document.", variant: "destructive" });
+      return;
+    }
+    setLastCvFileName(file.name);
+    await uploadCv(file);
+    e.target.value = "";
+  }
+
+  async function handleRemoveCv() {
+    if (!candidateProfileId) return;
+    const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvFile: null, cvFileName: null }),
+    });
+    queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+    toast({ title: "CV removed" });
   }
 
   const [editForm, setEditForm] = useState<EditFormState>({
@@ -335,6 +386,72 @@ export default function CandidateProfile() {
                   {skill}
                 </Badge>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">CV / Resume</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <input
+            ref={cvInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx"
+            className="hidden"
+            onChange={handleCvChange}
+          />
+          {(candidate as any)?.cvFile ? (
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{(candidate as any).cvFileName || "CV Document"}</p>
+                  <p className="text-xs text-muted-foreground">Uploaded</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => cvInputRef.current?.click()}
+                  disabled={isCvUploading}
+                >
+                  <Upload className="w-4 h-4 mr-1" />
+                  Replace
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveCv}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-colors"
+              onClick={() => cvInputRef.current?.click()}
+            >
+              {isCvUploading ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-muted-foreground">Uploading...</p>
+                </div>
+              ) : (
+                <>
+                  <Upload className="w-10 h-10 text-muted-foreground mb-3" />
+                  <p className="font-medium text-sm">Upload your CV</p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF or Word document (DOC, DOCX)</p>
+                </>
+              )}
             </div>
           )}
         </CardContent>

@@ -52,6 +52,8 @@ router.get("/candidates", async (req, res): Promise<void> => {
       education: candidatesTable.education,
       location: candidatesTable.location,
       profileImage: candidatesTable.profileImage,
+      cvFile: candidatesTable.cvFile,
+      cvFileName: candidatesTable.cvFileName,
       status: candidatesTable.status,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
@@ -152,6 +154,8 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       education: candidatesTable.education,
       location: candidatesTable.location,
       profileImage: candidatesTable.profileImage,
+      cvFile: candidatesTable.cvFile,
+      cvFileName: candidatesTable.cvFileName,
       status: candidatesTable.status,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
@@ -176,7 +180,7 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const { profileImage, ...rest } = req.body;
+  const { profileImage, cvFile, cvFileName, ...rest } = req.body;
   const parsed = UpdateCandidateBody.safeParse(rest);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -186,6 +190,12 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
   const updateData: any = { ...parsed.data };
   if (profileImage !== undefined) {
     updateData.profileImage = profileImage;
+  }
+  if (cvFile !== undefined) {
+    updateData.cvFile = cvFile;
+  }
+  if (cvFileName !== undefined) {
+    updateData.cvFileName = cvFileName;
   }
 
   const [candidate] = await db

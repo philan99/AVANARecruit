@@ -23,7 +23,7 @@ AI-powered recruitment platform that matches job descriptions with candidate pro
 
 ### Data Models
 - **Jobs**: Job descriptions with title, company, companyProfileId (FK to company_profiles), location, skills, experience level, salary range, status
-- **Candidates**: Candidate profiles with name, skills, experience years, education, location, status
+- **Candidates**: Candidate profiles with name, skills, experience years, education, location, status, profileImage (object storage path), cvFile (object storage path), cvFileName
 - **Matches**: AI-generated match results with overall score, skill/experience/education/location sub-scores, assessment text
 - **Company Profiles**: Company information with name, industry, website, location, description, logo (via object storage), size, founded year
 

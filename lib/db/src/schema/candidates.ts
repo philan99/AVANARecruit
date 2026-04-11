@@ -15,6 +15,8 @@ export const candidatesTable = pgTable("candidates", {
   education: text("education").notNull(),
   location: text("location").notNull(),
   profileImage: text("profile_image"),
+  cvFile: text("cv_file"),
+  cvFileName: text("cv_file_name"),
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
