@@ -5,6 +5,7 @@ export const companyProfiles = pgTable("company_profiles", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email"),
+  password: text("password"),
   industry: text("industry"),
   website: text("website"),
   location: text("location"),

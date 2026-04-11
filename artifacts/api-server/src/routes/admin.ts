@@ -46,6 +46,33 @@ router.get("/admin/candidates", async (req, res) => {
   }
 });
 
+router.post("/admin/companies/:id/reset-password", async (req, res) => {
+  try {
+    const companyId = parseInt(req.params.id, 10);
+    const { password } = req.body;
+
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db
+      .update(companyProfiles)
+      .set({ password: hashedPassword })
+      .where(eq(companyProfiles.id, companyId))
+      .returning({ id: companyProfiles.id });
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error(err, "Failed to reset company password");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/admin/candidates/:id/reset-password", async (req, res) => {
   try {
     const candidateId = parseInt(req.params.id, 10);
