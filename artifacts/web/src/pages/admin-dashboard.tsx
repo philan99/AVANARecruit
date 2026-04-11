@@ -46,9 +46,22 @@ interface Candidate {
   updatedAt: string;
 }
 
+interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  skills: string[];
+  experienceLevel: string;
+  status: string;
+  matchCount: number;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
   const [companies, setCompanies] = useState<CompanyProfile[]>([]);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "companies" | "candidates">("overview");
 
@@ -57,12 +70,14 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [companiesRes, candidatesRes] = await Promise.all([
+        const [companiesRes, candidatesRes, jobsRes] = await Promise.all([
           fetch(`${basePath}/admin/companies`),
           fetch(`${basePath}/admin/candidates`),
+          fetch(`${basePath}/jobs`),
         ]);
         if (companiesRes.ok) setCompanies(await companiesRes.json());
         if (candidatesRes.ok) setCandidates(await candidatesRes.json());
+        if (jobsRes.ok) setJobs(await jobsRes.json());
       } catch (err) {
         console.error("Failed to fetch admin data", err);
       } finally {
@@ -106,7 +121,7 @@ export default function AdminDashboard() {
 
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Companies</CardTitle>
@@ -131,6 +146,19 @@ export default function AdminDashboard() {
 
             <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
+                <Briefcase className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{jobs.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {jobs.filter(j => j.status === "open").length} open
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
                 <Users className="w-4 h-4 text-primary" />
               </CardHeader>
@@ -143,7 +171,7 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-base">Recent Companies</CardTitle>
@@ -199,6 +227,35 @@ export default function AdminDashboard() {
                     </div>
                   )) : (
                     <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base">Recent Jobs</CardTitle>
+                <CardDescription>Latest job requisitions across the platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {job.company} · {job.location}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={job.status === "open" ? "default" : "secondary"}
+                        className="text-[9px] uppercase shrink-0 ml-2"
+                      >
+                        {job.status}
+                      </Badge>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
                   )}
                 </div>
               </CardContent>
