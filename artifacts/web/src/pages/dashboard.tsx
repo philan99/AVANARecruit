@@ -118,18 +118,18 @@ export default function Dashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{profile?.name || "Dashboard"}</h1>
-          <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
-        </div>
         <div className="flex items-center gap-3">
-          <Link href="/jobs?create=true">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" /> New Requisition
-            </Button>
-          </Link>
           <DashboardLogo profile={profile} />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{profile?.name || "Dashboard"}</h1>
+            <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
+          </div>
         </div>
+        <Link href="/jobs?create=true">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" /> New Requisition
+          </Button>
+        </Link>
       </div>
 
       {/* KPI Cards */}
