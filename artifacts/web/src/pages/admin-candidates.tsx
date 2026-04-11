@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export default function AdminCandidates() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
@@ -122,7 +124,7 @@ export default function AdminCandidates() {
                 </thead>
                 <tbody>
                   {candidates.map((candidate) => (
-                    <tr key={candidate.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <tr key={candidate.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; navigate(`/candidates/${candidate.id}`); }}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
