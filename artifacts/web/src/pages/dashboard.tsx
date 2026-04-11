@@ -1,9 +1,106 @@
-import React from "react";
-import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates } from "@workspace/api-client-react";
+import React, { useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useGetCompanyProfile, useCreateCompanyProfile, getGetCompanyProfileQueryKey } from "@workspace/api-client-react";
+import { useUpload } from "@workspace/object-storage-web";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+
+function DashboardLogo() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: profile, error } = useGetCompanyProfile({
+    query: { queryKey: getGetCompanyProfileQueryKey(), retry: false },
+  });
+
+  const saveProfile = useCreateCompanyProfile();
+  const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
+
+  const { uploadFile, isUploading } = useUpload({
+    basePath,
+    onSuccess: (response) => {
+      const logoUrl = `${import.meta.env.BASE_URL}api/storage${response.objectPath}`.replace(/\/\//g, "/");
+      saveProfile.mutate(
+        { data: { name: profile?.name || "My Company", logoUrl } },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getGetCompanyProfileQueryKey() });
+            toast({ title: "Logo updated", description: "Company logo has been saved." });
+          },
+        }
+      );
+    },
+    onError: (err) => {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    },
+  });
+
+  function handleClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo must be under 5MB.", variant: "destructive" });
+      return;
+    }
+    await uploadFile(file);
+    e.target.value = "";
+  }
+
+  const hasLogo = profile?.logoUrl && !error;
+
+  return (
+    <div className="relative group">
+      {hasLogo ? (
+        <button onClick={handleClick} disabled={isUploading} className="relative cursor-pointer">
+          <img
+            src={profile.logoUrl!}
+            alt={`${profile.name} logo`}
+            className="w-12 h-12 rounded-lg object-cover border border-border"
+          />
+          <div className="absolute inset-0 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {isUploading ? (
+              <Upload className="w-4 h-4 text-white animate-pulse" />
+            ) : (
+              <Camera className="w-4 h-4 text-white" />
+            )}
+          </div>
+        </button>
+      ) : (
+        <button
+          onClick={handleClick}
+          disabled={isUploading}
+          className="w-12 h-12 rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 flex items-center justify-center transition-colors cursor-pointer"
+          title="Upload company logo"
+        >
+          {isUploading ? (
+            <Upload className="w-5 h-5 text-muted-foreground animate-pulse" />
+          ) : (
+            <Building2 className="w-5 h-5 text-muted-foreground/50" />
+          )}
+        </button>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats({ query: { queryKey: ["dashboard-stats"] } });
@@ -17,9 +114,12 @@ export default function Dashboard() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Cockpit</h1>
-        <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Cockpit</h1>
+          <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
+        </div>
+        <DashboardLogo />
       </div>
 
       {/* KPI Cards */}
