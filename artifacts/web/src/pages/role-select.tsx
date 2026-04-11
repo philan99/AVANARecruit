@@ -1,19 +1,47 @@
 import { useState } from "react";
-import { Building2, UserCircle, TerminalSquare, LogIn, Sparkles, Target, Users, BarChart3 } from "lucide-react";
+import { Building2, UserCircle, TerminalSquare, LogIn, Sparkles, Target, Users, BarChart3, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
+import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
 export default function RoleSelect() {
   const { setRole } = useRole();
+  const { toast } = useToast();
   const [selected, setSelected] = useState<UserRole | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selected) {
+    if (!selected) return;
+
+    if (selected === "admin") {
+      if (!email || !password) {
+        toast({ title: "Email and password are required", variant: "destructive" });
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+        const res = await fetch(`${basePath}/admin/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (res.ok) {
+          setRole("admin");
+        } else {
+          toast({ title: "Invalid admin credentials", variant: "destructive" });
+        }
+      } catch {
+        toast({ title: "Login failed", variant: "destructive" });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
       setRole(selected);
     }
   };
@@ -81,7 +109,7 @@ export default function RoleSelect() {
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">I am a</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => setSelected("company")}
@@ -105,6 +133,18 @@ export default function RoleSelect() {
                 >
                   <UserCircle className="w-4 h-4" />
                   Candidate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelected("admin")}
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer ${
+                    selected === "admin"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin
                 </button>
               </div>
             </div>
@@ -139,10 +179,10 @@ export default function RoleSelect() {
             <Button
               type="submit"
               className="w-full"
-              disabled={!selected}
+              disabled={!selected || isLoading}
             >
               <LogIn className="w-4 h-4 mr-2" />
-              Sign In
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground pt-2">

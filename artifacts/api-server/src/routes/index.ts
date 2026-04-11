@@ -5,6 +5,7 @@ import candidatesRouter from "./candidates";
 import matchesRouter from "./matches";
 import companyProfileRouter from "./companyProfile";
 import storageRouter from "./storage";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(candidatesRouter);
 router.use(matchesRouter);
 router.use(companyProfileRouter);
 router.use(storageRouter);
+router.use(adminRouter);
 
 export default router;

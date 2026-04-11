@@ -18,6 +18,9 @@ import CandidatesList from "@/pages/candidates/list";
 import CandidateDetail from "@/pages/candidates/detail";
 import MatchesList from "@/pages/matches/list";
 import CompanyProfile from "@/pages/company-profile";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminCompanies from "@/pages/admin-companies";
+import AdminCandidates from "@/pages/admin-candidates";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -61,6 +64,19 @@ function CandidateRoutes() {
   );
 }
 
+function AdminRoutes() {
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/" component={AdminDashboard} />
+        <Route path="/companies" component={AdminCompanies} />
+        <Route path="/candidates" component={AdminCandidates} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  );
+}
+
 function AppRouter() {
   const { role } = useRole();
 
@@ -71,6 +87,10 @@ function AppRouter() {
         <Route component={RoleSelect} />
       </Switch>
     );
+  }
+
+  if (role === "admin") {
+    return <AdminRoutes />;
   }
 
   if (role === "candidate") {

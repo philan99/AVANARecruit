@@ -35,7 +35,7 @@ Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores bas
 - **Location matching** (20% weight): Handles remote, exact match, and partial matches
 
 ### Role-Based Portal
-Users select their role on first visit: **Company** or **Candidate**. The selection is stored in localStorage and determines which portal (routes + sidebar navigation) is shown. Users can switch roles via the "Switch Role" button in the sidebar.
+Users select their role on first visit: **Company**, **Candidate**, or **Admin**. The selection is stored in localStorage and determines which portal (routes + sidebar navigation) is shown. Admin login requires server-side credential verification (email/password checked against ADMIN_EMAIL and ADMIN_PASSWORD env vars).
 
 ### Pages — Company Portal
 - `/` — Company dashboard with recruitment pipeline stats, skill demand chart, recent matches, top candidates
@@ -52,6 +52,11 @@ Users select their role on first visit: **Company** or **Candidate**. The select
 - `/my-matches` — View AI-generated job matches with detailed scoring breakdown
 - `/browse-jobs` — Browse all open positions
 - `/jobs/:id` — Job detail (read-only view)
+
+### Pages — Admin Portal
+- `/` — Admin dashboard with platform KPIs (total companies, candidates, active candidates) and recent entries
+- `/companies` — Full table of all company profiles
+- `/candidates` — Full table of all candidate profiles
 
 ## Key Commands
 

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 
-export type UserRole = "company" | "candidate";
+export type UserRole = "company" | "candidate" | "admin";
 
 interface RoleContextType {
   role: UserRole | null;
@@ -18,7 +18,7 @@ const CANDIDATE_ID_KEY = "avanatalent_candidate_id";
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {
     const stored = localStorage.getItem(ROLE_KEY);
-    return stored === "company" || stored === "candidate" ? stored : null;
+    return stored === "company" || stored === "candidate" || stored === "admin" ? stored : null;
   });
 
   const [candidateProfileId, setCandidateProfileIdState] = useState<number | null>(() => {

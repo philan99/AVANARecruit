@@ -9,7 +9,9 @@ import {
   UserCircle,
   Target,
   Search,
-  LogOut
+  LogOut,
+  Building2,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -37,7 +39,13 @@ export function Layout({ children }: LayoutProps) {
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
   ];
 
-  const navItems = role === "candidate" ? candidateNavItems : companyNavItems;
+  const adminNavItems = [
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/companies", label: "Companies", icon: Building2 },
+    { href: "/candidates", label: "Candidates", icon: Users },
+  ];
+
+  const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -51,7 +59,7 @@ export function Layout({ children }: LayoutProps) {
 
         <div className="px-4 py-3 border-b border-sidebar-border">
           <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
-            {role === "candidate" ? "Candidate Portal" : "Company Portal"}
+            {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
           </span>
         </div>
         
@@ -86,14 +94,14 @@ export function Layout({ children }: LayoutProps) {
           </button>
           <div className="mt-4 px-3 flex items-center">
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-xs">
-              {role === "candidate" ? "CA" : "CO"}
+              {role === "admin" ? "AD" : role === "candidate" ? "CA" : "CO"}
             </div>
             <div className="ml-3 flex flex-col">
               <span className="text-xs font-medium text-sidebar-foreground">
-                {role === "candidate" ? "Candidate" : "Hiring Manager"}
+                {role === "admin" ? "Administrator" : role === "candidate" ? "Candidate" : "Hiring Manager"}
               </span>
               <span className="text-[10px] text-sidebar-foreground/60">
-                {role === "candidate" ? "Job Seeker" : "Company Admin"}
+                {role === "admin" ? "Platform Admin" : role === "candidate" ? "Job Seeker" : "Company Admin"}
               </span>
             </div>
           </div>
