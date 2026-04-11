@@ -420,23 +420,6 @@ export default function CandidateDashboard() {
         </Card>
       </div>
 
-      {candidate?.skills && candidate.skills.length > 0 && (
-        <Card className="bg-card">
-          <CardHeader>
-            <CardTitle className="text-base">Your Skills</CardTitle>
-            <CardDescription>Skills from your profile used for AI matching</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {candidate.skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="px-3 py-1.5 text-xs font-medium">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
