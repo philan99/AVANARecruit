@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, useGetCandidateMatches, useListJobs, getGetCandidateQueryKey, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import {
   Clock,
   GraduationCap,
   Mail,
+  Heart,
 } from "lucide-react";
 import { Link } from "wouter";
 import {
@@ -49,6 +51,24 @@ export default function CandidateDashboard() {
   const { data: openJobs } = useListJobs({ status: "open" }, {
     query: { queryKey: ["open-jobs"] },
   });
+
+  const [favouritesCount, setFavouritesCount] = useState(0);
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  const fetchFavouritesCount = useCallback(async () => {
+    if (!candidateProfileId) return;
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`);
+      if (res.ok) {
+        const data = await res.json();
+        setFavouritesCount(data.length);
+      }
+    } catch {}
+  }, [candidateProfileId, apiBase]);
+
+  useEffect(() => {
+    fetchFavouritesCount();
+  }, [fetchFavouritesCount]);
 
   if (!candidateProfileId) {
     return (
@@ -159,7 +179,20 @@ export default function CandidateDashboard() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Link href="/browse-jobs">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">My Favourites</CardTitle>
+              <Heart className="w-4 h-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-500">{favouritesCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Saved jobs</p>
+            </CardContent>
+          </Card>
+        </Link>
+
         <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Open Positions</CardTitle>
