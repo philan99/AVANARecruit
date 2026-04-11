@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,9 @@ import {
   Building2,
   Users,
   Briefcase,
+  TrendingUp,
+  MapPin,
+  BarChart3,
 } from "lucide-react";
 
 interface CompanyProfile {
@@ -46,9 +49,24 @@ interface Job {
   location: string;
   skills: string[];
   experienceLevel: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
   status: string;
   matchCount: number;
   createdAt: string;
+}
+
+function InsightBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-muted-foreground w-28 truncate shrink-0">{label}</span>
+      <div className="flex-1 h-5 bg-secondary/60 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs font-mono font-semibold w-8 text-right shrink-0">{value}</span>
+    </div>
+  );
 }
 
 export default function AdminDashboard() {
@@ -79,6 +97,61 @@ export default function AdminDashboard() {
     fetchData();
   }, [basePath]);
 
+  const insights = useMemo(() => {
+    const openJobs = jobs.filter(j => j.status === "open").length;
+    const closedJobs = jobs.filter(j => j.status !== "open").length;
+    const totalMatches = jobs.reduce((sum, j) => sum + j.matchCount, 0);
+    const avgMatchesPerJob = jobs.length > 0 ? Math.round(totalMatches / jobs.length) : 0;
+
+    const activeCandidates = candidates.filter(c => c.status === "active").length;
+    const passiveCandidates = candidates.filter(c => c.status === "passive").length;
+    const notLooking = candidates.filter(c => c.status === "not_looking").length;
+
+    const avgExperience = candidates.length > 0
+      ? Math.round((candidates.reduce((sum, c) => sum + c.experienceYears, 0) / candidates.length) * 10) / 10
+      : 0;
+
+    const skillFreq: Record<string, number> = {};
+    candidates.forEach(c => c.skills.forEach(s => { skillFreq[s] = (skillFreq[s] || 0) + 1; }));
+    const topCandidateSkills = Object.entries(skillFreq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+    const jobSkillFreq: Record<string, number> = {};
+    jobs.forEach(j => j.skills.forEach(s => { jobSkillFreq[s] = (jobSkillFreq[s] || 0) + 1; }));
+    const topJobSkills = Object.entries(jobSkillFreq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+    const industryFreq: Record<string, number> = {};
+    companies.forEach(c => {
+      const ind = c.industry || "Unspecified";
+      industryFreq[ind] = (industryFreq[ind] || 0) + 1;
+    });
+    const topIndustries = Object.entries(industryFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    const locationFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      const loc = j.location || "Unspecified";
+      locationFreq[loc] = (locationFreq[loc] || 0) + 1;
+    });
+    const topJobLocations = Object.entries(locationFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    const levelFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      const lvl = j.experienceLevel || "unspecified";
+      levelFreq[lvl] = (levelFreq[lvl] || 0) + 1;
+    });
+
+    const jobsWithSalary = jobs.filter(j => j.salaryMin && j.salaryMax);
+    const avgSalary = jobsWithSalary.length > 0
+      ? Math.round(jobsWithSalary.reduce((sum, j) => sum + ((j.salaryMin! + j.salaryMax!) / 2), 0) / jobsWithSalary.length)
+      : 0;
+
+    return {
+      openJobs, closedJobs, totalMatches, avgMatchesPerJob,
+      activeCandidates, passiveCandidates, notLooking, avgExperience,
+      topCandidateSkills, topJobSkills, topIndustries, topJobLocations, levelFreq,
+      avgSalary, jobsWithSalary: jobsWithSalary.length,
+    };
+  }, [companies, candidates, jobs]);
+
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading admin data...</div>;
   }
@@ -87,146 +160,331 @@ export default function AdminDashboard() {
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin Console</h1>
-        <p className="text-muted-foreground mt-1">Platform overview and configuration tables.</p>
+        <p className="text-muted-foreground mt-1">Platform overview and insights.</p>
       </div>
 
-
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/companies">
-              <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Companies</CardTitle>
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{companies.length}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Registered on platform</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/jobs">
-              <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
-                  <Briefcase className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{jobs.length}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {jobs.filter(j => j.status === "open").length} open
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/candidates">
-              <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
-                  <Users className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{candidates.length}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Profiles created</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-base">Recent Companies</CardTitle>
-                <CardDescription>Latest companies registered on the platform</CardDescription>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link href="/companies">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Companies</CardTitle>
+                <Building2 className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {companies.length > 0 ? companies.slice(0, 5).map((company) => (
-                    <Link key={company.id} href="/companies"><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                          {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {company.industry || "No industry"} {company.location ? `· ${company.location}` : ""}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                        {new Date(company.createdAt).toLocaleDateString()}
-                      </span>
-                    </div></Link>
-                  )) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No companies registered yet.</p>
-                  )}
-                </div>
+                <div className="text-3xl font-bold">{companies.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">Registered on platform</p>
               </CardContent>
             </Card>
+          </Link>
 
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-base">Recent Jobs</CardTitle>
-                <CardDescription>Latest job requisitions across the platform</CardDescription>
+          <Link href="/jobs">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
+                <Briefcase className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
-                    <Link key={job.id} href="/jobs"><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                <div className="text-3xl font-bold">{jobs.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {insights.openJobs} open · {insights.closedJobs} closed
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/candidates">
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{candidates.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {insights.activeCandidates} active · {insights.passiveCandidates} passive
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Matches</p>
+              <p className="text-2xl font-bold mt-1">{insights.totalMatches}</p>
+              <p className="text-[10px] text-muted-foreground">{insights.avgMatchesPerJob} avg per job</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Avg Experience</p>
+              <p className="text-2xl font-bold mt-1">{insights.avgExperience} yrs</p>
+              <p className="text-[10px] text-muted-foreground">across all candidates</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Avg Salary</p>
+              <p className="text-2xl font-bold mt-1">
+                {insights.avgSalary > 0 ? `£${insights.avgSalary.toLocaleString()}` : "—"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">{insights.jobsWithSalary} jobs with salary data</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Candidate Status</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
+                <span className="text-xs">{insights.activeCandidates}</span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-orange-400 ml-1" />
+                <span className="text-xs">{insights.passiveCandidates}</span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-gray-400 ml-1" />
+                <span className="text-xs">{insights.notLooking}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[9px] text-muted-foreground">Active</span>
+                <span className="text-[9px] text-muted-foreground ml-1">Passive</span>
+                <span className="text-[9px] text-muted-foreground ml-1">Not looking</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Top Skills (Candidates)
+              </CardTitle>
+              <CardDescription>Most common skills across candidate profiles</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topCandidateSkills.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topCandidateSkills.map(([skill, count]) => (
+                    <InsightBar
+                      key={skill}
+                      label={skill}
+                      value={count}
+                      max={insights.topCandidateSkills[0][1]}
+                      color="bg-primary/70"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No skill data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Top Skills (Jobs)
+              </CardTitle>
+              <CardDescription>Most requested skills in job postings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topJobSkills.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topJobSkills.map(([skill, count]) => (
+                    <InsightBar
+                      key={skill}
+                      label={skill}
+                      value={count}
+                      max={insights.topJobSkills[0][1]}
+                      color="bg-blue-500/70"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No skill data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                Industries
+              </CardTitle>
+              <CardDescription>Company distribution by industry</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topIndustries.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topIndustries.map(([ind, count]) => (
+                    <InsightBar
+                      key={ind}
+                      label={ind}
+                      value={count}
+                      max={insights.topIndustries[0][1]}
+                      color="bg-emerald-500/70"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Job Locations
+              </CardTitle>
+              <CardDescription>Where jobs are being posted</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topJobLocations.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topJobLocations.map(([loc, count]) => (
+                    <InsightBar
+                      key={loc}
+                      label={loc}
+                      value={count}
+                      max={insights.topJobLocations[0][1]}
+                      color="bg-amber-500/70"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No location data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                Experience Levels
+              </CardTitle>
+              <CardDescription>Job distribution by seniority</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Object.keys(insights.levelFreq).length > 0 ? (
+                <div className="space-y-2.5">
+                  {Object.entries(insights.levelFreq)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([level, count]) => (
+                      <InsightBar
+                        key={level}
+                        label={level.charAt(0).toUpperCase() + level.slice(1)}
+                        value={count}
+                        max={Object.values(insights.levelFreq).reduce((a, b) => Math.max(a, b), 0)}
+                        color="bg-violet-500/70"
+                      />
+                    ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No level data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Companies</CardTitle>
+              <CardDescription>Latest companies registered on the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companies.length > 0 ? companies.slice(0, 5).map((company) => (
+                  <Link key={company.id} href={`/companies/${company.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {job.company} · {job.location}
+                          {company.industry || "No industry"} {company.location ? `· ${company.location}` : ""}
                         </p>
                       </div>
-                      <Badge
-                        variant={job.status === "open" ? "default" : "secondary"}
-                        className="text-[9px] uppercase shrink-0 ml-2"
-                      >
-                        {job.status}
-                      </Badge>
-                    </div></Link>
-                  )) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
+                      {new Date(company.createdAt).toLocaleDateString()}
+                    </span>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No companies registered yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-base">Recent Candidates</CardTitle>
-                <CardDescription>Latest candidate profiles on the platform</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
-                    <Link key={candidate.id} href="/candidates"><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                          {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
-                        </div>
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Jobs</CardTitle>
+              <CardDescription>Latest job requisitions across the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
+                  <Link key={job.id} href={`/jobs/${job.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {job.company} · {job.location}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={job.status === "open" ? "default" : "secondary"}
+                      className="text-[9px] uppercase shrink-0 ml-2"
+                    >
+                      {job.status}
+                    </Badge>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Candidates</CardTitle>
+              <CardDescription>Latest candidate profiles on the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
+                  <Link key={candidate.id} href={`/candidates/${candidate.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                       </div>
-                      <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
-                        {candidate.status}
-                      </Badge>
-                    </div></Link>
-                  )) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
+                      </div>
+                    </div>
+                    <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
+                      {candidate.status}
+                    </Badge>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      </div>
 
     </div>
   );
