@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { useState } from "react";
-import { Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft, Target, Calendar, FileText, Download, Eye, X } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft, Target, Calendar, FileText, Download, Eye } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -156,7 +155,6 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
 }
 
 function CvSection({ candidate }: { candidate: any }) {
-  const [showPdf, setShowPdf] = useState(false);
   const cvFile = candidate?.cvFile;
   const cvFileName = candidate?.cvFileName || "CV Document";
   const isPdf = cvFileName.toLowerCase().endsWith(".pdf");
@@ -173,47 +171,37 @@ function CvSection({ candidate }: { candidate: any }) {
       </CardHeader>
       <CardContent>
         {cvFile ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <FileText className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{cvFileName}</p>
-                  <p className="text-xs text-muted-foreground">Uploaded by candidate</p>
-                </div>
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <FileText className="w-6 h-6 text-primary" />
               </div>
-              <div className="flex items-center gap-2">
-                {isPdf && (
-                  <button
-                    onClick={() => setShowPdf(!showPdf)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    {showPdf ? <X className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    {showPdf ? "Close" : "View"}
-                  </button>
-                )}
+              <div>
+                <p className="font-medium text-sm">{cvFileName}</p>
+                <p className="text-xs text-muted-foreground">Uploaded by candidate</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {isPdf && (
                 <a
                   href={cvUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
-                  <Download className="w-4 h-4" />
-                  Download
+                  <Eye className="w-4 h-4" />
+                  View
                 </a>
-              </div>
+              )}
+              <a
+                href={cvUrl}
+                download={cvFileName}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download
+              </a>
             </div>
-            {showPdf && isPdf && (
-              <div className="border rounded-lg overflow-hidden">
-                <iframe
-                  src={cvUrl}
-                  className="w-full h-[700px]"
-                  title="CV Preview"
-                />
-              </div>
-            )}
           </div>
         ) : (
           <div className="flex flex-col items-center py-6 text-muted-foreground">
