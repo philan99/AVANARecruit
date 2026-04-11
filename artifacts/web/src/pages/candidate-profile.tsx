@@ -627,12 +627,26 @@ export default function CandidateProfile() {
       <Card className="bg-card">
         <CardHeader>
           <CardTitle className="text-lg">Education</CardTitle>
+          <p className="text-sm text-muted-foreground">Select your highest level of education</p>
         </CardHeader>
         <CardContent>
           {isEditing ? (
-            <div className="space-y-1.5">
-              <Input value={editForm.education} onChange={e => updateField("education", e.target.value)} />
-            </div>
+            <Select value={editForm.education} onValueChange={(val) => updateField("education", val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select education level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GCSE">GCSE</SelectItem>
+                <SelectItem value="A-Level">A-Level</SelectItem>
+                <SelectItem value="HND/HNC">HND/HNC</SelectItem>
+                <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
+                <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+                <SelectItem value="PhD">PhD</SelectItem>
+                <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           ) : (
             <div className="flex items-center text-muted-foreground">
               <GraduationCap className="w-5 h-5 mr-2" />
