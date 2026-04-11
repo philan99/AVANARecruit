@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles, candidatesTable } from "@workspace/db";
+import { db, companyProfiles, candidatesTable, jobsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -32,6 +32,21 @@ router.get("/admin/companies", async (req, res) => {
     res.json(companies);
   } catch (err) {
     req.log.error(err, "Failed to list companies");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/admin/companies/:id", async (req, res) => {
+  try {
+    const companyId = parseInt(req.params.id, 10);
+    const [company] = await db.select().from(companyProfiles).where(eq(companyProfiles.id, companyId));
+    if (!company) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+    const jobs = await db.select().from(jobsTable).where(eq(jobsTable.companyProfileId, companyId));
+    res.json({ ...company, jobs });
+  } catch (err) {
+    req.log.error(err, "Failed to fetch company detail");
     res.status(500).json({ error: "Internal server error" });
   }
 });

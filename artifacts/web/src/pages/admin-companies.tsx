@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export default function AdminCompanies() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
@@ -121,14 +123,14 @@ export default function AdminCompanies() {
                 </thead>
                 <tbody>
                   {companies.map((company) => (
-                    <tr key={company.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <tr key={company.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; navigate(`/companies/${company.id}`); }}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
                             {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-xs text-foreground truncate">{company.name}</p>
+                            <p className="font-medium text-xs text-foreground truncate text-primary hover:underline">{company.name}</p>
                             <p className="text-[10px] text-muted-foreground truncate">{company.email || "—"}</p>
                           </div>
                         </div>
