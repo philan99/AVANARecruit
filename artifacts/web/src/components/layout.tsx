@@ -81,7 +81,7 @@ export function Layout({ children }: LayoutProps) {
             className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4 mr-3" />
-            Switch Role
+            Sign Out
           </button>
           <div className="mt-4 px-3 flex items-center">
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-xs">
