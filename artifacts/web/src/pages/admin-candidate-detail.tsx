@@ -100,7 +100,7 @@ export default function AdminCandidateDetail() {
           <div className="flex items-start gap-5">
             {candidate.profileImage ? (
               <img
-                src={candidate.profileImage}
+                src={`${import.meta.env.BASE_URL}api/storage${candidate.profileImage}`.replace(/\/\//g, "/")}
                 alt={candidate.name}
                 className="w-16 h-16 rounded-full object-cover border"
               />
