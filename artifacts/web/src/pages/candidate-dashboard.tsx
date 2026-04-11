@@ -180,7 +180,7 @@ export default function CandidateDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Link href="/browse-jobs">
+        <Link href="/browse-jobs?favourites=1">
           <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">My Favourites</CardTitle>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link } from "wouter";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Link, useSearch } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Search, MapPin, Building, Briefcase, PoundSterling, Heart } from "lucide-react";
 
 export default function BrowseJobs() {
+  const searchString = useSearch();
+  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
   const [search, setSearch] = useState("");
-  const [showFavourites, setShowFavourites] = useState(false);
+  const [showFavourites, setShowFavourites] = useState(params.get("favourites") === "1");
   const { candidateProfileId } = useRole();
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
 
