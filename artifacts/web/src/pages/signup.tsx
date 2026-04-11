@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Building2, UserCircle, TerminalSquare, UserPlus, Sparkles, Target, Users, BarChart3 } from "lucide-react";
+import { Building2, UserCircle, UserPlus, Sparkles, Target, Users, BarChart3 } from "lucide-react";
+import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775916708818.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -120,10 +121,7 @@ export default function SignUp() {
       <div className="hidden lg:flex lg:w-1/2 bg-sidebar flex-col justify-between p-12">
         <div>
           <div className="flex items-center mb-2">
-            <TerminalSquare className="w-8 h-8 text-sidebar-primary mr-2" />
-            <span className="font-mono font-bold text-xl tracking-tight text-sidebar-foreground">
-              AVANA <span className="text-sidebar-primary">TALENT</span>
-            </span>
+            <img src={logoUrl} alt="Avana Talent" className="h-8" />
           </div>
         </div>
 
@@ -165,10 +163,7 @@ export default function SignUp() {
       <div className="flex-1 bg-background flex items-center justify-center p-8 overflow-y-auto">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center justify-center mb-8">
-            <TerminalSquare className="w-8 h-8 text-primary mr-2" />
-            <span className="font-mono font-bold text-xl tracking-tight text-foreground">
-              AVANA <span className="text-primary">TALENT</span>
-            </span>
+            <img src={logoUrl} alt="Avana Talent" className="h-8" />
           </div>
 
           <div className="mb-6">

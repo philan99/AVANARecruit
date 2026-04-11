@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775916708818.png";
 import { useState } from "react";
 import { 
   Briefcase, 
@@ -56,10 +57,7 @@ export function Layout({ children }: LayoutProps) {
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
         <div className="flex items-center justify-between h-14 px-6">
           <div className="flex items-center">
-            <TerminalSquare className="w-5 h-5 text-sidebar-primary mr-2" />
-            <span className="font-mono font-bold text-base tracking-tight text-sidebar-foreground">
-              AVANA <span className="text-sidebar-primary">TALENT</span>
-            </span>
+            <img src={logoUrl} alt="Avana Talent" className="h-7" />
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
