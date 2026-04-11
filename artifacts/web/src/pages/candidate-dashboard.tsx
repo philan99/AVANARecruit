@@ -286,7 +286,7 @@ export default function CandidateDashboard() {
             </div>
             {profileCompleteness < 100 && (
               <Link href="/profile">
-                <Button variant="outline" size="sm" className="w-full mt-2">
+                <Button size="sm" className="w-full mt-2">
                   Complete Profile
                 </Button>
               </Link>
