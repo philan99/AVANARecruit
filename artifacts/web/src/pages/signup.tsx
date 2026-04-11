@@ -59,7 +59,7 @@ export default function SignUp() {
         onSuccess: () => {
           toast({ title: "Company account created!" });
           setRole("company");
-          navigate("/");
+          navigate("/company-profile");
         },
         onError: (err: any) => {
           toast({ title: "Failed to create company", description: err?.message || "Unknown error", variant: "destructive" });
