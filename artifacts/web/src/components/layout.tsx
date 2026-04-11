@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   Briefcase, 
   Users, 
@@ -11,7 +12,8 @@ import {
   Search,
   LogOut,
   Building2,
-  Shield,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -23,6 +25,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const { role, clearRole } = useRole();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const companyNavItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -49,79 +52,104 @@ export function Layout({ children }: LayoutProps) {
   const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
-          <TerminalSquare className="w-6 h-6 text-sidebar-primary mr-2" />
-          <span className="font-mono font-bold text-lg tracking-tight text-sidebar-foreground">
-            AVANA <span className="text-sidebar-primary">TALENT</span>
-          </span>
-        </div>
-
-        <div className="px-4 py-3 border-b border-sidebar-border">
-          <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
-            {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
-          </span>
-        </div>
-        
-        <nav className="flex-1 py-6 px-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
-            return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                  isActive 
-                    ? "bg-sidebar-accent text-sidebar-primary" 
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                )}
-              >
-                <item.icon className="w-4 h-4 mr-3" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t border-sidebar-border">
-          <button
-            onClick={clearRole}
-            className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 mr-3" />
-            Sign Out
-          </button>
-          <div className="mt-4 px-3 flex items-center">
-            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-xs">
-              {role === "admin" ? "AD" : role === "candidate" ? "CA" : "CO"}
+    <div className="flex flex-col min-h-screen w-full bg-background">
+      <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
+        <div className="flex items-center justify-between h-14 px-6">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center">
+              <TerminalSquare className="w-5 h-5 text-sidebar-primary mr-2" />
+              <span className="font-mono font-bold text-base tracking-tight text-sidebar-foreground">
+                AVANA <span className="text-sidebar-primary">TALENT</span>
+              </span>
+              <span className="hidden sm:inline-block ml-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono border-l border-sidebar-border pl-3">
+                {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
+              </span>
             </div>
-            <div className="ml-3 flex flex-col">
+
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map((item) => {
+                const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    )}
+                  >
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-[10px]">
+                {role === "admin" ? "AD" : role === "candidate" ? "CA" : "CO"}
+              </div>
               <span className="text-xs font-medium text-sidebar-foreground">
                 {role === "admin" ? "Administrator" : role === "candidate" ? "Candidate" : "Hiring Manager"}
               </span>
-              <span className="text-[10px] text-sidebar-foreground/60">
-                {role === "admin" ? "Platform Admin" : role === "candidate" ? "Job Seeker" : "Company Admin"}
-              </span>
+            </div>
+            <button
+              onClick={clearRole}
+              className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 mr-1.5" />
+              Sign Out
+            </button>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-accent rounded-md transition-colors"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-sidebar-border px-4 py-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-primary"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  )}
+                >
+                  <item.icon className="w-4 h-4 mr-3" />
+                  {item.label}
+                </Link>
+              );
+            })}
+            <div className="pt-2 border-t border-sidebar-border mt-2">
+              <button
+                onClick={clearRole}
+                className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 mr-3" />
+                Sign Out
+              </button>
             </div>
           </div>
-        </div>
-      </aside>
+        )}
+      </header>
 
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 md:hidden">
-          <div className="flex items-center">
-            <TerminalSquare className="w-5 h-5 text-primary mr-2" />
-            <span className="font-mono font-bold text-base tracking-tight text-foreground">
-              AVANA <span className="text-primary">TALENT</span>
-            </span>
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-auto">
-          {children}
-        </div>
+      <main className="flex-1 overflow-auto">
+        {children}
       </main>
     </div>
   );
