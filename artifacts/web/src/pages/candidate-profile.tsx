@@ -392,8 +392,16 @@ export default function CandidateProfile() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <h2 className="text-2xl font-bold text-foreground">{candidate.name}</h2>
-                  <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="uppercase text-[10px]">
-                    {candidate.status}
+                  <Badge
+                    className={`uppercase text-[10px] ${
+                      candidate.status === "active"
+                        ? "bg-green-500 text-white hover:bg-green-600"
+                        : candidate.status === "passive"
+                        ? "bg-orange-400 text-white hover:bg-orange-500"
+                        : "bg-gray-400 text-white hover:bg-gray-500"
+                    }`}
+                  >
+                    {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                   </Badge>
                 </div>
                 <p className="text-lg text-primary font-medium mb-3">{candidate.currentTitle}</p>
