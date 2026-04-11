@@ -981,6 +981,8 @@ components:
           type: integer
         name:
           type: string
+        email:
+          type: ["string", "null"]
         industry:
           type: ["string", "null"]
         website:
@@ -1012,6 +1014,8 @@ components:
       properties:
         name:
           type: string
+        email:
+          type: ["string", "null"]
         industry:
           type: ["string", "null"]
         website:

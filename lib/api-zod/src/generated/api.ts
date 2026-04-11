@@ -401,6 +401,7 @@ export const GetTopCandidatesResponse = zod.array(GetTopCandidatesResponseItem);
 export const GetCompanyProfileResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
+  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   location: zod.string().nullish(),
@@ -417,6 +418,7 @@ export const GetCompanyProfileResponse = zod.object({
  */
 export const CreateCompanyProfileBody = zod.object({
   name: zod.string(),
+  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   location: zod.string().nullish(),
@@ -429,6 +431,7 @@ export const CreateCompanyProfileBody = zod.object({
 export const CreateCompanyProfileResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
+  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   location: zod.string().nullish(),

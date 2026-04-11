@@ -9,6 +9,8 @@
 export interface CompanyProfileBody {
   name: string;
   /** @nullable */
+  email?: string | null;
+  /** @nullable */
   industry?: string | null;
   /** @nullable */
   website?: string | null;

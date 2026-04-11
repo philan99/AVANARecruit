@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 export const companyProfiles = pgTable("company_profiles", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  email: text("email"),
   industry: text("industry"),
   website: text("website"),
   location: text("location"),

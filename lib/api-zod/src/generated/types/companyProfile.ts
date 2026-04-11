@@ -10,6 +10,8 @@ export interface CompanyProfile {
   id: number;
   name: string;
   /** @nullable */
+  email?: string | null;
+  /** @nullable */
   industry?: string | null;
   /** @nullable */
   website?: string | null;

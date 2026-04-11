@@ -38,11 +38,13 @@ import {
   Upload,
   Pencil,
   Camera,
+  Mail,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Company name is required"),
+  email: z.string().optional(),
   industry: z.string().optional(),
   website: z.string().optional(),
   location: z.string().optional(),
@@ -101,6 +103,7 @@ export default function CompanyProfile() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      email: "",
       industry: "",
       website: "",
       location: "",
@@ -116,6 +119,7 @@ export default function CompanyProfile() {
     if (profile) {
       form.reset({
         name: profile.name || "",
+        email: profile.email || "",
         industry: profile.industry || "",
         website: profile.website || "",
         location: profile.location || "",
@@ -218,6 +222,13 @@ export default function CompanyProfile() {
                     <FormItem>
                       <FormLabel>Company Name *</FormLabel>
                       <FormControl><Input placeholder="Acme Inc." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl><Input type="email" placeholder="admin@acme.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -353,6 +364,9 @@ export default function CompanyProfile() {
                 <p className="text-lg text-primary font-medium mb-3">{profile!.industry}</p>
               )}
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                {profile!.email && (
+                  <span className="flex items-center"><Mail className="w-4 h-4 mr-1.5" /> {profile!.email}</span>
+                )}
                 {profile!.location && (
                   <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {profile!.location}</span>
                 )}

@@ -19,6 +19,7 @@ export default function SignUp() {
 
   const [companyForm, setCompanyForm] = useState({
     name: "",
+    email: "",
     industry: "",
     website: "",
     location: "",
@@ -44,8 +45,8 @@ export default function SignUp() {
 
   const handleCompanySignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyForm.name.trim()) {
-      toast({ title: "Company name is required", variant: "destructive" });
+    if (!companyForm.name.trim() || !companyForm.email.trim()) {
+      toast({ title: "Company name and email are required", variant: "destructive" });
       return;
     }
     createCompany.mutate(
@@ -204,17 +205,32 @@ export default function SignUp() {
 
             {selected === "company" && (
               <form onSubmit={handleCompanySignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Company Name <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Acme Inc."
-                    value={companyForm.name}
-                    onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))}
-                    className="bg-card"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Company Name <span className="text-destructive">*</span>
+                    </label>
+                    <Input
+                      placeholder="Acme Inc."
+                      value={companyForm.name}
+                      onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))}
+                      className="bg-card"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Email <span className="text-destructive">*</span>
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="admin@acme.com"
+                      value={companyForm.email}
+                      onChange={(e) => setCompanyForm(f => ({ ...f, email: e.target.value }))}
+                      className="bg-card"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
