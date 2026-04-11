@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useRole } from "@/contexts/role-context";
-import { useGetCandidate, useUpdateCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
+import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpload } from "@workspace/object-storage-web";
 
@@ -52,8 +52,6 @@ export default function CandidateProfile() {
   const { data: candidate, isLoading: profileLoading } = useGetCandidate(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
   });
-
-  const updateCandidate = useUpdateCandidate();
 
   const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
   const { uploadFile, isUploading } = useUpload({
@@ -221,8 +219,11 @@ export default function CandidateProfile() {
     });
   }
 
-  function handleSave() {
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function handleSave() {
     if (!candidateProfileId) return;
+    setIsSaving(true);
     const payload = {
       name: editForm.name,
       email: editForm.email,
@@ -237,17 +238,23 @@ export default function CandidateProfile() {
       experience: experienceList,
     };
 
-    updateCandidate.mutate({ id: candidateProfileId, data: payload }, {
-      onSuccess: () => {
-        toast({ title: "Profile updated", description: "Your changes have been saved." });
-        queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
-        queryClient.invalidateQueries({ queryKey: getListCandidatesQueryKey() });
-        setIsEditing(false);
-      },
-      onError: () => {
-        toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
-      },
-    });
+    try {
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      toast({ title: "Profile updated", description: "Your changes have been saved." });
+      queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+      queryClient.invalidateQueries({ queryKey: getListCandidatesQueryKey() });
+      setIsEditing(false);
+    } catch {
+      toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function handleStatusChange(newStatus: string) {
@@ -304,9 +311,9 @@ export default function CandidateProfile() {
               <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={updateCandidate.isPending}>
+            <Button size="sm" onClick={handleSave} disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
-              {updateCandidate.isPending ? "Saving..." : "Save Changes"}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         ) : (
