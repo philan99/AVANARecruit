@@ -98,27 +98,6 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground mt-1">Platform overview and configuration tables.</p>
       </div>
 
-      <div className="flex gap-2 border-b border-border pb-0">
-        {[
-          { key: "overview" as const, label: "Overview", icon: LayoutDashboard },
-          { key: "companies" as const, label: `Companies (${companies.length})`, icon: Building2 },
-          { key: "jobs" as const, label: `Jobs (${jobs.length})`, icon: Briefcase },
-          { key: "candidates" as const, label: `Candidates (${candidates.length})`, icon: Users },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-              activeTab === tab.key
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
 
       {activeTab === "overview" && (
         <div className="space-y-6">
