@@ -14,18 +14,22 @@ export default function RoleSelect() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { setCandidateProfileId } = useRole();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selected) return;
 
-    if (selected === "admin") {
-      if (!email || !password) {
-        toast({ title: "Email and password are required", variant: "destructive" });
-        return;
-      }
-      setIsLoading(true);
-      try {
-        const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    if (!email || !password) {
+      toast({ title: "Email and password are required", variant: "destructive" });
+      return;
+    }
+
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    setIsLoading(true);
+
+    try {
+      if (selected === "admin") {
         const res = await fetch(`${basePath}/admin/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -36,13 +40,27 @@ export default function RoleSelect() {
         } else {
           toast({ title: "Invalid admin credentials", variant: "destructive" });
         }
-      } catch {
-        toast({ title: "Login failed", variant: "destructive" });
-      } finally {
-        setIsLoading(false);
+      } else if (selected === "candidate") {
+        const res = await fetch(`${basePath}/candidates/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCandidateProfileId(data.candidateId);
+          setRole("candidate");
+        } else {
+          const data = await res.json().catch(() => ({}));
+          toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+        }
+      } else {
+        setRole(selected);
       }
-    } else {
-      setRole(selected);
+    } catch {
+      toast({ title: "Login failed", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -179,7 +197,7 @@ export default function RoleSelect() {
             <Button
               type="submit"
               className="w-full"
-              disabled={!selected || isLoading}
+              disabled={!selected || isLoading || !email || !password}
             >
               <LogIn className="w-4 h-4 mr-2" />
               {isLoading ? "Signing in..." : "Sign In"}

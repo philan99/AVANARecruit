@@ -71,6 +71,41 @@ router.get("/candidates", async (req, res): Promise<void> => {
   res.json(ListCandidatesResponse.parse(candidates));
 });
 
+router.post("/candidates/login", async (req, res): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).json({ error: "Email and password are required" });
+      return;
+    }
+
+    const [candidate] = await db
+      .select({
+        id: candidatesTable.id,
+        name: candidatesTable.name,
+        email: candidatesTable.email,
+        password: candidatesTable.password,
+      })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.email, email));
+
+    if (!candidate || !candidate.password) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    const valid = await bcrypt.compare(password, candidate.password);
+    if (!valid) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    res.json({ success: true, candidateId: candidate.id, name: candidate.name });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/candidates", async (req, res): Promise<void> => {
   const { password, ...rest } = req.body;
   const parsed = CreateCandidateBody.safeParse(rest);
