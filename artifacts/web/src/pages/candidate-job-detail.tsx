@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart } from "lucide-react";
@@ -11,6 +12,39 @@ import { Button } from "@/components/ui/button";
 export default function CandidateJobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
   const { candidateProfileId } = useRole();
+  const [isFavourite, setIsFavourite] = useState(false);
+
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  const fetchFavouriteStatus = useCallback(async () => {
+    if (!candidateProfileId) return;
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`);
+      if (res.ok) {
+        const data = await res.json();
+        setIsFavourite(data.some((f: any) => f.jobId === jobId));
+      }
+    } catch {}
+  }, [candidateProfileId, jobId, apiBase]);
+
+  useEffect(() => {
+    fetchFavouriteStatus();
+  }, [fetchFavouriteStatus]);
+
+  async function toggleFavourite() {
+    if (!candidateProfileId) return;
+    if (isFavourite) {
+      setIsFavourite(false);
+      await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites/${jobId}`, { method: "DELETE" });
+    } else {
+      setIsFavourite(true);
+      await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+    }
+  }
 
   const { data: job, isLoading: jobLoading } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
@@ -59,8 +93,14 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="lg" className="font-mono tracking-tight">
-            <Heart className="w-4 h-4 mr-2" /> Add to Favourites
+          <Button
+            variant={isFavourite ? "default" : "outline"}
+            size="lg"
+            className="font-mono tracking-tight"
+            onClick={toggleFavourite}
+          >
+            <Heart className={`w-4 h-4 mr-2 ${isFavourite ? "fill-white" : ""}`} />
+            {isFavourite ? "Favourited" : "Add to Favourites"}
           </Button>
           <Button size="lg" className="font-mono tracking-tight">
             <Send className="w-4 h-4 mr-2" /> APPLY
