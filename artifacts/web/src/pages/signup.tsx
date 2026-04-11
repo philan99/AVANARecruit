@@ -3,7 +3,7 @@ import { Building2, UserCircle, TerminalSquare, UserPlus, Sparkles, Target, User
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,12 +20,8 @@ export default function SignUp() {
   const [companyForm, setCompanyForm] = useState({
     name: "",
     email: "",
-    industry: "",
-    website: "",
-    location: "",
-    description: "",
-    size: "",
-    founded: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [candidateForm, setCandidateForm] = useState({
@@ -45,12 +41,20 @@ export default function SignUp() {
 
   const handleCompanySignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyForm.name.trim() || !companyForm.email.trim()) {
-      toast({ title: "Company name and email are required", variant: "destructive" });
+    if (!companyForm.name.trim() || !companyForm.email.trim() || !companyForm.password) {
+      toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (companyForm.password !== companyForm.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (companyForm.password.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
       return;
     }
     createCompany.mutate(
-      { data: { ...companyForm } },
+      { data: { name: companyForm.name, email: companyForm.email } },
       {
         onSuccess: () => {
           toast({ title: "Company account created!" });
@@ -205,93 +209,58 @@ export default function SignUp() {
 
             {selected === "company" && (
               <form onSubmit={handleCompanySignUp} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Company Name <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      placeholder="Acme Inc."
-                      value={companyForm.name}
-                      onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))}
-                      className="bg-card"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Email <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      type="email"
-                      placeholder="admin@acme.com"
-                      value={companyForm.email}
-                      onChange={(e) => setCompanyForm(f => ({ ...f, email: e.target.value }))}
-                      className="bg-card"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Industry</label>
-                    <Input
-                      placeholder="Technology"
-                      value={companyForm.industry}
-                      onChange={(e) => setCompanyForm(f => ({ ...f, industry: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Company Size</label>
-                    <Select
-                      value={companyForm.size}
-                      onValueChange={(val) => setCompanyForm(f => ({ ...f, size: val }))}
-                    >
-                      <SelectTrigger className="bg-card">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1-10">1-10</SelectItem>
-                        <SelectItem value="11-50">11-50</SelectItem>
-                        <SelectItem value="51-200">51-200</SelectItem>
-                        <SelectItem value="201-500">201-500</SelectItem>
-                        <SelectItem value="501-1000">501-1000</SelectItem>
-                        <SelectItem value="1000+">1000+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Location</label>
-                    <Input
-                      placeholder="San Francisco, CA"
-                      value={companyForm.location}
-                      onChange={(e) => setCompanyForm(f => ({ ...f, location: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Founded</label>
-                    <Input
-                      placeholder="2020"
-                      value={companyForm.founded}
-                      onChange={(e) => setCompanyForm(f => ({ ...f, founded: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Company Name <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder="Acme Inc."
+                    value={companyForm.name}
+                    onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))}
+                    className="bg-card"
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Website</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Email <span className="text-destructive">*</span>
+                  </label>
                   <Input
-                    placeholder="https://example.com"
-                    value={companyForm.website}
-                    onChange={(e) => setCompanyForm(f => ({ ...f, website: e.target.value }))}
+                    type="email"
+                    placeholder="admin@acme.com"
+                    value={companyForm.email}
+                    onChange={(e) => setCompanyForm(f => ({ ...f, email: e.target.value }))}
                     className="bg-card"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Password <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Minimum 8 characters"
+                    value={companyForm.password}
+                    onChange={(e) => setCompanyForm(f => ({ ...f, password: e.target.value }))}
+                    className="bg-card"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Re-Confirm Password <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Re-enter your password"
+                    value={companyForm.confirmPassword}
+                    onChange={(e) => setCompanyForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                    className="bg-card"
+                    required
                   />
                 </div>
 
