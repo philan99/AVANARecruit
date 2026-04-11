@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, companyProfiles, candidatesTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 const router: IRouter = Router();
 
@@ -40,6 +42,33 @@ router.get("/admin/candidates", async (req, res) => {
     res.json(candidates);
   } catch (err) {
     req.log.error(err, "Failed to list candidates");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/admin/candidates/:id/reset-password", async (req, res) => {
+  try {
+    const candidateId = parseInt(req.params.id, 10);
+    const { password } = req.body;
+
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db
+      .update(candidatesTable)
+      .set({ password: hashedPassword })
+      .where(eq(candidatesTable.id, candidateId))
+      .returning({ id: candidatesTable.id });
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error(err, "Failed to reset candidate password");
     res.status(500).json({ error: "Internal server error" });
   }
 });

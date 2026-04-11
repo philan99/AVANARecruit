@@ -7,6 +7,7 @@ export const candidatesTable = pgTable("candidates", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone"),
+  password: text("password"),
   currentTitle: text("current_title").notNull(),
   summary: text("summary").notNull(),
   skills: text("skills").array().notNull(),

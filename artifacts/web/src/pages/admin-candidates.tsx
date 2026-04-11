@@ -1,7 +1,19 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Mail, MapPin, Clock, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Users, Mail, MapPin, Clock, GraduationCap, KeyRound } from "lucide-react";
 
 interface Candidate {
   id: number;
@@ -22,6 +34,11 @@ interface Candidate {
 export default function AdminCandidates() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resetTarget, setResetTarget] = useState<Candidate | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
+  const { toast } = useToast();
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -38,6 +55,40 @@ export default function AdminCandidates() {
     }
     fetchData();
   }, [basePath]);
+
+  async function handleResetPassword() {
+    if (!resetTarget) return;
+    if (newPassword.length < 6) {
+      toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const res = await fetch(`${basePath}/admin/candidates/${resetTarget.id}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (res.ok) {
+        toast({ title: "Password Reset", description: `Password has been reset for ${resetTarget.name}.` });
+        setResetTarget(null);
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        const data = await res.json();
+        toast({ title: "Error", description: data.error || "Failed to reset password.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to reset password.", variant: "destructive" });
+    } finally {
+      setResetting(false);
+    }
+  }
 
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading candidates...</div>;
@@ -69,6 +120,7 @@ export default function AdminCandidates() {
                     <th className="text-left py-3 px-4 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-3 px-4 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,6 +170,21 @@ export default function AdminCandidates() {
                       <td className="py-3 px-4 text-muted-foreground text-xs">
                         {new Date(candidate.createdAt).toLocaleDateString()}
                       </td>
+                      <td className="py-3 px-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1"
+                          onClick={() => {
+                            setResetTarget(candidate);
+                            setNewPassword("");
+                            setConfirmPassword("");
+                          }}
+                        >
+                          <KeyRound className="w-3 h-3" />
+                          Reset Password
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -128,6 +195,45 @@ export default function AdminCandidates() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!resetTarget} onOpenChange={(open) => { if (!open) setResetTarget(null); }}>
+        <DialogContent className="bg-card">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for <span className="font-medium text-foreground">{resetTarget?.name}</span> ({resetTarget?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Minimum 6 characters"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Re-enter password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetTarget(null)}>Cancel</Button>
+            <Button onClick={handleResetPassword} disabled={resetting || !newPassword || !confirmPassword}>
+              {resetting ? "Resetting..." : "Reset Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
