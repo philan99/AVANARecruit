@@ -24,7 +24,7 @@ export default function BrowseJobs() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-            <Briefcase className="mr-3 text-primary" /> Browse Opportunities
+            <Briefcase className="mr-3 text-primary" /> Browse Jobs
           </h1>
           <p className="text-muted-foreground mt-1">Explore open positions from companies on the platform.</p>
         </div>
