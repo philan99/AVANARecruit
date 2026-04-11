@@ -48,6 +48,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/companies", label: "Companies", icon: Building2 },
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/candidates", label: "Candidates", icon: Users },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;

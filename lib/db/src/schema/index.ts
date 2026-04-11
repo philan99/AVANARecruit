@@ -3,3 +3,4 @@ export * from "./candidates";
 export * from "./matches";
 export * from "./companyProfiles";
 export * from "./favourites";
+export * from "./admins";
