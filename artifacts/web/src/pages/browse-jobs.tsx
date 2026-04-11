@@ -10,6 +10,7 @@ import { Search, MapPin, Building, Briefcase, PoundSterling, Heart } from "lucid
 
 export default function BrowseJobs() {
   const [search, setSearch] = useState("");
+  const [showFavourites, setShowFavourites] = useState(false);
   const { candidateProfileId } = useRole();
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
 
@@ -58,6 +59,10 @@ export default function BrowseJobs() {
     query: { queryKey: getListJobsQueryKey(queryParams) },
   });
 
+  const displayedJobs = showFavourites
+    ? jobs?.filter((job) => favouriteJobIds.has(job.id))
+    : jobs;
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex items-start justify-between">
@@ -67,8 +72,14 @@ export default function BrowseJobs() {
           </h1>
           <p className="text-muted-foreground mt-1">Explore open positions from companies on the platform.</p>
         </div>
-        <Button size="lg" className="font-mono tracking-tight">
-          <Heart className="w-4 h-4 mr-2" /> Show Favourites
+        <Button
+          size="lg"
+          className="font-mono tracking-tight"
+          variant={showFavourites ? "default" : "outline"}
+          onClick={() => setShowFavourites(!showFavourites)}
+        >
+          <Heart className={`w-4 h-4 mr-2 ${showFavourites ? "fill-white" : ""}`} />
+          {showFavourites ? "Show All Jobs" : "Show Favourites"}
         </Button>
       </div>
 
@@ -85,10 +96,12 @@ export default function BrowseJobs() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
           <div className="col-span-full py-12 text-center text-muted-foreground font-mono">Loading opportunities...</div>
-        ) : jobs?.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-muted-foreground font-mono">No open positions found.</div>
+        ) : displayedJobs?.length === 0 ? (
+          <div className="col-span-full py-12 text-center text-muted-foreground font-mono">
+            {showFavourites ? "You haven't added any favourites yet." : "No open positions found."}
+          </div>
         ) : (
-          jobs?.map((job) => (
+          displayedJobs?.map((job) => (
             <Link key={job.id} href={`/jobs/${job.id}`}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col relative">
                 <button
