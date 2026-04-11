@@ -1,10 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Mail, MapPin, Clock, GraduationCap, KeyRound } from "lucide-react";
+import { Users, Search, X, KeyRound } from "lucide-react";
 
 interface Candidate {
   id: number;
@@ -42,6 +49,11 @@ export default function AdminCandidates() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [skillFilter, setSkillFilter] = useState("all");
+
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   useEffect(() => {
@@ -57,6 +69,42 @@ export default function AdminCandidates() {
     }
     fetchData();
   }, [basePath]);
+
+  const uniqueLocations = useMemo(() => {
+    const locs = new Set(candidates.map(c => c.location).filter(Boolean));
+    return Array.from(locs).sort();
+  }, [candidates]);
+
+  const uniqueSkills = useMemo(() => {
+    const skills = new Set(candidates.flatMap(c => c.skills));
+    return Array.from(skills).sort();
+  }, [candidates]);
+
+  const filtered = useMemo(() => {
+    return candidates.filter(c => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matches = c.name.toLowerCase().includes(q) ||
+          c.email.toLowerCase().includes(q) ||
+          c.currentTitle.toLowerCase().includes(q) ||
+          c.skills.some(s => s.toLowerCase().includes(q));
+        if (!matches) return false;
+      }
+      if (statusFilter !== "all" && c.status !== statusFilter) return false;
+      if (locationFilter !== "all" && c.location !== locationFilter) return false;
+      if (skillFilter !== "all" && !c.skills.includes(skillFilter)) return false;
+      return true;
+    });
+  }, [candidates, searchQuery, statusFilter, locationFilter, skillFilter]);
+
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || skillFilter !== "all";
+
+  function clearFilters() {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setLocationFilter("all");
+    setSkillFilter("all");
+  }
 
   async function handleResetPassword() {
     if (!resetTarget) return;
@@ -106,8 +154,85 @@ export default function AdminCandidates() {
       </div>
 
       <Card className="bg-card">
+        <CardContent className="pt-5 pb-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-[200px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Name, email, title, or skill..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-9 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="w-[140px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="passive">Passive</SelectItem>
+                  <SelectItem value="not_looking">Not Looking</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Location</Label>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {uniqueLocations.map(loc => (
+                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Skill</Label>
+              <Select value={skillFilter} onValueChange={setSkillFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Skills</SelectItem>
+                  {uniqueSkills.map(skill => (
+                    <SelectItem key={skill} value={skill}>{skill}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" className="h-9 text-xs gap-1 text-muted-foreground" onClick={clearFilters}>
+                <X className="w-3 h-3" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          {hasActiveFilters && (
+            <p className="text-[11px] text-muted-foreground mt-3">
+              Showing {filtered.length} of {candidates.length} candidates
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
         <CardContent className="pt-6">
-          {candidates.length > 0 ? (
+          {filtered.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -123,7 +248,7 @@ export default function AdminCandidates() {
                   </tr>
                 </thead>
                 <tbody>
-                  {candidates.map((candidate) => (
+                  {filtered.map((candidate) => (
                     <tr key={candidate.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; navigate(`/candidates/${candidate.id}`); }}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
@@ -182,7 +307,9 @@ export default function AdminCandidates() {
               </table>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">No candidates registered yet.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {hasActiveFilters ? "No candidates match your filters." : "No candidates registered yet."}
+            </p>
           )}
         </CardContent>
       </Card>
