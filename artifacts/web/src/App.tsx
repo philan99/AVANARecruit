@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout";
 import { RoleProvider, useRole } from "@/contexts/role-context";
 
 import RoleSelect from "@/pages/role-select";
+import SignUp from "@/pages/signup";
 import Dashboard from "@/pages/dashboard";
 import CandidateDashboard from "@/pages/candidate-dashboard";
 import CandidateProfile from "@/pages/candidate-profile";
@@ -64,7 +65,12 @@ function AppRouter() {
   const { role } = useRole();
 
   if (!role) {
-    return <RoleSelect />;
+    return (
+      <Switch>
+        <Route path="/signup" component={SignUp} />
+        <Route component={RoleSelect} />
+      </Switch>
+    );
   }
 
   if (role === "candidate") {

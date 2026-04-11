@@ -3,6 +3,7 @@ import { Building2, UserCircle, TerminalSquare, LogIn, Sparkles, Target, Users, 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
+import { Link } from "wouter";
 
 export default function RoleSelect() {
   const { setRole } = useRole();
@@ -146,9 +147,9 @@ export default function RoleSelect() {
 
             <p className="text-center text-xs text-muted-foreground pt-2">
               Don't have an account?{" "}
-              <span className="text-primary font-medium cursor-pointer hover:underline">
+              <Link href="/signup" className="text-primary font-medium cursor-pointer hover:underline">
                 Sign up
-              </span>
+              </Link>
             </p>
           </form>
         </div>
