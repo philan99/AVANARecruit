@@ -134,16 +134,18 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Open Jobs</CardTitle>
-            <Briefcase className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.openJobs || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalJobs || 0} total</p>
-          </CardContent>
-        </Card>
+        <Link href="/jobs?status=open">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Open Jobs</CardTitle>
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stats?.openJobs || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalJobs || 0} total</p>
+            </CardContent>
+          </Card>
+        </Link>
         
         <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">

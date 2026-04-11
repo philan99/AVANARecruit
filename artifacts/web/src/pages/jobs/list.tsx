@@ -53,17 +53,23 @@ const formSchema = z.object({
 
 export default function JobsList() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const [statusFilter, setStatusFilter] = useState<string>(urlParams.get("status") || "all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [, setLocation] = useLocation();
-  const searchString = useSearch();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { role } = useRole();
 
   useEffect(() => {
-    if (new URLSearchParams(searchString).get("create") === "true") {
+    const params = new URLSearchParams(searchString);
+    if (params.get("create") === "true") {
       setIsCreateOpen(true);
+    }
+    const statusParam = params.get("status");
+    if (statusParam) {
+      setStatusFilter(statusParam);
     }
   }, [searchString]);
 
