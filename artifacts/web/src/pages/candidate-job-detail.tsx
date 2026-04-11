@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -58,9 +58,14 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             )}
           </div>
         </div>
-        <Button size="lg" className="font-mono tracking-tight shrink-0">
-          <Send className="w-4 h-4 mr-2" /> APPLY
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="lg" className="font-mono tracking-tight">
+            <Heart className="w-4 h-4 mr-2" /> Add to Favourites
+          </Button>
+          <Button size="lg" className="font-mono tracking-tight">
+            <Send className="w-4 h-4 mr-2" /> APPLY
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
