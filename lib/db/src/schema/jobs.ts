@@ -6,6 +6,7 @@ export const jobsTable = pgTable("jobs", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   company: text("company").notNull(),
+  companyProfileId: integer("company_profile_id"),
   location: text("location").notNull(),
   description: text("description").notNull(),
   requirements: text("requirements").notNull(),

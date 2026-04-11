@@ -32,6 +32,8 @@ export interface Job {
   id: number;
   title: string;
   company: string;
+  /** @nullable */
+  companyProfileId?: number | null;
   location: string;
   description: string;
   requirements: string;
@@ -70,6 +72,8 @@ export const CreateJobBodyStatus = {
 export interface CreateJobBody {
   title: string;
   company: string;
+  /** @nullable */
+  companyProfileId?: number | null;
   location: string;
   description: string;
   requirements: string;
@@ -386,6 +390,7 @@ export interface ErrorEnvelope {
 export type ListJobsParams = {
   status?: ListJobsStatus;
   search?: string;
+  companyProfileId?: number;
 };
 
 export type ListJobsStatus =

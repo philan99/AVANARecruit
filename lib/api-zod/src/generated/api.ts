@@ -21,12 +21,14 @@ export const HealthCheckResponse = zod.object({
 export const ListJobsQueryParams = zod.object({
   status: zod.enum(["open", "closed", "draft"]).optional(),
   search: zod.coerce.string().optional(),
+  companyProfileId: zod.coerce.number().optional(),
 });
 
 export const ListJobsResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   company: zod.string(),
+  companyProfileId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -47,6 +49,7 @@ export const ListJobsResponse = zod.array(ListJobsResponseItem);
 export const CreateJobBody = zod.object({
   title: zod.string(),
   company: zod.string(),
+  companyProfileId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -68,6 +71,7 @@ export const GetJobResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   company: zod.string(),
+  companyProfileId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -107,6 +111,7 @@ export const UpdateJobResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   company: zod.string(),
+  companyProfileId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),

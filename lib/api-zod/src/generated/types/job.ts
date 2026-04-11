@@ -12,6 +12,8 @@ export interface Job {
   id: number;
   title: string;
   company: string;
+  /** @nullable */
+  companyProfileId?: number | null;
   location: string;
   description: string;
   requirements: string;

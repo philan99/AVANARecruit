@@ -11,6 +11,8 @@ import type { CreateJobBodyStatus } from "./createJobBodyStatus";
 export interface CreateJobBody {
   title: string;
   company: string;
+  /** @nullable */
+  companyProfileId?: number | null;
   location: string;
   description: string;
   requirements: string;

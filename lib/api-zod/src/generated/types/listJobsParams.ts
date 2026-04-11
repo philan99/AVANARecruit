@@ -10,4 +10,5 @@ import type { ListJobsStatus } from "./listJobsStatus";
 export type ListJobsParams = {
   status?: ListJobsStatus;
   search?: string;
+  companyProfileId?: number;
 };

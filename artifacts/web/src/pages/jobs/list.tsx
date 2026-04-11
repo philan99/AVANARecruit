@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useListJobs, useCreateJob, getListJobsQueryKey } from "@workspace/api-client-react";
+import { useListJobs, useCreateJob, getListJobsQueryKey, useGetCompanyProfile, getGetCompanyProfileQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
+import { useRole } from "@/contexts/role-context";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,14 +58,22 @@ export default function JobsList() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { role } = useRole();
+
+  const { data: companyProfile } = useGetCompanyProfile({
+    query: { enabled: role === "company" },
+  });
+
+  const companyProfileId = companyProfile?.id;
 
   const queryParams = {
     ...(search ? { search } : {}),
     ...(statusFilter !== "all" ? { status: statusFilter as any } : {}),
+    ...(role === "company" && companyProfileId ? { companyProfileId } : {}),
   };
 
   const { data: jobs, isLoading } = useListJobs(queryParams, {
-    query: { queryKey: getListJobsQueryKey(queryParams) },
+    query: { queryKey: getListJobsQueryKey(queryParams), enabled: role !== "company" || !!companyProfileId },
   });
 
   const createJob = useCreateJob();
@@ -73,7 +82,7 @@ export default function JobsList() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      company: "",
+      company: companyProfile?.name ?? "",
       location: "",
       description: "",
       requirements: "",
@@ -87,6 +96,7 @@ export default function JobsList() {
     const payload = {
       ...values,
       skills: values.skills.split(",").map(s => s.trim()).filter(Boolean),
+      ...(companyProfileId ? { companyProfileId } : {}),
     };
 
     createJob.mutate({ data: payload }, {

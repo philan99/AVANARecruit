@@ -31,6 +31,9 @@ router.get("/jobs", async (req, res): Promise<void> => {
       )!
     );
   }
+  if (params.success && params.data.companyProfileId) {
+    conditions.push(eq(jobsTable.companyProfileId, params.data.companyProfileId));
+  }
 
   const matchCountSubquery = db
     .select({ jobId: matchesTable.jobId, cnt: count().as("cnt") })
@@ -43,6 +46,7 @@ router.get("/jobs", async (req, res): Promise<void> => {
       id: jobsTable.id,
       title: jobsTable.title,
       company: jobsTable.company,
+      companyProfileId: jobsTable.companyProfileId,
       location: jobsTable.location,
       description: jobsTable.description,
       requirements: jobsTable.requirements,
@@ -101,6 +105,7 @@ router.get("/jobs/:id", async (req, res): Promise<void> => {
       id: jobsTable.id,
       title: jobsTable.title,
       company: jobsTable.company,
+      companyProfileId: jobsTable.companyProfileId,
       location: jobsTable.location,
       description: jobsTable.description,
       requirements: jobsTable.requirements,
