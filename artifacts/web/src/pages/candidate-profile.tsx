@@ -441,13 +441,42 @@ export default function CandidateProfile() {
         </CardHeader>
         <CardContent>
           {isEditing ? (
-            <div className="space-y-1.5">
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {editForm.skills.split(",").map(s => s.trim()).filter(Boolean).map((skill, i) => (
+                  <Badge key={`${skill}-${i}`} variant="secondary" className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    {skill}
+                    <button
+                      type="button"
+                      className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                      onClick={() => {
+                        const skills = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
+                        skills.splice(i, 1);
+                        updateField("skills", skills.join(", "));
+                      }}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
               <Input
-                value={editForm.skills}
-                onChange={e => updateField("skills", e.target.value)}
-                placeholder="React, TypeScript, Node.js (comma separated)"
+                placeholder="Type a skill and press Enter"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) {
+                      const existing = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
+                      if (!existing.includes(val)) {
+                        updateField("skills", [...existing, val].join(", "));
+                      }
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }
+                }}
               />
-              <p className="text-xs text-muted-foreground">Separate skills with commas</p>
+              <p className="text-xs text-muted-foreground">Press Enter to add a skill</p>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
