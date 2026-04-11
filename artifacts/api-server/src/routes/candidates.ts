@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, ilike, or, sql, count } from "drizzle-orm";
 import { db, candidatesTable, matchesTable } from "@workspace/db";
+import bcrypt from "bcryptjs";
 import {
   ListCandidatesQueryParams,
   CreateCandidateBody,
@@ -71,13 +72,19 @@ router.get("/candidates", async (req, res): Promise<void> => {
 });
 
 router.post("/candidates", async (req, res): Promise<void> => {
-  const parsed = CreateCandidateBody.safeParse(req.body);
+  const { password, ...rest } = req.body;
+  const parsed = CreateCandidateBody.safeParse(rest);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
 
-  const [candidate] = await db.insert(candidatesTable).values(parsed.data).returning();
+  const insertData: any = { ...parsed.data };
+  if (password && typeof password === "string") {
+    insertData.password = await bcrypt.hash(password, 10);
+  }
+
+  const [candidate] = await db.insert(candidatesTable).values(insertData).returning();
 
   const result = { ...candidate, matchCount: 0 };
   res.status(201).json(GetCandidateResponse.parse(result));

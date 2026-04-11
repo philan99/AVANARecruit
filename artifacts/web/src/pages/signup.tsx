@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Building2, UserCircle, TerminalSquare, UserPlus, Sparkles, Target, Users, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
@@ -27,13 +26,8 @@ export default function SignUp() {
   const [candidateForm, setCandidateForm] = useState({
     name: "",
     email: "",
-    phone: "",
-    currentTitle: "",
-    summary: "",
-    skills: "",
-    experienceYears: "",
-    education: "",
-    location: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const createCompany = useCreateCompanyProfile();
@@ -70,31 +64,37 @@ export default function SignUp() {
 
   const handleCandidateSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, currentTitle, summary, skills, experienceYears, education, location } = candidateForm;
-    if (!name.trim() || !email.trim() || !currentTitle.trim()) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" });
+    const { name, email, password, confirmPassword } = candidateForm;
+    if (!name.trim() || !email.trim() || !password) {
+      toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
-    const skillsArray = skills.split(",").map(s => s.trim()).filter(Boolean);
-    const expYears = parseInt(experienceYears) || 0;
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (password.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
 
     createCandidate.mutate(
       {
         data: {
           name: name.trim(),
           email: email.trim(),
-          phone: candidateForm.phone.trim() || undefined,
-          currentTitle: currentTitle.trim(),
-          summary: summary.trim() || "No summary provided",
-          skills: skillsArray.length > 0 ? skillsArray : ["General"],
-          experienceYears: expYears,
-          education: education.trim() || "Not specified",
-          location: location.trim() || "Remote",
+          password,
+          currentTitle: "Not specified",
+          summary: "No summary provided",
+          skills: ["General"],
+          experienceYears: 0,
+          education: "Not specified",
+          location: "Not specified",
         },
       },
       {
         onSuccess: (data: any) => {
-          toast({ title: "Candidate profile created!" });
+          toast({ title: "Candidate account created!" });
           if (data?.id) {
             setCandidateProfileId(data.id);
           }
@@ -102,7 +102,7 @@ export default function SignUp() {
           navigate("/");
         },
         onError: (err: any) => {
-          toast({ title: "Failed to create profile", description: err?.message || "Unknown error", variant: "destructive" });
+          toast({ title: "Failed to create account", description: err?.message || "Unknown error", variant: "destructive" });
         },
       }
     );
@@ -273,115 +273,64 @@ export default function SignUp() {
 
             {selected === "candidate" && (
               <form onSubmit={handleCandidateSignUp} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Full Name <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      placeholder="Jane Doe"
-                      value={candidateForm.name}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, name: e.target.value }))}
-                      className="bg-card"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Email <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      type="email"
-                      placeholder="jane@example.com"
-                      value={candidateForm.email}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, email: e.target.value }))}
-                      className="bg-card"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Current Title <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      placeholder="Software Engineer"
-                      value={candidateForm.currentTitle}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, currentTitle: e.target.value }))}
-                      className="bg-card"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Phone</label>
-                    <Input
-                      placeholder="+1 (555) 000-0000"
-                      value={candidateForm.phone}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, phone: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Experience (years)</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      placeholder="5"
-                      value={candidateForm.experienceYears}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, experienceYears: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Location</label>
-                    <Input
-                      placeholder="New York, NY"
-                      value={candidateForm.location}
-                      onChange={(e) => setCandidateForm(f => ({ ...f, location: e.target.value }))}
-                      className="bg-card"
-                    />
-                  </div>
-                </div>
-
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Education</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Full Name <span className="text-destructive">*</span>
+                  </label>
                   <Input
-                    placeholder="B.S. Computer Science, MIT"
-                    value={candidateForm.education}
-                    onChange={(e) => setCandidateForm(f => ({ ...f, education: e.target.value }))}
+                    placeholder="Jane Doe"
+                    value={candidateForm.name}
+                    onChange={(e) => setCandidateForm(f => ({ ...f, name: e.target.value }))}
                     className="bg-card"
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Skills</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Email <span className="text-destructive">*</span>
+                  </label>
                   <Input
-                    placeholder="React, TypeScript, Node.js (comma-separated)"
-                    value={candidateForm.skills}
-                    onChange={(e) => setCandidateForm(f => ({ ...f, skills: e.target.value }))}
+                    type="email"
+                    placeholder="jane@example.com"
+                    value={candidateForm.email}
+                    onChange={(e) => setCandidateForm(f => ({ ...f, email: e.target.value }))}
                     className="bg-card"
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Professional Summary</label>
-                  <Textarea
-                    placeholder="A brief summary of your experience and goals..."
-                    value={candidateForm.summary}
-                    onChange={(e) => setCandidateForm(f => ({ ...f, summary: e.target.value }))}
-                    className="bg-card min-h-[80px]"
-                    rows={3}
+                  <label className="text-sm font-medium text-foreground">
+                    Password <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Minimum 8 characters"
+                    value={candidateForm.password}
+                    onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))}
+                    className="bg-card"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Re-Confirm Password <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Re-enter your password"
+                    value={candidateForm.confirmPassword}
+                    onChange={(e) => setCandidateForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                    className="bg-card"
+                    required
                   />
                 </div>
 
                 <Button type="submit" className="w-full" disabled={createCandidate.isPending}>
                   <UserPlus className="w-4 h-4 mr-2" />
-                  {createCandidate.isPending ? "Creating..." : "Create Candidate Profile"}
+                  {createCandidate.isPending ? "Creating..." : "Create Candidate Account"}
                 </Button>
               </form>
             )}
