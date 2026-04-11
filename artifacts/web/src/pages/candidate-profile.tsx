@@ -45,6 +45,7 @@ export default function CandidateProfile() {
   const { candidateProfileId, setCandidateProfileId } = useRole();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -58,6 +59,58 @@ export default function CandidateProfile() {
 
   const createCandidate = useCreateCandidate();
   const updateCandidate = useUpdateCandidate();
+
+  const editForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      currentTitle: "",
+      summary: "",
+      skills: "",
+      experienceYears: 0,
+      education: "",
+      location: "",
+    },
+  });
+
+  function openEditDialog() {
+    if (candidate) {
+      editForm.reset({
+        name: candidate.name,
+        email: candidate.email,
+        phone: candidate.phone || "",
+        currentTitle: candidate.currentTitle,
+        summary: candidate.summary,
+        skills: candidate.skills.join(", "),
+        experienceYears: candidate.experienceYears,
+        education: candidate.education,
+        location: candidate.location,
+      });
+    }
+    setIsEditOpen(true);
+  }
+
+  function onEditSubmit(values: z.infer<typeof formSchema>) {
+    if (!candidateProfileId) return;
+    const payload = {
+      ...values,
+      skills: values.skills.split(",").map(s => s.trim()).filter(Boolean),
+    };
+
+    updateCandidate.mutate({ id: candidateProfileId, data: payload }, {
+      onSuccess: () => {
+        toast({ title: "Profile updated", description: "Your changes have been saved." });
+        queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+        queryClient.invalidateQueries({ queryKey: getListCandidatesQueryKey() });
+        setIsEditOpen(false);
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
+      },
+    });
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -260,10 +313,96 @@ export default function CandidateProfile() {
           </h1>
           <p className="text-muted-foreground mt-1">Your professional profile used for job matching.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setCandidateProfileId(null)}>
-          Switch Profile
+        <Button variant="outline" size="sm" onClick={openEditDialog}>
+          <Edit className="w-4 h-4 mr-2" />
+          Edit Profile
         </Button>
       </div>
+
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={editForm.control} name="name" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={editForm.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl><Input type="email" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={editForm.control} name="phone" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone (optional)</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={editForm.control} name="currentTitle" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Title</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={editForm.control} name="experienceYears" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Years of Experience</FormLabel>
+                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={editForm.control} name="location" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+              <FormField control={editForm.control} name="education" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Education</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editForm.control} name="skills" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skills (comma separated)</FormLabel>
+                  <FormControl><Input placeholder="React, TypeScript, Node.js" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editForm.control} name="summary" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Professional Summary</FormLabel>
+                  <FormControl><Textarea className="h-32" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updateCandidate.isPending}>
+                  {updateCandidate.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       <Card className="bg-card">
         <CardContent className="p-6">
