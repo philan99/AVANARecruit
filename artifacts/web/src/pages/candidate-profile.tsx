@@ -360,7 +360,61 @@ export default function CandidateProfile() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Phone</label>
-                <Input value={editForm.phone} onChange={e => updateField("phone", e.target.value)} placeholder="Optional" />
+                <div className="flex gap-2">
+                  <Select
+                    value={editForm.phone.match(/^\+\d+/)?.[0] || "+44"}
+                    onValueChange={(code) => {
+                      const numberPart = editForm.phone.replace(/^\+\d+\s*/, "");
+                      updateField("phone", `${code} ${numberPart}`);
+                    }}
+                  >
+                    <SelectTrigger className="w-[120px] shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                      <SelectItem value="+353">🇮🇪 +353</SelectItem>
+                      <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                      <SelectItem value="+49">🇩🇪 +49</SelectItem>
+                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                      <SelectItem value="+39">🇮🇹 +39</SelectItem>
+                      <SelectItem value="+31">🇳🇱 +31</SelectItem>
+                      <SelectItem value="+32">🇧🇪 +32</SelectItem>
+                      <SelectItem value="+41">🇨🇭 +41</SelectItem>
+                      <SelectItem value="+46">🇸🇪 +46</SelectItem>
+                      <SelectItem value="+47">🇳🇴 +47</SelectItem>
+                      <SelectItem value="+45">🇩🇰 +45</SelectItem>
+                      <SelectItem value="+358">🇫🇮 +358</SelectItem>
+                      <SelectItem value="+48">🇵🇱 +48</SelectItem>
+                      <SelectItem value="+43">🇦🇹 +43</SelectItem>
+                      <SelectItem value="+351">🇵🇹 +351</SelectItem>
+                      <SelectItem value="+61">🇦🇺 +61</SelectItem>
+                      <SelectItem value="+64">🇳🇿 +64</SelectItem>
+                      <SelectItem value="+91">🇮🇳 +91</SelectItem>
+                      <SelectItem value="+81">🇯🇵 +81</SelectItem>
+                      <SelectItem value="+82">🇰🇷 +82</SelectItem>
+                      <SelectItem value="+86">🇨🇳 +86</SelectItem>
+                      <SelectItem value="+65">🇸🇬 +65</SelectItem>
+                      <SelectItem value="+852">🇭🇰 +852</SelectItem>
+                      <SelectItem value="+971">🇦🇪 +971</SelectItem>
+                      <SelectItem value="+966">🇸🇦 +966</SelectItem>
+                      <SelectItem value="+27">🇿🇦 +27</SelectItem>
+                      <SelectItem value="+234">🇳🇬 +234</SelectItem>
+                      <SelectItem value="+55">🇧🇷 +55</SelectItem>
+                      <SelectItem value="+52">🇲🇽 +52</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    value={editForm.phone.replace(/^\+\d+\s*/, "")}
+                    onChange={e => {
+                      const code = editForm.phone.match(/^\+\d+/)?.[0] || "+44";
+                      updateField("phone", `${code} ${e.target.value}`);
+                    }}
+                    placeholder="Phone number"
+                    className="flex-1"
+                  />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Current Title</label>
