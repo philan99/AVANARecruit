@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, MapPin, Building } from "lucide-react";
@@ -24,6 +25,7 @@ interface Job {
 export default function AdminJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [, navigate] = useLocation();
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -74,7 +76,7 @@ export default function AdminJobs() {
                 </thead>
                 <tbody>
                   {jobs.map((job) => (
-                    <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">

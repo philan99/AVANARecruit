@@ -24,6 +24,7 @@ import AdminCompanies from "@/pages/admin-companies";
 import AdminCandidates from "@/pages/admin-candidates";
 import AdminJobs from "@/pages/admin-jobs";
 import AdminCompanyDetail from "@/pages/admin-company-detail";
+import AdminJobDetail from "@/pages/admin-job-detail";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -75,6 +76,7 @@ function AdminRoutes() {
         <Route path="/companies/:id" component={AdminCompanyDetail} />
         <Route path="/companies" component={AdminCompanies} />
         <Route path="/candidates" component={AdminCandidates} />
+        <Route path="/jobs/:id" component={AdminJobDetail} />
         <Route path="/jobs" component={AdminJobs} />
         <Route component={NotFound} />
       </Switch>
