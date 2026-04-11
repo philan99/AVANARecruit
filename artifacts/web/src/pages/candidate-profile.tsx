@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExperienceEntry {
@@ -200,6 +200,15 @@ export default function CandidateProfile() {
 
   function removeExperienceEntry(index: number) {
     setExperienceList(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function moveExperienceEntry(index: number, direction: "up" | "down") {
+    setExperienceList(prev => {
+      const updated = [...prev];
+      const target = direction === "up" ? index - 1 : index + 1;
+      [updated[index], updated[target]] = [updated[target], updated[index]];
+      return updated;
+    });
   }
 
   function handleSave() {
@@ -431,14 +440,34 @@ export default function CandidateProfile() {
               )}
               {experienceList.map((entry, index) => (
                 <div key={index} className="border rounded-lg p-4 space-y-3 relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => removeExperienceEntry(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="absolute top-2 right-2 flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => moveExperienceEntry(index, "up")}
+                      disabled={index === 0}
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => moveExperienceEntry(index, "down")}
+                      disabled={index === experienceList.length - 1}
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeExperienceEntry(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-muted-foreground">Job Title</label>
