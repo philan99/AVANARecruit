@@ -8,14 +8,10 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-function DashboardLogo() {
+function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string | null } | null }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const { data: profile, error } = useGetCompanyProfile({
-    query: { queryKey: getGetCompanyProfileQueryKey(), retry: false },
-  });
 
   const saveProfile = useCreateCompanyProfile();
   const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
@@ -58,7 +54,7 @@ function DashboardLogo() {
     e.target.value = "";
   }
 
-  const hasLogo = profile?.logoUrl && !error;
+  const hasLogo = !!profile?.logoUrl;
 
   return (
     <div className="relative group">
@@ -107,6 +103,7 @@ export default function Dashboard() {
   const { data: recentMatches } = useGetRecentMatches({ limit: 5 }, { query: { queryKey: ["recent-matches"] } });
   const { data: topCandidates } = useGetTopCandidates({ limit: 5 }, { query: { queryKey: ["top-candidates"] } });
   const { data: skillDemand } = useGetSkillDemand({ query: { queryKey: ["skill-demand"] } });
+  const { data: profile } = useGetCompanyProfile({ query: { queryKey: getGetCompanyProfileQueryKey(), retry: false } });
 
   if (statsLoading) {
     return <div className="p-8 flex justify-center text-muted-foreground font-mono text-sm">Loading telemetry...</div>;
@@ -116,10 +113,10 @@ export default function Dashboard() {
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Cockpit</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{profile?.name || "Dashboard"}</h1>
           <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
         </div>
-        <DashboardLogo />
+        <DashboardLogo profile={profile} />
       </div>
 
       {/* KPI Cards */}
