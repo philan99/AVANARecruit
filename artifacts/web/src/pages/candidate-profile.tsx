@@ -72,26 +72,27 @@ export default function CandidateProfile() {
     e.target.value = "";
   }
 
+  const cvFileNameRef = useRef("");
+
   const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
     basePath,
     onSuccess: async (response) => {
-      if (!candidateProfileId || !lastCvFileName) return;
+      if (!candidateProfileId) return;
+      const savedName = cvFileNameRef.current || "CV Document";
       const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
       await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cvFile: response.objectPath, cvFileName: lastCvFileName }),
+        body: JSON.stringify({ cvFile: response.objectPath, cvFileName: savedName }),
       });
       queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
       toast({ title: "CV uploaded", description: "Your CV has been saved." });
-      setLastCvFileName("");
+      cvFileNameRef.current = "";
     },
     onError: () => {
       toast({ title: "Upload failed", description: "Could not upload CV.", variant: "destructive" });
     },
   });
-
-  const [lastCvFileName, setLastCvFileName] = useState("");
 
   async function handleCvChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -105,7 +106,7 @@ export default function CandidateProfile() {
       toast({ title: "Invalid file", description: "Please upload a PDF or Word document.", variant: "destructive" });
       return;
     }
-    setLastCvFileName(file.name);
+    cvFileNameRef.current = file.name;
     await uploadCv(file);
     e.target.value = "";
   }
