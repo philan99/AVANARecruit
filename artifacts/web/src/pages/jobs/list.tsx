@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { useListJobs, useCreateJob, getListJobsQueryKey, useGetCompanyProfile, getGetCompanyProfileQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -56,9 +56,16 @@ export default function JobsList() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { role } = useRole();
+
+  useEffect(() => {
+    if (new URLSearchParams(searchString).get("create") === "true") {
+      setIsCreateOpen(true);
+    }
+  }, [searchString]);
 
   const { data: companyProfile } = useGetCompanyProfile({
     query: { enabled: role === "company" },

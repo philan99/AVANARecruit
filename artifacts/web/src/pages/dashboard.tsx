@@ -3,7 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useGetCompanyProfile, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2 } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -121,7 +122,14 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{profile?.name || "Dashboard"}</h1>
           <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
         </div>
-        <DashboardLogo profile={profile} />
+        <div className="flex items-center gap-3">
+          <Link href="/jobs?create=true">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" /> New Requisition
+            </Button>
+          </Link>
+          <DashboardLogo profile={profile} />
+        </div>
       </div>
 
       {/* KPI Cards */}
