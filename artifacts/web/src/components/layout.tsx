@@ -55,35 +55,33 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
         <div className="flex items-center justify-between h-14 px-6">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center">
-              <TerminalSquare className="w-5 h-5 text-sidebar-primary mr-2" />
-              <span className="font-mono font-bold text-base tracking-tight text-sidebar-foreground">
-                AVANA <span className="text-sidebar-primary">TALENT</span>
-              </span>
-            </div>
-
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-primary"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                    )}
-                  >
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+          <div className="flex items-center">
+            <TerminalSquare className="w-5 h-5 text-sidebar-primary mr-2" />
+            <span className="font-mono font-bold text-base tracking-tight text-sidebar-foreground">
+              AVANA <span className="text-sidebar-primary">TALENT</span>
+            </span>
           </div>
+
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-primary"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  )}
+                >
+                  <item.icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
 
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-block text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
