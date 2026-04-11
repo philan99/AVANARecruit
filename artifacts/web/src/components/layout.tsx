@@ -61,9 +61,6 @@ export function Layout({ children }: LayoutProps) {
               <span className="font-mono font-bold text-base tracking-tight text-sidebar-foreground">
                 AVANA <span className="text-sidebar-primary">TALENT</span>
               </span>
-              <span className="hidden sm:inline-block ml-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono border-l border-sidebar-border pl-3">
-                {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
-              </span>
             </div>
 
             <nav className="hidden md:flex items-center gap-1">
@@ -89,6 +86,9 @@ export function Layout({ children }: LayoutProps) {
           </div>
 
           <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-block text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
+              {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
+            </span>
             <button
               onClick={clearRole}
               className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
