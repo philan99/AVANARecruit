@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -56,10 +56,10 @@ interface Job {
   createdAt: string;
 }
 
-function InsightBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
-    <div className="flex items-center gap-3">
+    <div className={`flex items-center gap-3 ${onClick ? "cursor-pointer hover:bg-secondary/40 rounded-md p-1 -m-1 transition-colors" : ""}`} onClick={onClick}>
       <span className="text-xs text-muted-foreground w-28 truncate shrink-0">{label}</span>
       <div className="flex-1 h-5 bg-secondary/60 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
@@ -75,6 +75,7 @@ export default function AdminDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [, navigate] = useLocation();
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   useEffect(() => {
@@ -272,6 +273,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topCandidateSkills[0][1]}
                       color="bg-primary/70"
+                      onClick={() => navigate("/candidates")}
                     />
                   ))}
                 </div>
@@ -299,6 +301,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topJobSkills[0][1]}
                       color="bg-blue-500/70"
+                      onClick={() => navigate("/jobs")}
                     />
                   ))}
                 </div>
@@ -328,6 +331,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topIndustries[0][1]}
                       color="bg-emerald-500/70"
+                      onClick={() => navigate("/companies")}
                     />
                   ))}
                 </div>
@@ -355,6 +359,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topJobLocations[0][1]}
                       color="bg-amber-500/70"
+                      onClick={() => navigate("/jobs")}
                     />
                   ))}
                 </div>
@@ -384,6 +389,7 @@ export default function AdminDashboard() {
                         value={count}
                         max={Object.values(insights.levelFreq).reduce((a, b) => Math.max(a, b), 0)}
                         color="bg-violet-500/70"
+                        onClick={() => navigate("/jobs")}
                       />
                     ))}
                 </div>
