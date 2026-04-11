@@ -1,8 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, MapPin, Building } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Briefcase, MapPin, Building, Search, X } from "lucide-react";
 
 interface Job {
   id: number;
@@ -27,6 +37,12 @@ export default function AdminJobs() {
   const [loading, setLoading] = useState(true);
   const [, navigate] = useLocation();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [companyFilter, setCompanyFilter] = useState("all");
+
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   useEffect(() => {
@@ -43,6 +59,48 @@ export default function AdminJobs() {
     fetchData();
   }, [basePath]);
 
+  const uniqueLocations = useMemo(() => {
+    const locs = new Set(jobs.map(j => j.location).filter(Boolean));
+    return Array.from(locs).sort();
+  }, [jobs]);
+
+  const uniqueLevels = useMemo(() => {
+    const levels = new Set(jobs.map(j => j.experienceLevel).filter(Boolean));
+    return Array.from(levels).sort();
+  }, [jobs]);
+
+  const uniqueCompanies = useMemo(() => {
+    const companies = new Set(jobs.map(j => j.company).filter(Boolean));
+    return Array.from(companies).sort();
+  }, [jobs]);
+
+  const filtered = useMemo(() => {
+    return jobs.filter(j => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matches = j.title.toLowerCase().includes(q) ||
+          j.company.toLowerCase().includes(q) ||
+          j.skills.some(s => s.toLowerCase().includes(q));
+        if (!matches) return false;
+      }
+      if (statusFilter !== "all" && j.status !== statusFilter) return false;
+      if (locationFilter !== "all" && j.location !== locationFilter) return false;
+      if (levelFilter !== "all" && j.experienceLevel !== levelFilter) return false;
+      if (companyFilter !== "all" && j.company !== companyFilter) return false;
+      return true;
+    });
+  }, [jobs, searchQuery, statusFilter, locationFilter, levelFilter, companyFilter]);
+
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || levelFilter !== "all" || companyFilter !== "all";
+
+  function clearFilters() {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setLocationFilter("all");
+    setLevelFilter("all");
+    setCompanyFilter("all");
+  }
+
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading jobs data...</div>;
   }
@@ -57,8 +115,99 @@ export default function AdminJobs() {
       </div>
 
       <Card className="bg-card">
+        <CardContent className="pt-5 pb-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-[200px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Title, company, or skill..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-9 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="w-[130px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Location</Label>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {uniqueLocations.map(loc => (
+                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[130px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Level</Label>
+              <Select value={levelFilter} onValueChange={setLevelFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  {uniqueLevels.map(lvl => (
+                    <SelectItem key={lvl} value={lvl}>{lvl.charAt(0).toUpperCase() + lvl.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Company</Label>
+              <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {uniqueCompanies.map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" className="h-9 text-xs gap-1 text-muted-foreground" onClick={clearFilters}>
+                <X className="w-3 h-3" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          {hasActiveFilters && (
+            <p className="text-[11px] text-muted-foreground mt-3">
+              Showing {filtered.length} of {jobs.length} jobs
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
         <CardContent className="pt-6">
-          {jobs.length > 0 ? (
+          {filtered.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -75,7 +224,7 @@ export default function AdminJobs() {
                   </tr>
                 </thead>
                 <tbody>
-                  {jobs.map((job) => (
+                  {filtered.map((job) => (
                     <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
@@ -133,7 +282,9 @@ export default function AdminJobs() {
               </table>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">No jobs on the platform yet.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {hasActiveFilters ? "No jobs match your filters." : "No jobs on the platform yet."}
+            </p>
           )}
         </CardContent>
       </Card>
