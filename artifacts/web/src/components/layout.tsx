@@ -60,7 +60,7 @@ export function Layout({ children }: LayoutProps) {
             <img src={logoUrl} alt="Avana Talent" className="h-7" />
           </div>
 
-          <nav className={cn("hidden md:flex items-center gap-1", role === "admin" && "md:hidden")}>
+          <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -95,7 +95,7 @@ export function Layout({ children }: LayoutProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={cn("md:hidden p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-accent rounded-md transition-colors", role === "admin" && "hidden")}
+              className="md:hidden p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-accent rounded-md transition-colors"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
