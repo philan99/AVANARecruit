@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
+import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,44 @@ import { Search, MapPin, Building, Briefcase, PoundSterling, Heart } from "lucid
 
 export default function BrowseJobs() {
   const [search, setSearch] = useState("");
+  const { candidateProfileId } = useRole();
+  const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
+
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  const fetchFavourites = useCallback(async () => {
+    if (!candidateProfileId) return;
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`);
+      if (res.ok) {
+        const data = await res.json();
+        setFavouriteJobIds(new Set(data.map((f: any) => f.jobId)));
+      }
+    } catch {}
+  }, [candidateProfileId, apiBase]);
+
+  useEffect(() => {
+    fetchFavourites();
+  }, [fetchFavourites]);
+
+  async function toggleFavourite(e: React.MouseEvent, jobId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!candidateProfileId) return;
+
+    const isFav = favouriteJobIds.has(jobId);
+    if (isFav) {
+      setFavouriteJobIds(prev => { const next = new Set(prev); next.delete(jobId); return next; });
+      await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites/${jobId}`, { method: "DELETE" });
+    } else {
+      setFavouriteJobIds(prev => new Set(prev).add(jobId));
+      await fetch(`${apiBase}/candidates/${candidateProfileId}/favourites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+    }
+  }
 
   const queryParams = {
     status: "open" as const,
@@ -51,12 +90,24 @@ export default function BrowseJobs() {
         ) : (
           jobs?.map((job) => (
             <Link key={job.id} href={`/jobs/${job.id}`}>
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col relative">
+                <button
+                  onClick={(e) => toggleFavourite(e, job.id)}
+                  className="absolute top-3 right-3 z-10 p-1.5 rounded-full hover:bg-muted transition-colors"
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-colors ${
+                      favouriteJobIds.has(job.id)
+                        ? "fill-red-500 text-red-500"
+                        : "text-muted-foreground/40 hover:text-red-400"
+                    }`}
+                  />
+                </button>
                 <CardHeader className="pb-3">
                   <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-wider w-fit mb-2">
                     {job.experienceLevel}
                   </Badge>
-                  <CardTitle className="text-lg leading-tight line-clamp-2">{job.title}</CardTitle>
+                  <CardTitle className="text-lg leading-tight line-clamp-2 pr-8">{job.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col justify-between">
                   <div className="space-y-2 mb-4">
