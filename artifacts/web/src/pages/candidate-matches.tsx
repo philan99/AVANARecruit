@@ -1,17 +1,45 @@
+import { useState } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, MapPin, Briefcase, ArrowRight } from "lucide-react";
+import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CandidateMatches() {
   const { candidateProfileId } = useRole();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [isRunning, setIsRunning] = useState(false);
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
   });
+
+  async function handleRunMatching() {
+    if (!candidateProfileId) return;
+    setIsRunning(true);
+    try {
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/run-matching`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const results = await res.json();
+        queryClient.invalidateQueries({ queryKey: getGetCandidateMatchesQueryKey(candidateProfileId) });
+        toast({ title: "AI Matching Complete", description: `Found ${results.length} job matches.` });
+      } else {
+        toast({ title: "Error", description: "Failed to run matching.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to run matching.", variant: "destructive" });
+    } finally {
+      setIsRunning(false);
+    }
+  }
 
   if (!candidateProfileId) {
     return (
@@ -30,11 +58,17 @@ export default function CandidateMatches() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Target className="mr-3 text-primary" /> My Job Matches
-        </h1>
-        <p className="text-muted-foreground mt-1">Jobs that match your skills and experience, ranked by AI scoring.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Target className="mr-3 text-primary" /> My Job Matches
+          </h1>
+          <p className="text-muted-foreground mt-1">Jobs that match your skills and experience, ranked by AI scoring.</p>
+        </div>
+        <Button onClick={handleRunMatching} disabled={isRunning} className="shrink-0">
+          <Sparkles className="w-4 h-4 mr-2" />
+          {isRunning ? "Running..." : "Run AI Matching"}
+        </Button>
       </div>
 
       {isLoading ? (

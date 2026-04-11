@@ -102,6 +102,51 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
   res.json(GetJobMatchesResponse.parse(matches));
 });
 
+router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
+  const params = GetCandidateMatchesParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, params.data.id));
+  if (!candidate) {
+    res.status(404).json({ error: "Candidate not found" });
+    return;
+  }
+
+  const openJobs = await db
+    .select()
+    .from(jobsTable)
+    .where(eq(jobsTable.status, "open"));
+
+  await db.delete(matchesTable).where(eq(matchesTable.candidateId, candidate.id));
+
+  const matchResults = [];
+  for (const job of openJobs) {
+    const result = computeMatch(job, candidate);
+    const [match] = await db
+      .insert(matchesTable)
+      .values({
+        jobId: job.id,
+        candidateId: candidate.id,
+        overallScore: result.overallScore,
+        skillScore: result.skillScore,
+        experienceScore: result.experienceScore,
+        educationScore: result.educationScore,
+        locationScore: result.locationScore,
+        assessment: result.assessment,
+        matchedSkills: result.matchedSkills,
+        missingSkills: result.missingSkills,
+      })
+      .returning();
+    matchResults.push(match);
+  }
+
+  matchResults.sort((a, b) => b.overallScore - a.overallScore);
+  res.json(matchResults);
+});
+
 router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
   const params = GetCandidateMatchesParams.safeParse(req.params);
   if (!params.success) {
