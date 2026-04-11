@@ -333,24 +333,6 @@ export default function CandidateProfile() {
 
       <Card className="bg-card">
         <CardHeader>
-          <CardTitle className="text-lg">Education</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isEditing ? (
-            <div className="space-y-1.5">
-              <Input value={editForm.education} onChange={e => updateField("education", e.target.value)} />
-            </div>
-          ) : (
-            <div className="flex items-center text-muted-foreground">
-              <GraduationCap className="w-5 h-5 mr-2" />
-              <span>{candidate.education}</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card">
-        <CardHeader>
           <CardTitle className="text-lg">Professional Summary</CardTitle>
         </CardHeader>
         <CardContent>
@@ -387,6 +369,24 @@ export default function CandidateProfile() {
                   {skill}
                 </Badge>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Education</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isEditing ? (
+            <div className="space-y-1.5">
+              <Input value={editForm.education} onChange={e => updateField("education", e.target.value)} />
+            </div>
+          ) : (
+            <div className="flex items-center text-muted-foreground">
+              <GraduationCap className="w-5 h-5 mr-2" />
+              <span>{candidate.education}</span>
             </div>
           )}
         </CardContent>
