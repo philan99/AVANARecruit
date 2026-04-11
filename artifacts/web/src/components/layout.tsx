@@ -89,14 +89,6 @@ export function Layout({ children }: LayoutProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-[10px]">
-                {role === "admin" ? "AD" : role === "candidate" ? "CA" : "CO"}
-              </div>
-              <span className="text-xs font-medium text-sidebar-foreground">
-                {role === "admin" ? "Administrator" : role === "candidate" ? "Candidate" : "Hiring Manager"}
-              </span>
-            </div>
             <button
               onClick={clearRole}
               className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
