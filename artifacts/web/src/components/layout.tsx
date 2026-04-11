@@ -26,11 +26,11 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen w-full bg-background">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border bg-card flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 border-b border-border">
-          <TerminalSquare className="w-6 h-6 text-primary mr-2" />
-          <span className="font-mono font-bold text-lg tracking-tight text-foreground">
-            TALENT<span className="text-primary">MATCH</span>
+      <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col hidden md:flex">
+        <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
+          <TerminalSquare className="w-6 h-6 text-sidebar-primary mr-2" />
+          <span className="font-mono font-bold text-lg tracking-tight text-sidebar-foreground">
+            TALENT<span className="text-sidebar-primary">MATCH</span>
           </span>
         </div>
         
@@ -44,8 +44,8 @@ export function Layout({ children }: LayoutProps) {
                 className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   isActive 
-                    ? "bg-primary/10 text-primary" 
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "bg-sidebar-accent text-sidebar-primary" 
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -55,18 +55,18 @@ export function Layout({ children }: LayoutProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-secondary transition-colors cursor-pointer">
+        <div className="p-4 border-t border-sidebar-border">
+          <div className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer">
             <Settings className="w-4 h-4 mr-3" />
             Settings
           </div>
           <div className="mt-4 px-3 flex items-center">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary font-bold text-xs">
               HM
             </div>
             <div className="ml-3 flex flex-col">
-              <span className="text-xs font-medium text-foreground">Hiring Manager</span>
-              <span className="text-[10px] text-muted-foreground">admin@acme.inc</span>
+              <span className="text-xs font-medium text-sidebar-foreground">Hiring Manager</span>
+              <span className="text-[10px] text-sidebar-foreground/60">admin@acme.inc</span>
             </div>
           </div>
         </div>
