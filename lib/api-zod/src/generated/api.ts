@@ -351,6 +351,10 @@ export const UpdateMatchStatusResponse = zod.object({
 /**
  * @summary Get dashboard overview stats
  */
+export const GetDashboardStatsQueryParams = zod.object({
+  companyProfileId: zod.coerce.number().optional(),
+});
+
 export const GetDashboardStatsResponse = zod.object({
   totalJobs: zod.number(),
   openJobs: zod.number(),

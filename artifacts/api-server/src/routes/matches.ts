@@ -11,6 +11,7 @@ import {
   UpdateMatchStatusParams,
   UpdateMatchStatusBody,
   UpdateMatchStatusResponse,
+  GetDashboardStatsQueryParams,
   GetDashboardStatsResponse,
   GetRecentMatchesQueryParams,
   GetRecentMatchesResponse,
@@ -161,23 +162,40 @@ router.patch("/matches/:id", async (req, res): Promise<void> => {
   res.json(UpdateMatchStatusResponse.parse(match));
 });
 
-router.get("/dashboard/stats", async (_req, res): Promise<void> => {
-  const [jobStats] = await db.select({
+router.get("/dashboard/stats", async (req, res): Promise<void> => {
+  const params = GetDashboardStatsQueryParams.safeParse(req.query);
+  const companyProfileId = params.success ? params.data.companyProfileId : undefined;
+
+  let jobQuery = db.select({
     totalJobs: count(),
     openJobs: count(sql`CASE WHEN ${jobsTable.status} = 'open' THEN 1 END`),
-  }).from(jobsTable);
+  }).from(jobsTable).$dynamic();
+
+  if (companyProfileId) {
+    jobQuery = jobQuery.where(eq(jobsTable.companyProfileId, companyProfileId));
+  }
+
+  const [jobStats] = await jobQuery;
 
   const [candidateStats] = await db.select({
     totalCandidates: count(),
     activeCandidates: count(sql`CASE WHEN ${candidatesTable.status} = 'active' THEN 1 END`),
   }).from(candidatesTable);
 
-  const [matchStats] = await db.select({
+  let matchQuery = db.select({
     totalMatches: count(),
     avgMatchScore: avg(matchesTable.overallScore),
     shortlistedCount: count(sql`CASE WHEN ${matchesTable.status} = 'shortlisted' THEN 1 END`),
     hiredCount: count(sql`CASE WHEN ${matchesTable.status} = 'hired' THEN 1 END`),
-  }).from(matchesTable);
+  }).from(matchesTable).$dynamic();
+
+  if (companyProfileId) {
+    matchQuery = matchQuery
+      .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+      .where(eq(jobsTable.companyProfileId, companyProfileId));
+  }
+
+  const [matchStats] = await matchQuery;
 
   const stats = {
     totalJobs: jobStats.totalJobs,

@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useGetCompanyProfile, useCreateCompanyProfile, getGetCompanyProfileQueryKey } from "@workspace/api-client-react";
+import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useGetCompanyProfile, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2 } from "lucide-react";
@@ -99,11 +99,16 @@ function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string
 }
 
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useGetDashboardStats({ query: { queryKey: ["dashboard-stats"] } });
+  const { data: profile } = useGetCompanyProfile({ query: { queryKey: getGetCompanyProfileQueryKey(), retry: false } });
+  const companyProfileId = profile?.id;
+
+  const statsParams = companyProfileId ? { companyProfileId } : {};
+  const { data: stats, isLoading: statsLoading } = useGetDashboardStats(statsParams, {
+    query: { queryKey: getGetDashboardStatsQueryKey(statsParams) },
+  });
   const { data: recentMatches } = useGetRecentMatches({ limit: 5 }, { query: { queryKey: ["recent-matches"] } });
   const { data: topCandidates } = useGetTopCandidates({ limit: 5 }, { query: { queryKey: ["top-candidates"] } });
   const { data: skillDemand } = useGetSkillDemand({ query: { queryKey: ["skill-demand"] } });
-  const { data: profile } = useGetCompanyProfile({ query: { queryKey: getGetCompanyProfileQueryKey(), retry: false } });
 
   if (statsLoading) {
     return <div className="p-8 flex justify-center text-muted-foreground font-mono text-sm">Loading telemetry...</div>;

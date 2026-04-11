@@ -337,6 +337,11 @@ paths:
       operationId: getDashboardStats
       tags: [dashboard]
       summary: Get dashboard overview stats
+      parameters:
+        - name: companyProfileId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Dashboard statistics

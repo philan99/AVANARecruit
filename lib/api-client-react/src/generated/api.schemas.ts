@@ -416,6 +416,10 @@ export const ListCandidatesStatus = {
   hired: "hired",
 } as const;
 
+export type GetDashboardStatsParams = {
+  companyProfileId?: number;
+};
+
 export type GetRecentMatchesParams = {
   limit?: number;
 };

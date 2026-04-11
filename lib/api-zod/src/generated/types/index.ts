@@ -17,6 +17,7 @@ export * from "./createJobBodyExperienceLevel";
 export * from "./createJobBodyStatus";
 export * from "./dashboardStats";
 export * from "./errorEnvelope";
+export * from "./getDashboardStatsParams";
 export * from "./getRecentMatchesParams";
 export * from "./getTopCandidatesParams";
 export * from "./healthStatus";
