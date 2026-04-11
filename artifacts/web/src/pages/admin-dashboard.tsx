@@ -134,17 +134,6 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("candidates")}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{candidates.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">Profiles created</p>
-              </CardContent>
-            </Card>
-
             <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("jobs")}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
@@ -155,6 +144,17 @@ export default function AdminDashboard() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {jobs.filter(j => j.status === "open").length} open
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("candidates")}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{candidates.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">Profiles created</p>
               </CardContent>
             </Card>
 
@@ -194,35 +194,6 @@ export default function AdminDashboard() {
 
             <Card className="bg-card">
               <CardHeader>
-                <CardTitle className="text-base">Recent Candidates</CardTitle>
-                <CardDescription>Latest candidate profiles on the platform</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
-                    <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => setActiveTab("candidates")}>
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                          {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
-                        </div>
-                      </div>
-                      <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
-                        {candidate.status}
-                      </Badge>
-                    </div>
-                  )) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card">
-              <CardHeader>
                 <CardTitle className="text-base">Recent Jobs</CardTitle>
                 <CardDescription>Latest job requisitions across the platform</CardDescription>
               </CardHeader>
@@ -245,6 +216,35 @@ export default function AdminDashboard() {
                     </div>
                   )) : (
                     <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base">Recent Candidates</CardTitle>
+                <CardDescription>Latest candidate profiles on the platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
+                    <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => setActiveTab("candidates")}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                          {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
+                        </div>
+                      </div>
+                      <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
+                        {candidate.status}
+                      </Badge>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
                   )}
                 </div>
               </CardContent>
