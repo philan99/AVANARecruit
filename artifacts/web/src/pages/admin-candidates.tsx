@@ -95,7 +95,7 @@ export default function AdminCandidates() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
           <Users className="mr-3 text-primary" /> Candidates
@@ -107,74 +107,63 @@ export default function AdminCandidates() {
         <CardContent className="pt-6">
           {candidates.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Email</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Title</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Location</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Experience</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Education</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Skills</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Created</th>
-                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Candidate</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Exp</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {candidates.map((candidate) => (
                     <tr key={candidate.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{candidate.id}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
                             {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                           </div>
-                          <span className="font-medium">{candidate.name}</span>
+                          <div className="min-w-0">
+                            <p className="font-medium text-xs text-foreground truncate">{candidate.name}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{candidate.email}</p>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{candidate.email}</span>
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">{candidate.currentTitle}</td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{candidate.experienceYears} yrs</span>
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        <span className="flex items-center gap-1"><GraduationCap className="w-3 h-3" />{candidate.education}</span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {candidate.skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-[9px] px-1.5 py-0">
+                      <td className="py-2 px-2 text-muted-foreground">{candidate.currentTitle}</td>
+                      <td className="py-2 px-2 text-muted-foreground">{candidate.location}</td>
+                      <td className="py-2 px-2 text-muted-foreground">{candidate.experienceYears}y</td>
+                      <td className="py-2 px-2">
+                        <div className="flex flex-wrap gap-1">
+                          {candidate.skills.slice(0, 2).map((skill) => (
+                            <Badge key={skill} variant="secondary" className="text-[8px] px-1 py-0">
                               {skill}
                             </Badge>
                           ))}
-                          {candidate.skills.length > 3 && (
-                            <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                              +{candidate.skills.length - 3}
+                          {candidate.skills.length > 2 && (
+                            <Badge variant="outline" className="text-[8px] px-1 py-0">
+                              +{candidate.skills.length - 2}
                             </Badge>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4">
-                        <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase">
+                      <td className="py-2 px-2">
+                        <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[8px] uppercase">
                           {candidate.status}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground text-xs">
+                      <td className="py-2 px-2 text-muted-foreground">
                         {new Date(candidate.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-xs gap-1"
+                          className="text-[10px] gap-1 h-7 px-2"
                           onClick={() => {
                             setResetTarget(candidate);
                             setNewPassword("");
@@ -182,7 +171,7 @@ export default function AdminCandidates() {
                           }}
                         >
                           <KeyRound className="w-3 h-3" />
-                          Reset Password
+                          Reset
                         </Button>
                       </td>
                     </tr>
