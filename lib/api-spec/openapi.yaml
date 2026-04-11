@@ -153,7 +153,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [active, inactive, hired]
+            enum: [active, passive, not_looking, inactive, hired]
         - name: search
           in: query
           schema:
@@ -634,7 +634,7 @@ components:
           type: string
         status:
           type: string
-          enum: [active, inactive, hired]
+          enum: [active, passive, not_looking, inactive, hired]
         matchCount:
           type: integer
         createdAt:
@@ -683,7 +683,7 @@ components:
           type: string
         status:
           type: string
-          enum: [active, inactive, hired]
+          enum: [active, passive, not_looking, inactive, hired]
       required:
         - name
         - email
@@ -719,7 +719,7 @@ components:
           type: string
         status:
           type: string
-          enum: [active, inactive, hired]
+          enum: [active, passive, not_looking, inactive, hired]
 
     Match:
       type: object

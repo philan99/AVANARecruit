@@ -126,6 +126,8 @@ export type CandidateStatus =
 
 export const CandidateStatus = {
   active: "active",
+  passive: "passive",
+  not_looking: "not_looking",
   inactive: "inactive",
   hired: "hired",
 } as const;
@@ -153,6 +155,8 @@ export type CreateCandidateBodyStatus =
 
 export const CreateCandidateBodyStatus = {
   active: "active",
+  passive: "passive",
+  not_looking: "not_looking",
   inactive: "inactive",
   hired: "hired",
 } as const;
@@ -176,6 +180,8 @@ export type UpdateCandidateBodyStatus =
 
 export const UpdateCandidateBodyStatus = {
   active: "active",
+  passive: "passive",
+  not_looking: "not_looking",
   inactive: "inactive",
   hired: "hired",
 } as const;
@@ -412,6 +418,8 @@ export type ListCandidatesStatus =
 
 export const ListCandidatesStatus = {
   active: "active",
+  passive: "passive",
+  not_looking: "not_looking",
   inactive: "inactive",
   hired: "hired",
 } as const;

@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -239,6 +246,19 @@ export default function CandidateProfile() {
     });
   }
 
+  function handleStatusChange(newStatus: string) {
+    if (!candidateProfileId) return;
+    const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+      toast({ title: "Status updated", description: `Your status is now "${newStatus === "active" ? "Active" : newStatus === "passive" ? "Passive" : "Not Looking"}".` });
+    });
+  }
+
   function updateField(field: keyof EditFormState, value: string | number) {
     setEditForm(prev => ({ ...prev, [field]: value }));
   }
@@ -286,10 +306,22 @@ export default function CandidateProfile() {
             </Button>
           </div>
         ) : (
-          <Button variant="outline" size="sm" onClick={startEditing}>
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button variant="outline" size="sm" onClick={startEditing}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+            <Select value={candidate?.status || "active"} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="passive">Passive</SelectItem>
+                <SelectItem value="not_looking">Not Looking</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </div>
 
