@@ -1,19 +1,61 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, User } from "lucide-react";
-import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
+import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, User, Pencil } from "lucide-react";
+import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching, useUpdateJob } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const editFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  company: z.string().min(1, "Company is required"),
+  location: z.string().min(1, "Location is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  requirements: z.string().min(10, "Requirements must be at least 10 characters"),
+  skills: z.string().min(1, "Skills are required (comma separated)"),
+  experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
+  salaryMin: z.coerce.number().optional(),
+  salaryMax: z.coerce.number().optional(),
+  status: z.enum(["open", "closed", "draft"]),
+});
 
 export default function JobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { data: job, isLoading: jobLoading } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
@@ -24,6 +66,58 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   });
 
   const runMatching = useRunJobMatching();
+  const updateJob = useUpdateJob();
+
+  const editForm = useForm<z.infer<typeof editFormSchema>>({
+    resolver: zodResolver(editFormSchema),
+    defaultValues: {
+      title: "",
+      company: "",
+      location: "",
+      description: "",
+      requirements: "",
+      skills: "",
+      experienceLevel: "mid" as const,
+      status: "open" as const,
+    },
+  });
+
+  useEffect(() => {
+    if (job && isEditOpen) {
+      editForm.reset({
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        description: job.description,
+        requirements: job.requirements,
+        skills: job.skills.join(", "),
+        experienceLevel: job.experienceLevel as any,
+        salaryMin: job.salaryMin ?? undefined,
+        salaryMax: job.salaryMax ?? undefined,
+        status: job.status as any,
+      });
+    }
+  }, [job, isEditOpen]);
+
+  function onEditSubmit(values: z.infer<typeof editFormSchema>) {
+    const payload = {
+      ...values,
+      skills: values.skills.split(",").map(s => s.trim()).filter(Boolean),
+    };
+    updateJob.mutate(
+      { id: jobId, data: payload },
+      {
+        onSuccess: () => {
+          toast({ title: "Job updated", description: "The requisition has been updated successfully." });
+          queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) });
+          setIsEditOpen(false);
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Failed to update requisition.", variant: "destructive" });
+        },
+      }
+    );
+  }
 
   const handleRunMatching = () => {
     runMatching.mutate(
@@ -77,13 +171,176 @@ export default function JobDetail({ params }: { params: { id: string } }) {
             )}
           </div>
         </div>
-        <Button onClick={handleRunMatching} disabled={runMatching.isPending} size="lg" className="shrink-0 font-mono tracking-tight">
-          {runMatching.isPending ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> ANALYZING...</>
-          ) : (
-            <><Network className="w-4 h-4 mr-2" /> RUN AI MATCHING</>
-          )}
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="lg">
+                <Pencil className="w-4 h-4 mr-2" /> Edit
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
+              <DialogHeader>
+                <DialogTitle>Edit Requisition</DialogTitle>
+              </DialogHeader>
+              <Form {...editForm}>
+                <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Job Title</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="company"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company/Department</FormLabel>
+                          <FormControl><Input {...field} readOnly className="bg-muted cursor-default" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="experienceLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Experience Level</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="junior">Junior</SelectItem>
+                              <SelectItem value="mid">Mid-Level</SelectItem>
+                              <SelectItem value="senior">Senior</SelectItem>
+                              <SelectItem value="lead">Lead</SelectItem>
+                              <SelectItem value="executive">Executive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="salaryMin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Salary Min</FormLabel>
+                          <FormControl><Input type="number" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="salaryMax"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Salary Max</FormLabel>
+                          <FormControl><Input type="number" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="open">Open</SelectItem>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={editForm.control}
+                    name="skills"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Required Skills (comma separated)</FormLabel>
+                        <FormControl><Input placeholder="React, TypeScript, Node.js" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Description</FormLabel>
+                        <FormControl><Textarea className="h-32" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="requirements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Requirements</FormLabel>
+                        <FormControl><Textarea className="h-32" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end pt-4">
+                    <Button type="submit" disabled={updateJob.isPending}>
+                      {updateJob.isPending ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          <Button onClick={handleRunMatching} disabled={runMatching.isPending} size="lg" className="font-mono tracking-tight">
+            {runMatching.isPending ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> ANALYZING...</>
+            ) : (
+              <><Network className="w-4 h-4 mr-2" /> RUN AI MATCHING</>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
