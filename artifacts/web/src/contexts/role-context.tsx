@@ -8,12 +8,15 @@ interface RoleContextType {
   clearRole: () => void;
   candidateProfileId: number | null;
   setCandidateProfileId: (id: number | null) => void;
+  companyProfileId: number | null;
+  setCompanyProfileId: (id: number | null) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 const ROLE_KEY = "avanatalent_role";
 const CANDIDATE_ID_KEY = "avanatalent_candidate_id";
+const COMPANY_ID_KEY = "avanatalent_company_id";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {
@@ -26,6 +29,11 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return stored ? parseInt(stored, 10) : null;
   });
 
+  const [companyProfileId, setCompanyProfileIdState] = useState<number | null>(() => {
+    const stored = localStorage.getItem(COMPANY_ID_KEY);
+    return stored ? parseInt(stored, 10) : null;
+  });
+
   const setRole = useCallback((newRole: UserRole) => {
     localStorage.setItem(ROLE_KEY, newRole);
     setRoleState(newRole);
@@ -34,8 +42,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const clearRole = useCallback(() => {
     localStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(CANDIDATE_ID_KEY);
+    localStorage.removeItem(COMPANY_ID_KEY);
     setRoleState(null);
     setCandidateProfileIdState(null);
+    setCompanyProfileIdState(null);
   }, []);
 
   const setCandidateProfileId = useCallback((id: number | null) => {
@@ -47,8 +57,17 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setCandidateProfileIdState(id);
   }, []);
 
+  const setCompanyProfileId = useCallback((id: number | null) => {
+    if (id !== null) {
+      localStorage.setItem(COMPANY_ID_KEY, id.toString());
+    } else {
+      localStorage.removeItem(COMPANY_ID_KEY);
+    }
+    setCompanyProfileIdState(id);
+  }, []);
+
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId }}>
       {children}
     </RoleContext.Provider>
   );

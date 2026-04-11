@@ -15,7 +15,7 @@ export default function RoleSelect() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { setCandidateProfileId } = useRole();
+  const { setCandidateProfileId, setCompanyProfileId } = useRole();
   const [, setLocation] = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -58,9 +58,21 @@ export default function RoleSelect() {
           const data = await res.json().catch(() => ({}));
           toast({ title: data.error || "Invalid email or password", variant: "destructive" });
         }
-      } else {
-        setRole(selected);
-        setLocation("/");
+      } else if (selected === "company") {
+        const res = await fetch(`${basePath}/companies/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCompanyProfileId(data.companyId);
+          setRole("company");
+          setLocation("/");
+        } else {
+          const data = await res.json().catch(() => ({}));
+          toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+        }
       }
     } catch {
       toast({ title: "Login failed", variant: "destructive" });
