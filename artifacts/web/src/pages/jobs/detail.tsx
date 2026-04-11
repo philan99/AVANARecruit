@@ -121,7 +121,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
 
   const handleRunMatching = () => {
     runMatching.mutate(
-      { data: { jobId } },
+      { id: jobId },
       {
         onSuccess: () => {
           toast({ title: "Matching Complete", description: "AI analysis finished successfully." });
