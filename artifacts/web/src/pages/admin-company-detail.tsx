@@ -91,7 +91,7 @@ export default function AdminCompanyDetail() {
           <div className="flex items-start gap-5">
             {company.logoUrl ? (
               <img
-                src={`${import.meta.env.BASE_URL}api/storage${company.logoUrl}`.replace("//", "/")}
+                src={company.logoUrl}
                 alt={company.name}
                 className="w-16 h-16 rounded-lg object-cover border"
               />
