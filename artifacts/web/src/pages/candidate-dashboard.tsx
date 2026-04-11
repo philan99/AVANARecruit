@@ -21,6 +21,8 @@ import {
   GraduationCap,
   Mail,
   Heart,
+  Phone,
+  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -100,19 +102,22 @@ export default function CandidateDashboard() {
   const shortlistedCount = matches?.filter(m => m.status === "shortlisted" || m.status === "hired").length || 0;
   const highMatches = matches?.filter(m => m.overallScore >= 75).length || 0;
 
-  const profileFields = candidate ? [
-    candidate.name,
-    candidate.email,
-    candidate.currentTitle,
-    candidate.summary,
-    candidate.skills?.length > 0,
-    candidate.experienceYears != null,
-    candidate.education,
-    candidate.location,
-    candidate.phone,
+  const profileChecks = candidate ? [
+    { label: "Name", filled: !!candidate.name, icon: UserCircle },
+    { label: "Email", filled: !!candidate.email, icon: Mail },
+    { label: "Phone", filled: !!candidate.phone, icon: Phone },
+    { label: "Location", filled: !!candidate.location, icon: MapPin },
+    { label: "Current Title", filled: !!candidate.currentTitle, icon: Briefcase },
+    { label: "Years of Experience", filled: candidate.experienceYears != null && candidate.experienceYears > 0, icon: Clock },
+    { label: "Profile Photo", filled: !!(candidate as any).profileImage, icon: UserCircle },
+    { label: "Professional Summary", filled: !!candidate.summary, icon: Target },
+    { label: "Skills", filled: (candidate.skills?.length || 0) > 0, icon: Zap },
+    { label: "Experience History", filled: Array.isArray((candidate as any).experience) && (candidate as any).experience.length > 0, icon: Briefcase },
+    { label: "Education", filled: !!candidate.education, icon: GraduationCap },
+    { label: "CV / Resume", filled: !!(candidate as any).cvFile, icon: FileText },
   ] : [];
-  const filledCount = profileFields.filter(Boolean).length;
-  const profileCompleteness = Math.round((filledCount / profileFields.length) * 100);
+  const filledCount = profileChecks.filter(c => c.filled).length;
+  const profileCompleteness = profileChecks.length ? Math.round((filledCount / profileChecks.length) * 100) : 0;
 
   const avgSkillScore = matches?.length
     ? Math.round(matches.reduce((s, m) => s + m.skillScore, 0) / matches.length)
@@ -263,16 +268,7 @@ export default function CandidateDashboard() {
             </div>
             <Progress value={profileCompleteness} className="h-2" />
             <div className="space-y-2 pt-2">
-              {[
-                { label: "Name", filled: !!candidate?.name, icon: UserCircle },
-                { label: "Email", filled: !!candidate?.email, icon: Mail },
-                { label: "Title", filled: !!candidate?.currentTitle, icon: Briefcase },
-                { label: "Skills", filled: (candidate?.skills?.length || 0) > 0, icon: Zap },
-                { label: "Experience", filled: candidate?.experienceYears != null, icon: Clock },
-                { label: "Education", filled: !!candidate?.education, icon: GraduationCap },
-                { label: "Location", filled: !!candidate?.location, icon: MapPin },
-                { label: "Summary", filled: !!candidate?.summary, icon: Target },
-              ].map((item) => (
+              {profileChecks.map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-xs">
                   {item.filled ? (
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
