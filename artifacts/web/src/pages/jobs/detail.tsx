@@ -166,7 +166,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
             <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
             {(job.salaryMin || job.salaryMax) && (
               <span className="flex items-center font-mono bg-secondary px-2 py-0.5 rounded">
-                ${(job.salaryMin || 0).toLocaleString()} - ${(job.salaryMax || 0).toLocaleString()}
+                £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
               </span>
             )}
           </div>

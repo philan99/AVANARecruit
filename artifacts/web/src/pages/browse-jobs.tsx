@@ -4,7 +4,7 @@ import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Building, Briefcase, DollarSign } from "lucide-react";
+import { Search, MapPin, Building, Briefcase, PoundSterling } from "lucide-react";
 
 export default function BrowseJobs() {
   const [search, setSearch] = useState("");
@@ -64,9 +64,9 @@ export default function BrowseJobs() {
                     </div>
                     {(job.salaryMin || job.salaryMax) && (
                       <div className="flex items-center text-sm text-muted-foreground">
-                        <DollarSign className="w-3.5 h-3.5 mr-2" />
+                        <PoundSterling className="w-3.5 h-3.5 mr-2" />
                         <span className="font-mono text-xs">
-                          ${(job.salaryMin || 0).toLocaleString()} - ${(job.salaryMax || 0).toLocaleString()}
+                          £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
                         </span>
                       </div>
                     )}
