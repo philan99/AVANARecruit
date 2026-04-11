@@ -28,15 +28,15 @@ export default function RoleSelect() {
         <div className="flex items-center justify-center mb-4">
           <TerminalSquare className="w-10 h-10 text-primary mr-3" />
           <span className="font-mono font-bold text-3xl tracking-tight text-foreground">
-            TALENT<span className="text-primary">MATCH</span>
+            AVANA <span className="text-primary">TALENT</span>
           </span>
         </div>
         <p className="text-muted-foreground text-lg max-w-md mx-auto">
-          AI-powered job matching that connects the right talent with the right opportunities.
+          AI-powered talent matching that connects the right people with the right opportunities.
         </p>
       </div>
 
-      <h2 className="text-xl font-semibold text-foreground mb-8">How would you like to use TalentMatch?</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-8">How would you like to use Avana Talent?</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full">
         {roles.map((roleOption) => (

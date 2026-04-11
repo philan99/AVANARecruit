@@ -44,7 +44,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
           <TerminalSquare className="w-6 h-6 text-sidebar-primary mr-2" />
           <span className="font-mono font-bold text-lg tracking-tight text-sidebar-foreground">
-            TALENT<span className="text-sidebar-primary">MATCH</span>
+            AVANA <span className="text-sidebar-primary">TALENT</span>
           </span>
         </div>
 
@@ -104,7 +104,7 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex items-center">
             <TerminalSquare className="w-5 h-5 text-primary mr-2" />
             <span className="font-mono font-bold text-base tracking-tight text-foreground">
-              TALENT<span className="text-primary">MATCH</span>
+              AVANA <span className="text-primary">TALENT</span>
             </span>
           </div>
         </header>

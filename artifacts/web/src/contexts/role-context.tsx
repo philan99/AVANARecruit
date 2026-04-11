@@ -12,8 +12,8 @@ interface RoleContextType {
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
-const ROLE_KEY = "talentmatch_role";
-const CANDIDATE_ID_KEY = "talentmatch_candidate_id";
+const ROLE_KEY = "avanatalent_role";
+const CANDIDATE_ID_KEY = "avanatalent_candidate_id";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {

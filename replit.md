@@ -1,4 +1,4 @@
-# TalentMatch - AI Job Matching Platform
+# Avana Talent - AI Job Matching Platform
 
 ## Overview
 
