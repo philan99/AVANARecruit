@@ -143,7 +143,17 @@ export default function CandidateDashboard() {
             )}
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground">{candidate?.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{candidate?.status || "active"}</p>
+              <Badge
+                className={`text-[10px] uppercase ${
+                  (candidate?.status || "active") === "active"
+                    ? "bg-green-500 text-white hover:bg-green-600"
+                    : (candidate?.status) === "passive"
+                    ? "bg-orange-400 text-white hover:bg-orange-500"
+                    : "bg-gray-400 text-white hover:bg-gray-500"
+                }`}
+              >
+                {candidate?.status === "not_looking" ? "Not Looking" : candidate?.status || "active"}
+              </Badge>
             </div>
           </div>
         </Link>
