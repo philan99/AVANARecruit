@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function RoleSelect() {
   const { setRole } = useRole();
@@ -15,6 +15,7 @@ export default function RoleSelect() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { setCandidateProfileId } = useRole();
+  const [, setLocation] = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +38,7 @@ export default function RoleSelect() {
         });
         if (res.ok) {
           setRole("admin");
+          setLocation("/");
         } else {
           toast({ title: "Invalid admin credentials", variant: "destructive" });
         }
@@ -50,12 +52,14 @@ export default function RoleSelect() {
           const data = await res.json();
           setCandidateProfileId(data.candidateId);
           setRole("candidate");
+          setLocation("/");
         } else {
           const data = await res.json().catch(() => ({}));
           toast({ title: data.error || "Invalid email or password", variant: "destructive" });
         }
       } else {
         setRole(selected);
+        setLocation("/");
       }
     } catch {
       toast({ title: "Login failed", variant: "destructive" });
