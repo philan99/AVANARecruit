@@ -295,17 +295,6 @@ export default function SignUp() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Description</label>
-                  <Textarea
-                    placeholder="Tell candidates about your company..."
-                    value={companyForm.description}
-                    onChange={(e) => setCompanyForm(f => ({ ...f, description: e.target.value }))}
-                    className="bg-card min-h-[80px]"
-                    rows={3}
-                  />
-                </div>
-
                 <Button type="submit" className="w-full" disabled={createCompany.isPending}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   {createCompany.isPending ? "Creating..." : "Create Company Account"}
