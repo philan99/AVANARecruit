@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,10 +49,13 @@ export default function AdminCandidates() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [skillFilter, setSkillFilter] = useState("all");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+
+  const [searchQuery, setSearchQuery] = useState(urlParams.get("search") || "");
+  const [statusFilter, setStatusFilter] = useState(urlParams.get("status") || "all");
+  const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
+  const [skillFilter, setSkillFilter] = useState(urlParams.get("skill") || "all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 

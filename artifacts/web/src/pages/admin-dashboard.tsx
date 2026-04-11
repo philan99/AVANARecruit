@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topCandidateSkills[0][1]}
                       color="bg-primary/70"
-                      onClick={() => navigate("/candidates")}
+                      onClick={() => navigate(`/candidates?skill=${encodeURIComponent(skill)}`)}
                     />
                   ))}
                 </div>
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topJobSkills[0][1]}
                       color="bg-blue-500/70"
-                      onClick={() => navigate("/jobs")}
+                      onClick={() => navigate(`/jobs?search=${encodeURIComponent(skill)}`)}
                     />
                   ))}
                 </div>
@@ -331,7 +331,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topIndustries[0][1]}
                       color="bg-emerald-500/70"
-                      onClick={() => navigate("/companies")}
+                      onClick={() => navigate(`/companies?industry=${encodeURIComponent(ind)}`)}
                     />
                   ))}
                 </div>
@@ -359,7 +359,7 @@ export default function AdminDashboard() {
                       value={count}
                       max={insights.topJobLocations[0][1]}
                       color="bg-amber-500/70"
-                      onClick={() => navigate("/jobs")}
+                      onClick={() => navigate(`/jobs?location=${encodeURIComponent(loc)}`)}
                     />
                   ))}
                 </div>
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
                         value={count}
                         max={Object.values(insights.levelFreq).reduce((a, b) => Math.max(a, b), 0)}
                         color="bg-violet-500/70"
-                        onClick={() => navigate("/jobs")}
+                        onClick={() => navigate(`/jobs?level=${encodeURIComponent(level)}`)}
                       />
                     ))}
                 </div>

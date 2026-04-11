@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,11 +37,14 @@ export default function AdminJobs() {
   const [loading, setLoading] = useState(true);
   const [, navigate] = useLocation();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [levelFilter, setLevelFilter] = useState("all");
-  const [companyFilter, setCompanyFilter] = useState("all");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+
+  const [searchQuery, setSearchQuery] = useState(urlParams.get("search") || "");
+  const [statusFilter, setStatusFilter] = useState(urlParams.get("status") || "all");
+  const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
+  const [levelFilter, setLevelFilter] = useState(urlParams.get("level") || "all");
+  const [companyFilter, setCompanyFilter] = useState(urlParams.get("company") || "all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
