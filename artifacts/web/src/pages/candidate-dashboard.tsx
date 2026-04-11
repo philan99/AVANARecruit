@@ -130,9 +130,17 @@ export default function CandidateDashboard() {
         </div>
         <Link href="/profile">
           <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-card border border-border hover:border-primary/40 transition-colors cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-              {candidate?.name?.split(" ").map(n => n[0]).join("").slice(0, 2) || "?"}
-            </div>
+            {(candidate as any)?.profileImage ? (
+              <img
+                src={`${import.meta.env.BASE_URL}api/storage${(candidate as any).profileImage}`.replace(/\/\//g, "/")}
+                alt={candidate?.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                {candidate?.name?.split(" ").map(n => n[0]).join("").slice(0, 2) || "?"}
+              </div>
+            )}
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground">{candidate?.name}</p>
               <p className="text-xs text-muted-foreground">{candidate?.currentTitle}</p>
