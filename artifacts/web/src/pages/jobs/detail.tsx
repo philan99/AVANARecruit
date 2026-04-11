@@ -1,0 +1,180 @@
+import { Link } from "wouter";
+import { format } from "date-fns";
+import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, User } from "lucide-react";
+import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+export default function JobDetail({ params }: { params: { id: string } }) {
+  const jobId = parseInt(params.id);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: job, isLoading: jobLoading } = useGetJob(jobId, {
+    query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
+  });
+
+  const { data: matches, isLoading: matchesLoading } = useGetJobMatches(jobId, {
+    query: { enabled: !!jobId, queryKey: getGetJobMatchesQueryKey(jobId) },
+  });
+
+  const runMatching = useRunJobMatching();
+
+  const handleRunMatching = () => {
+    runMatching.mutate(
+      { data: { jobId } },
+      {
+        onSuccess: () => {
+          toast({ title: "Matching Complete", description: "AI analysis finished successfully." });
+          queryClient.invalidateQueries({ queryKey: getGetJobMatchesQueryKey(jobId) });
+          queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) });
+        },
+        onError: () => {
+          toast({ title: "Matching Failed", description: "There was an error running the AI analysis.", variant: "destructive" });
+        },
+      }
+    );
+  };
+
+  if (jobLoading) {
+    return <div className="p-8 text-center text-muted-foreground font-mono">Loading requisition data...</div>;
+  }
+
+  if (!job) {
+    return <div className="p-8 text-center text-destructive font-mono">Requisition not found.</div>;
+  }
+
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center text-sm text-muted-foreground mb-4">
+        <Link href="/jobs" className="hover:text-primary flex items-center">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Requisitions
+        </Link>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{job.title}</h1>
+            <Badge variant={job.status === 'open' ? 'default' : 'secondary'} className="uppercase text-[10px] tracking-wider">
+              {job.status}
+            </Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center"><Building className="w-4 h-4 mr-1.5" /> {job.company}</span>
+            <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {job.location}</span>
+            <span className="flex items-center"><Briefcase className="w-4 h-4 mr-1.5" /> {job.experienceLevel}</span>
+            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
+            {(job.salaryMin || job.salaryMax) && (
+              <span className="flex items-center font-mono bg-secondary px-2 py-0.5 rounded">
+                ${(job.salaryMin || 0).toLocaleString()} - ${(job.salaryMax || 0).toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+        <Button onClick={handleRunMatching} disabled={runMatching.isPending} size="lg" className="shrink-0 font-mono tracking-tight">
+          {runMatching.isPending ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> ANALYZING...</>
+          ) : (
+            <><Network className="w-4 h-4 mr-2" /> RUN AI MATCHING</>
+          )}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+        <div className="col-span-1 lg:col-span-2 space-y-6">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
+                {job.description}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Requirements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
+                {job.requirements}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="col-span-1 space-y-6">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Required Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {job.skills.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="px-2 py-1 text-xs">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-primary/20">
+            <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
+              <CardTitle className="text-lg flex items-center justify-between">
+                <span>Top Matches</span>
+                <Badge variant="outline" className="font-mono bg-background">
+                  {matches?.length || 0} TOTAL
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {matchesLoading ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">Loading matches...</div>
+              ) : matches?.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground flex flex-col items-center">
+                  <Target className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                  No matches yet. Run AI matching to find candidates.
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {matches?.map((match) => (
+                    <Link key={match.id} href={`/candidates/${match.candidateId}`}>
+                      <div className="p-4 hover:bg-secondary/50 transition-colors cursor-pointer group">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                              {match.candidateName}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">{match.candidateTitle}</p>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="font-mono font-bold text-lg text-primary">
+                              {Math.round(match.overallScore)}%
+                            </span>
+                            <Badge variant="outline" className="text-[9px] uppercase mt-1 h-4 px-1">{match.status}</Badge>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground line-clamp-2 mt-2 leading-relaxed">
+                          {match.assessment}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

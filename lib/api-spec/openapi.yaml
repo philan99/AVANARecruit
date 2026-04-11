@@ -3,13 +3,22 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Job matching API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Job description operations
+  - name: candidates
+    description: Candidate operations
+  - name: matches
+    description: AI matching operations
+  - name: dashboard
+    description: Dashboard and analytics
+
 paths:
   /healthz:
     get:
@@ -24,6 +33,367 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List all jobs
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, draft]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a new job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobBody"
+      responses:
+        "201":
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateJobBody"
+      responses:
+        "200":
+          description: Job updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /candidates:
+    get:
+      operationId: listCandidates
+      tags: [candidates]
+      summary: List all candidates
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, hired]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candidate"
+    post:
+      operationId: createCandidate
+      tags: [candidates]
+      summary: Create a new candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateBody"
+      responses:
+        "201":
+          description: Candidate created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+
+  /candidates/{id}:
+    get:
+      operationId: getCandidate
+      tags: [candidates]
+      summary: Get a candidate by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Candidate details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCandidate
+      tags: [candidates]
+      summary: Update a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCandidateBody"
+      responses:
+        "200":
+          description: Candidate updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteCandidate
+      tags: [candidates]
+      summary: Delete a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /jobs/{id}/run-matching:
+    post:
+      operationId: runJobMatching
+      tags: [matches]
+      summary: Run AI matching for a job against all active candidates
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matching results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+
+  /jobs/{id}/matches:
+    get:
+      operationId: getJobMatches
+      tags: [matches]
+      summary: Get all matches for a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of matches for the job
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MatchWithCandidate"
+
+  /candidates/{id}/matches:
+    get:
+      operationId: getCandidateMatches
+      tags: [matches]
+      summary: Get all matches for a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of matches for the candidate
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MatchWithJob"
+
+  /matches/{id}:
+    patch:
+      operationId: updateMatchStatus
+      tags: [matches]
+      summary: Update match status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMatchStatusBody"
+      responses:
+        "200":
+          description: Match updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard overview stats
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-matches:
+    get:
+      operationId: getRecentMatches
+      tags: [dashboard]
+      summary: Get recent match results
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recent matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecentMatch"
+
+  /dashboard/top-candidates:
+    get:
+      operationId: getTopCandidates
+      tags: [dashboard]
+      summary: Get top matched candidates across all jobs
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        "200":
+          description: Top candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopCandidate"
+
+  /dashboard/skill-demand:
+    get:
+      operationId: getSkillDemand
+      tags: [dashboard]
+      summary: Get most in-demand skills across jobs
+      responses:
+        "200":
+          description: Skill demand data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SkillDemand"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +404,497 @@ components:
       required:
         - status
 
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceLevel:
+          type: string
+          enum: [junior, mid, senior, lead, executive]
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [open, closed, draft]
+        matchCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - company
+        - location
+        - description
+        - requirements
+        - skills
+        - experienceLevel
+        - status
+        - matchCount
+        - createdAt
+        - updatedAt
+
+    CreateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceLevel:
+          type: string
+          enum: [junior, mid, senior, lead, executive]
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [open, closed, draft]
+      required:
+        - title
+        - company
+        - location
+        - description
+        - requirements
+        - skills
+        - experienceLevel
+
+    UpdateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceLevel:
+          type: string
+          enum: [junior, mid, senior, lead, executive]
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [open, closed, draft]
+
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        currentTitle:
+          type: string
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceYears:
+          type: integer
+        education:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, hired]
+        matchCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - currentTitle
+        - summary
+        - skills
+        - experienceYears
+        - education
+        - location
+        - status
+        - matchCount
+        - createdAt
+        - updatedAt
+
+    CreateCandidateBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        currentTitle:
+          type: string
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceYears:
+          type: integer
+        education:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, hired]
+      required:
+        - name
+        - email
+        - currentTitle
+        - summary
+        - skills
+        - experienceYears
+        - education
+        - location
+
+    UpdateCandidateBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        currentTitle:
+          type: string
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceYears:
+          type: integer
+        education:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, hired]
+
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        candidateId:
+          type: integer
+        overallScore:
+          type: number
+        skillScore:
+          type: number
+        experienceScore:
+          type: number
+        educationScore:
+          type: number
+        locationScore:
+          type: number
+        assessment:
+          type: string
+        matchedSkills:
+          type: array
+          items:
+            type: string
+        missingSkills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, shortlisted, rejected, hired]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - jobId
+        - candidateId
+        - overallScore
+        - skillScore
+        - experienceScore
+        - educationScore
+        - locationScore
+        - assessment
+        - matchedSkills
+        - missingSkills
+        - status
+        - createdAt
+
+    MatchWithCandidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        candidateId:
+          type: integer
+        overallScore:
+          type: number
+        skillScore:
+          type: number
+        experienceScore:
+          type: number
+        educationScore:
+          type: number
+        locationScore:
+          type: number
+        assessment:
+          type: string
+        matchedSkills:
+          type: array
+          items:
+            type: string
+        missingSkills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, shortlisted, rejected, hired]
+        createdAt:
+          type: string
+          format: date-time
+        candidateName:
+          type: string
+        candidateTitle:
+          type: string
+        candidateEmail:
+          type: string
+      required:
+        - id
+        - jobId
+        - candidateId
+        - overallScore
+        - skillScore
+        - experienceScore
+        - educationScore
+        - locationScore
+        - assessment
+        - matchedSkills
+        - missingSkills
+        - status
+        - createdAt
+        - candidateName
+        - candidateTitle
+        - candidateEmail
+
+    MatchWithJob:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        candidateId:
+          type: integer
+        overallScore:
+          type: number
+        skillScore:
+          type: number
+        experienceScore:
+          type: number
+        educationScore:
+          type: number
+        locationScore:
+          type: number
+        assessment:
+          type: string
+        matchedSkills:
+          type: array
+          items:
+            type: string
+        missingSkills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, shortlisted, rejected, hired]
+        createdAt:
+          type: string
+          format: date-time
+        jobTitle:
+          type: string
+        jobCompany:
+          type: string
+      required:
+        - id
+        - jobId
+        - candidateId
+        - overallScore
+        - skillScore
+        - experienceScore
+        - educationScore
+        - locationScore
+        - assessment
+        - matchedSkills
+        - missingSkills
+        - status
+        - createdAt
+        - jobTitle
+        - jobCompany
+
+    UpdateMatchStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, shortlisted, rejected, hired]
+      required:
+        - status
+
+    DashboardStats:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        openJobs:
+          type: integer
+        totalCandidates:
+          type: integer
+        activeCandidates:
+          type: integer
+        totalMatches:
+          type: integer
+        avgMatchScore:
+          type: number
+        shortlistedCount:
+          type: integer
+        hiredCount:
+          type: integer
+      required:
+        - totalJobs
+        - openJobs
+        - totalCandidates
+        - activeCandidates
+        - totalMatches
+        - avgMatchScore
+        - shortlistedCount
+        - hiredCount
+
+    RecentMatch:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobTitle:
+          type: string
+        candidateName:
+          type: string
+        overallScore:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - jobTitle
+        - candidateName
+        - overallScore
+        - status
+        - createdAt
+
+    TopCandidate:
+      type: object
+      properties:
+        candidateId:
+          type: integer
+        candidateName:
+          type: string
+        candidateTitle:
+          type: string
+        avgScore:
+          type: number
+        matchCount:
+          type: integer
+        topSkills:
+          type: array
+          items:
+            type: string
+      required:
+        - candidateId
+        - candidateName
+        - candidateTitle
+        - avgScore
+        - matchCount
+        - topSkills
+
+    SkillDemand:
+      type: object
+      properties:
+        skill:
+          type: string
+        jobCount:
+          type: integer
+        candidateCount:
+          type: integer
+      required:
+        - skill
+        - jobCount
+        - candidateCount

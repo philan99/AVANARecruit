@@ -1,8 +1,8 @@
-# Workspace
+# TalentMatch - AI Job Matching Platform
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+AI-powered recruitment platform that matches job descriptions with candidate profiles. Uses algorithmic matching based on skills, experience, education, and location to generate match scores and assessments.
 
 ## Stack
 
@@ -10,11 +10,36 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
+- **Frontend**: React + Vite + Tailwind CSS + shadcn/ui
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Routing**: wouter (frontend)
+- **State management**: TanStack React Query
+
+## Architecture
+
+### Data Models
+- **Jobs**: Job descriptions with title, company, location, skills, experience level, salary range, status
+- **Candidates**: Candidate profiles with name, skills, experience years, education, location, status
+- **Matches**: AI-generated match results with overall score, skill/experience/education/location sub-scores, assessment text
+
+### AI Matching Engine
+Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores based on:
+- **Skill matching** (40% weight): Fuzzy matching using Levenshtein similarity
+- **Experience matching** (25% weight): Compares candidate years vs job level requirements
+- **Education matching** (15% weight): Parses education levels from requirements text
+- **Location matching** (20% weight): Handles remote, exact match, and partial matches
+
+### Pages
+- `/` — Dashboard with stats, skill demand chart, recent matches, top candidates
+- `/jobs` — Job listings with search/filter, create new
+- `/jobs/:id` — Job detail, run AI matching, view match results
+- `/candidates` — Candidate listings with search/filter, create new
+- `/candidates/:id` — Candidate detail, view match history
+- `/matches` — All match results management
 
 ## Key Commands
 
@@ -23,5 +48,13 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
+
+## Key Files
+
+- `lib/api-spec/openapi.yaml` — OpenAPI specification (source of truth for API contracts)
+- `lib/db/src/schema/` — Database schema (jobs.ts, candidates.ts, matches.ts)
+- `artifacts/api-server/src/routes/` — API route handlers
+- `artifacts/api-server/src/lib/matching.ts` — AI matching engine
+- `artifacts/web/src/` — React frontend
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
