@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award,
+  Monitor, Building, Award, Send,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 
@@ -157,6 +157,12 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
                   Registered {new Date(candidate.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                 </span>
               </div>
+            </div>
+            <div className="shrink-0">
+              <Button className="gap-2" disabled>
+                <Send className="w-4 h-4" />
+                Contact Candidate
+              </Button>
             </div>
           </div>
         </CardContent>
