@@ -34,14 +34,14 @@ const formSchema = z.object({
   location: z.string().min(1, "Location is required"),
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
-  experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]).optional(),
-  jobType: z.string().optional(),
-  industry: z.string().optional(),
+  experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"], { required_error: "Experience level is required" }),
+  jobType: z.string().min(1, "Job type is required"),
+  industry: z.string().min(1, "Industry is required"),
   educationLevel: z.string().optional(),
-  workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
+  workplace: z.enum(["office", "remote", "hybrid"], { required_error: "Workplace is required" }),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
-  status: z.enum(["open", "closed", "draft"]).optional(),
+  status: z.enum(["open", "closed", "draft"], { required_error: "Status is required" }),
 });
 
 export default function CreateJob() {
