@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, desc, sql, avg, count } from "drizzle-orm";
+import { eq, desc, sql, avg, count, and } from "drizzle-orm";
 import { db, jobsTable, candidatesTable, matchesTable } from "@workspace/db";
 import {
   RunJobMatchingParams,
@@ -194,6 +194,13 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
     return;
   }
 
+  const companyId = req.query.companyId ? parseInt(req.query.companyId as string, 10) : null;
+
+  const conditions = [eq(matchesTable.candidateId, params.data.id)];
+  if (companyId) {
+    conditions.push(eq(jobsTable.companyProfileId, companyId));
+  }
+
   const matches = await db
     .select({
       id: matchesTable.id,
@@ -214,7 +221,7 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
     })
     .from(matchesTable)
     .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
-    .where(eq(matchesTable.candidateId, params.data.id))
+    .where(and(...conditions))
     .orderBy(desc(matchesTable.overallScore));
 
   res.json(GetCandidateMatchesResponse.parse(matches));

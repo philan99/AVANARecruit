@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
   Monitor, Building, Award,
 } from "lucide-react";
-import { useGetCandidate, getGetCandidateQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
+import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,9 +77,27 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
     query: { enabled: !!candidateId, queryKey: getGetCandidateQueryKey(candidateId) },
   });
 
-  const { data: matches, isLoading: matchesLoading } = useGetCandidateMatches(candidateId, {
-    query: { enabled: !!candidateId, queryKey: getGetCandidateMatchesQueryKey(candidateId) },
-  });
+  const [matches, setMatches] = useState<any[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMatches() {
+      try {
+        const companyId = localStorage.getItem("avanatalent_company_id");
+        const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+        const url = companyId
+          ? `${basePath}/candidates/${candidateId}/matches?companyId=${companyId}`
+          : `${basePath}/candidates/${candidateId}/matches`;
+        const res = await fetch(url);
+        if (res.ok) setMatches(await res.json());
+      } catch (err) {
+        console.error("Failed to fetch matches", err);
+      } finally {
+        setMatchesLoading(false);
+      }
+    }
+    if (candidateId) fetchMatches();
+  }, [candidateId]);
 
   if (candidateLoading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading candidate...</div>;
