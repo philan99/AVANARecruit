@@ -75,47 +75,47 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 54 72% 91%;
-  --foreground: 228 21% 18%;
+  --background: 220 20% 97%;
+  --foreground: 224 35% 16%;
   
-  --border: 54 25% 80%;
-  --input: 54 25% 80%;
-  --ring: 228 21% 29%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 122 39% 49%;
   
-  --card: 54 60% 95%;
-  --card-foreground: 228 21% 18%;
-  --card-border: 54 25% 82%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 35% 16%;
+  --card-border: 220 13% 91%;
   
-  --popover: 54 60% 95%;
-  --popover-foreground: 228 21% 18%;
-  --popover-border: 54 25% 82%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 35% 16%;
+  --popover-border: 220 13% 91%;
   
-  --primary: 228 21% 29%;
-  --primary-foreground: 54 72% 91%;
+  --primary: 122 39% 49%;
+  --primary-foreground: 0 0% 100%;
   
-  --secondary: 54 40% 86%;
-  --secondary-foreground: 228 21% 18%;
+  --secondary: 220 15% 93%;
+  --secondary-foreground: 224 35% 16%;
   
-  --muted: 54 35% 87%;
-  --muted-foreground: 228 12% 44%;
+  --muted: 220 15% 93%;
+  --muted-foreground: 220 9% 46%;
   
-  --accent: 54 50% 83%;
-  --accent-foreground: 228 21% 22%;
+  --accent: 220 15% 93%;
+  --accent-foreground: 224 35% 16%;
   
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 54 72% 95%;
+  --destructive-foreground: 0 0% 100%;
 
-  --sidebar: 230 20% 29%;
-  --sidebar-foreground: 54 72% 91%;
-  --sidebar-border: 230 20% 23%;
-  --sidebar-primary: 54 72% 91%;
-  --sidebar-primary-foreground: 230 20% 29%;
-  --sidebar-accent: 230 20% 25%;
-  --sidebar-accent-foreground: 54 60% 88%;
-  --sidebar-ring: 54 72% 91%;
+  --sidebar: 224 35% 16%;
+  --sidebar-foreground: 220 20% 95%;
+  --sidebar-border: 224 30% 12%;
+  --sidebar-primary: 122 39% 49%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 224 30% 20%;
+  --sidebar-accent-foreground: 220 20% 90%;
+  --sidebar-ring: 122 39% 49%;
 
-  --chart-1: 228 21% 29%;
-  --chart-2: 54 50% 60%;
+  --chart-1: 122 39% 49%;
+  --chart-2: 224 35% 35%;
   --chart-3: 160 40% 40%;
   --chart-4: 30 60% 50%;
   --chart-5: 280 40% 50%;
