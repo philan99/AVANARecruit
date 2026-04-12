@@ -2,6 +2,8 @@ import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const contactSubmissions = pgTable("contact_submissions", {
   id: serial("id").primaryKey(),
+  contactType: text("contact_type").notNull(),
+  company: text("company"),
   name: text("name").notNull(),
   email: text("email").notNull(),
   subject: text("subject").notNull(),

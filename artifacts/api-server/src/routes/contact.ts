@@ -5,15 +5,23 @@ const router = Router();
 
 router.post("/contact", async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, subject, message, contactType, company } = req.body;
 
+    if (!contactType || !["company", "candidate"].includes(contactType)) {
+      return res.status(400).json({ error: "Please select Company or Candidate" });
+    }
     if (!name?.trim() || !email?.trim() || !subject?.trim() || !message?.trim()) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+    if (contactType === "company" && !company?.trim()) {
+      return res.status(400).json({ error: "Company name is required" });
     }
 
     const [submission] = await db
       .insert(contactSubmissions)
       .values({
+        contactType,
+        company: contactType === "company" ? company.trim() : null,
         name: name.trim(),
         email: email.trim(),
         subject: subject.trim(),

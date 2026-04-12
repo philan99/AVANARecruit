@@ -8,17 +8,27 @@ import { Link } from "wouter";
 export default function ContactUs() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactType, setContactType] = useState<"company" | "candidate" | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
+    company: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!contactType) {
+      toast({ title: "Please select whether you are a Company or Candidate", variant: "destructive" });
+      return;
+    }
     if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
       toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (contactType === "company" && !form.company.trim()) {
+      toast({ title: "Company name is required", variant: "destructive" });
       return;
     }
 
@@ -28,7 +38,7 @@ export default function ContactUs() {
       const res = await fetch(`${basePath}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, contactType }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -36,7 +46,8 @@ export default function ContactUs() {
         return;
       }
       toast({ title: "Message sent!", description: "We'll get back to you as soon as possible." });
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({ name: "", email: "", subject: "", message: "", company: "" });
+      setContactType(null);
     } catch {
       toast({ title: "Failed to send message", variant: "destructive" });
     } finally {
@@ -86,6 +97,45 @@ export default function ContactUs() {
                   <p className="text-sm mb-6" style={{ color: "#6b7280" }}>Fill out the form below and we'll get back to you shortly.</p>
 
                   <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a <span style={{ color: "#ef4444" }}>*</span></label>
+                      <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="contactType"
+                            checked={contactType === "company"}
+                            onChange={() => setContactType("company")}
+                            className="w-4 h-4 accent-[#4CAF50]"
+                          />
+                          <span className="text-sm" style={{ color: "#374151" }}>Company</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="contactType"
+                            checked={contactType === "candidate"}
+                            onChange={() => setContactType("candidate")}
+                            className="w-4 h-4 accent-[#4CAF50]"
+                          />
+                          <span className="text-sm" style={{ color: "#374151" }}>Candidate</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {contactType === "company" && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
+                        <Input
+                          placeholder="Your company name"
+                          value={form.company}
+                          onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
+                          style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                          required
+                        />
+                      </div>
+                    )}
+
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Full Name <span style={{ color: "#ef4444" }}>*</span></label>
