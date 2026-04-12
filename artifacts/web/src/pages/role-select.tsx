@@ -157,7 +157,7 @@ export default function RoleSelect() {
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
         </div>
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-28 lg:py-40">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-6" style={{ color: "#4CAF50" }}>
               AI-Powered Recruitment Platform
             </p>
@@ -165,10 +165,10 @@ export default function RoleSelect() {
               Connecting the Right Talent
               <br />with the Right Opportunity.
             </h1>
-            <p className="text-lg leading-relaxed max-w-xl mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p className="text-lg leading-relaxed max-w-xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
               Avana Talent uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => setShowLogin(true)}
                 className="px-8 py-3.5 text-sm font-semibold rounded-md transition-all cursor-pointer hover:opacity-90"
