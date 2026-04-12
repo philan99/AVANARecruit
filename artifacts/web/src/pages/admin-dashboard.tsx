@@ -9,6 +9,10 @@ import {
   TrendingUp,
   MapPin,
   BarChart3,
+  Monitor,
+  GraduationCap,
+  Factory,
+  Heart,
 } from "lucide-react";
 
 interface CompanyProfile {
@@ -34,9 +38,13 @@ interface Candidate {
   currentTitle: string;
   summary: string;
   skills: string[];
+  qualifications: string[] | null;
   experienceYears: number;
   education: string;
   location: string;
+  preferredJobTypes: string[] | null;
+  preferredWorkplaces: string[] | null;
+  preferredIndustries: string[] | null;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -51,6 +59,10 @@ interface Job {
   experienceLevel: string;
   salaryMin: number | null;
   salaryMax: number | null;
+  jobType: string | null;
+  workplace: string | null;
+  industry: string | null;
+  educationLevel: string | null;
   status: string;
   matchCount: number;
   createdAt: string;
@@ -145,11 +157,100 @@ export default function AdminDashboard() {
       ? Math.round(jobsWithSalary.reduce((sum, j) => sum + ((j.salaryMin! + j.salaryMax!) / 2), 0) / jobsWithSalary.length)
       : 0;
 
+    const jobTypeLabels: Record<string, string> = {
+      permanent_full_time: "Permanent (Full Time)", contract: "Contract",
+      fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary",
+    };
+    const jobTypeFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      if (j.jobType) {
+        const label = jobTypeLabels[j.jobType] || j.jobType;
+        jobTypeFreq[label] = (jobTypeFreq[label] || 0) + 1;
+      }
+    });
+    const topJobTypes = Object.entries(jobTypeFreq).sort((a, b) => b[1] - a[1]);
+
+    const workplaceFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      if (j.workplace) {
+        const label = j.workplace.charAt(0).toUpperCase() + j.workplace.slice(1);
+        workplaceFreq[label] = (workplaceFreq[label] || 0) + 1;
+      }
+    });
+    const topWorkplaces = Object.entries(workplaceFreq).sort((a, b) => b[1] - a[1]);
+
+    const industryLabels: Record<string, string> = {
+      accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive",
+      banking: "Banking", construction: "Construction", consulting: "Consulting",
+      creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities",
+      engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism",
+      human_resources: "Human Resources", insurance: "Insurance", legal: "Legal",
+      logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing",
+      marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment",
+      nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate",
+      public_sector: "Public Sector", retail: "Retail", sales: "Sales",
+      science_research: "Science & Research", technology: "Technology",
+      telecommunications: "Telecommunications", transport: "Transport", other: "Other",
+    };
+    const jobIndustryFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      if (j.industry) {
+        const label = industryLabels[j.industry] || j.industry;
+        jobIndustryFreq[label] = (jobIndustryFreq[label] || 0) + 1;
+      }
+    });
+    const topJobIndustries = Object.entries(jobIndustryFreq).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const eduFreq: Record<string, number> = {};
+    jobs.forEach(j => {
+      if (j.educationLevel) {
+        eduFreq[j.educationLevel] = (eduFreq[j.educationLevel] || 0) + 1;
+      }
+    });
+    const topEducationLevels = Object.entries(eduFreq).sort((a, b) => b[1] - a[1]);
+
+    const prefJobTypeFreq: Record<string, number> = {};
+    candidates.forEach(c => {
+      (c.preferredJobTypes || []).forEach(t => {
+        const label = jobTypeLabels[t] || t;
+        prefJobTypeFreq[label] = (prefJobTypeFreq[label] || 0) + 1;
+      });
+    });
+    const topPrefJobTypes = Object.entries(prefJobTypeFreq).sort((a, b) => b[1] - a[1]);
+
+    const prefWorkplaceFreq: Record<string, number> = {};
+    candidates.forEach(c => {
+      (c.preferredWorkplaces || []).forEach(w => {
+        const label = w.charAt(0).toUpperCase() + w.slice(1);
+        prefWorkplaceFreq[label] = (prefWorkplaceFreq[label] || 0) + 1;
+      });
+    });
+    const topPrefWorkplaces = Object.entries(prefWorkplaceFreq).sort((a, b) => b[1] - a[1]);
+
+    const prefIndustryFreq: Record<string, number> = {};
+    candidates.forEach(c => {
+      (c.preferredIndustries || []).forEach(i => {
+        const label = industryLabels[i] || i;
+        prefIndustryFreq[label] = (prefIndustryFreq[label] || 0) + 1;
+      });
+    });
+    const topPrefIndustries = Object.entries(prefIndustryFreq).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const qualFreq: Record<string, number> = {};
+    candidates.forEach(c => {
+      (c.qualifications || []).forEach(q => {
+        qualFreq[q] = (qualFreq[q] || 0) + 1;
+      });
+    });
+    const topQualifications = Object.entries(qualFreq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
     return {
       openJobs, closedJobs, totalMatches, avgMatchesPerJob,
       activeCandidates, passiveCandidates, notLooking, avgExperience,
       topCandidateSkills, topJobSkills, topIndustries, topJobLocations, levelFreq,
       avgSalary, jobsWithSalary: jobsWithSalary.length,
+      topJobTypes, topWorkplaces, topJobIndustries, topEducationLevels,
+      topPrefJobTypes, topPrefWorkplaces, topPrefIndustries, topQualifications,
     };
   }, [companies, candidates, jobs]);
 
@@ -395,6 +496,182 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No level data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                Jobs by Type
+              </CardTitle>
+              <CardDescription>Distribution of job postings by employment type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topJobTypes.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topJobTypes.map(([type, count]) => (
+                    <InsightBar key={type} label={type} value={count} max={insights.topJobTypes[0][1]} color="bg-cyan-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No job type data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Job Types
+              </CardTitle>
+              <CardDescription>What candidates are looking for</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topPrefJobTypes.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topPrefJobTypes.map(([type, count]) => (
+                    <InsightBar key={type} label={type} value={count} max={insights.topPrefJobTypes[0][1]} color="bg-pink-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Monitor className="w-4 h-4" />
+                Jobs by Workplace
+              </CardTitle>
+              <CardDescription>Office, remote, and hybrid job distribution</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topWorkplaces.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topWorkplaces.map(([wp, count]) => (
+                    <InsightBar key={wp} label={wp} value={count} max={insights.topWorkplaces[0][1]} color="bg-teal-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No workplace data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Workplaces
+              </CardTitle>
+              <CardDescription>Where candidates want to work</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topPrefWorkplaces.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topPrefWorkplaces.map(([wp, count]) => (
+                    <InsightBar key={wp} label={wp} value={count} max={insights.topPrefWorkplaces[0][1]} color="bg-rose-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Factory className="w-4 h-4" />
+                Jobs by Industry
+              </CardTitle>
+              <CardDescription>Industry sectors with the most job postings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topJobIndustries.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topJobIndustries.map(([ind, count]) => (
+                    <InsightBar key={ind} label={ind} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Industries
+              </CardTitle>
+              <CardDescription>Industries candidates are interested in</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topPrefIndustries.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topPrefIndustries.map(([ind, count]) => (
+                    <InsightBar key={ind} label={ind} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Education Requirements (Jobs)
+              </CardTitle>
+              <CardDescription>Education levels required by job postings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topEducationLevels.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topEducationLevels.map(([edu, count]) => (
+                    <InsightBar key={edu} label={edu} value={count} max={insights.topEducationLevels[0][1]} color="bg-indigo-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Candidate Qualifications
+              </CardTitle>
+              <CardDescription>Professional qualifications held by candidates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {insights.topQualifications.length > 0 ? (
+                <div className="space-y-2.5">
+                  {insights.topQualifications.map(([qual, count]) => (
+                    <InsightBar key={qual} label={qual} value={count} max={insights.topQualifications[0][1]} color="bg-sky-500/70" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No qualification data yet.</p>
               )}
             </CardContent>
           </Card>
