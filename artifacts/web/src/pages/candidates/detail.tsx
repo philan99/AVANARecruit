@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send, Linkedin, Github, Twitter, Globe,
+  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 
@@ -348,7 +348,7 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
             </CardContent>
           </Card>
 
-          {(c.linkedinUrl || c.githubUrl || c.twitterUrl || c.portfolioUrl) && (
+          {(c.linkedinUrl || c.facebookUrl || c.twitterUrl || c.portfolioUrl) && (
             <Card className="bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Social Media</CardTitle>
@@ -363,12 +363,12 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
                     </div>
                   </a>
                 )}
-                {c.githubUrl && (
-                  <a href={c.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
-                    <div className="p-1.5 rounded-md bg-gray-500/10"><Github className="w-3.5 h-3.5 text-gray-400" /></div>
+                {c.facebookUrl && (
+                  <a href={c.facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">GitHub</p>
-                      <p className="text-xs text-foreground truncate">{c.githubUrl}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Facebook</p>
+                      <p className="text-xs text-foreground truncate">{c.facebookUrl}</p>
                     </div>
                   </a>
                 )}

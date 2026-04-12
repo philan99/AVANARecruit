@@ -19,7 +19,7 @@ import {
   Award,
   Download,
   Linkedin,
-  Github,
+  Facebook,
   Twitter,
   Globe,
 } from "lucide-react";
@@ -331,7 +331,7 @@ export default function AdminCandidateDetail() {
             </CardContent>
           </Card>
 
-          {((candidate as any).linkedinUrl || (candidate as any).githubUrl || (candidate as any).twitterUrl || (candidate as any).portfolioUrl) && (
+          {((candidate as any).linkedinUrl || (candidate as any).facebookUrl || (candidate as any).twitterUrl || (candidate as any).portfolioUrl) && (
             <Card className="bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Social Media</CardTitle>
@@ -346,12 +346,12 @@ export default function AdminCandidateDetail() {
                     </div>
                   </a>
                 )}
-                {(candidate as any).githubUrl && (
-                  <a href={(candidate as any).githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
-                    <div className="p-1.5 rounded-md bg-gray-500/10"><Github className="w-3.5 h-3.5 text-gray-400" /></div>
+                {(candidate as any).facebookUrl && (
+                  <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">GitHub</p>
-                      <p className="text-xs text-foreground truncate">{(candidate as any).githubUrl}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Facebook</p>
+                      <p className="text-xs text-foreground truncate">{(candidate as any).facebookUrl}</p>
                     </div>
                   </a>
                 )}

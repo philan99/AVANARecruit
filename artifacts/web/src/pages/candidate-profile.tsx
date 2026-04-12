@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Github, Globe, Twitter } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Facebook, Globe, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExperienceEntry {
@@ -44,7 +44,7 @@ interface EditFormState {
   educationDetails: string;
   location: string;
   linkedinUrl: string;
-  githubUrl: string;
+  facebookUrl: string;
   twitterUrl: string;
   portfolioUrl: string;
 }
@@ -151,7 +151,7 @@ export default function CandidateProfile() {
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
     summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, education: "", educationDetails: "", location: "",
-    linkedinUrl: "", githubUrl: "", twitterUrl: "", portfolioUrl: "",
+    linkedinUrl: "", facebookUrl: "", twitterUrl: "", portfolioUrl: "",
   });
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function CandidateProfile() {
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
         linkedinUrl: (candidate as any).linkedinUrl || "",
-        githubUrl: (candidate as any).githubUrl || "",
+        facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
         portfolioUrl: (candidate as any).portfolioUrl || "",
       });
@@ -201,7 +201,7 @@ export default function CandidateProfile() {
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
         linkedinUrl: (candidate as any).linkedinUrl || "",
-        githubUrl: (candidate as any).githubUrl || "",
+        facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
         portfolioUrl: (candidate as any).portfolioUrl || "",
       });
@@ -266,7 +266,7 @@ export default function CandidateProfile() {
       location: editForm.location,
       experience: experienceList,
       linkedinUrl: editForm.linkedinUrl || null,
-      githubUrl: editForm.githubUrl || null,
+      facebookUrl: editForm.facebookUrl || null,
       twitterUrl: editForm.twitterUrl || null,
       portfolioUrl: editForm.portfolioUrl || null,
     };
@@ -1014,12 +1014,12 @@ export default function CandidateProfile() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                  <Github className="w-3.5 h-3.5" /> GitHub
+                  <Facebook className="w-3.5 h-3.5" /> Facebook
                 </label>
                 <Input
-                  value={editForm.githubUrl}
-                  onChange={e => updateField("githubUrl", e.target.value)}
-                  placeholder="https://github.com/yourusername"
+                  value={editForm.facebookUrl}
+                  onChange={e => updateField("facebookUrl", e.target.value)}
+                  placeholder="https://facebook.com/yourprofile"
                 />
               </div>
               <div className="space-y-1.5">
@@ -1045,7 +1045,7 @@ export default function CandidateProfile() {
             </div>
           ) : (
             <div className="space-y-3">
-              {!(candidate as any)?.linkedinUrl && !(candidate as any)?.githubUrl && !(candidate as any)?.twitterUrl && !(candidate as any)?.portfolioUrl ? (
+              {!(candidate as any)?.linkedinUrl && !(candidate as any)?.facebookUrl && !(candidate as any)?.twitterUrl && !(candidate as any)?.portfolioUrl ? (
                 <p className="text-sm text-muted-foreground text-center py-2">No social media links added yet. Click Edit to add your links.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1060,14 +1060,14 @@ export default function CandidateProfile() {
                       </div>
                     </a>
                   )}
-                  {(candidate as any)?.githubUrl && (
-                    <a href={(candidate as any).githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
-                      <div className="p-2 rounded-lg bg-gray-500/10">
-                        <Github className="w-4 h-4 text-gray-400" />
+                  {(candidate as any)?.facebookUrl && (
+                    <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                      <div className="p-2 rounded-lg bg-blue-600/10">
+                        <Facebook className="w-4 h-4 text-blue-600" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-muted-foreground">GitHub</p>
-                        <p className="text-sm text-foreground truncate">{(candidate as any).githubUrl}</p>
+                        <p className="text-xs font-medium text-muted-foreground">Facebook</p>
+                        <p className="text-sm text-foreground truncate">{(candidate as any).facebookUrl}</p>
                       </div>
                     </a>
                   )}

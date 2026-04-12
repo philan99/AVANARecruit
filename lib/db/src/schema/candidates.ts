@@ -24,7 +24,7 @@ export const candidatesTable = pgTable("candidates", {
   preferredWorkplaces: text("preferred_workplaces").array().default([]),
   preferredIndustries: text("preferred_industries").array().default([]),
   linkedinUrl: text("linkedin_url"),
-  githubUrl: text("github_url"),
+  facebookUrl: text("facebook_url"),
   twitterUrl: text("twitter_url"),
   portfolioUrl: text("portfolio_url"),
   status: text("status").notNull().default("active"),
