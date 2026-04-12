@@ -53,13 +53,13 @@ export default function MatchesList() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
             <Network className="mr-3 text-primary" /> Intelligence Matches
           </h1>
-          <p className="text-muted-foreground mt-1">Review AI-generated candidate fits for open requisitions.</p>
+          <p className="text-muted-foreground mt-1">Review AI-generated candidate fits for open jobs.</p>
         </div>
         
         <div className="w-full md:w-[300px]">
           <Select value={activeJobId.toString()} onValueChange={(val) => setSelectedJobId(val)}>
             <SelectTrigger className="bg-card">
-              <SelectValue placeholder="Select a requisition..." />
+              <SelectValue placeholder="Select a job..." />
             </SelectTrigger>
             <SelectContent>
               {jobs?.map(job => (
@@ -79,14 +79,14 @@ export default function MatchesList() {
           {!activeJobId ? (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
               <Building className="w-12 h-12 text-muted-foreground/30 mb-4" />
-              <p>Select an open requisition to view matches.</p>
+              <p>Select a job to view matches.</p>
             </div>
           ) : matchesLoading ? (
              <div className="p-12 text-center text-muted-foreground font-mono">Loading match telemetry...</div>
           ) : matches?.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
               <Target className="w-12 h-12 text-muted-foreground/30 mb-4" />
-              <p>No matches found for this requisition yet.</p>
+              <p>No matches found for this job yet.</p>
               <p className="text-sm mt-2">Go to the Job Detail page and run the AI matching engine.</p>
             </div>
           ) : (

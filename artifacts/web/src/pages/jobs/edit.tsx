@@ -96,12 +96,12 @@ export default function EditJob({ params }: { params: { id: string } }) {
       { id: jobId, data: payload },
       {
         onSuccess: () => {
-          toast({ title: "Job updated", description: "The requisition has been updated successfully." });
+          toast({ title: "Job updated", description: "The job has been updated successfully." });
           queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) });
           navigate(`/jobs/${jobId}`);
         },
         onError: () => {
-          toast({ title: "Error", description: "Failed to update requisition.", variant: "destructive" });
+          toast({ title: "Error", description: "Failed to update job.", variant: "destructive" });
         },
       }
     );

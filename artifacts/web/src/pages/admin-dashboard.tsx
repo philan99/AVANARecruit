@@ -712,7 +712,7 @@ export default function AdminDashboard() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-base">Recent Jobs</CardTitle>
-              <CardDescription>Latest job requisitions across the platform</CardDescription>
+              <CardDescription>Latest jobs across the platform</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

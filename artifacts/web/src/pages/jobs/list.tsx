@@ -492,12 +492,12 @@ export default function JobsList() {
       )}
 
       {isLoading ? (
-        <div className="py-12 text-center text-muted-foreground font-mono">Loading requisitions...</div>
+        <div className="py-12 text-center text-muted-foreground font-mono">Loading jobs...</div>
       ) : filtered.length === 0 ? (
         <Card className="bg-card">
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground text-center py-8">
-              {hasActiveFilters ? "No jobs match your filters." : "No requisitions found."}
+              {hasActiveFilters ? "No jobs match your filters." : "No jobs found."}
             </p>
           </CardContent>
         </Card>

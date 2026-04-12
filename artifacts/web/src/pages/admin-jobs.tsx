@@ -365,7 +365,7 @@ export default function AdminJobs() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
           <Briefcase className="mr-3 text-primary" /> Jobs
         </h1>
-        <p className="text-muted-foreground mt-1">{jobs.length} job requisitions on the platform.</p>
+        <p className="text-muted-foreground mt-1">{jobs.length} jobs on the platform.</p>
       </div>
 
       <div className="space-y-3">

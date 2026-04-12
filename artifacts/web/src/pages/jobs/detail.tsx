@@ -82,18 +82,18 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   };
 
   if (jobLoading) {
-    return <div className="p-8 text-center text-muted-foreground font-mono">Loading requisition data...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-mono">Loading job data...</div>;
   }
 
   if (!job) {
-    return <div className="p-8 text-center text-destructive font-mono">Requisition not found.</div>;
+    return <div className="p-8 text-center text-destructive font-mono">Job not found.</div>;
   }
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center text-sm text-muted-foreground mb-4">
         <Link href="/jobs" className="hover:text-primary flex items-center">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Requisitions
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Jobs
         </Link>
       </div>
 
