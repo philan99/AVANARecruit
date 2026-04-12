@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Building2, UserCircle, LogIn, Sparkles, Target, Users, BarChart3, Shield, ArrowRight, Zap, Globe, Lock } from "lucide-react";
+import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock } from "lucide-react";
 import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775917058507.png";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useToast } from "@/hooks/use-toast";
@@ -85,183 +84,196 @@ export default function RoleSelect() {
     }
   };
 
-  const features = [
+  const services = [
     {
       icon: Sparkles,
-      title: "AI-Powered Matching",
-      description: "Our intelligent engine analyses skills, experience, education and location to find the perfect fit.",
+      title: "AI Matching",
+      subtitle: "Intelligent Candidate Matching",
+      description: "Our AI engine analyses skills, experience, education and location to deliver precise candidate-to-job matches.",
     },
     {
       icon: Target,
-      title: "Skills-Based Scoring",
-      description: "Detailed scoring breakdowns help you understand exactly how well candidates align with your roles.",
+      title: "Skills Scoring",
+      subtitle: "Competency-Based Assessment",
+      description: "Detailed scoring breakdowns help you understand exactly how well candidates align with your role requirements.",
     },
     {
       icon: Users,
       title: "Talent Pipeline",
-      description: "Build and manage a smart pipeline of pre-matched candidates ready for your open positions.",
+      subtitle: "Smart Pipeline Management",
+      description: "Build and manage a pipeline of pre-matched candidates, ready for your current and future positions.",
     },
     {
       icon: BarChart3,
-      title: "Analytics & Insights",
-      description: "Real-time dashboards and reporting to track your recruitment performance at a glance.",
+      title: "Analytics",
+      subtitle: "Recruitment Intelligence",
+      description: "Real-time dashboards and reporting to track performance, identify trends, and optimise your hiring strategy.",
     },
   ];
 
-  const stats = [
-    { value: "95%", label: "Match Accuracy" },
-    { value: "3x", label: "Faster Hiring" },
-    { value: "500+", label: "Skills Tracked" },
-    { value: "24/7", label: "AI Processing" },
+  const values = [
+    {
+      icon: Lightbulb,
+      title: "Innovation",
+      description: "We drive strategic recruitment innovation by harnessing the latest in AI and data science.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Value Driven",
+      description: "Our approach delivers tangible results — faster hires, better matches, and reduced recruitment costs.",
+    },
+    {
+      icon: Heart,
+      title: "People First",
+      description: "Every solution is built around people, ensuring candidates and companies find their perfect match.",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-sidebar/95 backdrop-blur-sm border-b border-sidebar-border">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <img src={logoUrl} alt="Avana Talent" className="h-7" />
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              className="text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent text-sm"
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setShowLogin(true)}
+              className="px-5 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors cursor-pointer"
             >
               Sign In
-            </Button>
+            </button>
             <Link href="/signup">
-              <Button size="sm" className="text-sm">
+              <button className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
                 Get Started
-                <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-              </Button>
+                <ArrowRight className="w-3.5 h-3.5 ml-1.5 inline" />
+              </button>
             </Link>
           </div>
         </div>
       </nav>
 
-      <section className="relative pt-16">
-        <div className="bg-sidebar">
-          <div className="max-w-7xl mx-auto px-6 py-24 lg:py-32">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 bg-sidebar-accent/60 rounded-full px-4 py-1.5 mb-6">
-                <Zap className="w-3.5 h-3.5 text-sidebar-primary" />
-                <span className="text-xs font-medium text-sidebar-foreground/70 tracking-wide uppercase">AI-Powered Recruitment Platform</span>
-              </div>
-              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-sidebar-foreground leading-[1.1] mb-6">
-                Connecting the right talent with the right opportunity.
-              </h1>
-              <p className="text-lg text-sidebar-foreground/60 leading-relaxed max-w-xl mb-10">
-                Avana Talent uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button
-                  size="lg"
-                  className="text-base px-8"
-                  onClick={() => setShowLogin(true)}
-                >
-                  Sign In
-                  <LogIn className="w-4 h-4 ml-2" />
-                </Button>
-                <Link href="/signup">
-                  <Button size="lg" variant="outline" className="text-base px-8 border-sidebar-foreground/20 text-sidebar-foreground hover:bg-sidebar-accent">
-                    Create Account
-                  </Button>
-                </Link>
-              </div>
+      <section className="relative" style={{ backgroundColor: "#1a2035", paddingTop: "72px" }}>
+        <div className="absolute inset-0 overflow-hidden" style={{ paddingTop: "72px" }}>
+          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-28 lg:py-40">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-6" style={{ color: "#4CAF50" }}>
+              AI-Powered Recruitment Platform
+            </p>
+            <h1 className="text-4xl lg:text-[56px] font-bold leading-[1.08] mb-6" style={{ color: "#ffffff" }}>
+              Connecting the Right Talent
+              <br />with the Right Opportunity.
+            </h1>
+            <p className="text-lg leading-relaxed max-w-xl mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Avana Talent uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => setShowLogin(true)}
+                className="px-8 py-3.5 text-sm font-semibold rounded-md transition-all cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+              >
+                Sign In
+              </button>
+              <Link href="/signup">
+                <button className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-white/5" style={{ borderColor: "rgba(255,255,255,0.2)", color: "#fff", backgroundColor: "transparent" }}>
+                  Create Account
+                </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-12 border-b border-border bg-card/50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Everything you need to hire smarter
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+              Platform Capabilities
+            </p>
+            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+              Expertise That Transforms
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From AI matching to real-time analytics, Avana Talent provides the tools to streamline your entire recruitment process.
+            <p className="text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
+              Tailored AI-powered recruitment solutions for real results
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature) => (
-              <div key={feature.title} className="group">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="w-6 h-6 text-primary" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service) => (
+              <div
+                key={service.title}
+                className="group rounded-xl p-7 transition-all hover:-translate-y-1"
+                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+              >
+                <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                  <service.icon className="w-5 h-5" style={{ color: "#4CAF50" }} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                <h3 className="text-base font-bold mb-1" style={{ color: "#1a2035" }}>{service.title}</h3>
+                <p className="text-xs font-medium mb-3" style={{ color: "#4CAF50" }}>{service.subtitle}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{service.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 lg:py-28 bg-sidebar">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#ffffff" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-sidebar-foreground mb-6">
-                Built for companies and candidates alike
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+                Built For Everyone
+              </p>
+              <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6" style={{ color: "#1a2035" }}>
+                Your Strategic Partner in Talent Acquisition
               </h2>
-              <p className="text-sidebar-foreground/60 mb-8 leading-relaxed">
+              <p className="text-base leading-relaxed mb-10" style={{ color: "#6b7280" }}>
                 Whether you're looking to hire top talent or find your next career move, Avana Talent's AI engine works for both sides of the recruitment equation.
               </p>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-sidebar-accent flex items-center justify-center shrink-0 mt-0.5">
-                    <Building2 className="w-5 h-5 text-sidebar-primary" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <Building2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sidebar-foreground mb-1">For Companies</h4>
-                    <p className="text-sm text-sidebar-foreground/60">Post jobs, receive AI-ranked candidate matches, and manage your recruitment pipeline from a single dashboard.</p>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>For Companies</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Post jobs, receive AI-ranked candidate matches, and manage your recruitment pipeline from a single dashboard.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-sidebar-accent flex items-center justify-center shrink-0 mt-0.5">
-                    <UserCircle className="w-5 h-5 text-sidebar-primary" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <UserCircle className="w-5 h-5" style={{ color: "#4CAF50" }} />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sidebar-foreground mb-1">For Candidates</h4>
-                    <p className="text-sm text-sidebar-foreground/60">Create your profile, browse opportunities, and see how well you match against each role with our AI scoring.</p>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>For Candidates</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Create your profile, browse opportunities, and see how well you match against each role with detailed AI scoring.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-sidebar-accent flex items-center justify-center shrink-0 mt-0.5">
-                    <Lock className="w-5 h-5 text-sidebar-primary" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <Lock className="w-5 h-5" style={{ color: "#4CAF50" }} />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sidebar-foreground mb-1">Secure & Private</h4>
-                    <p className="text-sm text-sidebar-foreground/60">Your data is protected with enterprise-grade security. We never share your information without consent.</p>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>Secure & Private</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Your data is protected with enterprise-grade security. We never share your information without consent.</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="bg-sidebar-accent/30 rounded-2xl p-8 border border-sidebar-border w-full max-w-md">
+              <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Globe className="w-5 h-5 text-primary" />
+                  <div className="flex items-center gap-3 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}>
+                      <Globe className="w-5 h-5" style={{ color: "#4CAF50" }} />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-sidebar-foreground">Global Reach</div>
-                      <div className="text-xs text-sidebar-foreground/50">Match talent across regions</div>
+                      <div className="text-sm font-semibold" style={{ color: "#ffffff" }}>AI Match Report</div>
+                      <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Sample candidate analysis</div>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {[
                       { label: "Skills Match", value: 92 },
                       { label: "Experience Fit", value: 85 },
@@ -269,23 +281,23 @@ export default function RoleSelect() {
                       { label: "Location Match", value: 95 },
                     ].map((item) => (
                       <div key={item.label}>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-sidebar-foreground/70">{item.label}</span>
-                          <span className="font-mono font-semibold text-sidebar-foreground">{item.value}%</span>
+                        <div className="flex justify-between text-xs mb-1.5">
+                          <span style={{ color: "rgba(255,255,255,0.6)" }}>{item.label}</span>
+                          <span className="font-mono font-semibold" style={{ color: "#ffffff" }}>{item.value}%</span>
                         </div>
-                        <div className="h-2 bg-sidebar-accent rounded-full overflow-hidden">
+                        <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
                           <div
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${item.value}%` }}
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${item.value}%`, backgroundColor: "#4CAF50" }}
                           />
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="pt-2 border-t border-sidebar-border">
+                  <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-sidebar-foreground/50">Overall Score</span>
-                      <span className="text-2xl font-bold font-mono text-primary">87%</span>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Overall Score</span>
+                      <span className="text-3xl font-bold font-mono" style={{ color: "#4CAF50" }}>87%</span>
                     </div>
                   </div>
                 </div>
@@ -295,30 +307,65 @@ export default function RoleSelect() {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">Ready to get started?</h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Join Avana Talent today and experience the future of intelligent recruitment.
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#1a2035" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+              Our Core Values
+            </p>
+            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight" style={{ color: "#ffffff" }}>
+              Everything We Do is Underpinned
+              <br className="hidden lg:block" />by Our Core Values
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {values.map((value) => (
+              <div key={value.title} className="text-center">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.12)" }}>
+                  <value.icon className="w-6 h-6" style={{ color: "#4CAF50" }} />
+                </div>
+                <h3 className="text-lg font-bold mb-2" style={{ color: "#ffffff" }}>{value.title}</h3>
+                <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>{value.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="max-w-3xl mx-auto px-6 lg:px-10 text-center">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+            Get Started Today
+          </p>
+          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+            Ready to Transform Your Recruitment?
+          </h2>
+          <p className="text-base mb-10 max-w-lg mx-auto" style={{ color: "#6b7280" }}>
+            Join Avana Talent and experience the future of intelligent recruitment — powered by AI, built for people.
           </p>
           <div className="flex justify-center gap-4">
-            <Button size="lg" className="text-base px-8" onClick={() => setShowLogin(true)}>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="px-8 py-3.5 text-sm font-semibold rounded-md transition-all cursor-pointer hover:opacity-90"
+              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+            >
               Sign In
-            </Button>
+            </button>
             <Link href="/signup">
-              <Button size="lg" variant="outline" className="text-base px-8">
+              <button className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-gray-50" style={{ borderColor: "#d1d5db", color: "#1a2035", backgroundColor: "#ffffff" }}>
                 Create Account
-              </Button>
+                <ChevronRight className="w-4 h-4 ml-1 inline" />
+              </button>
             </Link>
           </div>
         </div>
       </section>
 
-      <footer className="bg-sidebar border-t border-sidebar-border py-10">
-        <div className="max-w-7xl mx-auto px-6">
+      <footer style={{ backgroundColor: "#1a2035", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <img src={logoUrl} alt="Avana Talent" className="h-6" />
-            <p className="text-xs text-sidebar-foreground/40">
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
               © 2026 AVANA Services Limited. Company Number: 15268633
             </p>
           </div>
@@ -327,79 +374,64 @@ export default function RoleSelect() {
 
       {showLogin && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLogin(false)} />
-          <div className="relative bg-card rounded-xl shadow-2xl border border-border w-full max-w-md mx-4 p-8">
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(26, 32, 53, 0.7)", backdropFilter: "blur(4px)" }} onClick={() => setShowLogin(false)} />
+          <div className="relative w-full max-w-md mx-4 rounded-xl shadow-2xl p-8" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
             <button
               onClick={() => setShowLogin(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors text-xl leading-none cursor-pointer"
+              className="absolute top-4 right-5 transition-colors text-xl leading-none cursor-pointer"
+              style={{ color: "#9ca3af" }}
             >
               &times;
             </button>
 
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-1">Welcome back</h2>
-              <p className="text-sm text-muted-foreground">Sign in to your Avana Talent account</p>
+              <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Welcome Back</h2>
+              <p className="text-sm" style={{ color: "#6b7280" }}>Sign in to your Avana Talent account</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">I am a</label>
+                <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a</label>
                 <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelected("company")}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer ${
-                      selected === "company"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4" />
-                    Company
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelected("candidate")}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer ${
-                      selected === "candidate"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    <UserCircle className="w-4 h-4" />
-                    Candidate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelected("admin")}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer ${
-                      selected === "admin"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    <Shield className="w-4 h-4" />
-                    Admin
-                  </button>
+                  {[
+                    { key: "company" as UserRole, icon: Building2, label: "Company" },
+                    { key: "candidate" as UserRole, icon: UserCircle, label: "Candidate" },
+                    { key: "admin" as UserRole, icon: Shield, label: "Admin" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSelected(opt.key)}
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
+                      style={{
+                        borderColor: selected === opt.key ? "#4CAF50" : "#e5e7eb",
+                        backgroundColor: selected === opt.key ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
+                        color: selected === opt.key ? "#4CAF50" : "#6b7280",
+                      }}
+                    >
+                      <opt.icon className="w-4 h-4" />
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
+                <label htmlFor="email" className="text-sm font-medium" style={{ color: "#1a2035" }}>Email</label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background"
+                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
-                  <span className="text-xs text-primary cursor-pointer hover:underline">Forgot password?</span>
+                  <label htmlFor="password" className="text-sm font-medium" style={{ color: "#1a2035" }}>Password</label>
+                  <span className="text-xs cursor-pointer hover:underline" style={{ color: "#4CAF50" }}>Forgot password?</span>
                 </div>
                 <Input
                   id="password"
@@ -407,22 +439,23 @@ export default function RoleSelect() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background"
+                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
                 />
               </div>
 
-              <Button
+              <button
                 type="submit"
-                className="w-full"
                 disabled={!selected || isLoading || !email || !password}
+                className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-4 h-4 mr-2 inline" />
                 {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
+              </button>
 
-              <p className="text-center text-xs text-muted-foreground pt-2">
+              <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
                 Don't have an account?{" "}
-                <Link href="/signup" className="text-primary font-medium cursor-pointer hover:underline">
+                <Link href="/signup" className="font-medium cursor-pointer hover:underline" style={{ color: "#4CAF50" }}>
                   Sign up
                 </Link>
               </p>
