@@ -596,80 +596,6 @@ export default function CandidateProfile() {
             </Card>
           )}
 
-          {/* Social Media */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Social Links</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Linkedin className="w-3 h-3" /> LinkedIn
-                    </label>
-                    <Input value={editForm.linkedinUrl} onChange={e => updateField("linkedinUrl", e.target.value)} placeholder="https://linkedin.com/in/yourprofile" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Facebook className="w-3 h-3" /> Facebook
-                    </label>
-                    <Input value={editForm.facebookUrl} onChange={e => updateField("facebookUrl", e.target.value)} placeholder="https://facebook.com/yourprofile" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Twitter className="w-3 h-3" /> X / Twitter
-                    </label>
-                    <Input value={editForm.twitterUrl} onChange={e => updateField("twitterUrl", e.target.value)} placeholder="https://x.com/yourhandle" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Globe className="w-3 h-3" /> Portfolio
-                    </label>
-                    <Input value={editForm.portfolioUrl} onChange={e => updateField("portfolioUrl", e.target.value)} placeholder="https://yourportfolio.com" className="h-8 text-sm" />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {!(candidate as any)?.linkedinUrl && !(candidate as any)?.facebookUrl && !(candidate as any)?.twitterUrl && !(candidate as any)?.portfolioUrl ? (
-                    <p className="text-xs text-muted-foreground text-center py-2">No links added yet</p>
-                  ) : (
-                    <>
-                      {(candidate as any)?.linkedinUrl && (
-                        <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
-                          <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
-                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).linkedinUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
-                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
-                      )}
-                      {(candidate as any)?.facebookUrl && (
-                        <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
-                          <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
-                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).facebookUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
-                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
-                      )}
-                      {(candidate as any)?.twitterUrl && (
-                        <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
-                          <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
-                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).twitterUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
-                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
-                      )}
-                      {(candidate as any)?.portfolioUrl && (
-                        <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
-                          <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
-                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).portfolioUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
-                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Skills */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
@@ -833,6 +759,80 @@ export default function CandidateProfile() {
                       <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap leading-relaxed">{(candidate as any).educationDetails}</p>
                     )}
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Social Media */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Social Links</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Linkedin className="w-3 h-3" /> LinkedIn
+                    </label>
+                    <Input value={editForm.linkedinUrl} onChange={e => updateField("linkedinUrl", e.target.value)} placeholder="https://linkedin.com/in/yourprofile" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Facebook className="w-3 h-3" /> Facebook
+                    </label>
+                    <Input value={editForm.facebookUrl} onChange={e => updateField("facebookUrl", e.target.value)} placeholder="https://facebook.com/yourprofile" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Twitter className="w-3 h-3" /> X / Twitter
+                    </label>
+                    <Input value={editForm.twitterUrl} onChange={e => updateField("twitterUrl", e.target.value)} placeholder="https://x.com/yourhandle" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Globe className="w-3 h-3" /> Portfolio
+                    </label>
+                    <Input value={editForm.portfolioUrl} onChange={e => updateField("portfolioUrl", e.target.value)} placeholder="https://yourportfolio.com" className="h-8 text-sm" />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {!(candidate as any)?.linkedinUrl && !(candidate as any)?.facebookUrl && !(candidate as any)?.twitterUrl && !(candidate as any)?.portfolioUrl ? (
+                    <p className="text-xs text-muted-foreground text-center py-2">No links added yet</p>
+                  ) : (
+                    <>
+                      {(candidate as any)?.linkedinUrl && (
+                        <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                          <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
+                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).linkedinUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </a>
+                      )}
+                      {(candidate as any)?.facebookUrl && (
+                        <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                          <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
+                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).facebookUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </a>
+                      )}
+                      {(candidate as any)?.twitterUrl && (
+                        <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                          <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
+                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).twitterUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </a>
+                      )}
+                      {(candidate as any)?.portfolioUrl && (
+                        <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                          <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
+                          <span className="text-sm text-foreground truncate flex-1">{(candidate as any).portfolioUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </a>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>
