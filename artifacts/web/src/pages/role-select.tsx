@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check } from "lucide-react";
+import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
+import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
+
+type SignUpRole = "company" | "candidate";
 
 export default function RoleSelect() {
   const { setRole } = useRole();
@@ -14,9 +17,98 @@ export default function RoleSelect() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
+  const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [candidateForm, setCandidateForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const createCompany = useCreateCompanyProfile();
+  const createCandidate = useCreateCandidate();
 
   const { setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
   const [, setLocation] = useLocation();
+
+  const handleCompanySignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!companyForm.name.trim() || !companyForm.email.trim() || !companyForm.password) {
+      toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (companyForm.password !== companyForm.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (companyForm.password.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    try {
+      const res = await fetch(`${basePath}/company-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: companyForm.name.trim(), email: companyForm.email.trim(), password: companyForm.password }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast({ title: "Failed to create company", description: data.error || "Unknown error", variant: "destructive" });
+        return;
+      }
+      const data = await res.json();
+      toast({ title: "Company account created!" });
+      setCompanyProfileId(data.id);
+      setUserEmail(companyForm.email.trim());
+      setRole("company");
+      setShowSignup(false);
+      setLocation("/company-profile");
+    } catch {
+      toast({ title: "Failed to create company", variant: "destructive" });
+    }
+  };
+
+  const handleCandidateSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    const { name, email: cEmail, password: cPass, confirmPassword } = candidateForm;
+    if (!name.trim() || !cEmail.trim() || !cPass) {
+      toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (cPass !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (cPass.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+    createCandidate.mutate(
+      {
+        data: {
+          name: name.trim(),
+          email: cEmail.trim(),
+          password: cPass,
+          currentTitle: "Not specified",
+          summary: "No summary provided",
+          skills: ["General"],
+          experienceYears: 0,
+          education: "Not specified",
+          location: "Not specified",
+        },
+      },
+      {
+        onSuccess: (data: any) => {
+          toast({ title: "Candidate account created!" });
+          if (data?.id) setCandidateProfileId(data.id);
+          setUserEmail(candidateForm.email.trim());
+          setRole("candidate");
+          setShowSignup(false);
+          setLocation("/");
+        },
+        onError: (err: any) => {
+          toast({ title: "Failed to create account", description: err?.message || "Unknown error", variant: "destructive" });
+        },
+      }
+    );
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,12 +255,14 @@ export default function RoleSelect() {
             >
               Sign In
             </button>
-            <Link href="/signup">
-              <button className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
-                Get Started
-                <ArrowRight className="w-3.5 h-3.5 ml-1.5 inline" />
-              </button>
-            </Link>
+            <button
+              onClick={() => setShowSignup(true)}
+              className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer"
+              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+            >
+              Get Started
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5 inline" />
+            </button>
           </div>
         </div>
       </nav>
@@ -198,11 +292,13 @@ export default function RoleSelect() {
               >
                 Sign In
               </button>
-              <Link href="/signup">
-                <button className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-white/5" style={{ borderColor: "rgba(255,255,255,0.2)", color: "#fff", backgroundColor: "transparent" }}>
-                  Create Account
-                </button>
-              </Link>
+              <button
+                onClick={() => setShowSignup(true)}
+                className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-white/5"
+                style={{ borderColor: "rgba(255,255,255,0.2)", color: "#fff", backgroundColor: "transparent" }}
+              >
+                Create Account
+              </button>
             </div>
           </div>
         </div>
@@ -382,11 +478,13 @@ export default function RoleSelect() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup">
-                <button className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50" style={{ borderColor: "#d1d5db", color: "#1a2035" }}>
-                  Get Started
-                </button>
-              </Link>
+              <button
+                onClick={() => setShowSignup(true)}
+                className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50"
+                style={{ borderColor: "#d1d5db", color: "#1a2035" }}
+              >
+                Get Started
+              </button>
             </div>
 
             <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#1a2035", border: "2px solid #4CAF50" }}>
@@ -461,12 +559,14 @@ export default function RoleSelect() {
             >
               Sign In
             </button>
-            <Link href="/signup">
-              <button className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-gray-50" style={{ borderColor: "#d1d5db", color: "#1a2035", backgroundColor: "#ffffff" }}>
-                Create Account
-                <ChevronRight className="w-4 h-4 ml-1 inline" />
-              </button>
-            </Link>
+            <button
+              onClick={() => setShowSignup(true)}
+              className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-gray-50"
+              style={{ borderColor: "#d1d5db", color: "#1a2035", backgroundColor: "#ffffff" }}
+            >
+              Create Account
+              <ChevronRight className="w-4 h-4 ml-1 inline" />
+            </button>
           </div>
         </div>
       </section>
@@ -565,11 +665,138 @@ export default function RoleSelect() {
 
               <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
                 Don't have an account?{" "}
-                <Link href="/signup" className="font-medium cursor-pointer hover:underline" style={{ color: "#4CAF50" }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowLogin(false); setShowSignup(true); }}
+                  className="font-medium cursor-pointer hover:underline"
+                  style={{ color: "#4CAF50" }}
+                >
                   Sign up
-                </Link>
+                </button>
               </p>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showSignup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(26, 32, 53, 0.7)", backdropFilter: "blur(4px)" }} onClick={() => setShowSignup(false)} />
+          <div className="relative w-full max-w-md mx-4 rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <button
+              onClick={() => setShowSignup(false)}
+              className="absolute top-4 right-5 transition-colors text-xl leading-none cursor-pointer"
+              style={{ color: "#9ca3af" }}
+            >
+              &times;
+            </button>
+
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Create an account</h2>
+              <p className="text-sm" style={{ color: "#6b7280" }}>Choose your account type to get started</p>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSignupRole("company")}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
+                    style={{
+                      borderColor: signupRole === "company" ? "#4CAF50" : "#e5e7eb",
+                      backgroundColor: signupRole === "company" ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
+                      color: signupRole === "company" ? "#4CAF50" : "#6b7280",
+                    }}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    Company
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSignupRole("candidate")}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
+                    style={{
+                      borderColor: signupRole === "candidate" ? "#4CAF50" : "#e5e7eb",
+                      backgroundColor: signupRole === "candidate" ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
+                      color: signupRole === "candidate" ? "#4CAF50" : "#6b7280",
+                    }}
+                  >
+                    <UserCircle className="w-4 h-4" />
+                    Candidate
+                  </button>
+                </div>
+              </div>
+
+              {signupRole === "company" && (
+                <form onSubmit={handleCompanySignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input placeholder="Acme Inc." value={companyForm.name} onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Email <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="email" placeholder="admin@acme.com" value={companyForm.email} onChange={(e) => setCompanyForm(f => ({ ...f, email: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Password <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="password" placeholder="Minimum 8 characters" value={companyForm.password} onChange={(e) => setCompanyForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="password" placeholder="Re-enter your password" value={companyForm.confirmPassword} onChange={(e) => setCompanyForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <button type="submit" className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
+                    <UserPlus className="w-4 h-4 mr-2 inline" />
+                    Create Company Account
+                  </button>
+                </form>
+              )}
+
+              {signupRole === "candidate" && (
+                <form onSubmit={handleCandidateSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Full Name <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input placeholder="Jane Doe" value={candidateForm.name} onChange={(e) => setCandidateForm(f => ({ ...f, name: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Email <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="email" placeholder="jane@example.com" value={candidateForm.email} onChange={(e) => setCandidateForm(f => ({ ...f, email: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Password <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="password" placeholder="Minimum 8 characters" value={candidateForm.password} onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Input type="password" placeholder="Re-enter your password" value={candidateForm.confirmPassword} onChange={(e) => setCandidateForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <button type="submit" disabled={createCandidate.isPending} className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
+                    <UserPlus className="w-4 h-4 mr-2 inline" />
+                    {createCandidate.isPending ? "Creating..." : "Create Candidate Account"}
+                  </button>
+                </form>
+              )}
+
+              {!signupRole && (
+                <div className="text-center py-6 text-sm rounded-lg border border-dashed" style={{ color: "#6b7280", borderColor: "#d1d5db" }}>
+                  Select your account type above to see the signup form.
+                </div>
+              )}
+
+              <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => { setShowSignup(false); setShowLogin(true); }}
+                  className="font-medium cursor-pointer hover:underline"
+                  style={{ color: "#4CAF50" }}
+                >
+                  Sign in
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       )}
