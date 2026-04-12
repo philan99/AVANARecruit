@@ -514,7 +514,7 @@ export default function AdminDashboard() {
               {insights.topJobTypes.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topJobTypes.map(([type, count]) => (
-                    <InsightBar key={type} label={type} value={count} max={insights.topJobTypes[0][1]} color="bg-cyan-500/70" onClick={() => navigate("/jobs")} />
+                    <InsightBar key={type} label={type} value={count} max={insights.topJobTypes[0][1]} color="bg-cyan-500/70" onClick={() => navigate(`/jobs?jobType=${encodeURIComponent(type)}`)} />
                   ))}
                 </div>
               ) : (
@@ -535,7 +535,7 @@ export default function AdminDashboard() {
               {insights.topPrefJobTypes.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topPrefJobTypes.map(([type, count]) => (
-                    <InsightBar key={type} label={type} value={count} max={insights.topPrefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate("/candidates")} />
+                    <InsightBar key={type} label={type} value={count} max={insights.topPrefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate(`/candidates?jobType=${encodeURIComponent(type)}`)} />
                   ))}
                 </div>
               ) : (
@@ -558,7 +558,7 @@ export default function AdminDashboard() {
               {insights.topWorkplaces.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topWorkplaces.map(([wp, count]) => (
-                    <InsightBar key={wp} label={wp} value={count} max={insights.topWorkplaces[0][1]} color="bg-teal-500/70" onClick={() => navigate("/jobs")} />
+                    <InsightBar key={wp} label={wp} value={count} max={insights.topWorkplaces[0][1]} color="bg-teal-500/70" onClick={() => navigate(`/jobs?workplace=${encodeURIComponent(wp)}`)} />
                   ))}
                 </div>
               ) : (
@@ -579,7 +579,7 @@ export default function AdminDashboard() {
               {insights.topPrefWorkplaces.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topPrefWorkplaces.map(([wp, count]) => (
-                    <InsightBar key={wp} label={wp} value={count} max={insights.topPrefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate("/candidates")} />
+                    <InsightBar key={wp} label={wp} value={count} max={insights.topPrefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate(`/candidates?workplace=${encodeURIComponent(wp)}`)} />
                   ))}
                 </div>
               ) : (
@@ -602,7 +602,7 @@ export default function AdminDashboard() {
               {insights.topJobIndustries.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topJobIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={ind} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate("/jobs")} />
+                    <InsightBar key={ind} label={ind} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate(`/jobs?industry=${encodeURIComponent(ind)}`)} />
                   ))}
                 </div>
               ) : (
@@ -623,7 +623,7 @@ export default function AdminDashboard() {
               {insights.topPrefIndustries.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topPrefIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={ind} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate("/candidates")} />
+                    <InsightBar key={ind} label={ind} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
                   ))}
                 </div>
               ) : (
@@ -646,7 +646,7 @@ export default function AdminDashboard() {
               {insights.topEducationLevels.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topEducationLevels.map(([edu, count]) => (
-                    <InsightBar key={edu} label={edu} value={count} max={insights.topEducationLevels[0][1]} color="bg-indigo-500/70" onClick={() => navigate("/jobs")} />
+                    <InsightBar key={edu} label={edu} value={count} max={insights.topEducationLevels[0][1]} color="bg-indigo-500/70" onClick={() => navigate(`/jobs?education=${encodeURIComponent(edu)}`)} />
                   ))}
                 </div>
               ) : (
@@ -667,7 +667,7 @@ export default function AdminDashboard() {
               {insights.topQualifications.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topQualifications.map(([qual, count]) => (
-                    <InsightBar key={qual} label={qual} value={count} max={insights.topQualifications[0][1]} color="bg-sky-500/70" onClick={() => navigate("/candidates")} />
+                    <InsightBar key={qual} label={qual} value={count} max={insights.topQualifications[0][1]} color="bg-sky-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(qual)}`)} />
                   ))}
                 </div>
               ) : (
