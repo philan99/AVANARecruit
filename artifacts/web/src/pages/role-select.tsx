@@ -100,7 +100,7 @@ export default function RoleSelect() {
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold text-sidebar-foreground leading-tight mb-3">
-              Connect the right talent<br />with the right opportunity.
+              Connecting the right talent<br />with the right opportunity.
             </h1>
             <p className="text-sidebar-foreground/60 text-sm leading-relaxed max-w-sm">
               Our AI matching engine analyzes skills, experience, education, and location to find the perfect fit — for companies and candidates alike.
