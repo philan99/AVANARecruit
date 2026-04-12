@@ -131,7 +131,7 @@ export default function RoleSelect() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(59, 65, 89, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <img src={logoUrl} alt="Avana Talent" className="h-7" />
           <div className="flex items-center gap-2">
