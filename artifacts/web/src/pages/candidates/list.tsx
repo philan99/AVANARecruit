@@ -182,27 +182,54 @@ export default function CandidatesList() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
-  const [showFilters, setShowFilters] = useState(false);
 
-  const [statusFilters, setStatusFilters] = useState<Set<string>>(() => {
-    const v = urlParams.get("status");
-    return v && v !== "all" ? new Set([v]) : new Set();
-  });
-  const [locationFilters, setLocationFilters] = useState<Set<string>>(new Set());
+  const initStatus = urlParams.get("status");
+  const initLocation = urlParams.get("location");
+  const initJobType = urlParams.get("jobType");
+  const initWorkplace = urlParams.get("workplace");
+  const initIndustry = urlParams.get("industry");
+  const initEducation = urlParams.get("education");
+  const hasInitialFilters = !!(initStatus && initStatus !== "all") || !!initLocation || !!initJobType || !!initWorkplace || !!initIndustry || !!initEducation;
+
+  const [showFilters, setShowFilters] = useState(hasInitialFilters);
+
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(
+    initStatus && initStatus !== "all" ? new Set([initStatus]) : new Set()
+  );
+  const [locationFilters, setLocationFilters] = useState<Set<string>>(
+    initLocation ? new Set([initLocation]) : new Set()
+  );
   const [skillFilters, setSkillFilters] = useState<Set<string>>(new Set());
-  const [educationFilters, setEducationFilters] = useState<Set<string>>(new Set());
+  const [educationFilters, setEducationFilters] = useState<Set<string>>(
+    initEducation ? new Set([initEducation]) : new Set()
+  );
   const [experienceFilters, setExperienceFilters] = useState<Set<string>>(new Set());
-  const [jobTypeFilters, setJobTypeFilters] = useState<Set<string>>(new Set());
-  const [workplaceFilters, setWorkplaceFilters] = useState<Set<string>>(new Set());
-  const [industryFilters, setIndustryFilters] = useState<Set<string>>(new Set());
+  const [jobTypeFilters, setJobTypeFilters] = useState<Set<string>>(
+    initJobType ? new Set([initJobType]) : new Set()
+  );
+  const [workplaceFilters, setWorkplaceFilters] = useState<Set<string>>(
+    initWorkplace ? new Set([initWorkplace]) : new Set()
+  );
+  const [industryFilters, setIndustryFilters] = useState<Set<string>>(
+    initIndustry ? new Set([initIndustry]) : new Set()
+  );
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     const status = params.get("status");
-    if (status && status !== "all") {
-      setStatusFilters(new Set([status]));
-      setShowFilters(true);
-    }
+    const jobType = params.get("jobType");
+    const workplace = params.get("workplace");
+    const industry = params.get("industry");
+    const education = params.get("education");
+    const location = params.get("location");
+    let hasFilter = false;
+    if (status && status !== "all") { setStatusFilters(new Set([status])); hasFilter = true; }
+    if (jobType) { setJobTypeFilters(new Set([jobType])); hasFilter = true; }
+    if (workplace) { setWorkplaceFilters(new Set([workplace])); hasFilter = true; }
+    if (industry) { setIndustryFilters(new Set([industry])); hasFilter = true; }
+    if (education) { setEducationFilters(new Set([education])); hasFilter = true; }
+    if (location) { setLocationFilters(new Set([location])); hasFilter = true; }
+    if (hasFilter) setShowFilters(true);
   }, [searchString]);
 
   const { data: candidates, isLoading } = useListCandidates({}, {

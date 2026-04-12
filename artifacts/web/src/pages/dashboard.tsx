@@ -399,7 +399,7 @@ export default function Dashboard() {
             {insights.prefJobTypes.length > 0 ? (
               <div className="space-y-2.5">
                 {insights.prefJobTypes.map(([type, count]) => (
-                  <InsightBar key={type} label={formatLabel(type)} value={count} max={insights.prefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(type)}`)} />
+                  <InsightBar key={type} label={formatLabel(type)} value={count} max={insights.prefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate(`/candidates?jobType=${encodeURIComponent(type)}`)} />
                 ))}
               </div>
             ) : (
@@ -443,7 +443,7 @@ export default function Dashboard() {
             {insights.prefWorkplaces.length > 0 ? (
               <div className="space-y-2.5">
                 {insights.prefWorkplaces.map(([wp, count]) => (
-                  <InsightBar key={wp} label={formatLabel(wp)} value={count} max={insights.prefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(wp)}`)} />
+                  <InsightBar key={wp} label={formatLabel(wp)} value={count} max={insights.prefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate(`/candidates?workplace=${encodeURIComponent(wp)}`)} />
                 ))}
               </div>
             ) : (
@@ -487,7 +487,7 @@ export default function Dashboard() {
             {insights.prefIndustries.length > 0 ? (
               <div className="space-y-2.5">
                 {insights.prefIndustries.map(([ind, count]) => (
-                  <InsightBar key={ind} label={formatLabel(ind)} value={count} max={insights.prefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(ind)}`)} />
+                  <InsightBar key={ind} label={formatLabel(ind)} value={count} max={insights.prefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
                 ))}
               </div>
             ) : (
@@ -531,7 +531,7 @@ export default function Dashboard() {
             {insights.candidateEducation.length > 0 ? (
               <div className="space-y-2.5">
                 {insights.candidateEducation.map(([edu, count]) => (
-                  <InsightBar key={edu} label={edu} value={count} max={insights.candidateEducation[0][1]} color="bg-sky-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(edu)}`)} />
+                  <InsightBar key={edu} label={edu} value={count} max={insights.candidateEducation[0][1]} color="bg-sky-500/70" onClick={() => navigate(`/candidates?education=${encodeURIComponent(edu)}`)} />
                 ))}
               </div>
             ) : (
