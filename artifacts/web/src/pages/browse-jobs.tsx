@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link, useSearch, useLocation } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
@@ -6,25 +6,123 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap } from "lucide-react";
+import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check } from "lucide-react";
+
+function MultiSelectDropdown({
+  label,
+  icon: Icon,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  icon: React.ElementType;
+  options: string[];
+  selected: Set<string>;
+  onChange: (val: Set<string>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [filterText, setFilterText] = useState("");
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function toggle(val: string) {
+    const next = new Set(selected);
+    if (next.has(val)) next.delete(val);
+    else next.add(val);
+    onChange(next);
+  }
+
+  const filtered = filterText
+    ? options.filter(o => o.toLowerCase().includes(filterText.toLowerCase()))
+    : options;
+
+  const displayText = selected.size === 0
+    ? `All ${label}`
+    : selected.size === 1
+    ? Array.from(selected)[0]
+    : `${selected.size} selected`;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center w-full h-9 px-3 rounded-md border border-input bg-background text-sm text-left hover:bg-accent/50 transition-colors"
+      >
+        <Icon className="w-3.5 h-3.5 mr-2 text-muted-foreground shrink-0" />
+        <span className={`flex-1 truncate ${selected.size === 0 ? "text-muted-foreground" : "text-foreground"}`}>
+          {displayText}
+        </span>
+        <ChevronDown className={`w-3.5 h-3.5 ml-1 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full min-w-[200px] rounded-md border border-border bg-card shadow-lg">
+          {options.length > 5 && (
+            <div className="p-2 border-b border-border">
+              <Input
+                placeholder={`Search ${label.toLowerCase()}...`}
+                className="h-7 text-xs"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                autoFocus
+              />
+            </div>
+          )}
+          <div className="max-h-48 overflow-y-auto py-1">
+            {filtered.length === 0 && (
+              <div className="px-3 py-2 text-xs text-muted-foreground">No matches</div>
+            )}
+            {filtered.map(option => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggle(option)}
+                className="flex items-center w-full px-3 py-1.5 text-sm hover:bg-accent/50 transition-colors text-left"
+              >
+                <div className={`w-4 h-4 mr-2 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                  selected.has(option) ? "bg-primary border-primary" : "border-input"
+                }`}>
+                  {selected.has(option) && <Check className="w-3 h-3 text-primary-foreground" />}
+                </div>
+                <span className="truncate capitalize">{option}</span>
+              </button>
+            ))}
+          </div>
+          {selected.size > 0 && (
+            <div className="border-t border-border p-1.5">
+              <button
+                type="button"
+                onClick={() => onChange(new Set())}
+                className="w-full text-xs text-muted-foreground hover:text-foreground py-1 transition-colors"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BrowseJobs() {
   const searchString = useSearch();
   const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
   const [search, setSearch] = useState("");
-  const [companyFilter, setCompanyFilter] = useState("all");
-  const [levelFilter, setLevelFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
+  const [companyFilters, setCompanyFilters] = useState<Set<string>>(new Set());
+  const [levelFilters, setLevelFilters] = useState<Set<string>>(new Set());
+  const [locationFilters, setLocationFilters] = useState<Set<string>>(new Set());
   const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 200000]);
   const [salaryEnabled, setSalaryEnabled] = useState(false);
-  const [skillFilter, setSkillFilter] = useState("all");
+  const [skillFilters, setSkillFilters] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [showFavourites, setShowFavourites] = useState(params.get("favourites") === "1");
   const [showFilters, setShowFilters] = useState(false);
@@ -103,21 +201,21 @@ export default function BrowseJobs() {
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (companyFilter !== "all") count++;
-    if (levelFilter !== "all") count++;
-    if (locationFilter !== "all") count++;
+    if (companyFilters.size > 0) count += companyFilters.size;
+    if (levelFilters.size > 0) count += levelFilters.size;
+    if (locationFilters.size > 0) count += locationFilters.size;
     if (salaryEnabled) count++;
-    if (skillFilter !== "all") count++;
+    if (skillFilters.size > 0) count += skillFilters.size;
     return count;
-  }, [companyFilter, levelFilter, locationFilter, salaryEnabled, skillFilter]);
+  }, [companyFilters, levelFilters, locationFilters, salaryEnabled, skillFilters]);
 
   function clearAllFilters() {
-    setCompanyFilter("all");
-    setLevelFilter("all");
-    setLocationFilter("all");
+    setCompanyFilters(new Set());
+    setLevelFilters(new Set());
+    setLocationFilters(new Set());
     setSalaryEnabled(false);
     setSalaryRange([0, 200000]);
-    setSkillFilter("all");
+    setSkillFilters(new Set());
     setSearch("");
   }
 
@@ -126,14 +224,14 @@ export default function BrowseJobs() {
     if (showFavourites) {
       result = result?.filter((job) => favouriteJobIds.has(job.id));
     }
-    if (companyFilter !== "all") {
-      result = result?.filter((job) => job.company === companyFilter);
+    if (companyFilters.size > 0) {
+      result = result?.filter((job) => companyFilters.has(job.company));
     }
-    if (levelFilter !== "all") {
-      result = result?.filter((job) => job.experienceLevel === levelFilter);
+    if (levelFilters.size > 0) {
+      result = result?.filter((job) => levelFilters.has(job.experienceLevel));
     }
-    if (locationFilter !== "all") {
-      result = result?.filter((job) => job.location === locationFilter);
+    if (locationFilters.size > 0) {
+      result = result?.filter((job) => locationFilters.has(job.location));
     }
     if (salaryEnabled) {
       result = result?.filter((job) => {
@@ -143,11 +241,11 @@ export default function BrowseJobs() {
         return max >= salaryRange[0] && min <= salaryRange[1];
       });
     }
-    if (skillFilter !== "all") {
-      result = result?.filter((job) => job.skills?.includes(skillFilter));
+    if (skillFilters.size > 0) {
+      result = result?.filter((job) => job.skills?.some(s => skillFilters.has(s)));
     }
     return result;
-  }, [jobs, showFavourites, favouriteJobIds, companyFilter, levelFilter, locationFilter, salaryEnabled, salaryRange, skillFilter]);
+  }, [jobs, showFavourites, favouriteJobIds, companyFilters, levelFilters, locationFilters, salaryEnabled, salaryRange, skillFilters]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -223,66 +321,46 @@ export default function BrowseJobs() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Company</label>
-                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
-                    <SelectTrigger className="bg-background">
-                      <Building className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Companies" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Companies</SelectItem>
-                      {uniqueCompanies.map(company => (
-                        <SelectItem key={company} value={company}>{company}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiSelectDropdown
+                    label="Companies"
+                    icon={Building}
+                    options={uniqueCompanies}
+                    selected={companyFilters}
+                    onChange={setCompanyFilters}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Experience Level</label>
-                  <Select value={levelFilter} onValueChange={setLevelFilter}>
-                    <SelectTrigger className="bg-background">
-                      <GraduationCap className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Levels" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Levels</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level} className="capitalize">{level}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiSelectDropdown
+                    label="Levels"
+                    icon={GraduationCap}
+                    options={uniqueLevels}
+                    selected={levelFilters}
+                    onChange={setLevelFilters}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</label>
-                  <Select value={locationFilter} onValueChange={setLocationFilter}>
-                    <SelectTrigger className="bg-background">
-                      <MapPin className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Locations" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Locations</SelectItem>
-                      {uniqueLocations.map(loc => (
-                        <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiSelectDropdown
+                    label="Locations"
+                    icon={MapPin}
+                    options={uniqueLocations}
+                    selected={locationFilters}
+                    onChange={setLocationFilters}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Skill</label>
-                  <Select value={skillFilter} onValueChange={setSkillFilter}>
-                    <SelectTrigger className="bg-background">
-                      <Briefcase className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Skills" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Skills</SelectItem>
-                      {uniqueSkills.map(skill => (
-                        <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiSelectDropdown
+                    label="Skills"
+                    icon={Briefcase}
+                    options={uniqueSkills}
+                    selected={skillFilters}
+                    onChange={setSkillFilters}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
@@ -322,30 +400,30 @@ export default function BrowseJobs() {
               {activeFilterCount > 0 && (
                 <div className="mt-4 pt-3 border-t border-border flex items-center gap-2 flex-wrap">
                   <span className="text-xs text-muted-foreground">Active:</span>
-                  {companyFilter !== "all" && (
-                    <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
-                      {companyFilter}
-                      <button onClick={() => setCompanyFilter("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                  {Array.from(companyFilters).map(c => (
+                    <span key={`company-${c}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {c}
+                      <button onClick={() => { const n = new Set(companyFilters); n.delete(c); setCompanyFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
-                  )}
-                  {levelFilter !== "all" && (
-                    <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1 capitalize">
-                      {levelFilter}
-                      <button onClick={() => setLevelFilter("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                  ))}
+                  {Array.from(levelFilters).map(l => (
+                    <span key={`level-${l}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1 capitalize">
+                      {l}
+                      <button onClick={() => { const n = new Set(levelFilters); n.delete(l); setLevelFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
-                  )}
-                  {locationFilter !== "all" && (
-                    <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
-                      {locationFilter}
-                      <button onClick={() => setLocationFilter("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                  ))}
+                  {Array.from(locationFilters).map(loc => (
+                    <span key={`loc-${loc}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {loc}
+                      <button onClick={() => { const n = new Set(locationFilters); n.delete(loc); setLocationFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
-                  )}
-                  {skillFilter !== "all" && (
-                    <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
-                      {skillFilter}
-                      <button onClick={() => setSkillFilter("all")} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                  ))}
+                  {Array.from(skillFilters).map(s => (
+                    <span key={`skill-${s}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {s}
+                      <button onClick={() => { const n = new Set(skillFilters); n.delete(s); setSkillFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
-                  )}
+                  ))}
                   {salaryEnabled && (
                     <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
                       £{salaryRange[0].toLocaleString()} – £{salaryRange[1].toLocaleString()}
