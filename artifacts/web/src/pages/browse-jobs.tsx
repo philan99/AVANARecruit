@@ -197,16 +197,16 @@ export default function BrowseJobs() {
                     )}
                   </div>
                   <div className="pt-4 border-t border-border mt-auto">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                       {job.skills.slice(0, 4).map(skill => (
-                        <Badge key={skill} variant="outline" className="text-[10px] py-0 px-1.5 h-4">
+                        <span key={skill} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-0.5">
                           {skill}
-                        </Badge>
+                        </span>
                       ))}
                       {job.skills.length > 4 && (
-                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4">
-                          +{job.skills.length - 4}
-                        </Badge>
+                        <span className="inline-flex items-center rounded-full bg-muted text-muted-foreground text-[11px] font-medium px-2.5 py-0.5">
+                          +{job.skills.length - 4} more
+                        </span>
                       )}
                     </div>
                   </div>
@@ -266,16 +266,16 @@ export default function BrowseJobs() {
                         : "—"}
                     </td>
                     <td className="py-3 px-3">
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {job.skills.slice(0, 3).map(skill => (
-                          <Badge key={skill} variant="outline" className="text-[10px] py-0 px-1.5 h-4">
+                          <span key={skill} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-0.5">
                             {skill}
-                          </Badge>
+                          </span>
                         ))}
                         {job.skills.length > 3 && (
-                          <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4">
-                            +{job.skills.length - 3}
-                          </Badge>
+                          <span className="inline-flex items-center rounded-full bg-muted text-muted-foreground text-[11px] font-medium px-2.5 py-0.5">
+                            +{job.skills.length - 3} more
+                          </span>
                         )}
                       </div>
                     </td>
