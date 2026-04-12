@@ -7,6 +7,7 @@ import companyProfileRouter from "./companyProfile";
 import storageRouter from "./storage";
 import adminRouter from "./admin";
 import favouritesRouter from "./favourites";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(companyProfileRouter);
 router.use(storageRouter);
 router.use(adminRouter);
 router.use(favouritesRouter);
+router.use(contactRouter);
 
 export default router;

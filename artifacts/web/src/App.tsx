@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout";
 import { RoleProvider, useRole } from "@/contexts/role-context";
 
 import RoleSelect from "@/pages/role-select";
+import ContactUs from "@/pages/contact-us";
 import Dashboard from "@/pages/dashboard";
 import CandidateDashboard from "@/pages/candidate-dashboard";
 import CandidateProfile from "@/pages/candidate-profile";
@@ -97,6 +98,7 @@ function AppRouter() {
   if (!role) {
     return (
       <Switch>
+        <Route path="/contact-us" component={ContactUs} />
         <Route component={RoleSelect} />
       </Switch>
     );
