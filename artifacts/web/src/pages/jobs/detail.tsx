@@ -92,9 +92,9 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center text-sm text-muted-foreground mb-4">
-        <Link href="/jobs" className="hover:text-primary flex items-center">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Jobs
-        </Link>
+        <button onClick={() => window.history.back()} className="hover:text-primary flex items-center cursor-pointer bg-transparent border-none p-0">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </button>
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">

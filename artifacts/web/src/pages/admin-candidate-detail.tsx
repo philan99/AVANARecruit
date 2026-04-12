@@ -152,10 +152,10 @@ export default function AdminCandidateDetail() {
         variant="ghost"
         size="sm"
         className="gap-1 text-muted-foreground hover:text-foreground"
-        onClick={() => navigate("/candidates")}
+        onClick={() => window.history.back()}
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Candidates
+        Back
       </Button>
 
       <Card className="bg-card">

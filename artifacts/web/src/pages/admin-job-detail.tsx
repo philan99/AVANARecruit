@@ -129,10 +129,10 @@ export default function AdminJobDetail() {
         variant="ghost"
         size="sm"
         className="gap-1 text-muted-foreground hover:text-foreground"
-        onClick={() => navigate("/jobs")}
+        onClick={() => window.history.back()}
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Jobs
+        Back
       </Button>
 
       <Card className="bg-card">

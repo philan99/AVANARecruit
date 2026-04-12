@@ -118,8 +118,8 @@ export default function EditJob({ params }: { params: { id: string } }) {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(`/jobs/${jobId}`)}>
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Job
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
         </Button>
       </div>
 

@@ -83,7 +83,7 @@ export default function AdminCompanyDetail() {
         onClick={() => window.history.back()}
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Companies
+        Back
       </Button>
 
       <Card className="bg-card">
