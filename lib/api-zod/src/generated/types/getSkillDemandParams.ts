@@ -6,7 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type GetRecentMatchesParams = {
-  limit?: number;
+export type GetSkillDemandParams = {
   companyProfileId?: number;
 };

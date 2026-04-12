@@ -19,6 +19,7 @@ export * from "./dashboardStats";
 export * from "./errorEnvelope";
 export * from "./getDashboardStatsParams";
 export * from "./getRecentMatchesParams";
+export * from "./getSkillDemandParams";
 export * from "./getTopCandidatesParams";
 export * from "./healthStatus";
 export * from "./job";

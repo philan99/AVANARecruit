@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useGetCompanyProfile, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
+import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -101,16 +102,32 @@ function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
-  const { data: profile } = useGetCompanyProfile({ query: { queryKey: getGetCompanyProfileQueryKey(), retry: false } });
+  const { companyProfileId: ctxCompanyId } = useRole();
+  const apiBasePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const { data: profile } = useQuery({
+    queryKey: getGetCompanyProfileQueryKey(),
+    queryFn: async () => {
+      const url = ctxCompanyId
+        ? `${apiBasePath}/company-profile?companyId=${ctxCompanyId}`
+        : `${apiBasePath}/company-profile`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch company profile");
+      return res.json();
+    },
+    retry: false,
+  });
   const companyProfileId = profile?.id;
 
   const statsParams = companyProfileId ? { companyProfileId } : {};
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats(statsParams, {
     query: { queryKey: getGetDashboardStatsQueryKey(statsParams) },
   });
-  const { data: recentMatches } = useGetRecentMatches({ limit: 5 }, { query: { queryKey: ["recent-matches"] } });
-  const { data: topCandidates } = useGetTopCandidates({ limit: 5 }, { query: { queryKey: ["top-candidates"] } });
-  const { data: skillDemand } = useGetSkillDemand({ query: { queryKey: ["skill-demand"] } });
+  const recentMatchesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
+  const { data: recentMatches } = useGetRecentMatches(recentMatchesParams, { query: { queryKey: ["recent-matches", companyProfileId] } });
+  const topCandidatesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
+  const { data: topCandidates } = useGetTopCandidates(topCandidatesParams, { query: { queryKey: ["top-candidates", companyProfileId] } });
+  const skillDemandParams = companyProfileId ? { companyProfileId } : undefined;
+  const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId] } });
 
   if (statsLoading) {
     return <div className="p-8 flex justify-center text-muted-foreground font-mono text-sm">Loading telemetry...</div>;

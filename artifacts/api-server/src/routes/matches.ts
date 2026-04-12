@@ -259,8 +259,9 @@ router.get("/dashboard/stats", async (req, res): Promise<void> => {
 router.get("/dashboard/recent-matches", async (req, res): Promise<void> => {
   const params = GetRecentMatchesQueryParams.safeParse(req.query);
   const limit = params.success ? (params.data.limit ?? 10) : 10;
+  const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
 
-  const matches = await db
+  let query = db
     .select({
       id: matchesTable.id,
       candidateId: matchesTable.candidateId,
@@ -273,6 +274,13 @@ router.get("/dashboard/recent-matches", async (req, res): Promise<void> => {
     .from(matchesTable)
     .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
     .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+    .$dynamic();
+
+  if (companyProfileId) {
+    query = query.where(eq(jobsTable.companyProfileId, companyProfileId));
+  }
+
+  const matches = await query
     .orderBy(desc(matchesTable.createdAt))
     .limit(limit);
 
@@ -282,8 +290,9 @@ router.get("/dashboard/recent-matches", async (req, res): Promise<void> => {
 router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
   const params = GetTopCandidatesQueryParams.safeParse(req.query);
   const limit = params.success ? (params.data.limit ?? 5) : 5;
+  const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
 
-  const topCandidates = await db
+  let query = db
     .select({
       candidateId: candidatesTable.id,
       candidateName: candidatesTable.name,
@@ -293,6 +302,14 @@ router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
     })
     .from(matchesTable)
     .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+    .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+    .$dynamic();
+
+  if (companyProfileId) {
+    query = query.where(eq(jobsTable.companyProfileId, companyProfileId));
+  }
+
+  const topCandidates = await query
     .groupBy(candidatesTable.id, candidatesTable.name, candidatesTable.currentTitle)
     .orderBy(desc(avg(matchesTable.overallScore)))
     .limit(limit);
@@ -319,8 +336,14 @@ router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
   res.json(GetTopCandidatesResponse.parse(results));
 });
 
-router.get("/dashboard/skill-demand", async (_req, res): Promise<void> => {
-  const jobs = await db.select({ skills: jobsTable.skills }).from(jobsTable);
+router.get("/dashboard/skill-demand", async (req, res): Promise<void> => {
+  const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
+
+  let jobQuery = db.select({ skills: jobsTable.skills }).from(jobsTable).$dynamic();
+  if (companyProfileId) {
+    jobQuery = jobQuery.where(eq(jobsTable.companyProfileId, companyProfileId));
+  }
+  const jobs = await jobQuery;
   const candidates = await db.select({ skills: candidatesTable.skills }).from(candidatesTable);
 
   const skillJobCount: Record<string, number> = {};

@@ -423,8 +423,14 @@ export type GetDashboardStatsParams = {
 
 export type GetRecentMatchesParams = {
   limit?: number;
+  companyProfileId?: number;
 };
 
 export type GetTopCandidatesParams = {
   limit?: number;
+  companyProfileId?: number;
+};
+
+export type GetSkillDemandParams = {
+  companyProfileId?: number;
 };

@@ -373,6 +373,7 @@ export const getRecentMatchesQueryLimitDefault = 10;
 
 export const GetRecentMatchesQueryParams = zod.object({
   limit: zod.coerce.number().default(getRecentMatchesQueryLimitDefault),
+  companyProfileId: zod.coerce.number().optional(),
 });
 
 export const GetRecentMatchesResponseItem = zod.object({
@@ -393,6 +394,7 @@ export const getTopCandidatesQueryLimitDefault = 5;
 
 export const GetTopCandidatesQueryParams = zod.object({
   limit: zod.coerce.number().default(getTopCandidatesQueryLimitDefault),
+  companyProfileId: zod.coerce.number().optional(),
 });
 
 export const GetTopCandidatesResponseItem = zod.object({
@@ -485,6 +487,10 @@ export const GetStorageObjectParams = zod.object({
 /**
  * @summary Get most in-demand skills across jobs
  */
+export const GetSkillDemandQueryParams = zod.object({
+  companyProfileId: zod.coerce.number().optional(),
+});
+
 export const GetSkillDemandResponseItem = zod.object({
   skill: zod.string(),
   jobCount: zod.number(),

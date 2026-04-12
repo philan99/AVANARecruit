@@ -361,6 +361,10 @@ paths:
           schema:
             type: integer
             default: 10
+        - name: companyProfileId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Recent matches
@@ -382,6 +386,10 @@ paths:
           schema:
             type: integer
             default: 5
+        - name: companyProfileId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Top candidates
@@ -468,6 +476,11 @@ paths:
       operationId: getSkillDemand
       tags: [dashboard]
       summary: Get most in-demand skills across jobs
+      parameters:
+        - name: companyProfileId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Skill demand data

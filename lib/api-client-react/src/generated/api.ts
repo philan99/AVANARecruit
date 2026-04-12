@@ -25,6 +25,7 @@ import type {
   DashboardStats,
   GetDashboardStatsParams,
   GetRecentMatchesParams,
+  GetSkillDemandParams,
   GetTopCandidatesParams,
   HealthStatus,
   Job,
@@ -1973,41 +1974,57 @@ export function useGetStorageObject<
 /**
  * @summary Get most in-demand skills across jobs
  */
-export const getGetSkillDemandUrl = () => {
-  return `/api/dashboard/skill-demand`;
+export const getGetSkillDemandUrl = (params?: GetSkillDemandParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/dashboard/skill-demand?${stringifiedParams}`
+    : `/api/dashboard/skill-demand`;
 };
 
 export const getSkillDemand = async (
+  params?: GetSkillDemandParams,
   options?: RequestInit,
 ): Promise<SkillDemand[]> => {
-  return customFetch<SkillDemand[]>(getGetSkillDemandUrl(), {
+  return customFetch<SkillDemand[]>(getGetSkillDemandUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetSkillDemandQueryKey = () => {
-  return [`/api/dashboard/skill-demand`] as const;
+export const getGetSkillDemandQueryKey = (params?: GetSkillDemandParams) => {
+  return [`/api/dashboard/skill-demand`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetSkillDemandQueryOptions = <
   TData = Awaited<ReturnType<typeof getSkillDemand>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getSkillDemand>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}) => {
+>(
+  params?: GetSkillDemandParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSkillDemand>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetSkillDemandQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetSkillDemandQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getSkillDemand>>> = ({
     signal,
-  }) => getSkillDemand({ signal, ...requestOptions });
+  }) => getSkillDemand(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getSkillDemand>>,
@@ -2028,15 +2045,18 @@ export type GetSkillDemandQueryError = ErrorType<unknown>;
 export function useGetSkillDemand<
   TData = Awaited<ReturnType<typeof getSkillDemand>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getSkillDemand>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetSkillDemandQueryOptions(options);
+>(
+  params?: GetSkillDemandParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSkillDemand>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSkillDemandQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
