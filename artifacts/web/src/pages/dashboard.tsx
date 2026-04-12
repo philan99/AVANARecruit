@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
         <Link href="/jobs?create=true">
           <Button>
-            <Plus className="w-4 h-4 mr-2" /> New Requisition
+            <Plus className="w-4 h-4 mr-2" /> Post Job
           </Button>
         </Link>
       </div>

@@ -139,12 +139,12 @@ export default function JobsList() {
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="w-4 h-4 mr-2" /> New Requisition
+              <Plus className="w-4 h-4 mr-2" /> Post Job
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
             <DialogHeader>
-              <DialogTitle>Create New Requisition</DialogTitle>
+              <DialogTitle>Post New Job</DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
