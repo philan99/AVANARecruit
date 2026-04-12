@@ -35,6 +35,7 @@ const formSchema = z.object({
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
+  educationLevel: z.string().optional(),
   workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
@@ -147,6 +148,34 @@ export default function CreateJob() {
                           <SelectItem value="senior">Senior</SelectItem>
                           <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="educationLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Education Level</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select education level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="GCSE">GCSE</SelectItem>
+                          <SelectItem value="A-Level">A-Level</SelectItem>
+                          <SelectItem value="HND/HNC">HND/HNC</SelectItem>
+                          <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
+                          <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                          <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+                          <SelectItem value="PhD">PhD</SelectItem>
+                          <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
