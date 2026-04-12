@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2 } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe } from "lucide-react";
 import { useGetJob, getGetJobQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -15,6 +15,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
   const [isFavourite, setIsFavourite] = useState(false);
   const [myMatch, setMyMatch] = useState<any>(null);
   const [matchLoading, setMatchLoading] = useState(false);
+  const [companyWebsite, setCompanyWebsite] = useState<string | null>(null);
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -71,6 +72,19 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
   const { data: job, isLoading: jobLoading } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
   });
+
+  useEffect(() => {
+    if (!job?.companyProfileId) return;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/company-profile?companyId=${job.companyProfileId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.website) setCompanyWebsite(data.website);
+        }
+      } catch {}
+    })();
+  }, [job?.companyProfileId, apiBase]);
 
   if (jobLoading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading job details...</div>;
@@ -167,6 +181,19 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
                     <span className="font-mono bg-secondary px-2 py-0.5 rounded text-xs">
                       £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
                     </span>
+                  </div>
+                )}
+                {companyWebsite && (
+                  <div className="flex items-center text-muted-foreground">
+                    <Globe className="w-4 h-4 mr-2 shrink-0" />
+                    <a
+                      href={companyWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline truncate"
+                    >
+                      {companyWebsite.replace(/^https?:\/\//, "")}
+                    </a>
                   </div>
                 )}
               </div>
