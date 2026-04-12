@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, User, Pencil } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, Pencil } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,47 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+const JOB_TYPE_LABELS: Record<string, string> = {
+  permanent_full_time: "Permanent (Full Time)",
+  contract: "Contract",
+  fixed_term_contract: "Fixed Term Contract",
+  part_time: "Part-time",
+  temporary: "Temporary",
+};
+
+const INDUSTRY_LABELS: Record<string, string> = {
+  accounting_finance: "Accounting & Finance",
+  agriculture: "Agriculture",
+  automotive: "Automotive",
+  banking: "Banking",
+  construction: "Construction",
+  consulting: "Consulting",
+  creative_design: "Creative & Design",
+  education: "Education",
+  energy_utilities: "Energy & Utilities",
+  engineering: "Engineering",
+  healthcare: "Healthcare",
+  hospitality_tourism: "Hospitality & Tourism",
+  human_resources: "Human Resources",
+  insurance: "Insurance",
+  legal: "Legal",
+  logistics_supply_chain: "Logistics & Supply Chain",
+  manufacturing: "Manufacturing",
+  marketing_advertising: "Marketing & Advertising",
+  media_entertainment: "Media & Entertainment",
+  nonprofit: "Non-profit",
+  pharmaceutical: "Pharmaceutical",
+  property_real_estate: "Property & Real Estate",
+  public_sector: "Public Sector",
+  retail: "Retail",
+  sales: "Sales",
+  science_research: "Science & Research",
+  technology: "Technology",
+  telecommunications: "Telecommunications",
+  transport: "Transport",
+  other: "Other",
+};
 
 export default function JobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
@@ -49,7 +90,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center text-sm text-muted-foreground mb-4">
         <Link href="/jobs" className="hover:text-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Requisitions
@@ -60,20 +101,12 @@ export default function JobDetail({ params }: { params: { id: string } }) {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">{job.title}</h1>
-            <Badge variant={job.status === 'open' ? 'default' : 'secondary'} className="uppercase text-[10px] tracking-wider">
+            <Badge variant={job.status === "open" ? "default" : "secondary"} className="uppercase text-[10px] tracking-wider">
               {job.status}
             </Badge>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center"><Building className="w-4 h-4 mr-1.5" /> {job.company}</span>
-            <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {job.location}</span>
-            <span className="flex items-center"><Briefcase className="w-4 h-4 mr-1.5" /> {job.experienceLevel}</span>
-            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
-            {(job.salaryMin || job.salaryMax) && (
-              <span className="flex items-center font-mono bg-secondary px-2 py-0.5 rounded">
-                £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
-              </span>
-            )}
+            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> Posted {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -92,38 +125,40 @@ export default function JobDetail({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
-        <div className="col-span-1 lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 pt-4">
+        <div className="lg:col-span-2">
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: job.description }} />
+              <div
+                className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
             </CardContent>
           </Card>
-
         </div>
 
-        <div className="col-span-1 space-y-6">
+        <div className="space-y-6">
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-lg">Job Details</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                <div className="flex items-center text-muted-foreground">
-                  <Building className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{job.company}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Company</span>
+                  <span className="font-medium">{job.company}</span>
                 </div>
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{job.location}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="font-medium">{job.location}</span>
                 </div>
                 {job.jobType && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Job Type</span>
-                    <span className="font-medium capitalize">{({ permanent_full_time: "Permanent (Full Time)", contract: "Contract", fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary" } as Record<string, string>)[job.jobType] || job.jobType}</span>
+                    <span className="font-medium">{JOB_TYPE_LABELS[job.jobType] || job.jobType}</span>
                   </div>
                 )}
                 {job.workplace && (
@@ -139,7 +174,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                 {job.industry && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Industry</span>
-                    <span className="font-medium capitalize">{({ accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive", banking: "Banking", construction: "Construction", consulting: "Consulting", creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities", engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism", human_resources: "Human Resources", insurance: "Insurance", legal: "Legal", logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing", marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment", nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate", public_sector: "Public Sector", retail: "Retail", sales: "Sales", science_research: "Science & Research", technology: "Technology", telecommunications: "Telecommunications", transport: "Transport", other: "Other" } as Record<string, string>)[job.industry] || job.industry}</span>
+                    <span className="font-medium">{INDUSTRY_LABELS[job.industry] || job.industry}</span>
                   </div>
                 )}
                 {job.educationLevel && (
@@ -154,10 +189,6 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                     <span className="font-mono font-medium">£{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex items-center text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{format(new Date(job.createdAt), "MMM d, yyyy")}</span>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -176,7 +207,9 @@ export default function JobDetail({ params }: { params: { id: string } }) {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        <div>
           <Card className="bg-card border-primary/20">
             <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
               <CardTitle className="text-lg flex items-center justify-between">
