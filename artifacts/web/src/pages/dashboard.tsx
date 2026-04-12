@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string | null } | null }) {
@@ -100,6 +100,7 @@ function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string
 }
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const { data: profile } = useGetCompanyProfile({ query: { queryKey: getGetCompanyProfileQueryKey(), retry: false } });
   const companyProfileId = profile?.id;
 
@@ -147,31 +148,27 @@ export default function Dashboard() {
           </Card>
         </Link>
         
-        <Link href="/candidates?status=active">
-          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{stats?.activeCandidates || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalCandidates || 0} total</p>
-            </CardContent>
-          </Card>
-        </Link>
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/candidates?status=active")}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
+            <Users className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats?.activeCandidates || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalCandidates || 0} total</p>
+          </CardContent>
+        </Card>
 
-        <Link href="/matches">
-          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Matches</CardTitle>
-              <Network className="w-4 h-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats?.totalMatches || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats?.shortlistedCount || 0} shortlisted</p>
-            </CardContent>
-          </Card>
-        </Link>
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/matches")}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Matches</CardTitle>
+            <Network className="w-4 h-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{stats?.totalMatches || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">{stats?.shortlistedCount || 0} shortlisted</p>
+          </CardContent>
+        </Card>
 
         <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
