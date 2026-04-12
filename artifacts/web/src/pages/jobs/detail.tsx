@@ -246,7 +246,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                             <Badge variant="outline" className="text-[9px] uppercase mt-1 h-4 px-1">{match.status}</Badge>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           {match.assessment}
                         </p>
                       </div>
