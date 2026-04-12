@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { useListCandidates, getListCandidatesQueryKey } from "@workspace/api-client-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +16,12 @@ import {
 import { Users, Search, MapPin, Mail, X, LayoutGrid, List } from "lucide-react";
 
 export default function CandidatesList() {
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const initialStatus = urlParams.get("status") || "all";
+
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [skillFilter, setSkillFilter] = useState<string>("all");
   const [experienceFilter, setExperienceFilter] = useState<string>("all");

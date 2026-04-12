@@ -147,27 +147,31 @@ export default function Dashboard() {
           </Card>
         </Link>
         
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
-            <Users className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.activeCandidates || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalCandidates || 0} total</p>
-          </CardContent>
-        </Card>
+        <Link href="/candidates?status=active">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Candidates</CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stats?.activeCandidates || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Out of {stats?.totalCandidates || 0} total</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Matches</CardTitle>
-            <Network className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">{stats?.totalMatches || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{stats?.shortlistedCount || 0} shortlisted</p>
-          </CardContent>
-        </Card>
+        <Link href="/matches">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Matches</CardTitle>
+              <Network className="w-4 h-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{stats?.totalMatches || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">{stats?.shortlistedCount || 0} shortlisted</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
