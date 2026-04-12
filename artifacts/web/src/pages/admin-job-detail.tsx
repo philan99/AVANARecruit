@@ -25,6 +25,10 @@ interface JobDetail {
   experienceLevel: string;
   salaryMin: number | null;
   salaryMax: number | null;
+  jobType: string | null;
+  industry: string | null;
+  educationLevel: string | null;
+  workplace: string | null;
   status: string;
   matchCount: number;
   createdAt: string;
@@ -138,6 +142,41 @@ export default function AdminJobDetail() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {job.jobType && (
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Job Type</p>
+              <p className="text-sm font-medium capitalize">{({ permanent_full_time: "Permanent (Full Time)", contract: "Contract", fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary" } as Record<string, string>)[job.jobType] || job.jobType}</p>
+            </CardContent>
+          </Card>
+        )}
+        {job.workplace && (
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Workplace</p>
+              <p className="text-sm font-medium capitalize">{job.workplace}</p>
+            </CardContent>
+          </Card>
+        )}
+        {job.industry && (
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Industry</p>
+              <p className="text-sm font-medium capitalize">{({ accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive", banking: "Banking", construction: "Construction", consulting: "Consulting", creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities", engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism", human_resources: "Human Resources", insurance: "Insurance", legal: "Legal", logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing", marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment", nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate", public_sector: "Public Sector", retail: "Retail", sales: "Sales", science_research: "Science & Research", technology: "Technology", telecommunications: "Telecommunications", transport: "Transport", other: "Other" } as Record<string, string>)[job.industry] || job.industry}</p>
+            </CardContent>
+          </Card>
+        )}
+        {job.educationLevel && (
+          <Card className="bg-card">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Education Level</p>
+              <p className="text-sm font-medium">{job.educationLevel}</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Card className="bg-card">

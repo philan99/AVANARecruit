@@ -529,6 +529,14 @@ components:
           type: ["integer", "null"]
         salaryMax:
           type: ["integer", "null"]
+        jobType:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        educationLevel:
+          type: ["string", "null"]
+        workplace:
+          type: ["string", "null"]
         status:
           type: string
           enum: [open, closed, draft]
@@ -580,6 +588,14 @@ components:
           type: ["integer", "null"]
         salaryMax:
           type: ["integer", "null"]
+        jobType:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        educationLevel:
+          type: ["string", "null"]
+        workplace:
+          type: ["string", "null"]
         status:
           type: string
           enum: [open, closed, draft]
@@ -589,7 +605,6 @@ components:
         - location
         - description
         - skills
-        - experienceLevel
 
     UpdateJobBody:
       type: object
@@ -615,6 +630,14 @@ components:
           type: ["integer", "null"]
         salaryMax:
           type: ["integer", "null"]
+        jobType:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        educationLevel:
+          type: ["string", "null"]
+        workplace:
+          type: ["string", "null"]
         status:
           type: string
           enum: [open, closed, draft]

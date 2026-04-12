@@ -108,6 +108,62 @@ export default function JobDetail({ params }: { params: { id: string } }) {
         <div className="col-span-1 space-y-6">
           <Card className="bg-card">
             <CardHeader>
+              <CardTitle className="text-lg">Job Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center text-muted-foreground">
+                  <Building className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{job.company}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{job.location}</span>
+                </div>
+                {job.jobType && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Job Type</span>
+                    <span className="font-medium capitalize">{({ permanent_full_time: "Permanent (Full Time)", contract: "Contract", fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary" } as Record<string, string>)[job.jobType] || job.jobType}</span>
+                  </div>
+                )}
+                {job.workplace && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Workplace</span>
+                    <span className="font-medium capitalize">{job.workplace}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Experience Level</span>
+                  <span className="font-medium capitalize">{job.experienceLevel}</span>
+                </div>
+                {job.industry && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Industry</span>
+                    <span className="font-medium capitalize">{({ accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive", banking: "Banking", construction: "Construction", consulting: "Consulting", creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities", engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism", human_resources: "Human Resources", insurance: "Insurance", legal: "Legal", logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing", marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment", nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate", public_sector: "Public Sector", retail: "Retail", sales: "Sales", science_research: "Science & Research", technology: "Technology", telecommunications: "Telecommunications", transport: "Transport", other: "Other" } as Record<string, string>)[job.industry] || job.industry}</span>
+                  </div>
+                )}
+                {job.educationLevel && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Education Level</span>
+                    <span className="font-medium">{job.educationLevel}</span>
+                  </div>
+                )}
+                {(job.salaryMin || job.salaryMax) && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Salary Range</span>
+                    <span className="font-mono font-medium">£{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex items-center text-muted-foreground">
+                  <Calendar className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{format(new Date(job.createdAt), "MMM d, yyyy")}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
               <CardTitle className="text-lg">Required Skills</CardTitle>
             </CardHeader>
             <CardContent>
