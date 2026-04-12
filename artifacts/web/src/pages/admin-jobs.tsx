@@ -30,6 +30,10 @@ interface Job {
   matchCount: number;
   createdAt: string;
   updatedAt: string;
+  jobType: string | null;
+  workplace: string | null;
+  industry: string | null;
+  educationLevel: string | null;
 }
 
 export default function AdminJobs() {
@@ -45,6 +49,10 @@ export default function AdminJobs() {
   const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
   const [levelFilter, setLevelFilter] = useState(urlParams.get("level") || "all");
   const [companyFilter, setCompanyFilter] = useState(urlParams.get("company") || "all");
+  const [jobTypeFilter, setJobTypeFilter] = useState(urlParams.get("jobType") || "all");
+  const [workplaceFilter, setWorkplaceFilter] = useState(urlParams.get("workplace") || "all");
+  const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
+  const [educationFilter, setEducationFilter] = useState(urlParams.get("education") || "all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -77,6 +85,26 @@ export default function AdminJobs() {
     return Array.from(companies).sort();
   }, [jobs]);
 
+  const uniqueJobTypes = useMemo(() => {
+    const types = new Set(jobs.map(j => j.jobType).filter(Boolean) as string[]);
+    return Array.from(types).sort();
+  }, [jobs]);
+
+  const uniqueWorkplaces = useMemo(() => {
+    const wps = new Set(jobs.map(j => j.workplace).filter(Boolean) as string[]);
+    return Array.from(wps).sort();
+  }, [jobs]);
+
+  const uniqueIndustries = useMemo(() => {
+    const inds = new Set(jobs.map(j => j.industry).filter(Boolean) as string[]);
+    return Array.from(inds).sort();
+  }, [jobs]);
+
+  const uniqueEducationLevels = useMemo(() => {
+    const edus = new Set(jobs.map(j => j.educationLevel).filter(Boolean) as string[]);
+    return Array.from(edus).sort();
+  }, [jobs]);
+
   const filtered = useMemo(() => {
     return jobs.filter(j => {
       if (searchQuery) {
@@ -90,11 +118,15 @@ export default function AdminJobs() {
       if (locationFilter !== "all" && j.location !== locationFilter) return false;
       if (levelFilter !== "all" && j.experienceLevel !== levelFilter) return false;
       if (companyFilter !== "all" && j.company !== companyFilter) return false;
+      if (jobTypeFilter !== "all" && j.jobType !== jobTypeFilter) return false;
+      if (workplaceFilter !== "all" && j.workplace !== workplaceFilter) return false;
+      if (industryFilter !== "all" && j.industry !== industryFilter) return false;
+      if (educationFilter !== "all" && j.educationLevel !== educationFilter) return false;
       return true;
     });
-  }, [jobs, searchQuery, statusFilter, locationFilter, levelFilter, companyFilter]);
+  }, [jobs, searchQuery, statusFilter, locationFilter, levelFilter, companyFilter, jobTypeFilter, workplaceFilter, industryFilter, educationFilter]);
 
-  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || levelFilter !== "all" || companyFilter !== "all";
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || levelFilter !== "all" || companyFilter !== "all" || jobTypeFilter !== "all" || workplaceFilter !== "all" || industryFilter !== "all" || educationFilter !== "all";
 
   function clearFilters() {
     setSearchQuery("");
@@ -102,6 +134,10 @@ export default function AdminJobs() {
     setLocationFilter("all");
     setLevelFilter("all");
     setCompanyFilter("all");
+    setJobTypeFilter("all");
+    setWorkplaceFilter("all");
+    setIndustryFilter("all");
+    setEducationFilter("all");
   }
 
   if (loading) {
@@ -200,6 +236,68 @@ export default function AdminJobs() {
             )}
           </div>
 
+          <div className="flex flex-wrap items-end gap-3 mt-3">
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Job Type</Label>
+              <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Job Types</SelectItem>
+                  {uniqueJobTypes.map(t => (
+                    <SelectItem key={t} value={t}>{t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[130px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Workplace</Label>
+              <Select value={workplaceFilter} onValueChange={setWorkplaceFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Workplaces</SelectItem>
+                  {uniqueWorkplaces.map(w => (
+                    <SelectItem key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[180px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Industry</Label>
+              <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Industries</SelectItem>
+                  {uniqueIndustries.map(i => (
+                    <SelectItem key={i} value={i}>{i.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Education</Label>
+              <Select value={educationFilter} onValueChange={setEducationFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  {uniqueEducationLevels.map(e => (
+                    <SelectItem key={e} value={e}>{e}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {hasActiveFilters && (
             <p className="text-[11px] text-muted-foreground mt-3">
               Showing {filtered.length} of {jobs.length} jobs
@@ -219,6 +317,10 @@ export default function AdminJobs() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Company</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Level</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Type</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Workplace</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Industry</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Salary</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Matches</th>
@@ -248,6 +350,18 @@ export default function AdminJobs() {
                       </td>
                       <td className="py-2 px-2">
                         <Badge variant="outline" className="text-[8px] uppercase px-1 py-0">{job.experienceLevel}</Badge>
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
+                        {job.jobType ? job.jobType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "—"}
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
+                        {job.workplace ? job.workplace.charAt(0).toUpperCase() + job.workplace.slice(1) : "—"}
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
+                        {job.industry ? job.industry.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "—"}
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
+                        {job.educationLevel || "—"}
                       </td>
                       <td className="py-2 px-2 text-muted-foreground font-mono">
                         {job.salaryMin || job.salaryMax
