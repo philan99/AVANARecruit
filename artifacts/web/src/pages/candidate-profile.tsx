@@ -35,6 +35,7 @@ interface EditFormState {
   currentTitle: string;
   summary: string;
   skills: string;
+  qualifications: string;
   experienceYears: number;
   education: string;
   educationDetails: string;
@@ -142,7 +143,7 @@ export default function CandidateProfile() {
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
-    summary: "", skills: "", experienceYears: 0, education: "", educationDetails: "", location: "",
+    summary: "", skills: "", qualifications: "", experienceYears: 0, education: "", educationDetails: "", location: "",
   });
 
   useEffect(() => {
@@ -154,6 +155,7 @@ export default function CandidateProfile() {
         currentTitle: candidate.currentTitle,
         summary: candidate.summary,
         skills: candidate.skills.join(", "),
+        qualifications: ((candidate as any).qualifications || []).join(", "),
         experienceYears: candidate.experienceYears,
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
@@ -175,6 +177,7 @@ export default function CandidateProfile() {
         currentTitle: candidate.currentTitle,
         summary: candidate.summary,
         skills: candidate.skills.join(", "),
+        qualifications: ((candidate as any).qualifications || []).join(", "),
         experienceYears: candidate.experienceYears,
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
@@ -231,6 +234,7 @@ export default function CandidateProfile() {
       currentTitle: editForm.currentTitle,
       summary: editForm.summary,
       skills: editForm.skills.split(",").map(s => s.trim()).filter(Boolean),
+      qualifications: editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean),
       experienceYears: editForm.experienceYears,
       education: editForm.education,
       educationDetails: editForm.educationDetails || null,
@@ -550,6 +554,65 @@ export default function CandidateProfile() {
                   {skill}
                 </Badge>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Professional Qualifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isEditing ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean).map((qual, i) => (
+                  <Badge key={`${qual}-${i}`} variant="secondary" className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    {qual}
+                    <button
+                      type="button"
+                      className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                      onClick={() => {
+                        const quals = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
+                        quals.splice(i, 1);
+                        updateField("qualifications", quals.join(", "));
+                      }}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <Input
+                placeholder="Type a qualification and press Enter"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) {
+                      const existing = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
+                      if (!existing.includes(val)) {
+                        updateField("qualifications", [...existing, val].join(", "));
+                      }
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">Press Enter to add a qualification</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {((candidate as any).qualifications || []).length > 0 ? (
+                ((candidate as any).qualifications || []).map((qual: string) => (
+                  <Badge key={qual} variant="secondary" className="px-3 py-1.5 text-xs font-medium">
+                    {qual}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No qualifications added yet</p>
+              )}
             </div>
           )}
         </CardContent>

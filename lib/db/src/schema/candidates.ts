@@ -11,6 +11,7 @@ export const candidatesTable = pgTable("candidates", {
   currentTitle: text("current_title").notNull(),
   summary: text("summary").notNull(),
   skills: text("skills").array().notNull(),
+  qualifications: text("qualifications").array().default([]),
   experienceYears: integer("experience_years").notNull(),
   education: text("education").notNull(),
   educationDetails: text("education_details"),
