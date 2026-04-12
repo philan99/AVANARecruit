@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
-  useGetCompanyProfile,
   getGetCompanyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
+import { useRole } from "@/contexts/role-context";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -67,19 +67,27 @@ export default function CompanyProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { companyProfileId } = useRole();
 
   const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
+  const apiBasePath2 = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
-  const { data: profile, isLoading, error } = useGetCompanyProfile({
-    query: {
-      queryKey: getGetCompanyProfileQueryKey(),
-      retry: false,
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: getGetCompanyProfileQueryKey(),
+    queryFn: async () => {
+      const url = companyProfileId
+        ? `${apiBasePath2}/company-profile?companyId=${companyProfileId}`
+        : `${apiBasePath2}/company-profile`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch company profile");
+      return res.json();
     },
+    retry: false,
   });
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const apiBasePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const apiBasePath = apiBasePath2;
 
   async function updateProfile(data: Record<string, unknown>) {
     if (!profile?.id) return;
