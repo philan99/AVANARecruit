@@ -54,7 +54,7 @@ export default function JobsList() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-            <Briefcase className="mr-3 text-primary" /> Active Requisitions
+            <Briefcase className="mr-3 text-primary" /> All Jobs
           </h1>
           <p className="text-muted-foreground mt-1">Manage open roles and track matching candidates.</p>
         </div>
