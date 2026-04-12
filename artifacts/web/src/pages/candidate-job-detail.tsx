@@ -115,20 +115,10 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
               <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
-                {job.description}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Requirements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
-                {job.requirements}
-              </div>
+              <div
+                className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
             </CardContent>
           </Card>
         </div>
