@@ -1,17 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +14,169 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor } from "lucide-react";
+
+function MultiSelectDropdown({
+  label,
+  icon: Icon,
+  options,
+  selected,
+  onChange,
+  formatOption,
+}: {
+  label: string;
+  icon: React.ElementType;
+  options: string[];
+  selected: Set<string>;
+  onChange: (val: Set<string>) => void;
+  formatOption?: (val: string) => string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [filterText, setFilterText] = useState("");
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function toggle(val: string) {
+    const next = new Set(selected);
+    if (next.has(val)) next.delete(val);
+    else next.add(val);
+    onChange(next);
+  }
+
+  const fmt = formatOption || ((v: string) => v);
+
+  const filtered = filterText
+    ? options.filter(o => fmt(o).toLowerCase().includes(filterText.toLowerCase()))
+    : options;
+
+  const displayText = selected.size === 0
+    ? `All ${label}`
+    : selected.size === 1
+    ? fmt(Array.from(selected)[0])
+    : `${selected.size} selected`;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center w-full h-9 px-3 rounded-md border border-input bg-background text-sm text-left hover:bg-accent/50 transition-colors"
+      >
+        <Icon className="w-3.5 h-3.5 mr-2 text-muted-foreground shrink-0" />
+        <span className={`flex-1 truncate ${selected.size === 0 ? "text-muted-foreground" : "text-foreground"}`}>
+          {displayText}
+        </span>
+        <ChevronDown className={`w-3.5 h-3.5 ml-1 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full min-w-[200px] rounded-md border border-border bg-card shadow-lg">
+          {options.length > 5 && (
+            <div className="p-2 border-b border-border">
+              <Input
+                placeholder={`Search ${label.toLowerCase()}...`}
+                className="h-7 text-xs"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                autoFocus
+              />
+            </div>
+          )}
+          <div className="max-h-48 overflow-y-auto py-1">
+            {filtered.length === 0 && (
+              <div className="px-3 py-2 text-xs text-muted-foreground">No matches</div>
+            )}
+            {filtered.map(option => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggle(option)}
+                className="flex items-center w-full px-3 py-1.5 text-sm hover:bg-accent/50 transition-colors text-left"
+              >
+                <div className={`w-4 h-4 mr-2 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                  selected.has(option) ? "bg-primary border-primary" : "border-input"
+                }`}>
+                  {selected.has(option) && <Check className="w-3 h-3 text-primary-foreground" />}
+                </div>
+                <span className="truncate">{fmt(option)}</span>
+              </button>
+            ))}
+          </div>
+          {selected.size > 0 && (
+            <div className="border-t border-border p-1.5">
+              <button
+                type="button"
+                onClick={() => onChange(new Set())}
+                className="w-full text-xs text-muted-foreground hover:text-foreground py-1 transition-colors"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const JOB_TYPE_LABELS: Record<string, string> = {
+  permanent_full_time: "Permanent (Full Time)",
+  contract: "Contract",
+  fixed_term_contract: "Fixed Term Contract",
+  part_time: "Part-time",
+  temporary: "Temporary",
+};
+
+const INDUSTRY_LABELS: Record<string, string> = {
+  accounting_finance: "Accounting & Finance",
+  agriculture: "Agriculture",
+  automotive: "Automotive",
+  banking: "Banking",
+  construction: "Construction",
+  consulting: "Consulting",
+  creative_design: "Creative & Design",
+  education: "Education",
+  energy_utilities: "Energy & Utilities",
+  engineering: "Engineering",
+  healthcare: "Healthcare",
+  hospitality_tourism: "Hospitality & Tourism",
+  human_resources: "Human Resources",
+  insurance: "Insurance",
+  legal: "Legal",
+  logistics_supply_chain: "Logistics & Supply Chain",
+  manufacturing: "Manufacturing",
+  marketing_advertising: "Marketing & Advertising",
+  media_entertainment: "Media & Entertainment",
+  nonprofit: "Non-profit",
+  pharmaceutical: "Pharmaceutical",
+  property_real_estate: "Property & Real Estate",
+  public_sector: "Public Sector",
+  retail: "Retail",
+  sales: "Sales",
+  science_research: "Science & Research",
+  technology: "Technology",
+  telecommunications: "Telecommunications",
+  transport: "Transport",
+  other: "Other",
+};
+
+function formatJobType(val: string) {
+  return JOB_TYPE_LABELS[val] || val.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function formatWorkplace(val: string) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}
+
+function formatIndustry(val: string) {
+  return INDUSTRY_LABELS[val] || val.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
 
 interface Candidate {
   id: number;
@@ -57,24 +212,57 @@ export default function AdminCandidates() {
   const urlParams = new URLSearchParams(searchString);
 
   const [searchQuery, setSearchQuery] = useState(urlParams.get("search") || "");
-  const [statusFilter, setStatusFilter] = useState(urlParams.get("status") || "all");
-  const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
-  const [skillFilter, setSkillFilter] = useState(urlParams.get("skill") || "all");
-  const [jobTypeFilter, setJobTypeFilter] = useState(urlParams.get("jobType") || "all");
-  const [workplaceFilter, setWorkplaceFilter] = useState(urlParams.get("workplace") || "all");
-  const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
-  const [educationFilter, setEducationFilter] = useState(urlParams.get("education") || "all");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("status");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [locationFilters, setLocationFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("location");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [skillFilters, setSkillFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("skill");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [jobTypeFilters, setJobTypeFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("jobType");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [workplaceFilters, setWorkplaceFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("workplace");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [industryFilters, setIndustryFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("industry");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
+  const [educationFilters, setEducationFilters] = useState<Set<string>>(() => {
+    const v = urlParams.get("education");
+    return v && v !== "all" ? new Set([v]) : new Set();
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     setSearchQuery(params.get("search") || "");
-    setStatusFilter(params.get("status") || "all");
-    setLocationFilter(params.get("location") || "all");
-    setSkillFilter(params.get("skill") || "all");
-    setJobTypeFilter(params.get("jobType") || "all");
-    setWorkplaceFilter(params.get("workplace") || "all");
-    setIndustryFilter(params.get("industry") || "all");
-    setEducationFilter(params.get("education") || "all");
+    const status = params.get("status");
+    setStatusFilters(status && status !== "all" ? new Set([status]) : new Set());
+    const location = params.get("location");
+    setLocationFilters(location && location !== "all" ? new Set([location]) : new Set());
+    const skill = params.get("skill");
+    setSkillFilters(skill && skill !== "all" ? new Set([skill]) : new Set());
+    const jobType = params.get("jobType");
+    setJobTypeFilters(jobType && jobType !== "all" ? new Set([jobType]) : new Set());
+    const workplace = params.get("workplace");
+    setWorkplaceFilters(workplace && workplace !== "all" ? new Set([workplace]) : new Set());
+    const industry = params.get("industry");
+    setIndustryFilters(industry && industry !== "all" ? new Set([industry]) : new Set());
+    const education = params.get("education");
+    setEducationFilters(education && education !== "all" ? new Set([education]) : new Set());
+
+    const hasAny = status || location || skill || jobType || workplace || industry || education;
+    if (hasAny) setShowFilters(true);
   }, [searchString]);
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
@@ -123,6 +311,8 @@ export default function AdminCandidates() {
     return Array.from(edus).sort();
   }, [candidates]);
 
+  const uniqueStatuses = ["active", "passive", "not_looking"];
+
   const filtered = useMemo(() => {
     return candidates.filter(c => {
       if (searchQuery) {
@@ -133,28 +323,32 @@ export default function AdminCandidates() {
           c.skills.some(s => s.toLowerCase().includes(q));
         if (!matches) return false;
       }
-      if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (locationFilter !== "all" && c.location !== locationFilter) return false;
-      if (skillFilter !== "all" && !c.skills.includes(skillFilter)) return false;
-      if (jobTypeFilter !== "all" && !(c.preferredJobTypes || []).includes(jobTypeFilter)) return false;
-      if (workplaceFilter !== "all" && !(c.preferredWorkplaces || []).includes(workplaceFilter)) return false;
-      if (industryFilter !== "all" && !(c.preferredIndustries || []).includes(industryFilter)) return false;
-      if (educationFilter !== "all" && c.education !== educationFilter) return false;
+      if (statusFilters.size > 0 && !statusFilters.has(c.status)) return false;
+      if (locationFilters.size > 0 && !locationFilters.has(c.location)) return false;
+      if (skillFilters.size > 0 && !c.skills.some(s => skillFilters.has(s))) return false;
+      if (jobTypeFilters.size > 0 && !(c.preferredJobTypes || []).some(t => jobTypeFilters.has(t))) return false;
+      if (workplaceFilters.size > 0 && !(c.preferredWorkplaces || []).some(w => workplaceFilters.has(w))) return false;
+      if (industryFilters.size > 0 && !(c.preferredIndustries || []).some(i => industryFilters.has(i))) return false;
+      if (educationFilters.size > 0 && !educationFilters.has(c.education)) return false;
       return true;
     });
-  }, [candidates, searchQuery, statusFilter, locationFilter, skillFilter, jobTypeFilter, workplaceFilter, industryFilter, educationFilter]);
+  }, [candidates, searchQuery, statusFilters, locationFilters, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters]);
 
-  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || skillFilter !== "all" || jobTypeFilter !== "all" || workplaceFilter !== "all" || industryFilter !== "all" || educationFilter !== "all";
+  const activeFilterCount = useMemo(() => {
+    return statusFilters.size + locationFilters.size + skillFilters.size + jobTypeFilters.size + workplaceFilters.size + industryFilters.size + educationFilters.size;
+  }, [statusFilters, locationFilters, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters]);
+
+  const hasActiveFilters = searchQuery || activeFilterCount > 0;
 
   function clearFilters() {
     setSearchQuery("");
-    setStatusFilter("all");
-    setLocationFilter("all");
-    setSkillFilter("all");
-    setJobTypeFilter("all");
-    setWorkplaceFilter("all");
-    setIndustryFilter("all");
-    setEducationFilter("all");
+    setStatusFilters(new Set());
+    setLocationFilters(new Set());
+    setSkillFilters(new Set());
+    setJobTypeFilters(new Set());
+    setWorkplaceFilters(new Set());
+    setIndustryFilters(new Set());
+    setEducationFilters(new Set());
   }
 
   async function handleResetPassword() {
@@ -204,144 +398,183 @@ export default function AdminCandidates() {
         <p className="text-muted-foreground mt-1">{candidates.length} candidate profiles on the platform.</p>
       </div>
 
-      <Card className="bg-card">
-        <CardContent className="pt-5 pb-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex-1 min-w-[200px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Name, email, title, or skill..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-9 text-xs"
-                />
-              </div>
-            </div>
-
-            <div className="w-[140px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="passive">Passive</SelectItem>
-                  <SelectItem value="not_looking">Not Looking</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-[160px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Location</Label>
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {uniqueLocations.map(loc => (
-                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-[160px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Skill</Label>
-              <Select value={skillFilter} onValueChange={setSkillFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Skills</SelectItem>
-                  {uniqueSkills.map(skill => (
-                    <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" className="h-9 text-xs gap-1 text-muted-foreground" onClick={clearFilters}>
-                <X className="w-3 h-3" />
-                Clear
-              </Button>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[250px] max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, title, or skill..."
+              className="pl-9 bg-card"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            onClick={() => setShowFilters(!showFilters)}
+            className="relative"
+          >
+            <SlidersHorizontal className="w-4 h-4 mr-2" />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-white text-primary text-[11px] font-bold">
+                {activeFilterCount}
+              </span>
             )}
-          </div>
-
-          <div className="flex flex-wrap items-end gap-3 mt-3">
-            <div className="w-[160px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Job Type</Label>
-              <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Job Types</SelectItem>
-                  {uniqueJobTypes.map(t => (
-                    <SelectItem key={t} value={t}>{t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-[140px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Workplace</Label>
-              <Select value={workplaceFilter} onValueChange={setWorkplaceFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Workplaces</SelectItem>
-                  {uniqueWorkplaces.map(w => (
-                    <SelectItem key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-[180px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Industry</Label>
-              <Select value={industryFilter} onValueChange={setIndustryFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Industries</SelectItem>
-                  {uniqueIndustries.map(i => (
-                    <SelectItem key={i} value={i}>{i.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="w-[160px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Education</Label>
-              <Select value={educationFilter} onValueChange={setEducationFilter}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  {uniqueEducation.map(e => (
-                    <SelectItem key={e} value={e}>{e}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
+          </Button>
           {hasActiveFilters && (
-            <p className="text-[11px] text-muted-foreground mt-3">
-              Showing {filtered.length} of {candidates.length} candidates
-            </p>
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3.5 h-3.5 mr-1" /> Clear all
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {showFilters && (
+          <Card className="bg-card border-border">
+            <CardContent className="pt-5 pb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</label>
+                  <MultiSelectDropdown
+                    label="Statuses"
+                    icon={Users}
+                    options={uniqueStatuses}
+                    selected={statusFilters}
+                    onChange={setStatusFilters}
+                    formatOption={(v) => v === "not_looking" ? "Not Looking" : v.charAt(0).toUpperCase() + v.slice(1)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</label>
+                  <MultiSelectDropdown
+                    label="Locations"
+                    icon={MapPin}
+                    options={uniqueLocations}
+                    selected={locationFilters}
+                    onChange={setLocationFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Skill</label>
+                  <MultiSelectDropdown
+                    label="Skills"
+                    icon={Briefcase}
+                    options={uniqueSkills}
+                    selected={skillFilters}
+                    onChange={setSkillFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Education</label>
+                  <MultiSelectDropdown
+                    label="Education"
+                    icon={GraduationCap}
+                    options={uniqueEducation}
+                    selected={educationFilters}
+                    onChange={setEducationFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pref. Job Type</label>
+                  <MultiSelectDropdown
+                    label="Job Types"
+                    icon={Briefcase}
+                    options={uniqueJobTypes}
+                    selected={jobTypeFilters}
+                    onChange={setJobTypeFilters}
+                    formatOption={formatJobType}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pref. Workplace</label>
+                  <MultiSelectDropdown
+                    label="Workplaces"
+                    icon={Monitor}
+                    options={uniqueWorkplaces}
+                    selected={workplaceFilters}
+                    onChange={setWorkplaceFilters}
+                    formatOption={formatWorkplace}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pref. Industry</label>
+                  <MultiSelectDropdown
+                    label="Industries"
+                    icon={Building}
+                    options={uniqueIndustries}
+                    selected={industryFilters}
+                    onChange={setIndustryFilters}
+                    formatOption={formatIndustry}
+                  />
+                </div>
+              </div>
+
+              {activeFilterCount > 0 && (
+                <div className="mt-4 pt-3 border-t border-border flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-muted-foreground">Active:</span>
+                  {Array.from(statusFilters).map(v => (
+                    <span key={`status-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {v === "not_looking" ? "Not Looking" : v.charAt(0).toUpperCase() + v.slice(1)}
+                      <button onClick={() => { const n = new Set(statusFilters); n.delete(v); setStatusFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(locationFilters).map(v => (
+                    <span key={`loc-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {v}
+                      <button onClick={() => { const n = new Set(locationFilters); n.delete(v); setLocationFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(skillFilters).map(v => (
+                    <span key={`skill-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {v}
+                      <button onClick={() => { const n = new Set(skillFilters); n.delete(v); setSkillFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(educationFilters).map(v => (
+                    <span key={`edu-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {v}
+                      <button onClick={() => { const n = new Set(educationFilters); n.delete(v); setEducationFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(jobTypeFilters).map(v => (
+                    <span key={`jt-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {formatJobType(v)}
+                      <button onClick={() => { const n = new Set(jobTypeFilters); n.delete(v); setJobTypeFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(workplaceFilters).map(v => (
+                    <span key={`wp-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {formatWorkplace(v)}
+                      <button onClick={() => { const n = new Set(workplaceFilters); n.delete(v); setWorkplaceFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(industryFilters).map(v => (
+                    <span key={`ind-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {formatIndustry(v)}
+                      <button onClick={() => { const n = new Set(industryFilters); n.delete(v); setIndustryFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {hasActiveFilters && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{filtered.length}</span> of {candidates.length} candidates
+            {activeFilterCount > 0 && <span> (filtered)</span>}
+          </p>
+        </div>
+      )}
 
       <Card className="bg-card">
         <CardContent className="pt-6">
@@ -387,7 +620,7 @@ export default function AdminCandidates() {
                         <div className="flex flex-wrap gap-1">
                           {(candidate.preferredJobTypes || []).slice(0, 1).map(t => (
                             <Badge key={t} variant="outline" className="text-[8px] px-1 py-0">
-                              {t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                              {formatJobType(t)}
                             </Badge>
                           ))}
                           {(candidate.preferredJobTypes || []).length > 1 && (
@@ -402,7 +635,7 @@ export default function AdminCandidates() {
                         <div className="flex flex-wrap gap-1">
                           {(candidate.preferredWorkplaces || []).map(w => (
                             <Badge key={w} variant="outline" className="text-[8px] px-1 py-0">
-                              {w.charAt(0).toUpperCase() + w.slice(1)}
+                              {formatWorkplace(w)}
                             </Badge>
                           ))}
                           {(candidate.preferredWorkplaces || []).length === 0 && <span className="text-muted-foreground">—</span>}
