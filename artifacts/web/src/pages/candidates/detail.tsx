@@ -1,10 +1,73 @@
 import { Link } from "wouter";
-import { format } from "date-fns";
-import { Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft, Target, Calendar, FileText, Download, Eye } from "lucide-react";
+import {
+  Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
+  Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
+  Monitor, Building, Award,
+} from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey, useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const statusStyles: Record<string, string> = {
+  active: "bg-green-500 text-white",
+  passive: "bg-orange-400 text-white",
+  not_looking: "bg-gray-400 text-white",
+};
+
+const JOB_TYPE_LABELS: Record<string, string> = {
+  permanent_full_time: "Permanent (Full Time)",
+  contract: "Contract",
+  fixed_term_contract: "Fixed Term Contract",
+  part_time: "Part-time",
+  temporary: "Temporary",
+};
+
+const INDUSTRY_LABELS: Record<string, string> = {
+  accounting_finance: "Accounting & Finance",
+  agriculture: "Agriculture",
+  automotive: "Automotive",
+  banking: "Banking",
+  construction: "Construction",
+  consulting: "Consulting",
+  creative_design: "Creative & Design",
+  education: "Education",
+  energy_utilities: "Energy & Utilities",
+  engineering: "Engineering",
+  healthcare: "Healthcare",
+  hospitality_tourism: "Hospitality & Tourism",
+  human_resources: "Human Resources",
+  insurance: "Insurance",
+  legal: "Legal",
+  logistics_supply_chain: "Logistics & Supply Chain",
+  manufacturing: "Manufacturing",
+  marketing_advertising: "Marketing & Advertising",
+  media_entertainment: "Media & Entertainment",
+  nonprofit: "Non-profit",
+  pharmaceutical: "Pharmaceutical",
+  property_real_estate: "Property & Real Estate",
+  public_sector: "Public Sector",
+  retail: "Retail",
+  sales: "Sales",
+  science_research: "Science & Research",
+  technology: "Technology",
+  telecommunications: "Telecommunications",
+  transport: "Transport",
+  other: "Other",
+};
+
+function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-border/40 last:border-0">
+      <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+        <div className="text-sm font-medium text-foreground mt-0.5">{value}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function CandidateDetail({ params }: { params: { id: string } }) {
   const candidateId = parseInt(params.id);
@@ -18,93 +81,191 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   });
 
   if (candidateLoading) {
-    return <div className="p-8 text-center text-muted-foreground font-mono">Loading profile...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-mono">Loading candidate...</div>;
   }
 
   if (!candidate) {
-    return <div className="p-8 text-center text-destructive font-mono">Candidate not found.</div>;
+    return <div className="p-8 text-center text-muted-foreground">Candidate not found.</div>;
   }
 
+  const statusLabel = candidate.status === "not_looking" ? "Not Looking" : candidate.status;
+  const c = candidate as any;
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center text-sm text-muted-foreground mb-4">
-        <button onClick={() => window.history.back()} className="hover:text-primary flex items-center cursor-pointer bg-transparent border-none p-0">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back
-        </button>
+    <div className="p-8 max-w-[1400px] mx-auto space-y-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-1 text-muted-foreground hover:text-foreground"
+        onClick={() => window.history.back()}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </Button>
+
+      <Card className="bg-card">
+        <CardContent className="pt-6 pb-5">
+          <div className="flex items-start gap-5">
+            {c.profileImage ? (
+              <img
+                src={`${import.meta.env.BASE_URL}api/storage${c.profileImage}`.replace(/\/\//g, "/")}
+                alt={candidate.name}
+                className="w-16 h-16 rounded-full object-cover border"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shrink-0">
+                {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">{candidate.name}</h1>
+                <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${statusStyles[candidate.status] || "bg-gray-100 text-gray-600"}`}>
+                  {statusLabel}
+                </span>
+              </div>
+              {candidate.currentTitle && (
+                <p className="text-sm text-muted-foreground mt-1">{candidate.currentTitle}</p>
+              )}
+              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
+                <span className="flex items-center gap-1"><Mail className="w-4 h-4" />{candidate.email}</span>
+                {candidate.phone && (
+                  <span className="flex items-center gap-1"><Phone className="w-4 h-4" />{candidate.phone}</span>
+                )}
+                <span className="flex items-center gap-1">
+                  <CalendarDays className="w-4 h-4" />
+                  Registered {new Date(candidate.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-card">
+          <CardContent className="pt-4 pb-4 text-center">
+            <Users className="w-5 h-5 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold text-primary">{candidate.matchCount}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Job Matches</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card">
+          <CardContent className="pt-4 pb-4 text-center">
+            <Clock className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+            <p className="text-2xl font-bold">{candidate.experienceYears}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Years Experience</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card">
+          <CardContent className="pt-4 pb-4 text-center">
+            <Briefcase className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+            <p className="text-2xl font-bold">{candidate.skills.length}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Skills</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card">
+          <CardContent className="pt-4 pb-4 text-center">
+            <GraduationCap className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+            <p className="text-lg font-bold truncate px-2">{candidate.education || "—"}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Education</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">{candidate.name}</h1>
-            <Badge variant="outline" className={`uppercase text-[10px] tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
-              {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
-            </Badge>
-          </div>
-          <h2 className="text-xl text-primary font-medium mb-4">{candidate.currentTitle}</h2>
-          
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center"><Mail className="w-4 h-4 mr-1.5" /> {candidate.email}</span>
-            {candidate.phone && <span className="flex items-center"><Phone className="w-4 h-4 mr-1.5" /> {candidate.phone}</span>}
-            <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {candidate.location}</span>
-            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> Added {format(new Date(candidate.createdAt), "MMM yyyy")}</span>
-          </div>
-        </div>
-        <div className="flex flex-col items-end">
-           <div className="text-4xl font-mono font-bold text-primary">{candidate.experienceYears}</div>
-           <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Years Exp.</div>
-        </div>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {candidate.summary && (
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{candidate.summary}</p>
+              </CardContent>
+            </Card>
+          )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
-        <div className="col-span-1 lg:col-span-2 space-y-6">
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Professional Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {candidate.summary}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Skills Inventory</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {candidate.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="px-3 py-1.5 text-xs font-medium">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {c.experience && c.experience.length > 0 && (
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Experience History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {c.experience.map((exp: any, i: number) => (
+                    <div key={i} className="border-l-2 border-primary/30 pl-4">
+                      <p className="text-sm font-medium text-foreground">{exp.jobTitle}</p>
+                      <p className="text-xs text-muted-foreground">{exp.company}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {exp.startDate} – {exp.current ? "Present" : exp.endDate}
+                      </p>
+                      {exp.description && (
+                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{exp.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <GraduationCap className="w-5 h-5 mr-2" /> Education Background
+              <CardTitle className="text-base flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                Skills
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground">
-                {candidate.education}
-              </div>
+              {candidate.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {candidate.skills.map((skill) => (
+                    <span key={skill} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-xs font-medium px-3 py-1">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No skills listed.</p>
+              )}
             </CardContent>
           </Card>
 
-          <CvSection candidate={candidate} />
-        </div>
+          {c.qualifications && c.qualifications.length > 0 && (
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Award className="w-4 h-4" />
+                  Qualifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {c.qualifications.map((q: string) => (
+                    <Badge key={q} variant="secondary" className="text-xs px-2.5 py-1">
+                      {q}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        <div className="col-span-1 space-y-6">
           <Card className="bg-card border-primary/20">
             <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>Match History</span>
+              <CardTitle className="text-base flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Match History
+                </span>
                 <Badge variant="outline" className="font-mono bg-background">
                   {matches?.length || 0} TOTAL
                 </Badge>
@@ -149,67 +310,149 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
             </CardContent>
           </Card>
         </div>
+
+        <div className="space-y-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Contact Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailRow icon={Mail} label="Email" value={candidate.email} />
+              <DetailRow icon={Phone} label="Phone" value={candidate.phone || "Not provided"} />
+              <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Education</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailRow icon={GraduationCap} label="Level" value={candidate.education || "Not specified"} />
+              {c.educationDetails && (
+                <div className="mt-2 pt-2 border-t border-border/40">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Details</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{c.educationDetails}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Job Preferences</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailRow
+                icon={Briefcase}
+                label="Preferred Job Types"
+                value={
+                  (c.preferredJobTypes || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-0.5">
+                      {c.preferredJobTypes.map((t: string) => (
+                        <Badge key={t} variant="outline" className="text-[11px] px-2 py-0.5">
+                          {JOB_TYPE_LABELS[t] || t}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : "Not specified"
+                }
+              />
+              <DetailRow
+                icon={Monitor}
+                label="Preferred Workplaces"
+                value={
+                  (c.preferredWorkplaces || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-0.5">
+                      {c.preferredWorkplaces.map((w: string) => (
+                        <Badge key={w} variant="outline" className="text-[11px] px-2 py-0.5 capitalize">
+                          {w}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : "Not specified"
+                }
+              />
+              <DetailRow
+                icon={Building}
+                label="Preferred Industries"
+                value={
+                  (c.preferredIndustries || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-0.5">
+                      {c.preferredIndustries.map((i: string) => (
+                        <Badge key={i} variant="outline" className="text-[11px] px-2 py-0.5">
+                          {INDUSTRY_LABELS[i] || i}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : "Not specified"
+                }
+              />
+            </CardContent>
+          </Card>
+
+          {c.cvFileName && (
+            <Card className="bg-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">CV / Resume</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{c.cvFileName}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {c.cvFile && c.cvFileName?.toLowerCase().endsWith(".pdf") && (
+                      <a
+                        href={`${import.meta.env.BASE_URL}api/storage${c.cvFile}`.replace(/\/\//g, "/")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm" className="text-xs gap-1 h-7">
+                          <Eye className="w-3 h-3" />
+                          View
+                        </Button>
+                      </a>
+                    )}
+                    {c.cvFile && (
+                      <a
+                        href={`${import.meta.env.BASE_URL}api/storage${c.cvFile}`.replace(/\/\//g, "/")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0"
+                      >
+                        <Button variant="outline" size="sm" className="text-xs gap-1 h-7">
+                          <Download className="w-3 h-3" />
+                          Download
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Registered</span>
+                  <span className="font-medium">{new Date(candidate.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Last Updated</span>
+                  <span className="font-medium">{new Date(candidate.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
-  );
-}
-
-function CvSection({ candidate }: { candidate: any }) {
-  const cvFile = candidate?.cvFile;
-  const cvFileName = candidate?.cvFileName || "CV Document";
-  const isPdf = cvFileName.toLowerCase().endsWith(".pdf");
-  const cvUrl = cvFile
-    ? `${import.meta.env.BASE_URL}api/storage${cvFile}`.replace(/\/\//g, "/")
-    : "";
-
-  return (
-    <Card className="bg-card">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center">
-          <FileText className="w-5 h-5 mr-2" /> CV / Resume
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {cvFile ? (
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">{cvFileName}</p>
-                <p className="text-xs text-muted-foreground">Uploaded by candidate</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {isPdf && (
-                <a
-                  href={cvUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  <Eye className="w-4 h-4" />
-                  View
-                </a>
-              )}
-              <a
-                href={cvUrl}
-                download={cvFileName}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center py-6 text-muted-foreground">
-            <FileText className="w-8 h-8 text-muted-foreground/30 mb-2" />
-            <p className="text-sm">No CV uploaded by this candidate.</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
