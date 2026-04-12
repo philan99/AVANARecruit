@@ -206,19 +206,10 @@ export default function AdminJobDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{job.description}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{job.requirements}</p>
+              <div
+                className="text-sm text-muted-foreground leading-relaxed prose prose-sm prose-invert max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_p]:mb-3 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-1 [&_a]:text-primary [&_a]:underline [&_strong]:text-foreground [&_table]:w-full [&_th]:text-left [&_th]:p-2 [&_td]:p-2 [&_tr]:border-b [&_tr]:border-border/40"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
             </CardContent>
           </Card>
         </div>
