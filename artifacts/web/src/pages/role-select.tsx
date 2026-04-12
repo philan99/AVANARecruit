@@ -120,7 +120,7 @@ export default function RoleSelect() {
         </div>
 
         <p className="text-[11px] text-sidebar-foreground/40">
-          Avana Talent Platform
+          © 2026 AVANA Services Limited. Company Number: 15268633
         </p>
       </div>
 
