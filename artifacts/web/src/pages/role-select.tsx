@@ -131,7 +131,7 @@ export default function RoleSelect() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(59, 65, 89, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <img src={logoUrl} alt="Avana Talent" className="h-7" />
           <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export default function RoleSelect() {
         </div>
       </nav>
 
-      <section className="relative" style={{ backgroundColor: "#3b4159", paddingTop: "72px" }}>
+      <section className="relative" style={{ backgroundColor: "#1a2035", paddingTop: "72px" }}>
         <div className="absolute inset-0 overflow-hidden" style={{ paddingTop: "72px" }}>
           <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
