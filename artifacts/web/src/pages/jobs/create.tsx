@@ -38,7 +38,7 @@ const formSchema = z.object({
   jobType: z.string().min(1, "Job type is required"),
   industry: z.string().min(1, "Industry is required"),
   educationLevel: z.string().optional(),
-  workplace: z.enum(["office", "remote", "hybrid"], { required_error: "Workplace is required" }),
+  workplace: z.enum(["office", "remote", "hybrid"], { required_error: "Workplace is required" }).optional().refine(val => val !== undefined, { message: "Workplace is required" }),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"], { required_error: "Status is required" }),
@@ -65,7 +65,7 @@ export default function CreateJob() {
       description: "",
       skills: "",
       experienceLevel: undefined,
-      workplace: "office",
+      workplace: undefined,
       status: undefined,
     },
   });
