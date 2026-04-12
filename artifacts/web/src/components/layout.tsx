@@ -57,9 +57,9 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
         <div className="flex items-center justify-between h-14 px-6">
-          <div className="flex items-center">
-            <img src={logoUrl} alt="Avana Talent" className="h-7" />
-          </div>
+          <Link href="/" className="flex items-center cursor-pointer">
+            <img src={logoUrl} alt="AVANA Recruitment" className="h-7" />
+          </Link>
 
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
