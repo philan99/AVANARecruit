@@ -34,6 +34,7 @@ const editFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
+  jobType: z.string().optional(),
   educationLevel: z.string().optional(),
   workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
@@ -74,6 +75,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
         description: job.description,
         skills: job.skills.join(", "),
         experienceLevel: job.experienceLevel as any,
+        jobType: (job as any).jobType ?? undefined,
         educationLevel: (job as any).educationLevel ?? undefined,
         workplace: (job as any).workplace ?? "office",
         salaryMin: job.salaryMin ?? undefined,
@@ -171,6 +173,30 @@ export default function EditJob({ params }: { params: { id: string } }) {
                           <SelectItem value="senior">Senior</SelectItem>
                           <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="jobType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select job type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="permanent_full_time">Permanent (Full Time)</SelectItem>
+                          <SelectItem value="contract">Contract</SelectItem>
+                          <SelectItem value="fixed_term_contract">Fixed Term Contract</SelectItem>
+                          <SelectItem value="part_time">Part-time</SelectItem>
+                          <SelectItem value="temporary">Temporary</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
