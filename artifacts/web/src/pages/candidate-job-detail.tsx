@@ -188,6 +188,39 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
 
           <Card className="bg-card">
             <CardHeader>
+              <CardTitle className="text-lg">Job Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center text-muted-foreground">
+                  <Building className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{job.company}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{job.location}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Briefcase className="w-4 h-4 mr-2 shrink-0" />
+                  <span className="capitalize">{job.experienceLevel}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Calendar className="w-4 h-4 mr-2 shrink-0" />
+                  <span>{format(new Date(job.createdAt), "MMM d, yyyy")}</span>
+                </div>
+                {(job.salaryMin || job.salaryMax) && (
+                  <div className="flex items-center text-muted-foreground">
+                    <span className="font-mono bg-secondary px-2 py-0.5 rounded text-xs">
+                      £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
               <CardTitle className="text-lg">Required Skills</CardTitle>
             </CardHeader>
             <CardContent>
