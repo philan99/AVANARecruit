@@ -19,4 +19,12 @@ export interface UpdateCandidateBody {
   education?: string;
   location?: string;
   status?: UpdateCandidateBodyStatus;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  facebookUrl?: string | null;
+  /** @nullable */
+  twitterUrl?: string | null;
+  /** @nullable */
+  portfolioUrl?: string | null;
 }

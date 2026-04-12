@@ -17,10 +17,18 @@ export interface CreateJobBody {
   description: string;
   requirements?: string;
   skills: string[];
-  experienceLevel: CreateJobBodyExperienceLevel;
+  experienceLevel?: CreateJobBodyExperienceLevel;
   /** @nullable */
   salaryMin?: number | null;
   /** @nullable */
   salaryMax?: number | null;
+  /** @nullable */
+  jobType?: string | null;
+  /** @nullable */
+  industry?: string | null;
+  /** @nullable */
+  educationLevel?: string | null;
+  /** @nullable */
+  workplace?: string | null;
   status?: CreateJobBodyStatus;
 }

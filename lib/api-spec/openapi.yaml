@@ -755,6 +755,14 @@ components:
         status:
           type: string
           enum: [active, passive, not_looking]
+        linkedinUrl:
+          type: ["string", "null"]
+        facebookUrl:
+          type: ["string", "null"]
+        twitterUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
 
     Match:
       type: object

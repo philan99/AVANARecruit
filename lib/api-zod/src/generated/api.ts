@@ -58,7 +58,9 @@ export const CreateJobBody = zod.object({
   description: zod.string(),
   requirements: zod.string().optional(),
   skills: zod.array(zod.string()),
-  experienceLevel: zod.enum(["junior", "mid", "senior", "lead", "executive"]).optional(),
+  experienceLevel: zod
+    .enum(["junior", "mid", "senior", "lead", "executive"])
+    .optional(),
   salaryMin: zod.number().nullish(),
   salaryMax: zod.number().nullish(),
   jobType: zod.string().nullish(),
@@ -236,6 +238,10 @@ export const UpdateCandidateBody = zod.object({
   education: zod.string().optional(),
   location: zod.string().optional(),
   status: zod.enum(["active", "passive", "not_looking"]).optional(),
+  linkedinUrl: zod.string().nullish(),
+  facebookUrl: zod.string().nullish(),
+  twitterUrl: zod.string().nullish(),
+  portfolioUrl: zod.string().nullish(),
 });
 
 export const UpdateCandidateResponse = zod.object({

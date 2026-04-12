@@ -61,6 +61,10 @@ router.get("/candidates", async (req, res): Promise<void> => {
       preferredWorkplaces: candidatesTable.preferredWorkplaces,
       preferredIndustries: candidatesTable.preferredIndustries,
       status: candidatesTable.status,
+      linkedinUrl: candidatesTable.linkedinUrl,
+      facebookUrl: candidatesTable.facebookUrl,
+      twitterUrl: candidatesTable.twitterUrl,
+      portfolioUrl: candidatesTable.portfolioUrl,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
       updatedAt: candidatesTable.updatedAt,
@@ -169,6 +173,10 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       preferredWorkplaces: candidatesTable.preferredWorkplaces,
       preferredIndustries: candidatesTable.preferredIndustries,
       status: candidatesTable.status,
+      linkedinUrl: candidatesTable.linkedinUrl,
+      facebookUrl: candidatesTable.facebookUrl,
+      twitterUrl: candidatesTable.twitterUrl,
+      portfolioUrl: candidatesTable.portfolioUrl,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
       updatedAt: candidatesTable.updatedAt,
@@ -192,8 +200,8 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const { profileImage, cvFile, cvFileName, experience, educationDetails, qualifications, preferredJobTypes, preferredWorkplaces, preferredIndustries, ...rest } = req.body;
-  const parsed = UpdateCandidateBody.safeParse(rest);
+  const { profileImage, cvFile, cvFileName, experience, educationDetails, qualifications, preferredJobTypes, preferredWorkplaces, preferredIndustries, linkedinUrl, facebookUrl, twitterUrl, portfolioUrl, ...rest } = req.body;
+  const parsed = UpdateCandidateBody.safeParse({ ...rest, linkedinUrl, facebookUrl, twitterUrl, portfolioUrl });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;

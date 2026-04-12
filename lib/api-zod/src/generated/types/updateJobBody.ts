@@ -20,5 +20,13 @@ export interface UpdateJobBody {
   salaryMin?: number | null;
   /** @nullable */
   salaryMax?: number | null;
+  /** @nullable */
+  jobType?: string | null;
+  /** @nullable */
+  industry?: string | null;
+  /** @nullable */
+  educationLevel?: string | null;
+  /** @nullable */
+  workplace?: string | null;
   status?: UpdateJobBodyStatus;
 }
