@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Search, Plus, MapPin, Mail, Briefcase, GraduationCap, X } from "lucide-react";
+import { Users, Search, Plus, MapPin, Mail, Briefcase, GraduationCap, X, LayoutGrid, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -56,6 +56,7 @@ export default function CandidatesList() {
   const [skillFilter, setSkillFilter] = useState<string>("all");
   const [experienceFilter, setExperienceFilter] = useState<string>("all");
   const [educationFilter, setEducationFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -347,21 +348,41 @@ export default function CandidatesList() {
           <span className="text-sm text-muted-foreground">
             {filteredCandidates?.length ?? 0} candidate{(filteredCandidates?.length ?? 0) !== 1 ? "s" : ""} found
           </span>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground hover:text-foreground">
-              <X className="w-3.5 h-3.5 mr-1" /> Clear Filters
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground hover:text-foreground">
+                <X className="w-3.5 h-3.5 mr-1" /> Clear Filters
+              </Button>
+            )}
+            <div className="flex border rounded-md overflow-hidden">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="sm"
+                className="rounded-none h-8 px-2"
+                onClick={() => setViewMode("grid")}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                className="rounded-none h-8 px-2"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading ? (
-          <div className="col-span-full py-12 text-center text-muted-foreground font-mono">Loading talent pool...</div>
-        ) : filteredCandidates?.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-muted-foreground font-mono">No candidates found.</div>
-        ) : (
-          filteredCandidates?.map((candidate) => (
+      {isLoading ? (
+        <div className="py-12 text-center text-muted-foreground font-mono">Loading talent pool...</div>
+      ) : filteredCandidates?.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground font-mono">No candidates found.</div>
+      ) : viewMode === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredCandidates?.map((candidate) => (
             <Link key={candidate.id} href={`/candidates/${candidate.id}`}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
                 <CardHeader className="pb-3">
@@ -403,9 +424,66 @@ export default function CandidatesList() {
                 </CardContent>
               </Card>
             </Link>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="border rounded-lg overflow-hidden bg-card">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Name</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Title</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Location</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Experience</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Skills</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCandidates?.map((candidate) => (
+                <tr
+                  key={candidate.id}
+                  className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => setLocation(`/candidates/${candidate.id}`)}
+                >
+                  <td className="px-4 py-3">
+                    <div>
+                      <span className="font-medium text-sm">{candidate.name}</span>
+                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">{candidate.email}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{candidate.currentTitle}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-muted-foreground flex items-center">
+                      <MapPin className="w-3.5 h-3.5 mr-1.5" />{candidate.location}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{candidate.experienceYears} years</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1 max-w-[250px]">
+                      {candidate.skills.slice(0, 3).map(skill => (
+                        <Badge key={skill} variant="outline" className="text-[10px] py-0 px-1.5 h-4 bg-background">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {candidate.skills.length > 3 && (
+                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 bg-background">
+                          +{candidate.skills.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge variant={candidate.status === 'active' ? 'default' : 'secondary'} className="font-mono text-[10px] uppercase tracking-wider">
+                      {candidate.status}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
