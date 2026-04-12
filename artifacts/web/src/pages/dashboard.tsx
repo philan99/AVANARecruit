@@ -120,16 +120,16 @@ export default function Dashboard() {
 
   const statsParams = companyProfileId ? { companyProfileId } : {};
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats(statsParams, {
-    query: { queryKey: getGetDashboardStatsQueryKey(statsParams) },
+    query: { queryKey: getGetDashboardStatsQueryKey(statsParams), enabled: !!companyProfileId },
   });
   const recentMatchesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
-  const { data: recentMatches } = useGetRecentMatches(recentMatchesParams, { query: { queryKey: ["recent-matches", companyProfileId] } });
+  const { data: recentMatches } = useGetRecentMatches(recentMatchesParams, { query: { queryKey: ["recent-matches", companyProfileId], enabled: !!companyProfileId } });
   const topCandidatesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
-  const { data: topCandidates } = useGetTopCandidates(topCandidatesParams, { query: { queryKey: ["top-candidates", companyProfileId] } });
+  const { data: topCandidates } = useGetTopCandidates(topCandidatesParams, { query: { queryKey: ["top-candidates", companyProfileId], enabled: !!companyProfileId } });
   const skillDemandParams = companyProfileId ? { companyProfileId } : undefined;
-  const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId] } });
+  const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId], enabled: !!companyProfileId } });
 
-  if (statsLoading) {
+  if (!profile || statsLoading) {
     return <div className="p-8 flex justify-center text-muted-foreground font-mono text-sm">Loading telemetry...</div>;
   }
 
