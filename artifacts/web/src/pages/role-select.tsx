@@ -230,7 +230,7 @@ export default function RoleSelect() {
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
             className="cursor-pointer"
           >
-            <img src={logoUrl} alt="Avana Talent" className="h-7" />
+            <img src={logoUrl} alt="AVANA Recruitment" className="h-7" />
           </a>
           <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <a
@@ -282,7 +282,7 @@ export default function RoleSelect() {
               <br />with the Right Opportunity.
             </h1>
             <p className="text-lg leading-relaxed max-w-xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Avana Talent uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
+              AVANA Recruitment uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
@@ -347,7 +347,7 @@ export default function RoleSelect() {
                 Your Strategic Partner in Talent Acquisition
               </h2>
               <p className="text-base leading-relaxed mb-10" style={{ color: "#6b7280" }}>
-                Whether you're looking to hire top talent or find your next career move, Avana Talent's AI engine works for both sides of the recruitment equation.
+                Whether you're looking to hire top talent or find your next career move, AVANA Recruitment's AI engine works for both sides of the recruitment equation.
               </p>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
@@ -549,7 +549,7 @@ export default function RoleSelect() {
             Ready to Transform Your Recruitment?
           </h2>
           <p className="text-base mb-10 max-w-lg mx-auto" style={{ color: "#6b7280" }}>
-            Join Avana Talent and experience the future of intelligent recruitment — powered by AI, built for people.
+            Join AVANA Recruitment and experience the future of intelligent recruitment — powered by AI, built for people.
           </p>
           <div className="flex justify-center gap-4">
             <button
@@ -574,7 +574,7 @@ export default function RoleSelect() {
       <footer style={{ backgroundColor: "#1a2035", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <img src={logoUrl} alt="Avana Talent" className="h-6" />
+            <img src={logoUrl} alt="AVANA Recruitment" className="h-6" />
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
               © 2026 AVANA Services Limited. Company Number: 15268633
             </p>
@@ -596,7 +596,7 @@ export default function RoleSelect() {
 
             <div className="mb-6">
               <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Welcome Back</h2>
-              <p className="text-sm" style={{ color: "#6b7280" }}>Sign in to your Avana Talent account</p>
+              <p className="text-sm" style={{ color: "#6b7280" }}>Sign in to your AVANA Recruitment account</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
