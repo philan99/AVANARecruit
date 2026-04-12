@@ -115,7 +115,7 @@ export default function CreateJob() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Title</FormLabel>
+                      <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -126,7 +126,7 @@ export default function CreateJob() {
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location</FormLabel>
+                      <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,7 +137,7 @@ export default function CreateJob() {
                   name="experienceLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Experience Level</FormLabel>
+                      <FormLabel>Experience Level <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -161,7 +161,7 @@ export default function CreateJob() {
                   name="jobType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Type</FormLabel>
+                      <FormLabel>Job Type <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -185,7 +185,7 @@ export default function CreateJob() {
                   name="industry"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Industry</FormLabel>
+                      <FormLabel>Industry <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -262,7 +262,7 @@ export default function CreateJob() {
                   name="workplace"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Workplace</FormLabel>
+                      <FormLabel>Workplace <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -306,7 +306,7 @@ export default function CreateJob() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -330,7 +330,7 @@ export default function CreateJob() {
                 name="skills"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Required Skills (comma separated)</FormLabel>
+                    <FormLabel>Required Skills (comma separated) <span className="text-red-500">*</span></FormLabel>
                     <FormControl><Input placeholder="React, TypeScript, Node.js" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -342,7 +342,7 @@ export default function CreateJob() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Description</FormLabel>
+                    <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <RichTextEditor value={field.value} onChange={field.onChange} />
                     </FormControl>
