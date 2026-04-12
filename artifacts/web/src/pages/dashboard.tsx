@@ -224,7 +224,7 @@ export default function Dashboard() {
           <CardContent className="flex-1">
             <div className="space-y-4">
               {recentMatches?.map((match) => (
-                <div key={match.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors">
+                <div key={match.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${match.candidateId}`)}>
                   <div className="overflow-hidden">
                     <p className="text-sm font-medium text-foreground truncate">{match.candidateName}</p>
                     <p className="text-xs text-muted-foreground truncate">{match.jobTitle}</p>
@@ -256,7 +256,7 @@ export default function Dashboard() {
           <CardContent className="flex-1">
             <div className="space-y-4">
               {topCandidates?.map((candidate) => (
-                <div key={candidate.candidateId} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors">
+                <div key={candidate.candidateId} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${candidate.candidateId}`)}>
                   <div className="overflow-hidden">
                     <p className="text-sm font-medium text-foreground truncate">{candidate.candidateName}</p>
                     <p className="text-xs text-muted-foreground truncate">{candidate.candidateTitle}</p>
