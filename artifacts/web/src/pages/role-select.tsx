@@ -234,13 +234,6 @@ export default function RoleSelect() {
           </a>
           <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <a
-              href="#services"
-              onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
-            >
-              Our Services
-            </a>
-            <a
               href="#pricing"
               onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}
               className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
@@ -311,7 +304,7 @@ export default function RoleSelect() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
-              Our Services
+              Platform Capabilities
             </p>
             <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
               Expertise That Transforms
