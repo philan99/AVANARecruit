@@ -151,7 +151,7 @@ export default function RoleSelect() {
         </div>
       </nav>
 
-      <section className="relative" style={{ backgroundColor: "#1a2035", paddingTop: "72px" }}>
+      <section className="relative" style={{ backgroundColor: "#3b4159", paddingTop: "72px" }}>
         <div className="absolute inset-0 overflow-hidden" style={{ paddingTop: "72px" }}>
           <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
