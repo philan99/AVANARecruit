@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Search, Plus, MapPin, Mail, Briefcase, GraduationCap } from "lucide-react";
+import { Users, Search, Plus, MapPin, Mail, Briefcase, GraduationCap, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -52,6 +52,10 @@ const formSchema = z.object({
 export default function CandidatesList() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [skillFilter, setSkillFilter] = useState<string>("all");
+  const [experienceFilter, setExperienceFilter] = useState<string>("all");
+  const [educationFilter, setEducationFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -64,6 +68,35 @@ export default function CandidatesList() {
 
   const { data: candidates, isLoading } = useListCandidates(queryParams, {
     query: { queryKey: getListCandidatesQueryKey(queryParams) },
+  });
+
+  const uniqueLocations = [...new Set(candidates?.map(c => c.location).filter(Boolean) || [])].sort();
+  const uniqueSkills = [...new Set(candidates?.flatMap(c => c.skills) || [])].sort();
+  const uniqueEducations = [...new Set(candidates?.map(c => c.education).filter(Boolean) || [])].sort();
+
+  const hasActiveFilters = locationFilter !== "all" || skillFilter !== "all" || experienceFilter !== "all" || educationFilter !== "all" || statusFilter !== "all" || search !== "";
+
+  const clearAllFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setLocationFilter("all");
+    setSkillFilter("all");
+    setExperienceFilter("all");
+    setEducationFilter("all");
+  };
+
+  const filteredCandidates = candidates?.filter(c => {
+    if (locationFilter !== "all" && c.location !== locationFilter) return false;
+    if (skillFilter !== "all" && !c.skills.includes(skillFilter)) return false;
+    if (educationFilter !== "all" && c.education !== educationFilter) return false;
+    if (experienceFilter !== "all") {
+      const years = c.experienceYears;
+      if (experienceFilter === "0-2" && years > 2) return false;
+      if (experienceFilter === "3-5" && (years < 3 || years > 5)) return false;
+      if (experienceFilter === "6-10" && (years < 6 || years > 10)) return false;
+      if (experienceFilter === "10+" && years < 10) return false;
+    }
+    return true;
   });
 
   const createCandidate = useCreateCandidate();
@@ -242,36 +275,93 @@ export default function CandidatesList() {
         </Dialog>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search candidates by name or skills..." 
-            className="pl-9 bg-card"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="space-y-3 mb-6">
+        <div className="flex gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search candidates by name or skills..." 
+              className="pl-9 bg-card"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[150px] bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="hired">Hired</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={locationFilter} onValueChange={setLocationFilter}>
+            <SelectTrigger className="w-[170px] bg-card">
+              <SelectValue placeholder="Location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Locations</SelectItem>
+              {uniqueLocations.map(loc => (
+                <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={skillFilter} onValueChange={setSkillFilter}>
+            <SelectTrigger className="w-[170px] bg-card">
+              <SelectValue placeholder="Skill" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Skills</SelectItem>
+              {uniqueSkills.map(skill => (
+                <SelectItem key={skill} value={skill}>{skill}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={experienceFilter} onValueChange={setExperienceFilter}>
+            <SelectTrigger className="w-[170px] bg-card">
+              <SelectValue placeholder="Experience" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Experience</SelectItem>
+              <SelectItem value="0-2">0–2 years</SelectItem>
+              <SelectItem value="3-5">3–5 years</SelectItem>
+              <SelectItem value="6-10">6–10 years</SelectItem>
+              <SelectItem value="10+">10+ years</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={educationFilter} onValueChange={setEducationFilter}>
+            <SelectTrigger className="w-[170px] bg-card">
+              <SelectValue placeholder="Education" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Education</SelectItem>
+              {uniqueEducations.map(edu => (
+                <SelectItem key={edu} value={edu}>{edu}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] bg-card">
-            <SelectValue placeholder="Filter Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="hired">Hired</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {filteredCandidates?.length ?? 0} candidate{(filteredCandidates?.length ?? 0) !== 1 ? "s" : ""} found
+          </span>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3.5 h-3.5 mr-1" /> Clear Filters
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
           <div className="col-span-full py-12 text-center text-muted-foreground font-mono">Loading talent pool...</div>
-        ) : candidates?.length === 0 ? (
+        ) : filteredCandidates?.length === 0 ? (
           <div className="col-span-full py-12 text-center text-muted-foreground font-mono">No candidates found.</div>
         ) : (
-          candidates?.map((candidate) => (
+          filteredCandidates?.map((candidate) => (
             <Link key={candidate.id} href={`/candidates/${candidate.id}`}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
                 <CardHeader className="pb-3">
