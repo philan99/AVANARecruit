@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRole } from "@/contexts/role-context";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  company: z.string().min(1, "Company is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   requirements: z.string().min(10, "Requirements must be at least 10 characters"),
@@ -58,7 +57,6 @@ export default function CreateJob() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      company: companyProfile?.name ?? "",
       location: "",
       description: "",
       requirements: "",
@@ -68,13 +66,10 @@ export default function CreateJob() {
     },
   });
 
-  if (companyProfile?.name && !form.getValues("company")) {
-    form.setValue("company", companyProfile.name);
-  }
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     const payload = {
       ...values,
+      company: companyProfile?.name ?? "",
       skills: values.skills.split(",").map(s => s.trim()).filter(Boolean),
       ...(companyProfileId ? { companyProfileId } : {}),
     };
@@ -92,7 +87,7 @@ export default function CreateJob() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-6">
+    <div className="p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate("/jobs")}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Jobs
@@ -110,7 +105,7 @@ export default function CreateJob() {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -118,17 +113,6 @@ export default function CreateJob() {
                     <FormItem>
                       <FormLabel>Job Title</FormLabel>
                       <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company/Department</FormLabel>
-                      <FormControl><Input {...field} readOnly className="bg-muted cursor-default" /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -226,29 +210,31 @@ export default function CreateJob() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Description</FormLabel>
-                    <FormControl><Textarea className="h-32" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Description</FormLabel>
+                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="requirements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Requirements</FormLabel>
-                    <FormControl><Textarea className="h-32" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="requirements"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Requirements</FormLabel>
+                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => navigate("/jobs")}>

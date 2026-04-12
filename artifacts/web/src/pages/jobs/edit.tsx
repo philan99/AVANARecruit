@@ -30,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const editFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  company: z.string().min(1, "Company is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   requirements: z.string().min(10, "Requirements must be at least 10 characters"),
@@ -57,7 +56,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
     resolver: zodResolver(editFormSchema),
     defaultValues: {
       title: "",
-      company: "",
       location: "",
       description: "",
       requirements: "",
@@ -71,7 +69,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
     if (job) {
       form.reset({
         title: job.title,
-        company: job.company,
         location: job.location,
         description: job.description,
         requirements: job.requirements,
@@ -113,7 +110,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-6">
+    <div className="p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(`/jobs/${jobId}`)}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Job
@@ -131,7 +128,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -139,17 +136,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
                     <FormItem>
                       <FormLabel>Job Title</FormLabel>
                       <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company/Department</FormLabel>
-                      <FormControl><Input {...field} readOnly className="bg-muted cursor-default" /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -247,29 +233,31 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Description</FormLabel>
-                    <FormControl><Textarea className="h-32" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Description</FormLabel>
+                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="requirements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Requirements</FormLabel>
-                    <FormControl><Textarea className="h-32" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="requirements"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Requirements</FormLabel>
+                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => navigate(`/jobs/${jobId}`)}>
