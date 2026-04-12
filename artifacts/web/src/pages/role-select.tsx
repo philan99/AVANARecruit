@@ -133,7 +133,13 @@ export default function RoleSelect() {
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
-          <img src={logoUrl} alt="Avana Talent" className="h-7" />
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+            className="cursor-pointer"
+          >
+            <img src={logoUrl} alt="Avana Talent" className="h-7" />
+          </a>
           <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <a
               href="#services"
