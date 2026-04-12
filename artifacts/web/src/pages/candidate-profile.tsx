@@ -36,6 +36,9 @@ interface EditFormState {
   summary: string;
   skills: string;
   qualifications: string;
+  preferredJobTypes: string[];
+  preferredWorkplaces: string[];
+  preferredIndustries: string[];
   experienceYears: number;
   education: string;
   educationDetails: string;
@@ -143,7 +146,7 @@ export default function CandidateProfile() {
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
-    summary: "", skills: "", qualifications: "", experienceYears: 0, education: "", educationDetails: "", location: "",
+    summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, education: "", educationDetails: "", location: "",
   });
 
   useEffect(() => {
@@ -156,6 +159,9 @@ export default function CandidateProfile() {
         summary: candidate.summary,
         skills: candidate.skills.join(", "),
         qualifications: ((candidate as any).qualifications || []).join(", "),
+        preferredJobTypes: (candidate as any).preferredJobTypes || [],
+        preferredWorkplaces: (candidate as any).preferredWorkplaces || [],
+        preferredIndustries: (candidate as any).preferredIndustries || [],
         experienceYears: candidate.experienceYears,
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
@@ -178,6 +184,9 @@ export default function CandidateProfile() {
         summary: candidate.summary,
         skills: candidate.skills.join(", "),
         qualifications: ((candidate as any).qualifications || []).join(", "),
+        preferredJobTypes: (candidate as any).preferredJobTypes || [],
+        preferredWorkplaces: (candidate as any).preferredWorkplaces || [],
+        preferredIndustries: (candidate as any).preferredIndustries || [],
         experienceYears: candidate.experienceYears,
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
@@ -235,6 +244,9 @@ export default function CandidateProfile() {
       summary: editForm.summary,
       skills: editForm.skills.split(",").map(s => s.trim()).filter(Boolean),
       qualifications: editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean),
+      preferredJobTypes: editForm.preferredJobTypes,
+      preferredWorkplaces: editForm.preferredWorkplaces,
+      preferredIndustries: editForm.preferredIndustries,
       experienceYears: editForm.experienceYears,
       education: editForm.education,
       educationDetails: editForm.educationDetails || null,
@@ -613,6 +625,171 @@ export default function CandidateProfile() {
               ) : (
                 <p className="text-sm text-muted-foreground">No qualifications added yet</p>
               )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Preferences</CardTitle>
+          <p className="text-sm text-muted-foreground">Select your preferred job types, workplaces, and industries</p>
+        </CardHeader>
+        <CardContent>
+          {isEditing ? (
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-sm font-medium mb-3">Job Type</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: "permanent_full_time", label: "Permanent (Full Time)" },
+                    { value: "contract", label: "Contract" },
+                    { value: "fixed_term_contract", label: "Fixed Term Contract" },
+                    { value: "part_time", label: "Part-time" },
+                    { value: "temporary", label: "Temporary" },
+                  ].map((opt) => {
+                    const selected = editForm.preferredJobTypes.includes(opt.value);
+                    return (
+                      <Badge
+                        key={opt.value}
+                        variant={selected ? "default" : "outline"}
+                        className={`px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${selected ? "" : "hover:bg-muted"}`}
+                        onClick={() => {
+                          const updated = selected
+                            ? editForm.preferredJobTypes.filter(v => v !== opt.value)
+                            : [...editForm.preferredJobTypes, opt.value];
+                          updateField("preferredJobTypes", updated);
+                        }}
+                      >
+                        {opt.label}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-3">Workplace</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: "office", label: "Office" },
+                    { value: "remote", label: "Remote" },
+                    { value: "hybrid", label: "Hybrid" },
+                  ].map((opt) => {
+                    const selected = editForm.preferredWorkplaces.includes(opt.value);
+                    return (
+                      <Badge
+                        key={opt.value}
+                        variant={selected ? "default" : "outline"}
+                        className={`px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${selected ? "" : "hover:bg-muted"}`}
+                        onClick={() => {
+                          const updated = selected
+                            ? editForm.preferredWorkplaces.filter(v => v !== opt.value)
+                            : [...editForm.preferredWorkplaces, opt.value];
+                          updateField("preferredWorkplaces", updated);
+                        }}
+                      >
+                        {opt.label}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-3">Industry</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: "accounting_finance", label: "Accounting & Finance" },
+                    { value: "agriculture", label: "Agriculture" },
+                    { value: "automotive", label: "Automotive" },
+                    { value: "banking", label: "Banking" },
+                    { value: "construction", label: "Construction" },
+                    { value: "consulting", label: "Consulting" },
+                    { value: "creative_design", label: "Creative & Design" },
+                    { value: "education", label: "Education" },
+                    { value: "energy_utilities", label: "Energy & Utilities" },
+                    { value: "engineering", label: "Engineering" },
+                    { value: "healthcare", label: "Healthcare" },
+                    { value: "hospitality_tourism", label: "Hospitality & Tourism" },
+                    { value: "human_resources", label: "Human Resources" },
+                    { value: "insurance", label: "Insurance" },
+                    { value: "legal", label: "Legal" },
+                    { value: "logistics_supply_chain", label: "Logistics & Supply Chain" },
+                    { value: "manufacturing", label: "Manufacturing" },
+                    { value: "marketing_advertising", label: "Marketing & Advertising" },
+                    { value: "media_entertainment", label: "Media & Entertainment" },
+                    { value: "nonprofit", label: "Non-profit" },
+                    { value: "pharmaceutical", label: "Pharmaceutical" },
+                    { value: "property_real_estate", label: "Property & Real Estate" },
+                    { value: "public_sector", label: "Public Sector" },
+                    { value: "retail", label: "Retail" },
+                    { value: "sales", label: "Sales" },
+                    { value: "science_research", label: "Science & Research" },
+                    { value: "technology", label: "Technology" },
+                    { value: "telecommunications", label: "Telecommunications" },
+                    { value: "transport", label: "Transport" },
+                    { value: "other", label: "Other" },
+                  ].map((opt) => {
+                    const selected = editForm.preferredIndustries.includes(opt.value);
+                    return (
+                      <Badge
+                        key={opt.value}
+                        variant={selected ? "default" : "outline"}
+                        className={`px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${selected ? "" : "hover:bg-muted"}`}
+                        onClick={() => {
+                          const updated = selected
+                            ? editForm.preferredIndustries.filter(v => v !== opt.value)
+                            : [...editForm.preferredIndustries, opt.value];
+                          updateField("preferredIndustries", updated);
+                        }}
+                      >
+                        {opt.label}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-2">Job Type</h4>
+                <div className="flex flex-wrap gap-2">
+                  {((candidate as any).preferredJobTypes || []).length > 0 ? (
+                    ((candidate as any).preferredJobTypes || []).map((v: string) => {
+                      const labels: Record<string, string> = { permanent_full_time: "Permanent (Full Time)", contract: "Contract", fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary" };
+                      return <Badge key={v} variant="secondary" className="px-3 py-1.5 text-xs font-medium">{labels[v] || v}</Badge>;
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No preferences set</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-2">Workplace</h4>
+                <div className="flex flex-wrap gap-2">
+                  {((candidate as any).preferredWorkplaces || []).length > 0 ? (
+                    ((candidate as any).preferredWorkplaces || []).map((v: string) => {
+                      const labels: Record<string, string> = { office: "Office", remote: "Remote", hybrid: "Hybrid" };
+                      return <Badge key={v} variant="secondary" className="px-3 py-1.5 text-xs font-medium">{labels[v] || v}</Badge>;
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No preferences set</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-2">Industry</h4>
+                <div className="flex flex-wrap gap-2">
+                  {((candidate as any).preferredIndustries || []).length > 0 ? (
+                    ((candidate as any).preferredIndustries || []).map((v: string) => {
+                      const labels: Record<string, string> = { accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive", banking: "Banking", construction: "Construction", consulting: "Consulting", creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities", engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism", human_resources: "Human Resources", insurance: "Insurance", legal: "Legal", logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing", marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment", nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate", public_sector: "Public Sector", retail: "Retail", sales: "Sales", science_research: "Science & Research", technology: "Technology", telecommunications: "Telecommunications", transport: "Transport", other: "Other" };
+                      return <Badge key={v} variant="secondary" className="px-3 py-1.5 text-xs font-medium">{labels[v] || v}</Badge>;
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No preferences set</p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
