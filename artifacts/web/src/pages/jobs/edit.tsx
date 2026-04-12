@@ -140,43 +140,8 @@ export default function EditJob({ params }: { params: { id: string } }) {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Title</FormLabel>
+                      <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
                       <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="experienceLevel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Experience Level</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="junior">Junior</SelectItem>
-                          <SelectItem value="mid">Mid-Level</SelectItem>
-                          <SelectItem value="senior">Senior</SelectItem>
-                          <SelectItem value="lead">Lead</SelectItem>
-                          <SelectItem value="executive">Executive</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -186,7 +151,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
                   name="jobType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Type</FormLabel>
+                      <FormLabel>Job Type <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
@@ -207,10 +172,67 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 />
                 <FormField
                   control={form.control}
+                  name="workplace"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workplace <span className="text-red-500">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select workplace" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="remote">Remote</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="experienceLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Experience Level <span className="text-red-500">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="junior">Junior</SelectItem>
+                          <SelectItem value="mid">Mid-Level</SelectItem>
+                          <SelectItem value="senior">Senior</SelectItem>
+                          <SelectItem value="lead">Lead</SelectItem>
+                          <SelectItem value="executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="industry"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Industry</FormLabel>
+                      <FormLabel>Industry <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
@@ -284,28 +306,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 />
                 <FormField
                   control={form.control}
-                  name="workplace"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Workplace</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select workplace" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="office">Office</SelectItem>
-                          <SelectItem value="remote">Remote</SelectItem>
-                          <SelectItem value="hybrid">Hybrid</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="salaryMin"
                   render={({ field }) => (
                     <FormItem>
@@ -331,7 +331,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -355,7 +355,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 name="skills"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Required Skills (comma separated)</FormLabel>
+                    <FormLabel>Required Skills (comma separated) <span className="text-red-500">*</span></FormLabel>
                     <FormControl><Input placeholder="React, TypeScript, Node.js" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -367,7 +367,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Description</FormLabel>
+                    <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <RichTextEditor value={field.value} onChange={field.onChange} />
                     </FormControl>
