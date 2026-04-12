@@ -13,6 +13,4 @@ export const UpdateCandidateBodyStatus = {
   active: "active",
   passive: "passive",
   not_looking: "not_looking",
-  inactive: "inactive",
-  hired: "hired",
 } as const;

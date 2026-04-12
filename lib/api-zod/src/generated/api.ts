@@ -136,9 +136,7 @@ export const DeleteJobParams = zod.object({
  * @summary List all candidates
  */
 export const ListCandidatesQueryParams = zod.object({
-  status: zod
-    .enum(["active", "passive", "not_looking", "inactive", "hired"])
-    .optional(),
+  status: zod.enum(["active", "passive", "not_looking"]).optional(),
   search: zod.coerce.string().optional(),
 });
 
@@ -153,7 +151,7 @@ export const ListCandidatesResponseItem = zod.object({
   experienceYears: zod.number(),
   education: zod.string(),
   location: zod.string(),
-  status: zod.enum(["active", "passive", "not_looking", "inactive", "hired"]),
+  status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -173,9 +171,7 @@ export const CreateCandidateBody = zod.object({
   experienceYears: zod.number(),
   education: zod.string(),
   location: zod.string(),
-  status: zod
-    .enum(["active", "passive", "not_looking", "inactive", "hired"])
-    .optional(),
+  status: zod.enum(["active", "passive", "not_looking"]).optional(),
 });
 
 /**
@@ -196,7 +192,7 @@ export const GetCandidateResponse = zod.object({
   experienceYears: zod.number(),
   education: zod.string(),
   location: zod.string(),
-  status: zod.enum(["active", "passive", "not_looking", "inactive", "hired"]),
+  status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -219,9 +215,7 @@ export const UpdateCandidateBody = zod.object({
   experienceYears: zod.number().optional(),
   education: zod.string().optional(),
   location: zod.string().optional(),
-  status: zod
-    .enum(["active", "passive", "not_looking", "inactive", "hired"])
-    .optional(),
+  status: zod.enum(["active", "passive", "not_looking"]).optional(),
 });
 
 export const UpdateCandidateResponse = zod.object({
@@ -235,7 +229,7 @@ export const UpdateCandidateResponse = zod.object({
   experienceYears: zod.number(),
   education: zod.string(),
   location: zod.string(),
-  status: zod.enum(["active", "passive", "not_looking", "inactive", "hired"]),
+  status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),

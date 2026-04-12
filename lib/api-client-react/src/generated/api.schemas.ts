@@ -128,8 +128,6 @@ export const CandidateStatus = {
   active: "active",
   passive: "passive",
   not_looking: "not_looking",
-  inactive: "inactive",
-  hired: "hired",
 } as const;
 
 export interface Candidate {
@@ -157,8 +155,6 @@ export const CreateCandidateBodyStatus = {
   active: "active",
   passive: "passive",
   not_looking: "not_looking",
-  inactive: "inactive",
-  hired: "hired",
 } as const;
 
 export interface CreateCandidateBody {
@@ -182,8 +178,6 @@ export const UpdateCandidateBodyStatus = {
   active: "active",
   passive: "passive",
   not_looking: "not_looking",
-  inactive: "inactive",
-  hired: "hired",
 } as const;
 
 export interface UpdateCandidateBody {
@@ -420,8 +414,6 @@ export const ListCandidatesStatus = {
   active: "active",
   passive: "passive",
   not_looking: "not_looking",
-  inactive: "inactive",
-  hired: "hired",
 } as const;
 
 export type GetDashboardStatsParams = {

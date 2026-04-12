@@ -93,8 +93,8 @@ export default function CandidatesList() {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="hired">Hired</SelectItem>
+              <SelectItem value="passive">Passive</SelectItem>
+              <SelectItem value="not_looking">Not Looking</SelectItem>
             </SelectContent>
           </Select>
           <Select value={locationFilter} onValueChange={setLocationFilter}>
@@ -186,8 +186,8 @@ export default function CandidatesList() {
               <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant={candidate.status === 'active' ? 'default' : 'secondary'} className="font-mono text-[10px] uppercase tracking-wider">
-                      {candidate.status}
+                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                      {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                     </Badge>
                     <span className="text-xs text-muted-foreground font-mono">{candidate.experienceYears} YOE</span>
                   </div>
@@ -273,8 +273,8 @@ export default function CandidatesList() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={candidate.status === 'active' ? 'default' : 'secondary'} className="font-mono text-[10px] uppercase tracking-wider">
-                      {candidate.status}
+                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                      {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                     </Badge>
                   </td>
                 </tr>

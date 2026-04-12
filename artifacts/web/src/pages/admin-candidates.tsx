@@ -282,8 +282,8 @@ export default function AdminCandidates() {
                         </div>
                       </td>
                       <td className="py-2 px-2">
-                        <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[8px] uppercase">
-                          {candidate.status}
+                        <Badge className={`text-[8px] uppercase border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                          {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                         </Badge>
                       </td>
                       <td className="py-2 px-2 text-muted-foreground">
