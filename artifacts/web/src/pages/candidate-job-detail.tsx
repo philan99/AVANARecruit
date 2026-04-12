@@ -111,15 +111,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             </Badge>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center"><Building className="w-4 h-4 mr-1.5" /> {job.company}</span>
-            <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {job.location}</span>
-            <span className="flex items-center"><Briefcase className="w-4 h-4 mr-1.5" /> {job.experienceLevel}</span>
-            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
-            {(job.salaryMin || job.salaryMax) && (
-              <span className="flex items-center font-mono bg-secondary px-2 py-0.5 rounded">
-                £{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}
-              </span>
-            )}
+            <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> Posted {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -202,10 +194,6 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
                     <span className="font-mono font-medium">£{(job.salaryMin || 0).toLocaleString()} - £{(job.salaryMax || 0).toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex items-center text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{format(new Date(job.createdAt), "MMM d, yyyy")}</span>
-                </div>
                 {companyWebsite && (
                   <div className="flex items-center text-muted-foreground">
                     <Globe className="w-4 h-4 mr-2 shrink-0" />
