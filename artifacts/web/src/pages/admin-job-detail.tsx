@@ -221,6 +221,22 @@ export default function AdminJobDetail() {
             </CardHeader>
             <CardContent>
               <DetailRow
+                icon={Building}
+                label="Company"
+                value={
+                  job.companyProfileId ? (
+                    <button
+                      className="text-primary hover:underline text-sm font-medium"
+                      onClick={() => navigate(`/companies/${job.companyProfileId}`)}
+                    >
+                      {job.company}
+                    </button>
+                  ) : (
+                    job.company
+                  )
+                }
+              />
+              <DetailRow
                 icon={Briefcase}
                 label="Job Type"
                 value={job.jobType ? (JOB_TYPE_LABELS[job.jobType] || job.jobType) : "Not specified"}
@@ -258,22 +274,6 @@ export default function AdminJobDetail() {
                 icon={MapPin}
                 label="Location"
                 value={job.location || "Not specified"}
-              />
-              <DetailRow
-                icon={Building}
-                label="Company"
-                value={
-                  job.companyProfileId ? (
-                    <button
-                      className="text-primary hover:underline text-sm font-medium"
-                      onClick={() => navigate(`/companies/${job.companyProfileId}`)}
-                    >
-                      {job.company}
-                    </button>
-                  ) : (
-                    job.company
-                  )
-                }
               />
             </CardContent>
           </Card>
