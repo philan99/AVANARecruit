@@ -717,6 +717,174 @@ export default function CandidateProfile() {
               )}
             </CardContent>
           </Card>
+
+          {/* Skills */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {editForm.skills.split(",").map(s => s.trim()).filter(Boolean).map((skill, i) => (
+                      <Badge key={`${skill}-${i}`} variant="secondary" className="px-2.5 py-1 text-xs flex items-center gap-1">
+                        {skill}
+                        <button
+                          type="button"
+                          className="rounded-full hover:bg-muted-foreground/20 p-0.5"
+                          onClick={() => {
+                            const skills = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
+                            skills.splice(i, 1);
+                            updateField("skills", skills.join(", "));
+                          }}
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <Input
+                    placeholder="Type a skill and press Enter"
+                    className="h-8 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) {
+                          const existing = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
+                          if (!existing.includes(val)) {
+                            updateField("skills", [...existing, val].join(", "));
+                          }
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {candidate.skills.length > 0 ? candidate.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary" className="px-2.5 py-1 text-xs">
+                      {skill}
+                    </Badge>
+                  )) : (
+                    <p className="text-xs text-muted-foreground">No skills added yet</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Qualifications */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Qualifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean).map((qual, i) => (
+                      <Badge key={`${qual}-${i}`} variant="secondary" className="px-2.5 py-1 text-xs flex items-center gap-1">
+                        {qual}
+                        <button
+                          type="button"
+                          className="rounded-full hover:bg-muted-foreground/20 p-0.5"
+                          onClick={() => {
+                            const quals = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
+                            quals.splice(i, 1);
+                            updateField("qualifications", quals.join(", "));
+                          }}
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <Input
+                    placeholder="Type a qualification and press Enter"
+                    className="h-8 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) {
+                          const existing = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
+                          if (!existing.includes(val)) {
+                            updateField("qualifications", [...existing, val].join(", "));
+                          }
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {((candidate as any).qualifications || []).length > 0 ? (
+                    ((candidate as any).qualifications || []).map((qual: string) => (
+                      <Badge key={qual} variant="secondary" className="px-2.5 py-1 text-xs">
+                        {qual}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No qualifications added yet</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Education */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Education</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <Select value={editForm.education} onValueChange={(val) => updateField("education", val)}>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select education level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GCSE">GCSE</SelectItem>
+                      <SelectItem value="A-Level">A-Level</SelectItem>
+                      <SelectItem value="HND/HNC">HND/HNC</SelectItem>
+                      <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
+                      <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                      <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+                      <SelectItem value="PhD">PhD</SelectItem>
+                      <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Details (optional)</label>
+                    <Textarea
+                      value={editForm.educationDetails}
+                      onChange={e => updateField("educationDetails", e.target.value)}
+                      placeholder="e.g. BSc Computer Science, University of Manchester, 2018-2021"
+                      className="min-h-[80px] text-sm"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
+                    <GraduationCap className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{candidate.education}</p>
+                    {(candidate as any).educationDetails && (
+                      <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap leading-relaxed">{(candidate as any).educationDetails}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Content */}
@@ -739,125 +907,6 @@ export default function CandidateProfile() {
               )}
             </CardContent>
           </Card>
-
-          {/* Skills & Qualifications side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Skills</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {editForm.skills.split(",").map(s => s.trim()).filter(Boolean).map((skill, i) => (
-                        <Badge key={`${skill}-${i}`} variant="secondary" className="px-2.5 py-1 text-xs flex items-center gap-1">
-                          {skill}
-                          <button
-                            type="button"
-                            className="rounded-full hover:bg-muted-foreground/20 p-0.5"
-                            onClick={() => {
-                              const skills = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
-                              skills.splice(i, 1);
-                              updateField("skills", skills.join(", "));
-                            }}
-                          >
-                            <X className="w-2.5 h-2.5" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                    <Input
-                      placeholder="Type a skill and press Enter"
-                      className="h-8 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const val = (e.target as HTMLInputElement).value.trim();
-                          if (val) {
-                            const existing = editForm.skills.split(",").map(s => s.trim()).filter(Boolean);
-                            if (!existing.includes(val)) {
-                              updateField("skills", [...existing, val].join(", "));
-                            }
-                            (e.target as HTMLInputElement).value = "";
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {candidate.skills.length > 0 ? candidate.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="px-2.5 py-1 text-xs">
-                        {skill}
-                      </Badge>
-                    )) : (
-                      <p className="text-xs text-muted-foreground">No skills added yet</p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Qualifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean).map((qual, i) => (
-                        <Badge key={`${qual}-${i}`} variant="secondary" className="px-2.5 py-1 text-xs flex items-center gap-1">
-                          {qual}
-                          <button
-                            type="button"
-                            className="rounded-full hover:bg-muted-foreground/20 p-0.5"
-                            onClick={() => {
-                              const quals = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
-                              quals.splice(i, 1);
-                              updateField("qualifications", quals.join(", "));
-                            }}
-                          >
-                            <X className="w-2.5 h-2.5" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                    <Input
-                      placeholder="Type a qualification and press Enter"
-                      className="h-8 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const val = (e.target as HTMLInputElement).value.trim();
-                          if (val) {
-                            const existing = editForm.qualifications.split(",").map(s => s.trim()).filter(Boolean);
-                            if (!existing.includes(val)) {
-                              updateField("qualifications", [...existing, val].join(", "));
-                            }
-                            (e.target as HTMLInputElement).value = "";
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {((candidate as any).qualifications || []).length > 0 ? (
-                      ((candidate as any).qualifications || []).map((qual: string) => (
-                        <Badge key={qual} variant="secondary" className="px-2.5 py-1 text-xs">
-                          {qual}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-xs text-muted-foreground">No qualifications added yet</p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Preferences */}
           <Card className="bg-card">
@@ -1071,55 +1120,6 @@ export default function CandidateProfile() {
             </CardContent>
           </Card>
 
-          {/* Education */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Education</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <div className="space-y-3">
-                  <Select value={editForm.education} onValueChange={(val) => updateField("education", val)}>
-                    <SelectTrigger className="h-8 text-sm">
-                      <SelectValue placeholder="Select education level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GCSE">GCSE</SelectItem>
-                      <SelectItem value="A-Level">A-Level</SelectItem>
-                      <SelectItem value="HND/HNC">HND/HNC</SelectItem>
-                      <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
-                      <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
-                      <SelectItem value="Master's Degree">Master's Degree</SelectItem>
-                      <SelectItem value="PhD">PhD</SelectItem>
-                      <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">Details (optional)</label>
-                    <Textarea
-                      value={editForm.educationDetails}
-                      onChange={e => updateField("educationDetails", e.target.value)}
-                      placeholder="e.g. BSc Computer Science, University of Manchester, 2018-2021"
-                      className="min-h-[80px] text-sm"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
-                    <GraduationCap className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{candidate.education}</p>
-                    {(candidate as any).educationDetails && (
-                      <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap leading-relaxed">{(candidate as any).educationDetails}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
