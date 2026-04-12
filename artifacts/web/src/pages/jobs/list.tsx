@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { useListJobs, getListJobsQueryKey, useGetCompanyProfile } from "@workspace/api-client-react";
+import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,8 @@ export default function JobsList() {
     }
   }, [searchString]);
 
-  const { data: companyProfile } = useGetCompanyProfile({
-    query: { enabled: role === "company" },
+  const { data: companyProfile } = useCompanyProfile({
+    enabled: role === "company",
   });
 
   const companyProfileId = companyProfile?.id;

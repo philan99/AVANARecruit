@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
-import { useRole } from "@/contexts/role-context";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -102,20 +102,7 @@ function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
-  const { companyProfileId: ctxCompanyId } = useRole();
-  const apiBasePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
-  const { data: profile } = useQuery({
-    queryKey: getGetCompanyProfileQueryKey(),
-    queryFn: async () => {
-      const url = ctxCompanyId
-        ? `${apiBasePath}/company-profile?companyId=${ctxCompanyId}`
-        : `${apiBasePath}/company-profile`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch company profile");
-      return res.json();
-    },
-    retry: false,
-  });
+  const { data: profile } = useCompanyProfile();
   const companyProfileId = profile?.id;
 
   const statsParams = companyProfileId ? { companyProfileId } : {};

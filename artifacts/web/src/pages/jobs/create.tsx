@@ -1,10 +1,11 @@
 import { useLocation } from "wouter";
-import { useCreateJob, getListJobsQueryKey, useGetCompanyProfile } from "@workspace/api-client-react";
+import { useCreateJob, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRole } from "@/contexts/role-context";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,8 +46,8 @@ export default function CreateJob() {
   const { toast } = useToast();
   const { role } = useRole();
 
-  const { data: companyProfile } = useGetCompanyProfile({
-    query: { enabled: role === "company" },
+  const { data: companyProfile } = useCompanyProfile({
+    enabled: role === "company",
   });
 
   const companyProfileId = companyProfile?.id;
