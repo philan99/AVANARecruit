@@ -286,7 +286,7 @@ export default function CandidateProfile() {
     });
   }
 
-  function updateField(field: keyof EditFormState, value: string | number) {
+  function updateField(field: keyof EditFormState, value: string | number | string[]) {
     setEditForm(prev => ({ ...prev, [field]: value }));
   }
 
