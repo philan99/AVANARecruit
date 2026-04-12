@@ -95,7 +95,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center text-sm text-muted-foreground mb-4">
         <button onClick={() => window.history.back()} className="hover:text-primary flex items-center cursor-pointer bg-transparent border-none p-0">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back
@@ -138,8 +138,8 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 pt-4">
+        <div className="lg:col-span-2">
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-lg">Description</CardTitle>
@@ -151,25 +151,10 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
               />
             </CardContent>
           </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Required Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="px-2 py-1 text-xs">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-card h-fit">
+        <div className="space-y-6">
+          <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-lg">Job Details</CardTitle>
             </CardHeader>
@@ -238,7 +223,24 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-primary/20 h-fit">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Required Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {job.skills.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="px-2 py-1 text-xs">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <Card className="bg-card border-primary/20">
             <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
               <CardTitle className="text-lg">AI Match Score</CardTitle>
             </CardHeader>
