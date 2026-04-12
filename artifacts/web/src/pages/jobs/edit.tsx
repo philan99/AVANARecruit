@@ -32,7 +32,6 @@ const editFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  requirements: z.string().min(10, "Requirements must be at least 10 characters"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
   salaryMin: z.coerce.number().optional(),
@@ -58,7 +57,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
       title: "",
       location: "",
       description: "",
-      requirements: "",
       skills: "",
       experienceLevel: "mid" as const,
       status: "open" as const,
@@ -71,7 +69,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
         title: job.title,
         location: job.location,
         description: job.description,
-        requirements: job.requirements,
         skills: job.skills.join(", "),
         experienceLevel: job.experienceLevel as any,
         salaryMin: job.salaryMin ?? undefined,
@@ -233,31 +230,17 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Description</FormLabel>
-                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="requirements"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Requirements</FormLabel>
-                      <FormControl><Textarea className="h-40" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Description</FormLabel>
+                    <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => navigate(`/jobs/${jobId}`)}>
