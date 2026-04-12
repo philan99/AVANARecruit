@@ -247,6 +247,13 @@ export default function RoleSelect() {
             >
               Pricing
             </a>
+            <a
+              href="#contact"
+              onClick={(e) => { e.preventDefault(); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
+            >
+              Contact Us
+            </a>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -567,6 +574,43 @@ export default function RoleSelect() {
               Create Account
               <ChevronRight className="w-4 h-4 ml-1 inline" />
             </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="max-w-3xl mx-auto px-6 lg:px-10 text-center">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+            Contact Us
+          </p>
+          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+            Get in Touch
+          </h2>
+          <p className="text-base mb-10 max-w-lg mx-auto" style={{ color: "#6b7280" }}>
+            Have a question or want to learn more about how AVANA Recruitment can help? We'd love to hear from you.
+          </p>
+          <div className="grid md:grid-cols-3 gap-8 mb-10">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                <Globe className="w-5 h-5" style={{ color: "#4CAF50" }} />
+              </div>
+              <h3 className="text-sm font-semibold" style={{ color: "#1a2035" }}>Email</h3>
+              <a href="mailto:info@avanaservices.co.uk" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>info@avanaservices.co.uk</a>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                <Globe className="w-5 h-5" style={{ color: "#4CAF50" }} />
+              </div>
+              <h3 className="text-sm font-semibold" style={{ color: "#1a2035" }}>Website</h3>
+              <a href="https://www.avanaservices.co.uk" target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>www.avanaservices.co.uk</a>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                <Building2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
+              </div>
+              <h3 className="text-sm font-semibold" style={{ color: "#1a2035" }}>Office</h3>
+              <p className="text-sm" style={{ color: "#6b7280" }}>London, United Kingdom</p>
+            </div>
           </div>
         </div>
       </section>
