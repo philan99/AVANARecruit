@@ -35,6 +35,7 @@ const formSchema = z.object({
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
+  workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"]).default("open"),
@@ -61,6 +62,7 @@ export default function CreateJob() {
       description: "",
       skills: "",
       experienceLevel: "mid",
+      workplace: "office",
       status: "open",
     },
   });
@@ -145,6 +147,28 @@ export default function CreateJob() {
                           <SelectItem value="senior">Senior</SelectItem>
                           <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="workplace"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workplace</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select workplace" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="remote">Remote</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

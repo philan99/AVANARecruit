@@ -34,6 +34,7 @@ const editFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
+  workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"]),
@@ -59,6 +60,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
       description: "",
       skills: "",
       experienceLevel: "mid" as const,
+      workplace: "office" as const,
       status: "open" as const,
     },
   });
@@ -71,6 +73,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
         description: job.description,
         skills: job.skills.join(", "),
         experienceLevel: job.experienceLevel as any,
+        workplace: (job as any).workplace ?? "office",
         salaryMin: job.salaryMin ?? undefined,
         salaryMax: job.salaryMax ?? undefined,
         status: job.status as any,
@@ -166,6 +169,28 @@ export default function EditJob({ params }: { params: { id: string } }) {
                           <SelectItem value="senior">Senior</SelectItem>
                           <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="workplace"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workplace</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select workplace" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="remote">Remote</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

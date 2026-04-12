@@ -14,6 +14,7 @@ export const jobsTable = pgTable("jobs", {
   experienceLevel: text("experience_level").notNull().default("mid"),
   salaryMin: integer("salary_min"),
   salaryMax: integer("salary_max"),
+  workplace: text("workplace").notNull().default("office"),
   status: text("status").notNull().default("open"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
