@@ -200,8 +200,8 @@ export default function Dashboard() {
                     itemStyle={{ color: 'hsl(var(--foreground))' }}
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                  <Bar dataKey="jobCount" name="Required in Jobs" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="candidateCount" name="Found in Candidates" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="jobCount" name="Required in Jobs" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="candidateCount" name="Found in Candidates" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
