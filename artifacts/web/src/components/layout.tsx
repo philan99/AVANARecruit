@@ -25,7 +25,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
-  const { role, clearRole } = useRole();
+  const { role, clearRole, userEmail } = useRole();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const companyNavItems = [
@@ -83,9 +83,16 @@ export function Layout({ children }: LayoutProps) {
           </nav>
 
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-block text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
-              {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
-            </span>
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
+                {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
+              </span>
+              {userEmail && (
+                <span className="text-[10px] text-sidebar-foreground/40 truncate max-w-[180px]">
+                  {userEmail}
+                </span>
+              )}
+            </div>
             <button
               onClick={clearRole}
               className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"

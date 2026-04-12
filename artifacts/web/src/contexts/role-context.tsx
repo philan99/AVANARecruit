@@ -10,6 +10,8 @@ interface RoleContextType {
   setCandidateProfileId: (id: number | null) => void;
   companyProfileId: number | null;
   setCompanyProfileId: (id: number | null) => void;
+  userEmail: string | null;
+  setUserEmail: (email: string | null) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 const ROLE_KEY = "avanatalent_role";
 const CANDIDATE_ID_KEY = "avanatalent_candidate_id";
 const COMPANY_ID_KEY = "avanatalent_company_id";
+const EMAIL_KEY = "avanatalent_email";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {
@@ -34,6 +37,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return stored ? parseInt(stored, 10) : null;
   });
 
+  const [userEmail, setUserEmailState] = useState<string | null>(() => {
+    return localStorage.getItem(EMAIL_KEY);
+  });
+
   const setRole = useCallback((newRole: UserRole) => {
     localStorage.setItem(ROLE_KEY, newRole);
     setRoleState(newRole);
@@ -43,9 +50,11 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(CANDIDATE_ID_KEY);
     localStorage.removeItem(COMPANY_ID_KEY);
+    localStorage.removeItem(EMAIL_KEY);
     setRoleState(null);
     setCandidateProfileIdState(null);
     setCompanyProfileIdState(null);
+    setUserEmailState(null);
   }, []);
 
   const setCandidateProfileId = useCallback((id: number | null) => {
@@ -66,8 +75,17 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setCompanyProfileIdState(id);
   }, []);
 
+  const setUserEmail = useCallback((email: string | null) => {
+    if (email) {
+      localStorage.setItem(EMAIL_KEY, email);
+    } else {
+      localStorage.removeItem(EMAIL_KEY);
+    }
+    setUserEmailState(email);
+  }, []);
+
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, userEmail, setUserEmail }}>
       {children}
     </RoleContext.Provider>
   );

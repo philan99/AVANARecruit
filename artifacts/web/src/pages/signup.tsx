@@ -12,7 +12,7 @@ import { Link, useLocation } from "wouter";
 type SignUpRole = "company" | "candidate";
 
 export default function SignUp() {
-  const { setRole, setCandidateProfileId, setCompanyProfileId } = useRole();
+  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [selected, setSelected] = useState<SignUpRole | null>(null);
@@ -68,6 +68,7 @@ export default function SignUp() {
       const data = await res.json();
       toast({ title: "Company account created!" });
       setCompanyProfileId(data.id);
+      setUserEmail(companyForm.email.trim());
       setRole("company");
       navigate("/company-profile");
     } catch {
@@ -111,6 +112,7 @@ export default function SignUp() {
           if (data?.id) {
             setCandidateProfileId(data.id);
           }
+          setUserEmail(candidateForm.email.trim());
           setRole("candidate");
           navigate("/");
         },

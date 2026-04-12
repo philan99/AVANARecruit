@@ -15,7 +15,7 @@ export default function RoleSelect() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { setCandidateProfileId, setCompanyProfileId } = useRole();
+  const { setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
   const [, setLocation] = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,6 +38,7 @@ export default function RoleSelect() {
           body: JSON.stringify({ email, password }),
         });
         if (res.ok) {
+          setUserEmail(email);
           setRole("admin");
           setLocation("/");
         } else {
@@ -52,6 +53,7 @@ export default function RoleSelect() {
         if (res.ok) {
           const data = await res.json();
           setCandidateProfileId(data.candidateId);
+          setUserEmail(email);
           setRole("candidate");
           setLocation("/");
         } else {
@@ -67,6 +69,7 @@ export default function RoleSelect() {
         if (res.ok) {
           const data = await res.json();
           setCompanyProfileId(data.companyId);
+          setUserEmail(email);
           setRole("company");
           setLocation("/");
         } else {
