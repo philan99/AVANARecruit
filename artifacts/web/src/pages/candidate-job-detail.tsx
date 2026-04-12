@@ -152,13 +152,13 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                <div className="flex items-center text-muted-foreground">
-                  <Building className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{job.company}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Company</span>
+                  <span className="font-medium">{job.company}</span>
                 </div>
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2 shrink-0" />
-                  <span>{job.location}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="font-medium">{job.location}</span>
                 </div>
                 {job.jobType && (
                   <div className="flex justify-between">
