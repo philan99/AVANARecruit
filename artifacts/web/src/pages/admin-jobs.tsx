@@ -54,6 +54,19 @@ export default function AdminJobs() {
   const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
   const [educationFilter, setEducationFilter] = useState(urlParams.get("education") || "all");
 
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    setSearchQuery(params.get("search") || "");
+    setStatusFilter(params.get("status") || "all");
+    setLocationFilter(params.get("location") || "all");
+    setLevelFilter(params.get("level") || "all");
+    setCompanyFilter(params.get("company") || "all");
+    setJobTypeFilter(params.get("jobType") || "all");
+    setWorkplaceFilter(params.get("workplace") || "all");
+    setIndustryFilter(params.get("industry") || "all");
+    setEducationFilter(params.get("education") || "all");
+  }, [searchString]);
+
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   useEffect(() => {
