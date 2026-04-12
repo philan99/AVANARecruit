@@ -929,6 +929,8 @@ components:
       properties:
         id:
           type: integer
+        candidateId:
+          type: integer
         jobTitle:
           type: string
         candidateName:
@@ -942,6 +944,7 @@ components:
           format: date-time
       required:
         - id
+        - candidateId
         - jobTitle
         - candidateName
         - overallScore

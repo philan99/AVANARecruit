@@ -377,6 +377,7 @@ export const GetRecentMatchesQueryParams = zod.object({
 
 export const GetRecentMatchesResponseItem = zod.object({
   id: zod.number(),
+  candidateId: zod.number(),
   jobTitle: zod.string(),
   candidateName: zod.string(),
   overallScore: zod.number(),

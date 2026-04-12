@@ -263,6 +263,7 @@ router.get("/dashboard/recent-matches", async (req, res): Promise<void> => {
   const matches = await db
     .select({
       id: matchesTable.id,
+      candidateId: matchesTable.candidateId,
       jobTitle: jobsTable.title,
       candidateName: candidatesTable.name,
       overallScore: matchesTable.overallScore,

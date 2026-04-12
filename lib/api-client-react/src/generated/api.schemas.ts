@@ -303,6 +303,7 @@ export interface DashboardStats {
 
 export interface RecentMatch {
   id: number;
+  candidateId: number;
   jobTitle: string;
   candidateName: string;
   overallScore: number;
