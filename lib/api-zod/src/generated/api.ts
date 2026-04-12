@@ -52,7 +52,7 @@ export const CreateJobBody = zod.object({
   companyProfileId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
-  requirements: zod.string(),
+  requirements: zod.string().optional(),
   skills: zod.array(zod.string()),
   experienceLevel: zod.enum(["junior", "mid", "senior", "lead", "executive"]),
   salaryMin: zod.number().nullish(),

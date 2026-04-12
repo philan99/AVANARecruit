@@ -588,7 +588,6 @@ components:
         - company
         - location
         - description
-        - requirements
         - skills
         - experienceLevel
 

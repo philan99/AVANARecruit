@@ -76,7 +76,7 @@ export interface CreateJobBody {
   companyProfileId?: number | null;
   location: string;
   description: string;
-  requirements: string;
+  requirements?: string;
   skills: string[];
   experienceLevel: CreateJobBodyExperienceLevel;
   /** @nullable */
