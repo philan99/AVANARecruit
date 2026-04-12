@@ -37,6 +37,10 @@ interface Candidate {
   status: string;
   createdAt: string;
   updatedAt: string;
+  preferredJobTypes: string[];
+  preferredWorkplaces: string[];
+  preferredIndustries: string[];
+  qualifications: string[];
 }
 
 export default function AdminCandidates() {
@@ -56,6 +60,10 @@ export default function AdminCandidates() {
   const [statusFilter, setStatusFilter] = useState(urlParams.get("status") || "all");
   const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
   const [skillFilter, setSkillFilter] = useState(urlParams.get("skill") || "all");
+  const [jobTypeFilter, setJobTypeFilter] = useState(urlParams.get("jobType") || "all");
+  const [workplaceFilter, setWorkplaceFilter] = useState(urlParams.get("workplace") || "all");
+  const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
+  const [educationFilter, setEducationFilter] = useState(urlParams.get("education") || "all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -83,6 +91,26 @@ export default function AdminCandidates() {
     return Array.from(skills).sort();
   }, [candidates]);
 
+  const uniqueJobTypes = useMemo(() => {
+    const types = new Set(candidates.flatMap(c => c.preferredJobTypes || []));
+    return Array.from(types).sort();
+  }, [candidates]);
+
+  const uniqueWorkplaces = useMemo(() => {
+    const wps = new Set(candidates.flatMap(c => c.preferredWorkplaces || []));
+    return Array.from(wps).sort();
+  }, [candidates]);
+
+  const uniqueIndustries = useMemo(() => {
+    const inds = new Set(candidates.flatMap(c => c.preferredIndustries || []));
+    return Array.from(inds).sort();
+  }, [candidates]);
+
+  const uniqueEducation = useMemo(() => {
+    const edus = new Set(candidates.map(c => c.education).filter(Boolean));
+    return Array.from(edus).sort();
+  }, [candidates]);
+
   const filtered = useMemo(() => {
     return candidates.filter(c => {
       if (searchQuery) {
@@ -96,17 +124,25 @@ export default function AdminCandidates() {
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
       if (locationFilter !== "all" && c.location !== locationFilter) return false;
       if (skillFilter !== "all" && !c.skills.includes(skillFilter)) return false;
+      if (jobTypeFilter !== "all" && !(c.preferredJobTypes || []).includes(jobTypeFilter)) return false;
+      if (workplaceFilter !== "all" && !(c.preferredWorkplaces || []).includes(workplaceFilter)) return false;
+      if (industryFilter !== "all" && !(c.preferredIndustries || []).includes(industryFilter)) return false;
+      if (educationFilter !== "all" && c.education !== educationFilter) return false;
       return true;
     });
-  }, [candidates, searchQuery, statusFilter, locationFilter, skillFilter]);
+  }, [candidates, searchQuery, statusFilter, locationFilter, skillFilter, jobTypeFilter, workplaceFilter, industryFilter, educationFilter]);
 
-  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || skillFilter !== "all";
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || locationFilter !== "all" || skillFilter !== "all" || jobTypeFilter !== "all" || workplaceFilter !== "all" || industryFilter !== "all" || educationFilter !== "all";
 
   function clearFilters() {
     setSearchQuery("");
     setStatusFilter("all");
     setLocationFilter("all");
     setSkillFilter("all");
+    setJobTypeFilter("all");
+    setWorkplaceFilter("all");
+    setIndustryFilter("all");
+    setEducationFilter("all");
   }
 
   async function handleResetPassword() {
@@ -225,6 +261,68 @@ export default function AdminCandidates() {
             )}
           </div>
 
+          <div className="flex flex-wrap items-end gap-3 mt-3">
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Job Type</Label>
+              <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Job Types</SelectItem>
+                  {uniqueJobTypes.map(t => (
+                    <SelectItem key={t} value={t}>{t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[140px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Workplace</Label>
+              <Select value={workplaceFilter} onValueChange={setWorkplaceFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Workplaces</SelectItem>
+                  {uniqueWorkplaces.map(w => (
+                    <SelectItem key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[180px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Pref. Industry</Label>
+              <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Industries</SelectItem>
+                  {uniqueIndustries.map(i => (
+                    <SelectItem key={i} value={i}>{i.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-[160px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Education</Label>
+              <Select value={educationFilter} onValueChange={setEducationFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  {uniqueEducation.map(e => (
+                    <SelectItem key={e} value={e}>{e}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {hasActiveFilters && (
             <p className="text-[11px] text-muted-foreground mt-3">
               Showing {filtered.length} of {candidates.length} candidates
@@ -244,6 +342,9 @@ export default function AdminCandidates() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Exp</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Type</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Workplace</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
@@ -267,6 +368,34 @@ export default function AdminCandidates() {
                       <td className="py-2 px-2 text-muted-foreground">{candidate.currentTitle}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.location}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.experienceYears}y</td>
+                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
+                        {candidate.education || "—"}
+                      </td>
+                      <td className="py-2 px-2">
+                        <div className="flex flex-wrap gap-1">
+                          {(candidate.preferredJobTypes || []).slice(0, 1).map(t => (
+                            <Badge key={t} variant="outline" className="text-[8px] px-1 py-0">
+                              {t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                            </Badge>
+                          ))}
+                          {(candidate.preferredJobTypes || []).length > 1 && (
+                            <Badge variant="outline" className="text-[8px] px-1 py-0">
+                              +{(candidate.preferredJobTypes || []).length - 1}
+                            </Badge>
+                          )}
+                          {(candidate.preferredJobTypes || []).length === 0 && <span className="text-muted-foreground">—</span>}
+                        </div>
+                      </td>
+                      <td className="py-2 px-2">
+                        <div className="flex flex-wrap gap-1">
+                          {(candidate.preferredWorkplaces || []).map(w => (
+                            <Badge key={w} variant="outline" className="text-[8px] px-1 py-0">
+                              {w.charAt(0).toUpperCase() + w.slice(1)}
+                            </Badge>
+                          ))}
+                          {(candidate.preferredWorkplaces || []).length === 0 && <span className="text-muted-foreground">—</span>}
+                        </div>
+                      </td>
                       <td className="py-2 px-2">
                         <div className="flex flex-wrap gap-1">
                           {candidate.skills.slice(0, 2).map((skill) => (
