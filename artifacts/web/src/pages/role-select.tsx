@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock } from "lucide-react";
+import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
@@ -134,6 +134,22 @@ export default function RoleSelect() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <img src={logoUrl} alt="Avana Talent" className="h-7" />
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            <a
+              href="#services"
+              onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
+            >
+              Our Services
+            </a>
+            <a
+              href="#pricing"
+              onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
+            >
+              Pricing
+            </a>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowLogin(true)}
@@ -186,11 +202,11 @@ export default function RoleSelect() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+      <section id="services" className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
-              Platform Capabilities
+              Our Services
             </p>
             <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
               Expertise That Transforms
@@ -332,7 +348,95 @@ export default function RoleSelect() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+      <section id="pricing" className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+              Pricing
+            </p>
+            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
+              Choose a plan that fits your recruitment needs. No hidden fees.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Starter</p>
+              <div className="mb-1">
+                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Free</span>
+              </div>
+              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>Perfect for candidates exploring opportunities</p>
+              <ul className="space-y-3 mb-8 flex-1">
+                {["Create candidate profile", "Browse all open jobs", "AI match scoring", "Save favourite jobs", "Email notifications"].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
+                    <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup">
+                <button className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50" style={{ borderColor: "#d1d5db", color: "#1a2035" }}>
+                  Get Started
+                </button>
+              </Link>
+            </div>
+
+            <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#1a2035", border: "2px solid #4CAF50" }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
+                Most Popular
+              </div>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Professional</p>
+              <div className="mb-1">
+                <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>£199</span>
+                <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span>
+              </div>
+              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For growing companies hiring regularly</p>
+              <ul className="space-y-3 mb-8 flex-1">
+                {["Up to 10 active job listings", "AI candidate matching", "Candidate pipeline management", "Skills-based scoring engine", "Priority email support", "Company profile page"].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
+                    <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+              >
+                Start Free Trial
+              </button>
+            </div>
+
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Enterprise</p>
+              <div className="mb-1">
+                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Custom</span>
+              </div>
+              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large organisations with bespoke needs</p>
+              <ul className="space-y-3 mb-8 flex-1">
+                {["Unlimited job listings", "Advanced AI matching algorithms", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
+                    <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50"
+                style={{ borderColor: "#d1d5db", color: "#1a2035" }}
+              >
+                Contact Sales
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#1a2035" }}>
         <div className="max-w-3xl mx-auto px-6 lg:px-10 text-center">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
             Get Started Today
