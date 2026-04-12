@@ -24,14 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const editFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
   salaryMin: z.coerce.number().optional(),
@@ -236,7 +236,9 @@ export default function EditJob({ params }: { params: { id: string } }) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job Description</FormLabel>
-                    <FormControl><Textarea className="h-40" {...field} /></FormControl>
+                    <FormControl>
+                      <RichTextEditor value={field.value} onChange={field.onChange} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
