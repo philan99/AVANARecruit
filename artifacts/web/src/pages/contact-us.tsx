@@ -123,19 +123,6 @@ export default function ContactUs() {
                       </div>
                     </div>
 
-                    {contactType === "company" && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
-                        <Input
-                          placeholder="Your company name"
-                          value={form.company}
-                          onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
-                          style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                          required
-                        />
-                      </div>
-                    )}
-
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Full Name <span style={{ color: "#ef4444" }}>*</span></label>
@@ -159,6 +146,19 @@ export default function ContactUs() {
                         />
                       </div>
                     </div>
+
+                    {contactType === "company" && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
+                        <Input
+                          placeholder="Your company name"
+                          value={form.company}
+                          onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
+                          style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                          required
+                        />
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Subject <span style={{ color: "#ef4444" }}>*</span></label>
