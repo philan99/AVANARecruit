@@ -102,6 +102,46 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
   res.json(GetJobMatchesResponse.parse(matches));
 });
 
+router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promise<void> => {
+  const candidateId = parseInt(req.params.candidateId, 10);
+  const jobId = parseInt(req.params.jobId, 10);
+  if (isNaN(candidateId) || isNaN(jobId)) {
+    res.status(400).json({ error: "Invalid IDs" });
+    return;
+  }
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
+  if (!candidate) { res.status(404).json({ error: "Candidate not found" }); return; }
+
+  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+  if (!job) { res.status(404).json({ error: "Job not found" }); return; }
+
+  const existing = await db.select().from(matchesTable)
+    .where(sql`${matchesTable.candidateId} = ${candidateId} AND ${matchesTable.jobId} = ${jobId}`);
+  if (existing.length > 0) {
+    res.json(existing[0]);
+    return;
+  }
+
+  const result = computeMatch(job, candidate);
+  const [match] = await db
+    .insert(matchesTable)
+    .values({
+      jobId: job.id,
+      candidateId: candidate.id,
+      overallScore: result.overallScore,
+      skillScore: result.skillScore,
+      experienceScore: result.experienceScore,
+      educationScore: result.educationScore,
+      locationScore: result.locationScore,
+      assessment: result.assessment,
+      matchedSkills: result.matchedSkills,
+      missingSkills: result.missingSkills,
+    })
+    .returning();
+  res.json(match);
+});
+
 router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
   const params = GetCandidateMatchesParams.safeParse(req.params);
   if (!params.success) {
