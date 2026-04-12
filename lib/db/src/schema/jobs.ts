@@ -15,6 +15,7 @@ export const jobsTable = pgTable("jobs", {
   salaryMin: integer("salary_min"),
   salaryMax: integer("salary_max"),
   jobType: text("job_type"),
+  industry: text("industry"),
   educationLevel: text("education_level_required"),
   workplace: text("workplace").notNull().default("office"),
   status: text("status").notNull().default("open"),

@@ -35,6 +35,7 @@ const editFormSchema = z.object({
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
   jobType: z.string().optional(),
+  industry: z.string().optional(),
   educationLevel: z.string().optional(),
   workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
@@ -76,6 +77,7 @@ export default function EditJob({ params }: { params: { id: string } }) {
         skills: job.skills.join(", "),
         experienceLevel: job.experienceLevel as any,
         jobType: (job as any).jobType ?? undefined,
+        industry: (job as any).industry ?? undefined,
         educationLevel: (job as any).educationLevel ?? undefined,
         workplace: (job as any).workplace ?? "office",
         salaryMin: job.salaryMin ?? undefined,
@@ -197,6 +199,55 @@ export default function EditJob({ params }: { params: { id: string } }) {
                           <SelectItem value="fixed_term_contract">Fixed Term Contract</SelectItem>
                           <SelectItem value="part_time">Part-time</SelectItem>
                           <SelectItem value="temporary">Temporary</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select industry" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="accounting_finance">Accounting & Finance</SelectItem>
+                          <SelectItem value="agriculture">Agriculture</SelectItem>
+                          <SelectItem value="automotive">Automotive</SelectItem>
+                          <SelectItem value="banking">Banking</SelectItem>
+                          <SelectItem value="construction">Construction</SelectItem>
+                          <SelectItem value="consulting">Consulting</SelectItem>
+                          <SelectItem value="creative_design">Creative & Design</SelectItem>
+                          <SelectItem value="education">Education</SelectItem>
+                          <SelectItem value="energy_utilities">Energy & Utilities</SelectItem>
+                          <SelectItem value="engineering">Engineering</SelectItem>
+                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="hospitality_tourism">Hospitality & Tourism</SelectItem>
+                          <SelectItem value="human_resources">Human Resources</SelectItem>
+                          <SelectItem value="insurance">Insurance</SelectItem>
+                          <SelectItem value="legal">Legal</SelectItem>
+                          <SelectItem value="logistics_supply_chain">Logistics & Supply Chain</SelectItem>
+                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                          <SelectItem value="marketing_advertising">Marketing & Advertising</SelectItem>
+                          <SelectItem value="media_entertainment">Media & Entertainment</SelectItem>
+                          <SelectItem value="nonprofit">Non-profit</SelectItem>
+                          <SelectItem value="pharmaceutical">Pharmaceutical</SelectItem>
+                          <SelectItem value="property_real_estate">Property & Real Estate</SelectItem>
+                          <SelectItem value="public_sector">Public Sector</SelectItem>
+                          <SelectItem value="retail">Retail</SelectItem>
+                          <SelectItem value="sales">Sales</SelectItem>
+                          <SelectItem value="science_research">Science & Research</SelectItem>
+                          <SelectItem value="technology">Technology</SelectItem>
+                          <SelectItem value="telecommunications">Telecommunications</SelectItem>
+                          <SelectItem value="transport">Transport</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
