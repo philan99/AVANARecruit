@@ -12,7 +12,7 @@ import { Link, useLocation } from "wouter";
 type SignUpRole = "company" | "candidate";
 
 export default function SignUp() {
-  const { setRole, setCandidateProfileId } = useRole();
+  const { setRole, setCandidateProfileId, setCompanyProfileId } = useRole();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [selected, setSelected] = useState<SignUpRole | null>(null);
@@ -34,7 +34,7 @@ export default function SignUp() {
   const createCompany = useCreateCompanyProfile();
   const createCandidate = useCreateCandidate();
 
-  const handleCompanySignUp = (e: React.FormEvent) => {
+  const handleCompanySignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyForm.name.trim() || !companyForm.email.trim() || !companyForm.password) {
       toast({ title: "All fields are required", variant: "destructive" });
@@ -48,19 +48,31 @@ export default function SignUp() {
       toast({ title: "Password must be at least 8 characters", variant: "destructive" });
       return;
     }
-    createCompany.mutate(
-      { data: { name: companyForm.name, email: companyForm.email } },
-      {
-        onSuccess: () => {
-          toast({ title: "Company account created!" });
-          setRole("company");
-          navigate("/company-profile");
-        },
-        onError: (err: any) => {
-          toast({ title: "Failed to create company", description: err?.message || "Unknown error", variant: "destructive" });
-        },
+
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    try {
+      const res = await fetch(`${basePath}/company-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: companyForm.name.trim(),
+          email: companyForm.email.trim(),
+          password: companyForm.password,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast({ title: "Failed to create company", description: data.error || "Unknown error", variant: "destructive" });
+        return;
       }
-    );
+      const data = await res.json();
+      toast({ title: "Company account created!" });
+      setCompanyProfileId(data.id);
+      setRole("company");
+      navigate("/company-profile");
+    } catch {
+      toast({ title: "Failed to create company", variant: "destructive" });
+    }
   };
 
   const handleCandidateSignUp = (e: React.FormEvent) => {

@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   useGetCompanyProfile,
-  useCreateCompanyProfile,
   getGetCompanyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
@@ -78,21 +77,37 @@ export default function CompanyProfile() {
     },
   });
 
-  const saveProfile = useCreateCompanyProfile();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const apiBasePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  async function updateProfile(data: Record<string, unknown>) {
+    if (!profile?.id) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${apiBasePath}/company-profile/${profile.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      queryClient.invalidateQueries({ queryKey: getGetCompanyProfileQueryKey() });
+      return await res.json();
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   const { uploadFile, isUploading } = useUpload({
     basePath,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const logoUrl = `${import.meta.env.BASE_URL}api/storage${response.objectPath}`.replace(/\/\//g, "/");
-      saveProfile.mutate(
-        { data: { ...form.getValues(), name: form.getValues().name || profile?.name || "My Company", logoUrl } },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getGetCompanyProfileQueryKey() });
-            toast({ title: "Logo updated", description: "Company logo has been updated." });
-          },
-        }
-      );
+      try {
+        await updateProfile({ ...form.getValues(), name: form.getValues().name || profile?.name || "My Company", logoUrl });
+        toast({ title: "Logo updated", description: "Company logo has been updated." });
+      } catch {
+        toast({ title: "Error", description: "Failed to save logo.", variant: "destructive" });
+      }
     },
     onError: (err) => {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
@@ -131,24 +146,18 @@ export default function CompanyProfile() {
     setIsEditing(true);
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const payload: Record<string, unknown> = { ...values };
     if (profile?.logoUrl) {
       payload.logoUrl = profile.logoUrl;
     }
-    saveProfile.mutate(
-      { data: payload as any },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetCompanyProfileQueryKey() });
-          toast({ title: "Profile saved", description: "Company profile has been updated." });
-          setIsEditing(false);
-        },
-        onError: () => {
-          toast({ title: "Error", description: "Failed to save profile.", variant: "destructive" });
-        },
-      }
-    );
+    try {
+      await updateProfile(payload);
+      toast({ title: "Profile saved", description: "Company profile has been updated." });
+      setIsEditing(false);
+    } catch {
+      toast({ title: "Error", description: "Failed to save profile.", variant: "destructive" });
+    }
   }
 
   function handleLogoClick() {
@@ -298,8 +307,8 @@ export default function CompanyProfile() {
                       Cancel
                     </Button>
                   )}
-                  <Button type="submit" disabled={saveProfile.isPending}>
-                    {saveProfile.isPending ? "Saving..." : hasProfile ? "Save Changes" : "Create Profile"}
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </form>

@@ -62,27 +62,63 @@ router.post("/company-profile", async (req, res) => {
     }
     const body = parsed.data;
 
-    const [existing] = await db.select().from(companyProfiles).limit(1);
+    const password = req.body.password;
 
-    if (existing) {
-      const [updated] = await db
-        .update(companyProfiles)
-        .set({
-          ...body,
-          updatedAt: sql`now()`,
-        })
-        .where(eq(companyProfiles.id, existing.id))
-        .returning();
-      return res.json(updated);
+    if (body.email) {
+      const [existingEmail] = await db
+        .select()
+        .from(companyProfiles)
+        .where(eq(companyProfiles.email, body.email));
+      if (existingEmail) {
+        return res.status(409).json({ error: "A company with this email already exists" });
+      }
+    }
+
+    let hashedPassword: string | undefined;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
     }
 
     const [created] = await db
       .insert(companyProfiles)
-      .values(body)
+      .values({
+        ...body,
+        ...(hashedPassword ? { password: hashedPassword } : {}),
+      })
       .returning();
     res.json(created);
   } catch (err) {
     req.log.error(err, "Failed to save company profile");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/company-profile/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid company ID" });
+    }
+
+    const [existing] = await db.select().from(companyProfiles).where(eq(companyProfiles.id, id));
+    if (!existing) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+
+    const { password: _pw, id: _id, createdAt: _ca, ...updateFields } = req.body;
+
+    const [updated] = await db
+      .update(companyProfiles)
+      .set({
+        ...updateFields,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(companyProfiles.id, id))
+      .returning();
+
+    res.json(updated);
+  } catch (err) {
+    req.log.error(err, "Failed to update company profile");
     res.status(500).json({ error: "Internal server error" });
   }
 });
