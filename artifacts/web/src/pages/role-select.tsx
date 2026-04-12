@@ -447,7 +447,7 @@ export default function RoleSelect() {
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
             Get Started Today
           </p>
-          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#ffffff" }}>
             Ready to Transform Your Recruitment?
           </h2>
           <p className="text-base mb-10 max-w-lg mx-auto" style={{ color: "#6b7280" }}>
