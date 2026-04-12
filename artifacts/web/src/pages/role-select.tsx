@@ -525,7 +525,7 @@ export default function RoleSelect() {
                 ))}
               </ul>
               <button
-                onClick={() => setLocation("/contact-us")}
+                onClick={() => setLocation("/contact-us?type=company")}
                 className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50"
                 style={{ borderColor: "#d1d5db", color: "#1a2035" }}
               >

@@ -3,12 +3,17 @@ import { Send, ArrowLeft, Globe, Building2, Mail } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 
 export default function ContactUs() {
   const { toast } = useToast();
+  const searchString = useSearch();
+  const params = new URLSearchParams(searchString);
+  const initialType = params.get("type");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [contactType, setContactType] = useState<"company" | "candidate" | null>(null);
+  const [contactType, setContactType] = useState<"company" | "candidate" | null>(
+    initialType === "company" ? "company" : initialType === "candidate" ? "candidate" : null
+  );
   const [form, setForm] = useState({
     name: "",
     email: "",
