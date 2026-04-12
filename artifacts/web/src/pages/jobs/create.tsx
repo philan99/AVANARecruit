@@ -41,7 +41,7 @@ const formSchema = z.object({
   workplace: z.enum(["office", "remote", "hybrid"]).default("office"),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
-  status: z.enum(["open", "closed", "draft"]).default("open"),
+  status: z.enum(["open", "closed", "draft"]).optional(),
 });
 
 export default function CreateJob() {
@@ -66,7 +66,7 @@ export default function CreateJob() {
       skills: "",
       experienceLevel: undefined,
       workplace: "office",
-      status: "open",
+      status: undefined,
     },
   });
 
