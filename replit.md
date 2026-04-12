@@ -51,6 +51,8 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/profile` — Create/select/view candidate profile
 - `/my-matches` — View AI-generated job matches with detailed scoring breakdown
 - `/browse-jobs` — Browse all open positions
+- `/browse-companies` — Browse all companies on the platform with search/filter (industry, location, size)
+- `/browse-companies/:id` — Company detail with about section, stats, and open positions listing
 - `/jobs/:id` — Job detail (read-only view)
 
 ### Pages — Admin Portal

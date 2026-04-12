@@ -1,10 +1,67 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles } from "@workspace/db";
+import { db, companyProfiles, jobsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { CreateCompanyProfileBody } from "@workspace/api-zod";
 import bcrypt from "bcryptjs";
 
 const router: IRouter = Router();
+
+router.get("/companies", async (req, res) => {
+  try {
+    const all = await db
+      .select({
+        id: companyProfiles.id,
+        name: companyProfiles.name,
+        industry: companyProfiles.industry,
+        website: companyProfiles.website,
+        location: companyProfiles.location,
+        description: companyProfiles.description,
+        logoUrl: companyProfiles.logoUrl,
+        size: companyProfiles.size,
+        founded: companyProfiles.founded,
+      })
+      .from(companyProfiles);
+    res.json(all);
+  } catch (err) {
+    req.log.error(err, "Failed to list companies");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/companies/:id", async (req, res) => {
+  try {
+    const companyId = parseInt(req.params.id, 10);
+    if (isNaN(companyId)) {
+      return res.status(400).json({ error: "Invalid company ID" });
+    }
+    const [company] = await db
+      .select({
+        id: companyProfiles.id,
+        name: companyProfiles.name,
+        industry: companyProfiles.industry,
+        website: companyProfiles.website,
+        location: companyProfiles.location,
+        description: companyProfiles.description,
+        logoUrl: companyProfiles.logoUrl,
+        size: companyProfiles.size,
+        founded: companyProfiles.founded,
+      })
+      .from(companyProfiles)
+      .where(eq(companyProfiles.id, companyId));
+    if (!company) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+    const jobs = await db
+      .select()
+      .from(jobsTable)
+      .where(eq(jobsTable.companyProfileId, companyId));
+    const openJobs = jobs.filter(j => j.status === "open");
+    res.json({ ...company, jobs: openJobs, totalJobs: jobs.length });
+  } catch (err) {
+    req.log.error(err, "Failed to get company detail");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.post("/companies/login", async (req, res) => {
   try {

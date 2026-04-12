@@ -41,6 +41,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/profile", label: "My Profile", icon: UserCircle },
     { href: "/my-matches", label: "My Matches", icon: Target },
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
+    { href: "/browse-companies", label: "Browse Companies", icon: Building2 },
   ];
 
   const adminNavItems = [
