@@ -18,6 +18,10 @@ import {
   Building,
   Award,
   Download,
+  Linkedin,
+  Github,
+  Twitter,
+  Globe,
 } from "lucide-react";
 
 interface ExperienceEntry {
@@ -326,6 +330,52 @@ export default function AdminCandidateDetail() {
               <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
             </CardContent>
           </Card>
+
+          {((candidate as any).linkedinUrl || (candidate as any).githubUrl || (candidate as any).twitterUrl || (candidate as any).portfolioUrl) && (
+            <Card className="bg-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Social Media</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(candidate as any).linkedinUrl && (
+                  <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">LinkedIn</p>
+                      <p className="text-xs text-foreground truncate">{(candidate as any).linkedinUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {(candidate as any).githubUrl && (
+                  <a href={(candidate as any).githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-gray-500/10"><Github className="w-3.5 h-3.5 text-gray-400" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">GitHub</p>
+                      <p className="text-xs text-foreground truncate">{(candidate as any).githubUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {(candidate as any).twitterUrl && (
+                  <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">X / Twitter</p>
+                      <p className="text-xs text-foreground truncate">{(candidate as any).twitterUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {(candidate as any).portfolioUrl && (
+                  <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Portfolio / Website</p>
+                      <p className="text-xs text-foreground truncate">{(candidate as any).portfolioUrl}</p>
+                    </div>
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-card">
             <CardHeader className="pb-2">

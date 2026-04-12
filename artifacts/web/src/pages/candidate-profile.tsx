@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Github, Globe, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExperienceEntry {
@@ -43,6 +43,10 @@ interface EditFormState {
   education: string;
   educationDetails: string;
   location: string;
+  linkedinUrl: string;
+  githubUrl: string;
+  twitterUrl: string;
+  portfolioUrl: string;
 }
 
 export default function CandidateProfile() {
@@ -147,6 +151,7 @@ export default function CandidateProfile() {
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
     summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, education: "", educationDetails: "", location: "",
+    linkedinUrl: "", githubUrl: "", twitterUrl: "", portfolioUrl: "",
   });
 
   useEffect(() => {
@@ -166,6 +171,10 @@ export default function CandidateProfile() {
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
+        linkedinUrl: (candidate as any).linkedinUrl || "",
+        githubUrl: (candidate as any).githubUrl || "",
+        twitterUrl: (candidate as any).twitterUrl || "",
+        portfolioUrl: (candidate as any).portfolioUrl || "",
       });
       const exp = (candidate as any).experience;
       if (Array.isArray(exp)) {
@@ -191,6 +200,10 @@ export default function CandidateProfile() {
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
+        linkedinUrl: (candidate as any).linkedinUrl || "",
+        githubUrl: (candidate as any).githubUrl || "",
+        twitterUrl: (candidate as any).twitterUrl || "",
+        portfolioUrl: (candidate as any).portfolioUrl || "",
       });
     }
     setIsEditing(true);
@@ -252,6 +265,10 @@ export default function CandidateProfile() {
       educationDetails: editForm.educationDetails || null,
       location: editForm.location,
       experience: experienceList,
+      linkedinUrl: editForm.linkedinUrl || null,
+      githubUrl: editForm.githubUrl || null,
+      twitterUrl: editForm.twitterUrl || null,
+      portfolioUrl: editForm.portfolioUrl || null,
     };
 
     try {
@@ -971,6 +988,112 @@ export default function CandidateProfile() {
               </div>
               {(candidate as any).educationDetails && (
                 <p className="text-sm text-muted-foreground ml-7 whitespace-pre-wrap">{(candidate as any).educationDetails}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Social Media</CardTitle>
+          <p className="text-sm text-muted-foreground">Add your social media and professional links</p>
+        </CardHeader>
+        <CardContent>
+          {isEditing ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+                </label>
+                <Input
+                  value={editForm.linkedinUrl}
+                  onChange={e => updateField("linkedinUrl", e.target.value)}
+                  placeholder="https://linkedin.com/in/yourprofile"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Github className="w-3.5 h-3.5" /> GitHub
+                </label>
+                <Input
+                  value={editForm.githubUrl}
+                  onChange={e => updateField("githubUrl", e.target.value)}
+                  placeholder="https://github.com/yourusername"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Twitter className="w-3.5 h-3.5" /> X / Twitter
+                </label>
+                <Input
+                  value={editForm.twitterUrl}
+                  onChange={e => updateField("twitterUrl", e.target.value)}
+                  placeholder="https://x.com/yourhandle"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" /> Portfolio / Website
+                </label>
+                <Input
+                  value={editForm.portfolioUrl}
+                  onChange={e => updateField("portfolioUrl", e.target.value)}
+                  placeholder="https://yourportfolio.com"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {!(candidate as any)?.linkedinUrl && !(candidate as any)?.githubUrl && !(candidate as any)?.twitterUrl && !(candidate as any)?.portfolioUrl ? (
+                <p className="text-sm text-muted-foreground text-center py-2">No social media links added yet. Click Edit to add your links.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(candidate as any)?.linkedinUrl && (
+                    <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                      <div className="p-2 rounded-lg bg-blue-500/10">
+                        <Linkedin className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-muted-foreground">LinkedIn</p>
+                        <p className="text-sm text-foreground truncate">{(candidate as any).linkedinUrl}</p>
+                      </div>
+                    </a>
+                  )}
+                  {(candidate as any)?.githubUrl && (
+                    <a href={(candidate as any).githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                      <div className="p-2 rounded-lg bg-gray-500/10">
+                        <Github className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-muted-foreground">GitHub</p>
+                        <p className="text-sm text-foreground truncate">{(candidate as any).githubUrl}</p>
+                      </div>
+                    </a>
+                  )}
+                  {(candidate as any)?.twitterUrl && (
+                    <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                      <div className="p-2 rounded-lg bg-sky-500/10">
+                        <Twitter className="w-4 h-4 text-sky-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-muted-foreground">X / Twitter</p>
+                        <p className="text-sm text-foreground truncate">{(candidate as any).twitterUrl}</p>
+                      </div>
+                    </a>
+                  )}
+                  {(candidate as any)?.portfolioUrl && (
+                    <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                      <div className="p-2 rounded-lg bg-green-500/10">
+                        <Globe className="w-4 h-4 text-green-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-muted-foreground">Portfolio / Website</p>
+                        <p className="text-sm text-foreground truncate">{(candidate as any).portfolioUrl}</p>
+                      </div>
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           )}

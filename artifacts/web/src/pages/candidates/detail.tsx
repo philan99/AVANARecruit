@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send,
+  Monitor, Building, Award, Send, Linkedin, Github, Twitter, Globe,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 
@@ -347,6 +347,52 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
               <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
             </CardContent>
           </Card>
+
+          {(c.linkedinUrl || c.githubUrl || c.twitterUrl || c.portfolioUrl) && (
+            <Card className="bg-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Social Media</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {c.linkedinUrl && (
+                  <a href={c.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">LinkedIn</p>
+                      <p className="text-xs text-foreground truncate">{c.linkedinUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {c.githubUrl && (
+                  <a href={c.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-gray-500/10"><Github className="w-3.5 h-3.5 text-gray-400" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">GitHub</p>
+                      <p className="text-xs text-foreground truncate">{c.githubUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {c.twitterUrl && (
+                  <a href={c.twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">X / Twitter</p>
+                      <p className="text-xs text-foreground truncate">{c.twitterUrl}</p>
+                    </div>
+                  </a>
+                )}
+                {c.portfolioUrl && (
+                  <a href={c.portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                    <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Portfolio / Website</p>
+                      <p className="text-xs text-foreground truncate">{c.portfolioUrl}</p>
+                    </div>
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-card">
             <CardHeader className="pb-2">
