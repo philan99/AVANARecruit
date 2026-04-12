@@ -890,24 +890,6 @@ export default function CandidateProfile() {
         {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
 
-          {/* Professional Summary */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Professional Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <Textarea
-                  className="min-h-[120px]"
-                  value={editForm.summary}
-                  onChange={e => updateField("summary", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{candidate.summary || "No summary added yet."}</p>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Preferences */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
@@ -1025,6 +1007,24 @@ export default function CandidateProfile() {
                     </div>
                   </div>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Professional Summary */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Professional Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <Textarea
+                  className="min-h-[120px]"
+                  value={editForm.summary}
+                  onChange={e => updateField("summary", e.target.value)}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{candidate.summary || "No summary added yet."}</p>
               )}
             </CardContent>
           </Card>
