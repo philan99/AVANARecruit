@@ -282,7 +282,7 @@ export default function AdminCandidates() {
                         </div>
                       </td>
                       <td className="py-2 px-2">
-                        <Badge className={`text-[8px] uppercase border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                        <Badge className={`text-[8px] uppercase border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
                           {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                         </Badge>
                       </td>

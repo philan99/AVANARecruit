@@ -47,9 +47,9 @@ interface CandidateDetail {
 }
 
 const statusStyles: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  passive: "bg-orange-100 text-orange-800",
-  not_looking: "bg-gray-100 text-gray-600",
+  active: "bg-green-500 text-white",
+  passive: "bg-orange-400 text-white",
+  not_looking: "bg-gray-400 text-white",
 };
 
 export default function AdminCandidateDetail() {

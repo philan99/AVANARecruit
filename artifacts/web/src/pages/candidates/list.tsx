@@ -186,7 +186,7 @@ export default function CandidatesList() {
               <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
                       {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                     </Badge>
                     <span className="text-xs text-muted-foreground font-mono">{candidate.experienceYears} YOE</span>
@@ -273,7 +273,7 @@ export default function CandidatesList() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-100 text-green-800' : candidate.status === 'passive' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}`}>
+                    <Badge className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
                       {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                     </Badge>
                   </td>
