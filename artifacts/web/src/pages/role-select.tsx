@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock } from "lucide-react";
-import logoUrl from "@assets/Screenshot_2026-04-11_151121_1775917058507.png";
+import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useToast } from "@/hooks/use-toast";
