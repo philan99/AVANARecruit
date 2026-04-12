@@ -126,7 +126,7 @@ export default function Dashboard() {
             <p className="text-muted-foreground mt-1">Overview of your active recruitment pipeline.</p>
           </div>
         </div>
-        <Link href="/jobs?create=true">
+        <Link href="/jobs/new">
           <Button>
             <Plus className="w-4 h-4 mr-2" /> Post Job
           </Button>

@@ -14,6 +14,7 @@ import CandidateMatches from "@/pages/candidate-matches";
 import BrowseJobs from "@/pages/browse-jobs";
 import CandidateJobDetail from "@/pages/candidate-job-detail";
 import JobsList from "@/pages/jobs/list";
+import CreateJob from "@/pages/jobs/create";
 import JobDetail from "@/pages/jobs/detail";
 import CandidatesList from "@/pages/candidates/list";
 import CandidateDetail from "@/pages/candidates/detail";
@@ -44,6 +45,7 @@ function CompanyRoutes() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/jobs" component={JobsList} />
+        <Route path="/jobs/new" component={CreateJob} />
         <Route path="/jobs/:id" component={JobDetail} />
         <Route path="/candidates" component={CandidatesList} />
         <Route path="/candidates/:id" component={CandidateDetail} />
