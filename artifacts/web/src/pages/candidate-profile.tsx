@@ -670,54 +670,6 @@ export default function CandidateProfile() {
             </CardContent>
           </Card>
 
-          {/* CV / Resume */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">CV / Resume</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {(candidate as any)?.cvFile ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/20">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <FileText className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">{(candidate as any).cvFileName || "CV Document"}</p>
-                      <p className="text-xs text-muted-foreground">Uploaded</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => cvInputRef.current?.click()} disabled={isCvUploading}>
-                      <Upload className="w-3.5 h-3.5 mr-1" /> Replace
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1 h-8 text-xs text-destructive hover:text-destructive" onClick={handleRemoveCv}>
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-colors"
-                  onClick={() => cvInputRef.current?.click()}
-                >
-                  {isCvUploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="text-xs text-muted-foreground">Uploading...</p>
-                    </div>
-                  ) : (
-                    <>
-                      <Upload className="w-8 h-8 text-muted-foreground/50 mb-2" />
-                      <p className="font-medium text-xs">Upload your CV</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">PDF or Word document</p>
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Skills */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
@@ -881,6 +833,54 @@ export default function CandidateProfile() {
                       <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap leading-relaxed">{(candidate as any).educationDetails}</p>
                     )}
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* CV / Resume */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">CV / Resume</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(candidate as any)?.cvFile ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/20">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <FileText className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm truncate">{(candidate as any).cvFileName || "CV Document"}</p>
+                      <p className="text-xs text-muted-foreground">Uploaded</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => cvInputRef.current?.click()} disabled={isCvUploading}>
+                      <Upload className="w-3.5 h-3.5 mr-1" /> Replace
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 h-8 text-xs text-destructive hover:text-destructive" onClick={handleRemoveCv}>
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-colors"
+                  onClick={() => cvInputRef.current?.click()}
+                >
+                  {isCvUploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-xs text-muted-foreground">Uploading...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-muted-foreground/50 mb-2" />
+                      <p className="font-medium text-xs">Upload your CV</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">PDF or Word document</p>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>
