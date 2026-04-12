@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List } from "lucide-react";
 
 function MultiSelectDropdown({
   label,
@@ -213,6 +213,7 @@ export default function AdminCandidates() {
 
   const [searchQuery, setSearchQuery] = useState(urlParams.get("search") || "");
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "cards">("list");
 
   const [statusFilters, setStatusFilters] = useState<Set<string>>(() => {
     const v = urlParams.get("status");
@@ -427,6 +428,23 @@ export default function AdminCandidates() {
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
             </Button>
           )}
+          <div className="flex-1" />
+          <div className="flex items-center border border-border rounded-md bg-card overflow-hidden">
+            <button
+              className={`p-2 transition-colors ${viewMode === "cards" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              onClick={() => setViewMode("cards")}
+              title="Card view"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              onClick={() => setViewMode("list")}
+              title="List view"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -576,9 +594,89 @@ export default function AdminCandidates() {
         </div>
       )}
 
-      <Card className="bg-card">
-        <CardContent className="pt-6">
-          {filtered.length > 0 ? (
+      {filtered.length === 0 ? (
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {hasActiveFilters ? "No candidates match your filters." : "No candidates registered yet."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : viewMode === "cards" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((candidate) => (
+            <Card
+              key={candidate.id}
+              className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full flex flex-col"
+              onClick={() => navigate(`/candidates/${candidate.id}`)}
+            >
+              <CardContent className="pt-5 pb-4 flex-1 flex flex-col">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                    {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-foreground truncate">{candidate.name}</h3>
+                      <Badge className={`text-[8px] uppercase border-0 shrink-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
+                        {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 mb-3 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{candidate.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <GraduationCap className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{candidate.education || "Not specified"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Briefcase className="w-3 h-3 shrink-0" />
+                    <span>{candidate.experienceYears} years experience</span>
+                  </div>
+                </div>
+
+                {(candidate.preferredJobTypes?.length > 0 || candidate.preferredWorkplaces?.length > 0) && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {(candidate.preferredJobTypes || []).map(t => (
+                      <Badge key={t} variant="outline" className="text-[9px] px-1.5 py-0.5">
+                        {formatJobType(t)}
+                      </Badge>
+                    ))}
+                    {(candidate.preferredWorkplaces || []).map(w => (
+                      <Badge key={w} variant="outline" className="text-[9px] px-1.5 py-0.5">
+                        {formatWorkplace(w)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-border mt-auto">
+                  <div className="flex flex-wrap gap-1.5">
+                    {candidate.skills.slice(0, 4).map(skill => (
+                      <span key={skill} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-0.5">
+                        {skill}
+                      </span>
+                    ))}
+                    {candidate.skills.length > 4 && (
+                      <span className="inline-flex items-center rounded-full bg-muted text-muted-foreground text-[11px] font-medium px-2.5 py-0.5">
+                        +{candidate.skills.length - 4} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="bg-card">
+          <CardContent className="pt-6">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -683,13 +781,9 @@ export default function AdminCandidates() {
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {hasActiveFilters ? "No candidates match your filters." : "No candidates registered yet."}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <Dialog open={!!resetTarget} onOpenChange={(open) => { if (!open) setResetTarget(null); }}>
         <DialogContent className="bg-card">
