@@ -37,8 +37,8 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">{candidate.name}</h1>
-            <Badge variant={candidate.status === 'active' ? 'default' : 'secondary'} className="uppercase text-[10px] tracking-wider">
-              {candidate.status}
+            <Badge variant="outline" className={`uppercase text-[10px] tracking-wider border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
+              {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
             </Badge>
           </div>
           <h2 className="text-xl text-primary font-medium mb-4">{candidate.currentTitle}</h2>
