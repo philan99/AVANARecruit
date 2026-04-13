@@ -122,7 +122,8 @@ export default function RoleSelect() {
     }
     setForgotSending(true);
     try {
-      const res = await fetch(`${apiBase}/forgot-password`, {
+      const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${basePath}/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
