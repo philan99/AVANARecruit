@@ -335,6 +335,7 @@ export default function MatchesList() {
                                     className="w-8 h-8 rounded-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
                                     onClick={() => handleUpdateStatus(match.id, group.jobId, "rejected")}
                                     disabled={updateStatus.isPending}
+                                    title="Reject Candidate"
                                   >
                                     <X className="w-4 h-4" />
                                   </Button>
@@ -344,6 +345,7 @@ export default function MatchesList() {
                                     className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
                                     onClick={() => handleUpdateStatus(match.id, group.jobId, "shortlisted")}
                                     disabled={updateStatus.isPending}
+                                    title="Shortlist Candidate"
                                   >
                                     <Check className="w-4 h-4" />
                                   </Button>
