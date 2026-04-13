@@ -684,7 +684,7 @@ export default function RoleSelect() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Candidate</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>£10</span>
@@ -701,8 +701,8 @@ export default function RoleSelect() {
               </ul>
               <button
                 onClick={() => { setSignupRole("candidate"); setShowSignup(true); }}
-                className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50"
-                style={{ borderColor: "#d1d5db", color: "#1a2035" }}
+                className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
               >
                 Get Started
               </button>
@@ -732,15 +732,15 @@ export default function RoleSelect() {
               </button>
             </div>
 
-            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#1a2035", border: "1px solid rgba(255,255,255,0.1)" }}>
               <p className="text-xs font-semibold tracking-[0.12em] uppercase mb-2 whitespace-nowrap" style={{ color: "#4CAF50" }}>Company Enterprise</p>
               <div className="mb-1">
-                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Custom</span>
+                <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>Custom</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large organisations with high-volume hiring needs</p>
+              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For large organisations with high-volume hiring needs</p>
               <ul className="space-y-3 mb-8 flex-1">
                 {["Unlimited job listings", "Advanced AI matching algorithms", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
+                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
                   </li>
@@ -748,8 +748,8 @@ export default function RoleSelect() {
               </ul>
               <button
                 onClick={() => setLocation("/contact-us?type=company")}
-                className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:bg-gray-50"
-                style={{ borderColor: "#d1d5db", color: "#1a2035" }}
+                className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:opacity-90"
+                style={{ borderColor: "rgba(255,255,255,0.2)", color: "#ffffff" }}
               >
                 Contact Sales
               </button>
