@@ -301,6 +301,25 @@ export default function CandidateProfile() {
     }
   }
 
+  async function handleCancelVerification(verificationId: number) {
+    try {
+      const res = await fetch(`${apiBase}/verifications/${verificationId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId: candidateProfileId }),
+      });
+      if (res.ok) {
+        setVerifications(prev => prev.filter(v => v.id !== verificationId));
+        toast({ title: "Verification Cancelled", description: "The pending verification request has been cancelled." });
+      } else {
+        const err = await res.json();
+        toast({ title: "Error", description: err.error || "Failed to cancel verification.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to cancel verification.", variant: "destructive" });
+    }
+  }
+
   function startEditing() {
     if (candidate) {
       setEditForm({
@@ -1004,12 +1023,18 @@ export default function CandidateProfile() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium leading-tight truncate">{v.roleTitle}</p>
                         <p className="text-xs text-muted-foreground">{v.company}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
-                          {v.verifierName} &middot;{" "}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] text-muted-foreground">{v.verifierName}</span>
+                          <span className="text-[10px] text-muted-foreground">&middot;</span>
                           <Badge variant={v.status === "verified" ? "default" : v.status === "declined" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
                             {v.status === "verified" ? "Verified" : v.status === "declined" ? "Declined" : "Pending"}
                           </Badge>
-                        </p>
+                          {v.status === "pending" && (
+                            <Button variant="ghost" size="sm" className="h-4 px-1 text-[10px] text-muted-foreground hover:text-destructive" onClick={() => handleCancelVerification(v.id)}>
+                              <X className="w-3 h-3 mr-0.5" /> Cancel
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

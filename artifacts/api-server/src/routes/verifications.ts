@@ -161,6 +161,46 @@ router.post("/verifications/token/:token/respond", async (req, res): Promise<voi
   }
 });
 
+router.delete("/verifications/:id", async (req, res): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    const { candidateId } = req.body;
+
+    if (!candidateId) {
+      res.status(400).json({ error: "candidateId is required" });
+      return;
+    }
+
+    const [verification] = await db
+      .select()
+      .from(verificationsTable)
+      .where(eq(verificationsTable.id, id));
+
+    if (!verification) {
+      res.status(404).json({ error: "Verification not found" });
+      return;
+    }
+
+    if (verification.candidateId !== candidateId) {
+      res.status(403).json({ error: "Not authorised to cancel this verification" });
+      return;
+    }
+
+    if (verification.status !== "pending") {
+      res.status(400).json({ error: "Only pending verifications can be cancelled" });
+      return;
+    }
+
+    await db
+      .delete(verificationsTable)
+      .where(eq(verificationsTable.id, id));
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to cancel verification" });
+  }
+});
+
 router.get("/candidates/:id/verifications", async (req, res): Promise<void> => {
   try {
     const candidateId = parseInt(req.params.id);
