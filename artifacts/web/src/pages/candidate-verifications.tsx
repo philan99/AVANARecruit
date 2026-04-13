@@ -14,6 +14,7 @@ interface Verification {
   company: string;
   verifierName: string;
   verifierEmail: string;
+  message: string | null;
   status: string;
   verifierResponse: string | null;
   verifiedAt: string | null;
@@ -138,6 +139,12 @@ export default function CandidateVerifications() {
                         </div>
                       )}
                     </div>
+                    {v.message && (
+                      <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Your Message</p>
+                        <p className="text-sm text-foreground">{v.message}</p>
+                      </div>
+                    )}
                     {v.verifierResponse && (
                       <div className="mt-3 p-3 bg-muted/30 rounded-lg">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Verifier Response</p>

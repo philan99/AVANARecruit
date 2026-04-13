@@ -213,7 +213,9 @@ router.get("/candidates/:id/verifications", async (req, res): Promise<void> => {
         roleTitle: verificationsTable.roleTitle,
         company: verificationsTable.company,
         verifierName: verificationsTable.verifierName,
+        message: verificationsTable.message,
         status: verificationsTable.status,
+        verifierResponse: verificationsTable.verifierResponse,
         verifiedAt: verificationsTable.verifiedAt,
         createdAt: verificationsTable.createdAt,
       })
