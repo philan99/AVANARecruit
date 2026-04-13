@@ -80,9 +80,10 @@ export default function AdminJobMatches() {
           Candidate Matches
         </h1>
         {job && (
-          <p className="text-muted-foreground mt-1">
-            Showing all matches for <Link href={`/jobs/${id}`} className="text-primary hover:underline font-medium">{job.title}</Link>
-            {" "}at {job.company}
+          <p className="text-lg font-semibold text-foreground mt-1">
+            Showing all matches for{" "}
+            <Link href={`/jobs/${id}`} className="text-primary hover:underline">{job.title}</Link>
+            <span className="text-sm font-normal text-muted-foreground ml-2">— {job.company}</span>
           </p>
         )}
       </div>
