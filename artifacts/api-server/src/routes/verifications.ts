@@ -42,9 +42,8 @@ router.post("/verifications", async (req, res): Promise<void> => {
       })
       .returning();
 
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : process.env.REPLIT_DEPLOYMENT_URL || "https://example.com";
+    const baseUrl = process.env.REPLIT_DEPLOYMENT_URL
+      || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://example.com");
 
     const verifyUrl = `${baseUrl}/verify/${token}`;
 
