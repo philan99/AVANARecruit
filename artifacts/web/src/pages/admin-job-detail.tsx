@@ -155,10 +155,6 @@ export default function AdminJobDetail() {
                   <CalendarDays className="w-4 h-4" />
                   Posted {new Date(job.createdAt).toLocaleDateString()}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {job.matchCount} {job.matchCount === 1 ? "Match" : "Matches"}
-                </span>
               </div>
             </div>
           </div>
