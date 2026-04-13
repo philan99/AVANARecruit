@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql, avg, count, and } from "drizzle-orm";
-import { db, jobsTable, candidatesTable, matchesTable } from "@workspace/db";
+import { db, jobsTable, candidatesTable, matchesTable, companyProfiles } from "@workspace/db";
+import { getResendClient } from "../lib/resend";
 import {
   RunJobMatchingParams,
   RunJobMatchingResponse,
@@ -252,6 +253,67 @@ router.patch("/matches/:id", async (req, res): Promise<void> => {
   }
 
   res.json(UpdateMatchStatusResponse.parse(match));
+});
+
+router.post("/matches/:id/contact", async (req, res): Promise<void> => {
+  const matchId = parseInt(req.params.id, 10);
+  if (isNaN(matchId)) {
+    res.status(400).json({ error: "Invalid match ID" });
+    return;
+  }
+
+  const { subject, body, companyProfileId } = req.body;
+  if (!subject || !body || !companyProfileId) {
+    res.status(400).json({ error: "subject, body, and companyProfileId are required" });
+    return;
+  }
+
+  const [match] = await db
+    .select({
+      id: matchesTable.id,
+      candidateId: matchesTable.candidateId,
+      candidateName: candidatesTable.name,
+      candidateEmail: candidatesTable.email,
+      jobTitle: jobsTable.title,
+    })
+    .from(matchesTable)
+    .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+    .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+    .where(eq(matchesTable.id, matchId));
+
+  if (!match) {
+    res.status(404).json({ error: "Match not found" });
+    return;
+  }
+
+  if (!match.candidateEmail) {
+    res.status(400).json({ error: "Candidate has no email address on file" });
+    return;
+  }
+
+  const [company] = await db
+    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .from(companyProfiles)
+    .where(eq(companyProfiles.id, companyProfileId));
+
+  try {
+    const { client, fromEmail } = await getResendClient();
+    await client.emails.send({
+      from: fromEmail,
+      to: match.candidateEmail,
+      subject,
+      replyTo: company?.email || undefined,
+      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        ${body.replace(/\n/g, "<br>")}
+        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 12px;">This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.</p>
+      </div>`,
+    });
+    res.json({ success: true, message: "Email sent successfully" });
+  } catch (err: any) {
+    console.error("Failed to send contact email:", err);
+    res.status(500).json({ error: "Failed to send email" });
+  }
 });
 
 router.get("/dashboard/stats", async (req, res): Promise<void> => {

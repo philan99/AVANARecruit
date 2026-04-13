@@ -7,7 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -51,6 +55,11 @@ export default function MatchesList() {
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
   const [verificationMap, setVerificationMap] = useState<Record<number, VerificationSummary>>({});
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [contactMatch, setContactMatch] = useState<{ id: number; candidateName: string; jobTitle: string } | null>(null);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const { data: profile } = useCompanyProfile();
@@ -139,7 +148,7 @@ export default function MatchesList() {
 
   const updateStatus = useUpdateMatchStatus();
 
-  const handleUpdateStatus = (matchId: number, jobId: number, status: "shortlisted" | "rejected" | "hired") => {
+  const handleUpdateStatus = (matchId: number, jobId: number, status: "shortlisted" | "rejected" | "hired" | "pending") => {
     updateStatus.mutate(
       { id: matchId, data: { status } },
       {
@@ -157,6 +166,53 @@ export default function MatchesList() {
         }
       }
     );
+  };
+
+  const openContactDialog = (match: MatchItem, jobTitle: string) => {
+    const companyName = profile?.name || "Our Company";
+    setContactMatch({ id: match.id, candidateName: match.candidateName, jobTitle });
+    setEmailSubject(`Regarding the ${jobTitle} opportunity at ${companyName}`);
+    setEmailBody(
+`Dear ${match.candidateName},
+
+I hope this message finds you well. We have reviewed your profile and believe you would be an excellent fit for the ${jobTitle} role at ${companyName}.
+
+We would love the opportunity to discuss this position with you further and learn more about your experience and career goals.
+
+Would you be available for a brief conversation at your earliest convenience? Please feel free to suggest a time that works best for you.
+
+We look forward to hearing from you.
+
+Kind regards,
+${companyName}`
+    );
+    setContactDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!contactMatch || !companyProfileId) return;
+    setSendingEmail(true);
+    try {
+      const res = await fetch(`${basePath}/matches/${contactMatch.id}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: emailSubject,
+          body: emailBody,
+          companyProfileId,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to send email");
+      }
+      toast({ title: "Email Sent", description: `Your message has been sent to ${contactMatch.candidateName}.` });
+      setContactDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to send email.", variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   const toggleJob = (jobId: number) => {
@@ -367,7 +423,7 @@ export default function MatchesList() {
                                     variant="outline"
                                     size="icon"
                                     className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
-                                    disabled
+                                    onClick={() => openContactDialog(match, group.jobTitle)}
                                     title="Contact Candidate"
                                   >
                                     <Send className="w-4 h-4" />
@@ -396,6 +452,65 @@ export default function MatchesList() {
           </div>
         </>
       )}
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              Contact {contactMatch?.candidateName}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Send an email regarding the <span className="font-medium">{contactMatch?.jobTitle}</span> position
+            </p>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input
+                id="email-subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Email subject..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-body">Message</Label>
+              <Textarea
+                id="email-body"
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                placeholder="Write your message..."
+                rows={14}
+                className="resize-y"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setContactDialogOpen(false)}
+              disabled={sendingEmail}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendEmail}
+              disabled={sendingEmail || !emailSubject.trim() || !emailBody.trim()}
+            >
+              {sendingEmail ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
