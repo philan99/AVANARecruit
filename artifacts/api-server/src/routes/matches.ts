@@ -316,6 +316,68 @@ router.post("/matches/:id/contact", async (req, res): Promise<void> => {
   }
 });
 
+router.post("/matches/:id/apply", async (req, res): Promise<void> => {
+  const matchId = parseInt(req.params.id, 10);
+  if (isNaN(matchId)) {
+    res.status(400).json({ error: "Invalid match ID" });
+    return;
+  }
+
+  const { subject, body, candidateId } = req.body;
+  if (!subject || !body || !candidateId) {
+    res.status(400).json({ error: "subject, body, and candidateId are required" });
+    return;
+  }
+
+  const [match] = await db
+    .select({
+      id: matchesTable.id,
+      jobId: matchesTable.jobId,
+      candidateName: candidatesTable.name,
+      candidateEmail: candidatesTable.email,
+      jobTitle: jobsTable.title,
+      companyProfileId: jobsTable.companyProfileId,
+    })
+    .from(matchesTable)
+    .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+    .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+    .where(and(eq(matchesTable.id, matchId), eq(matchesTable.candidateId, candidateId)));
+
+  if (!match) {
+    res.status(404).json({ error: "Match not found" });
+    return;
+  }
+
+  const [company] = await db
+    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .from(companyProfiles)
+    .where(eq(companyProfiles.id, match.companyProfileId));
+
+  if (!company?.email) {
+    res.status(400).json({ error: "Company has no email address on file" });
+    return;
+  }
+
+  try {
+    const { client, fromEmail } = await getResendClient();
+    await client.emails.send({
+      from: fromEmail,
+      to: company.email,
+      subject,
+      replyTo: match.candidateEmail || undefined,
+      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        ${body.replace(/\n/g, "<br>")}
+        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 12px;">This application was sent via AVANA Recruitment on behalf of ${match.candidateName}.</p>
+      </div>`,
+    });
+    res.json({ success: true, message: "Application sent successfully" });
+  } catch (err: any) {
+    console.error("Failed to send application email:", err);
+    res.status(500).json({ error: "Failed to send application" });
+  }
+});
+
 router.get("/dashboard/stats", async (req, res): Promise<void> => {
   const params = GetDashboardStatsQueryParams.safeParse(req.query);
   const companyProfileId = params.success ? params.data.companyProfileId : undefined;

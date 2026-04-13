@@ -8,14 +8,25 @@ import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CandidateJobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
   const { candidateProfileId } = useRole();
+  const { toast } = useToast();
   const [isFavourite, setIsFavourite] = useState(false);
   const [myMatch, setMyMatch] = useState<any>(null);
   const [matchLoading, setMatchLoading] = useState(false);
   const [companyWebsite, setCompanyWebsite] = useState<string | null>(null);
+  const [applyDialogOpen, setApplyDialogOpen] = useState(false);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [candidateName, setCandidateName] = useState("");
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -86,6 +97,66 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
     })();
   }, [job?.companyProfileId, apiBase]);
 
+  useEffect(() => {
+    if (!candidateProfileId) return;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/candidates/${candidateProfileId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.name) setCandidateName(data.name);
+        }
+      } catch {}
+    })();
+  }, [candidateProfileId, apiBase]);
+
+  const openApplyDialog = () => {
+    if (!job || !myMatch) return;
+    const name = candidateName || "Candidate";
+    setEmailSubject(`Application for ${job.title} - ${name}`);
+    setEmailBody(
+`Dear ${job.company},
+
+I am writing to express my strong interest in the ${job.title} position. Having reviewed the role requirements, I believe my skills and experience make me an excellent fit for this opportunity.
+
+Based on my profile analysis, I have a ${Math.round(myMatch.overallScore)}% match score for this role${myMatch.matchedSkills?.length > 0 ? `, with matched skills including ${myMatch.matchedSkills.slice(0, 5).join(", ")}` : ""}.
+
+I would welcome the opportunity to discuss how my background and qualifications align with your team's needs. I am available for an interview at your earliest convenience.
+
+Thank you for considering my application. I look forward to hearing from you.
+
+Kind regards,
+${name}`
+    );
+    setApplyDialogOpen(true);
+  };
+
+  const handleSendApplication = async () => {
+    if (!myMatch || !candidateProfileId) return;
+    setSendingEmail(true);
+    try {
+      const res = await fetch(`${apiBase}/matches/${myMatch.id}/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: emailSubject,
+          body: emailBody,
+          candidateId: candidateProfileId,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to send application");
+      }
+      toast({ title: "Application Sent", description: `Your application for ${job?.title} has been sent to ${job?.company}.` });
+      setApplyDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to send application.", variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   if (jobLoading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading job details...</div>;
   }
@@ -129,6 +200,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
               size="lg"
               variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
               className="font-mono tracking-tight"
+              onClick={openApplyDialog}
             >
               <Send className="w-4 h-4 mr-2" /> APPLY
             </Button>
@@ -306,6 +378,66 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
           </Card>
         </div>
       </div>
+
+      <Dialog open={applyDialogOpen} onOpenChange={setApplyDialogOpen}>
+        <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              Apply for {job?.title}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Send your application to <span className="font-medium">{job?.company}</span>
+            </p>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="apply-subject">Subject</Label>
+              <Input
+                id="apply-subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Email subject..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="apply-body">Message</Label>
+              <Textarea
+                id="apply-body"
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                placeholder="Write your application..."
+                rows={14}
+                className="resize-y"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setApplyDialogOpen(false)}
+              disabled={sendingEmail}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendApplication}
+              disabled={sendingEmail || !emailSubject.trim() || !emailBody.trim()}
+            >
+              {sendingEmail ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Application
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
