@@ -749,7 +749,7 @@ export default function RoleSelect() {
               <button
                 onClick={() => setLocation("/contact-us?type=company")}
                 className="w-full py-3 rounded-md text-sm font-semibold border transition-all cursor-pointer hover:opacity-90"
-                style={{ borderColor: "rgba(255,255,255,0.2)", color: "#ffffff" }}
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
               >
                 Contact Sales
               </button>
