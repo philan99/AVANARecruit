@@ -148,6 +148,21 @@ export function Layout({ children }: LayoutProps) {
       <main className="flex-1 overflow-auto">
         {children}
       </main>
+
+      <footer className="border-t border-sidebar-border bg-sidebar">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2 px-6 py-4">
+          <img src={logoUrl} alt="AVANA Recruitment" className="h-5" />
+          <div className="flex items-center gap-3">
+            <Link href="/terms" className="text-[11px] text-sidebar-foreground/30 hover:text-sidebar-foreground/50 transition-colors">
+              Terms & Conditions
+            </Link>
+            <span className="text-[11px] text-sidebar-foreground/15">|</span>
+            <p className="text-[11px] text-sidebar-foreground/30">
+              © 2026 AVANA Services Limited. Company Number: 15268633
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
