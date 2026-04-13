@@ -728,7 +728,7 @@ export default function RoleSelect() {
                 className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90"
                 style={{ backgroundColor: "#4CAF50", color: "#fff" }}
               >
-                Start Free Trial
+                Get Started
               </button>
             </div>
 
