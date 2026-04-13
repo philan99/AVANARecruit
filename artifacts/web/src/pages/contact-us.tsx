@@ -208,7 +208,7 @@ export default function ContactUs() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>Email</h3>
-                      <a href="mailto:info@avanaservices.com" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>info@avanaservices.com</a>
+                      <a href="mailto:avana_resourcing@avanaservices.com" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>avana_resourcing@avanaservices.com</a>
                     </div>
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export default function ContactUs() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>Website</h3>
-                      <a href="https://www.avanaservices.co.uk" target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>www.avanaservices.co.uk</a>
+                      <a href="https://www.avanaservices.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>avanaservices.com</a>
                     </div>
                   </div>
                 </div>
