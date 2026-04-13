@@ -42,10 +42,9 @@ router.post("/verifications", async (req, res): Promise<void> => {
       })
       .returning();
 
-    const baseUrl = process.env.REPLIT_DEPLOYMENT_URL
+    const origin = req.get("origin") || req.get("referer")?.replace(/\/$/, "")
       || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://example.com");
-
-    const verifyUrl = `${baseUrl}/verify/${token}`;
+    const verifyUrl = `${origin}/verify/${token}`;
 
     try {
       const { client, fromEmail } = await getResendClient();
