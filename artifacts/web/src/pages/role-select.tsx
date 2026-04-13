@@ -662,9 +662,15 @@ export default function RoleSelect() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <img src={logoUrl} alt="AVANA Recruitment" className="h-6" />
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-              © 2026 AVANA Services Limited. Company Number: 15268633
-            </p>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Terms & Conditions
+              </Link>
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+                © 2026 AVANA Services Limited. Company Number: 15268633
+              </p>
+            </div>
           </div>
         </div>
       </footer>

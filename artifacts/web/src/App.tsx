@@ -35,6 +35,7 @@ import AdminCandidateDetail from "@/pages/admin-candidate-detail";
 import AdminCandidateMatches from "@/pages/admin-candidate-matches";
 import AdminSettings from "@/pages/admin-settings";
 import VerifyPage from "@/pages/verify";
+import Terms from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -114,6 +115,7 @@ function AppRouter() {
       <Switch>
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/contact-us" component={ContactUs} />
+        <Route path="/terms" component={Terms} />
         <Route component={RoleSelect} />
       </Switch>
     );
