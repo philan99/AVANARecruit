@@ -124,9 +124,15 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
             <Heart className={`w-4 h-4 mr-2 ${isFavourite ? "fill-white" : ""}`} />
             {isFavourite ? "Favourited" : "Add to Favourites"}
           </Button>
-          <Button size="lg" className="font-mono tracking-tight">
-            <Send className="w-4 h-4 mr-2" /> APPLY
-          </Button>
+          {myMatch && Math.round(myMatch.overallScore) >= 50 && (
+            <Button
+              size="lg"
+              variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
+              className="font-mono tracking-tight"
+            >
+              <Send className="w-4 h-4 mr-2" /> APPLY
+            </Button>
+          )}
         </div>
       </div>
 
