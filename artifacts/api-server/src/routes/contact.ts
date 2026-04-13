@@ -35,7 +35,7 @@ router.post("/contact", async (req, res) => {
 
       await client.emails.send({
         from: fromEmail,
-        to: "enquiries@avanaservices.com",
+        to: fromEmail,
         replyTo: email.trim(),
         subject: `[AVANA Contact] ${subject.trim()}`,
         html: `
