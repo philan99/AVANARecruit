@@ -676,6 +676,11 @@ export default function RoleSelect() {
               </p>
             </div>
           </div>
+          <div className="mt-4 text-center">
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Registered Office: 85 Great Portland Street, London, W1W 7LT
+            </p>
+          </div>
         </div>
       </footer>
 
