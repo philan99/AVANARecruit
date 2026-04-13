@@ -31,6 +31,7 @@ import AdminCompanyDetail from "@/pages/admin-company-detail";
 import AdminJobDetail from "@/pages/admin-job-detail";
 import AdminJobMatches from "@/pages/admin-job-matches";
 import AdminCandidateDetail from "@/pages/admin-candidate-detail";
+import AdminCandidateMatches from "@/pages/admin-candidate-matches";
 import AdminSettings from "@/pages/admin-settings";
 import NotFound from "@/pages/not-found";
 
@@ -86,6 +87,7 @@ function AdminRoutes() {
         <Route path="/" component={AdminDashboard} />
         <Route path="/companies/:id" component={AdminCompanyDetail} />
         <Route path="/companies" component={AdminCompanies} />
+        <Route path="/candidates/:id/matches" component={AdminCandidateMatches} />
         <Route path="/candidates/:id" component={AdminCandidateDetail} />
         <Route path="/candidates" component={AdminCandidates} />
         <Route path="/jobs/:id/matches" component={AdminJobMatches} />
