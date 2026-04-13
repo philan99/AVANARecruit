@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
+import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -350,15 +350,37 @@ export default function MatchesList() {
                                 </div>
                               )}
                               {match.status === 'shortlisted' && (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  className="h-8 text-xs font-medium uppercase tracking-wider"
-                                  onClick={() => handleUpdateStatus(match.id, group.jobId, "hired")}
-                                  disabled={updateStatus.isPending}
-                                >
-                                  Mark Hired
-                                </Button>
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="w-8 h-8 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "pending")}
+                                    disabled={updateStatus.isPending}
+                                    title="Back to Pending"
+                                  >
+                                    <RotateCcw className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
+                                    disabled
+                                    title="Contact Candidate"
+                                  >
+                                    <Send className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="default"
+                                    size="icon"
+                                    className="w-8 h-8 rounded-full"
+                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "hired")}
+                                    disabled={updateStatus.isPending}
+                                    title="Mark as Hired"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </Button>
+                                </div>
                               )}
                             </TableCell>
                           </TableRow>
