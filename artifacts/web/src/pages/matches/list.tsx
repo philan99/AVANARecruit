@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 interface MatchItem {
   id: number;
@@ -41,8 +42,12 @@ export default function MatchesList() {
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const { data: profile } = useCompanyProfile();
+  const companyProfileId = profile?.id;
 
-  const { data: jobs } = useListJobs({});
+  const { data: jobs } = useListJobs(companyProfileId ? { companyProfileId } : {}, {
+    query: { enabled: !!companyProfileId }
+  });
 
   useEffect(() => {
     if (!jobs || jobs.length === 0) return;
