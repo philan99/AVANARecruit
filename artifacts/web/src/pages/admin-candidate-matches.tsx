@@ -81,6 +81,7 @@ export default function AdminCandidateMatches() {
         </h1>
         {candidate && (
           <p className="text-lg font-semibold text-foreground mt-1">
+            Showing all matches for{" "}
             <Link href={`/candidates/${id}`} className="text-primary hover:underline">
               {candidate.name}
             </Link>
