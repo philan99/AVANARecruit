@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe,
+  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 
@@ -158,11 +158,17 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
                 </span>
               </div>
             </div>
-            <div className="shrink-0">
+            <div className="shrink-0 flex flex-col gap-2">
               <Button className="gap-2" disabled>
                 <Send className="w-4 h-4" />
                 Contact Candidate
               </Button>
+              <Link href={`/candidates/${candidateId}/verifications`}>
+                <Button variant="outline" className="gap-2 w-full">
+                  <ShieldCheck className="w-4 h-4" />
+                  View Verifications
+                </Button>
+              </Link>
             </div>
           </div>
         </CardContent>
