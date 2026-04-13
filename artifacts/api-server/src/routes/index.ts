@@ -10,6 +10,7 @@ import favouritesRouter from "./favourites";
 import contactRouter from "./contact";
 import verificationsRouter from "./verifications";
 import passwordResetRouter from "./passwordReset";
+import emailVerificationRouter from "./emailVerification";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(favouritesRouter);
 router.use(contactRouter);
 router.use(verificationsRouter);
 router.use(passwordResetRouter);
+router.use(emailVerificationRouter);
 
 export default router;

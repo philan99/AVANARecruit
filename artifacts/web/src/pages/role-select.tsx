@@ -30,6 +30,10 @@ export default function RoleSelect() {
   const [showCompanyConfirm, setShowCompanyConfirm] = useState(false);
   const [showCandidatePassword, setShowCandidatePassword] = useState(false);
   const [showCandidateConfirm, setShowCandidateConfirm] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resending, setResending] = useState(false);
   const createCompany = useCreateCompanyProfile();
   const createCandidate = useCreateCandidate();
 
@@ -62,13 +66,10 @@ export default function RoleSelect() {
         toast({ title: "Failed to create company", description: data.error || "Unknown error", variant: "destructive" });
         return;
       }
-      const data = await res.json();
-      toast({ title: "Company account created!" });
-      setCompanyProfileId(data.id);
-      setUserEmail(companyForm.email.trim());
-      setRole("company");
+      toast({ title: "Company account created! Please check your email to verify." });
+      setVerificationEmail(companyForm.email.trim());
+      setVerificationSent(true);
       setShowSignup(false);
-      setLocation("/company-profile");
     } catch {
       toast({ title: "Failed to create company", variant: "destructive" });
     }
@@ -104,13 +105,11 @@ export default function RoleSelect() {
         },
       },
       {
-        onSuccess: (data: any) => {
-          toast({ title: "Candidate account created!" });
-          if (data?.id) setCandidateProfileId(data.id);
-          setUserEmail(candidateForm.email.trim());
-          setRole("candidate");
+        onSuccess: () => {
+          toast({ title: "Account created! Please check your email to verify." });
+          setVerificationEmail(candidateForm.email.trim());
+          setVerificationSent(true);
           setShowSignup(false);
-          setLocation("/");
         },
         onError: (err: any) => {
           toast({ title: "Failed to create account", description: err?.message || "Unknown error", variant: "destructive" });
@@ -185,7 +184,12 @@ export default function RoleSelect() {
           setLocation("/");
         } else {
           const data = await res.json().catch(() => ({}));
-          toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+          if (data.unverified) {
+            setUnverifiedEmail(data.email || email);
+            setShowLogin(false);
+          } else {
+            toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+          }
         }
       } else if (selected === "company") {
         const res = await fetch(`${basePath}/companies/login`, {
@@ -201,13 +205,36 @@ export default function RoleSelect() {
           setLocation("/");
         } else {
           const data = await res.json().catch(() => ({}));
-          toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+          if (data.unverified) {
+            setUnverifiedEmail(data.email || email);
+            setShowLogin(false);
+          } else {
+            toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+          }
         }
       }
     } catch {
       toast({ title: "Login failed", variant: "destructive" });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async (emailToResend: string) => {
+    setResending(true);
+    try {
+      const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${basePath}/verify-email/resend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailToResend }),
+      });
+      const data = await res.json();
+      toast({ title: data.message || "Verification email sent!" });
+    } catch {
+      toast({ title: "Failed to resend verification email", variant: "destructive" });
+    } finally {
+      setResending(false);
     }
   };
 
@@ -255,6 +282,77 @@ export default function RoleSelect() {
       description: "Every solution is built around people, ensuring candidates and companies find their perfect match.",
     },
   ];
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#f3f4f6" }}>
+        <div className="w-full max-w-md mx-4 rounded-xl shadow-lg p-8" style={{ backgroundColor: "#fff" }}>
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ backgroundColor: "#dcfce7" }}>
+              <Mail className="w-8 h-8" style={{ color: "#4CAF50" }} />
+            </div>
+            <h2 className="text-xl font-bold" style={{ color: "#1a2035" }}>Check Your Email</h2>
+            <p className="text-sm" style={{ color: "#6b7280" }}>
+              We've sent a verification link to <strong>{verificationEmail}</strong>. Please click the link in the email to activate your account.
+            </p>
+            <p className="text-xs" style={{ color: "#9ca3af" }}>The link will expire in 24 hours.</p>
+            <div className="pt-2 space-y-3">
+              <button
+                onClick={() => handleResendVerification(verificationEmail)}
+                disabled={resending}
+                className="w-full py-3 rounded-md text-sm font-semibold cursor-pointer hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: "#f3f4f6", color: "#1a2035", border: "1px solid #e5e7eb" }}
+              >
+                {resending ? "Sending..." : "Resend Verification Email"}
+              </button>
+              <button
+                onClick={() => { setVerificationSent(false); setVerificationEmail(""); }}
+                className="w-full py-3 rounded-md text-sm font-semibold cursor-pointer hover:opacity-90 transition-all"
+                style={{ backgroundColor: "#1a2035", color: "#fff" }}
+              >
+                Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (unverifiedEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#f3f4f6" }}>
+        <div className="w-full max-w-md mx-4 rounded-xl shadow-lg p-8" style={{ backgroundColor: "#fff" }}>
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ backgroundColor: "#fef3c7" }}>
+              <Mail className="w-8 h-8" style={{ color: "#f59e0b" }} />
+            </div>
+            <h2 className="text-xl font-bold" style={{ color: "#1a2035" }}>Email Not Verified</h2>
+            <p className="text-sm" style={{ color: "#6b7280" }}>
+              Your account <strong>{unverifiedEmail}</strong> hasn't been verified yet. Please check your inbox for the verification email, or request a new one below.
+            </p>
+            <div className="pt-2 space-y-3">
+              <button
+                onClick={() => handleResendVerification(unverifiedEmail)}
+                disabled={resending}
+                className="w-full py-3 rounded-md text-sm font-semibold cursor-pointer hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+              >
+                {resending ? "Sending..." : "Resend Verification Email"}
+              </button>
+              <button
+                onClick={() => { setUnverifiedEmail(""); setShowLogin(true); }}
+                className="w-full py-3 rounded-md text-sm font-semibold cursor-pointer hover:opacity-90 transition-all"
+                style={{ backgroundColor: "#1a2035", color: "#fff" }}
+              >
+                Back to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>

@@ -40,6 +40,7 @@ import VerifyPage from "@/pages/verify";
 import Terms from "@/pages/terms";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import ResetPassword from "@/pages/reset-password";
+import VerifyEmailPage from "@/pages/verify-email";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -120,6 +121,7 @@ function AppRouter() {
     return (
       <Switch>
         <Route path="/verify/:token" component={VerifyPage} />
+        <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/contact-us" component={ContactUs} />
         <Route path="/terms" component={Terms} />

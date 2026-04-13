@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const companyProfiles = pgTable("company_profiles", {
@@ -13,6 +13,7 @@ export const companyProfiles = pgTable("company_profiles", {
   logoUrl: text("logo_url"),
   size: text("size"),
   founded: text("founded"),
+  verified: boolean("verified").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });

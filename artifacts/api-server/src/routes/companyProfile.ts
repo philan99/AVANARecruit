@@ -85,6 +85,10 @@ router.post("/companies/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
+    if (!company.verified) {
+      return res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: company.email });
+    }
+
     res.json({ success: true, companyId: company.id, companyName: company.name });
   } catch (err) {
     req.log.error(err, "Company login failed");
@@ -143,6 +147,17 @@ router.post("/company-profile", async (req, res) => {
         ...(hashedPassword ? { password: hashedPassword } : {}),
       })
       .returning();
+
+    if (created.email && password) {
+      try {
+        const { sendVerificationEmail } = await import("./emailVerification");
+        const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
+        await sendVerificationEmail(created.email, "company", origin);
+      } catch (err) {
+        console.error("Failed to send verification email:", err);
+      }
+    }
+
     res.json(created);
   } catch (err) {
     req.log.error(err, "Failed to save company profile");

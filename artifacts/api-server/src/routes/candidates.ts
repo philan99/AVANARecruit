@@ -98,6 +98,7 @@ router.post("/candidates/login", async (req, res): Promise<void> => {
         name: candidatesTable.name,
         email: candidatesTable.email,
         password: candidatesTable.password,
+        verified: candidatesTable.verified,
       })
       .from(candidatesTable)
       .where(eq(candidatesTable.email, email));
@@ -110,6 +111,11 @@ router.post("/candidates/login", async (req, res): Promise<void> => {
     const valid = await bcrypt.compare(password, candidate.password);
     if (!valid) {
       res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    if (!candidate.verified) {
+      res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: candidate.email });
       return;
     }
 
@@ -133,6 +139,16 @@ router.post("/candidates", async (req, res): Promise<void> => {
   }
 
   const [candidate] = await db.insert(candidatesTable).values(insertData).returning();
+
+  if (candidate.email && password) {
+    try {
+      const { sendVerificationEmail } = await import("./emailVerification");
+      const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
+      await sendVerificationEmail(candidate.email, "candidate", origin);
+    } catch (err) {
+      console.error("Failed to send verification email:", err);
+    }
+  }
 
   const result = { ...candidate, matchCount: 0 };
   res.status(201).json(result);
