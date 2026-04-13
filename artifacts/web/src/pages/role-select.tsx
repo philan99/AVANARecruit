@@ -685,7 +685,11 @@ export default function RoleSelect() {
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Candidate</p>
+              <div className="flex items-center gap-2 mb-2">
+                <UserCircle className="w-4 h-4" style={{ color: "#4CAF50" }} />
+                <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>Candidate</p>
+                <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: "rgba(76,175,80,0.1)", color: "#4CAF50" }}>For Job Seekers</span>
+              </div>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>£10</span>
                 <span className="text-sm" style={{ color: "#6b7280" }}>/year</span>
@@ -712,12 +716,16 @@ export default function RoleSelect() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
                 Most Popular
               </div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Professional</p>
+              <div className="flex items-center gap-2 mb-2">
+                <Building2 className="w-4 h-4" style={{ color: "#4CAF50" }} />
+                <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>Professional</p>
+                <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: "rgba(76,175,80,0.15)", color: "#4CAF50" }}>For Companies</span>
+              </div>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>£199</span>
                 <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For companies hiring regularly</p>
+              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For growing businesses hiring regularly</p>
               <ul className="space-y-3 mb-8 flex-1">
                 {["Up to 10 active job listings", "AI candidate matching & scoring", "Candidate pipeline management", "Skills-based shortlisting engine", "Priority email support", "Branded company profile page"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
@@ -736,11 +744,15 @@ export default function RoleSelect() {
             </div>
 
             <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Enterprise</p>
+              <div className="flex items-center gap-2 mb-2">
+                <Building2 className="w-4 h-4" style={{ color: "#4CAF50" }} />
+                <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>Enterprise</p>
+                <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: "rgba(76,175,80,0.1)", color: "#4CAF50" }}>For Companies</span>
+              </div>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Custom</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large companies with high-volume hiring needs</p>
+              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large organisations with high-volume hiring needs</p>
               <ul className="space-y-3 mb-8 flex-1">
                 {["Unlimited job listings", "Advanced AI matching algorithms", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
