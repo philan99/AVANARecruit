@@ -29,6 +29,7 @@ interface MatchItem {
   matchedSkills: string[];
   assessment: string;
   status: string;
+  applied: boolean;
   createdAt: string;
 }
 
@@ -317,11 +318,17 @@ ${companyName}`
                       </TableHeader>
                       <TableBody>
                         {group.matches.map((match) => (
-                          <TableRow key={match.id}>
+                          <TableRow key={match.id} className={match.applied ? "bg-blue-500/5 border-l-2 border-l-blue-500" : ""}>
                             <TableCell>
                               <Link href={`/candidates/${match.candidateId}`} className="block hover:text-primary transition-colors">
                                 <div className="flex items-center gap-1.5">
                                   <span className="font-medium text-foreground">{match.candidateName}</span>
+                                  {match.applied && (
+                                    <span className="inline-flex items-center gap-0.5 bg-blue-500/10 text-blue-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide" title="Candidate has applied">
+                                      <Send className="w-3 h-3" />
+                                      Applied
+                                    </span>
+                                  )}
                                   {verificationMap[match.candidateId]?.verified > 0 && (
                                     <span className="inline-flex items-center gap-0.5 bg-green-500/10 text-green-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide" title={`${verificationMap[match.candidateId].verified} verified employment${verificationMap[match.candidateId].verified > 1 ? "s" : ""}`}>
                                       <ShieldCheck className="w-3 h-3" />

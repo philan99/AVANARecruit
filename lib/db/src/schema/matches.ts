@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, real, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { jobsTable } from "./jobs";
@@ -17,6 +17,7 @@ export const matchesTable = pgTable("matches", {
   matchedSkills: text("matched_skills").array().notNull(),
   missingSkills: text("missing_skills").array().notNull(),
   status: text("status").notNull().default("pending"),
+  applied: boolean("applied").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

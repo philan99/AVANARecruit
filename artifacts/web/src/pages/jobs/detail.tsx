@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, Pencil } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, Pencil, Send } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -229,14 +229,22 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                 </div>
               ) : (
                 <div className="divide-y divide-border">
-                  {matches?.map((match) => (
+                  {matches?.map((match: any) => (
                     <Link key={match.id} href={`/candidates/${match.candidateId}`}>
-                      <div className="p-4 hover:bg-secondary/50 transition-colors cursor-pointer group">
+                      <div className={`p-4 hover:bg-secondary/50 transition-colors cursor-pointer group ${match.applied ? "bg-blue-500/5 border-l-2 border-l-blue-500" : ""}`}>
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
-                              {match.candidateName}
-                            </h4>
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {match.candidateName}
+                              </h4>
+                              {match.applied && (
+                                <span className="inline-flex items-center gap-0.5 bg-blue-500/10 text-blue-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide">
+                                  <Send className="w-3 h-3" />
+                                  Applied
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">{match.candidateTitle}</p>
                           </div>
                           <div className="flex flex-col items-end">

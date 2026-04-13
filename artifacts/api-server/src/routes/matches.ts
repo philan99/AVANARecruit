@@ -90,6 +90,7 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
       matchedSkills: matchesTable.matchedSkills,
       missingSkills: matchesTable.missingSkills,
       status: matchesTable.status,
+      applied: matchesTable.applied,
       createdAt: matchesTable.createdAt,
       candidateName: candidatesTable.name,
       candidateTitle: candidatesTable.currentTitle,
@@ -100,7 +101,7 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
     .where(eq(matchesTable.jobId, params.data.id))
     .orderBy(desc(matchesTable.overallScore));
 
-  res.json(GetJobMatchesResponse.parse(matches));
+  res.json(matches);
 });
 
 router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promise<void> => {
@@ -371,6 +372,7 @@ router.post("/matches/:id/apply", async (req, res): Promise<void> => {
         <p style="color: #6b7280; font-size: 12px;">This application was sent via AVANA Recruitment on behalf of ${match.candidateName}.</p>
       </div>`,
     });
+    await db.update(matchesTable).set({ applied: true }).where(eq(matchesTable.id, matchId));
     res.json({ success: true, message: "Application sent successfully" });
   } catch (err: any) {
     console.error("Failed to send application email:", err);
