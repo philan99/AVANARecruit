@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
+import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
   Building,
   Award,
   Download,
+  LogIn,
   Linkedin,
   Facebook,
   Twitter,
@@ -121,6 +123,7 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
 export default function AdminCandidateDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const { impersonateCandidate } = useRole();
   const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -182,6 +185,18 @@ export default function AdminCandidateDetail() {
                 <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${statusStyles[candidate.status] || "bg-gray-100 text-gray-600"}`}>
                   {statusLabel}
                 </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs h-7 ml-auto"
+                  onClick={() => {
+                    impersonateCandidate(candidate.id, candidate.email);
+                    navigate("/");
+                  }}
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Login as Candidate
+                </Button>
               </div>
               {candidate.currentTitle && (
                 <p className="text-sm text-muted-foreground mt-1">{candidate.currentTitle}</p>

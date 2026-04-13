@@ -12,6 +12,9 @@ interface RoleContextType {
   setCompanyProfileId: (id: number | null) => void;
   userEmail: string | null;
   setUserEmail: (email: string | null) => void;
+  isImpersonating: boolean;
+  impersonateCandidate: (candidateId: number, candidateEmail: string) => void;
+  exitImpersonation: () => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ const ROLE_KEY = "avanatalent_role";
 const CANDIDATE_ID_KEY = "avanatalent_candidate_id";
 const COMPANY_ID_KEY = "avanatalent_company_id";
 const EMAIL_KEY = "avanatalent_email";
+const IMPERSONATION_KEY = "avanatalent_impersonation";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {
@@ -39,6 +43,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   const [userEmail, setUserEmailState] = useState<string | null>(() => {
     return localStorage.getItem(EMAIL_KEY);
+  });
+
+  const [isImpersonating, setIsImpersonating] = useState<boolean>(() => {
+    return localStorage.getItem(IMPERSONATION_KEY) !== null;
   });
 
   const setRole = useCallback((newRole: UserRole) => {
@@ -84,8 +92,50 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setUserEmailState(email);
   }, []);
 
+  const impersonateCandidate = useCallback((candidateId: number, candidateEmail: string) => {
+    const adminState = {
+      role: localStorage.getItem(ROLE_KEY),
+      email: localStorage.getItem(EMAIL_KEY),
+      candidateId: localStorage.getItem(CANDIDATE_ID_KEY),
+      companyId: localStorage.getItem(COMPANY_ID_KEY),
+    };
+    localStorage.setItem(IMPERSONATION_KEY, JSON.stringify(adminState));
+
+    localStorage.setItem(ROLE_KEY, "candidate");
+    localStorage.setItem(CANDIDATE_ID_KEY, candidateId.toString());
+    localStorage.setItem(EMAIL_KEY, candidateEmail);
+    localStorage.removeItem(COMPANY_ID_KEY);
+
+    setRoleState("candidate");
+    setCandidateProfileIdState(candidateId);
+    setUserEmailState(candidateEmail);
+    setCompanyProfileIdState(null);
+    setIsImpersonating(true);
+  }, []);
+
+  const exitImpersonation = useCallback(() => {
+    const stored = localStorage.getItem(IMPERSONATION_KEY);
+    if (!stored) return;
+    const adminState = JSON.parse(stored);
+
+    if (adminState.role) localStorage.setItem(ROLE_KEY, adminState.role);
+    if (adminState.email) localStorage.setItem(EMAIL_KEY, adminState.email);
+    if (adminState.candidateId) localStorage.setItem(CANDIDATE_ID_KEY, adminState.candidateId);
+    else localStorage.removeItem(CANDIDATE_ID_KEY);
+    if (adminState.companyId) localStorage.setItem(COMPANY_ID_KEY, adminState.companyId);
+    else localStorage.removeItem(COMPANY_ID_KEY);
+
+    localStorage.removeItem(IMPERSONATION_KEY);
+
+    setRoleState(adminState.role as UserRole);
+    setUserEmailState(adminState.email);
+    setCandidateProfileIdState(adminState.candidateId ? parseInt(adminState.candidateId, 10) : null);
+    setCompanyProfileIdState(adminState.companyId ? parseInt(adminState.companyId, 10) : null);
+    setIsImpersonating(false);
+  }, []);
+
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, userEmail, setUserEmail }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, userEmail, setUserEmail, isImpersonating, impersonateCandidate, exitImpersonation }}>
       {children}
     </RoleContext.Provider>
   );

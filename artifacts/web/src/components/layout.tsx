@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
+import { ShieldAlert } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
-  const { role, clearRole, userEmail } = useRole();
+  const { role, clearRole, userEmail, isImpersonating, exitImpersonation } = useRole();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const companyNavItems = [
@@ -144,6 +145,22 @@ export function Layout({ children }: LayoutProps) {
           </div>
         )}
       </header>
+
+      {isImpersonating && (
+        <div className="bg-amber-500 text-white px-4 py-2 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4" />
+            <span className="font-medium">Admin View:</span>
+            <span>You are viewing the platform as {userEmail}</span>
+          </div>
+          <button
+            onClick={exitImpersonation}
+            className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-xs font-medium transition-colors cursor-pointer"
+          >
+            Return to Admin Console
+          </button>
+        </div>
+      )}
 
       <main className="flex-1 overflow-auto">
         {children}

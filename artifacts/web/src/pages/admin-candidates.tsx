@@ -14,7 +14,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn } from "lucide-react";
+import { useRole } from "@/contexts/role-context";
 
 function MultiSelectDropdown({
   label,
@@ -207,6 +208,7 @@ export default function AdminCandidates() {
   const [resetting, setResetting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { impersonateCandidate } = useRole();
 
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -762,19 +764,33 @@ export default function AdminCandidates() {
                         {new Date(candidate.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-2 px-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] gap-1 h-7 px-2"
-                          onClick={() => {
-                            setResetTarget(candidate);
-                            setNewPassword("");
-                            setConfirmPassword("");
-                          }}
-                        >
-                          <KeyRound className="w-3 h-3" />
-                          Reset
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] gap-1 h-7 px-2"
+                            onClick={() => {
+                              impersonateCandidate(candidate.id, candidate.email);
+                              navigate("/");
+                            }}
+                          >
+                            <LogIn className="w-3 h-3" />
+                            Login
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] gap-1 h-7 px-2"
+                            onClick={() => {
+                              setResetTarget(candidate);
+                              setNewPassword("");
+                              setConfirmPassword("");
+                            }}
+                          >
+                            <KeyRound className="w-3 h-3" />
+                            Reset
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
