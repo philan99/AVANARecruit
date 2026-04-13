@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus } from "lucide-react";
+import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
@@ -414,6 +414,97 @@ export default function RoleSelect() {
                       <span className="text-3xl font-bold font-mono" style={{ color: "#4CAF50" }}>87%</span>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+                Trusted Verification
+              </p>
+              <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6" style={{ color: "#1a2035" }}>
+                Verified Candidates,
+                <br />Confident Hiring
+              </h2>
+              <p className="text-base leading-relaxed mb-10" style={{ color: "#6b7280" }}>
+                Our built-in employment verification system lets candidates request references directly through the platform. Verifiers receive a secure email link to confirm employment history — giving companies the confidence they need.
+              </p>
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <ShieldCheck className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>One-Click Verification</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Candidates send verification requests to previous employers or colleagues with a single click from their profile.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <Mail className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>Secure Email Links</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Verifiers receive a branded, secure link — no account needed. They simply confirm or decline the employment claim.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
+                    <CheckCircle2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold mb-1" style={{ color: "#1a2035" }}>Transparent Status</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Verification status is tracked on the candidate profile — Pending, Verified, or Declined — visible to both candidates and companies.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
+                <div className="flex items-center gap-3 pb-5 mb-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}>
+                    <ShieldCheck className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold" style={{ color: "#ffffff" }}>Employment Verification</div>
+                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Sample verification status</div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { role: "Senior Developer", company: "Acme Corp", verifier: "J. Smith", status: "Verified" },
+                    { role: "Tech Lead", company: "Nova Tech", verifier: "S. Williams", status: "Verified" },
+                    { role: "Full Stack Engineer", company: "StartupXYZ", verifier: "M. Johnson", status: "Pending" },
+                  ].map((item) => (
+                    <div key={item.role} className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+                      <div className="shrink-0">
+                        {item.status === "Verified" ? (
+                          <CheckCircle2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border-2 animate-pulse" style={{ borderColor: "rgba(251, 191, 36, 0.6)" }} />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate" style={{ color: "#ffffff" }}>{item.role}</div>
+                        <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{item.company} &middot; {item.verifier}</div>
+                      </div>
+                      <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: item.status === "Verified" ? "rgba(76, 175, 80, 0.15)" : "rgba(251, 191, 36, 0.15)",
+                          color: item.status === "Verified" ? "#4CAF50" : "#FBBF24",
+                        }}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
