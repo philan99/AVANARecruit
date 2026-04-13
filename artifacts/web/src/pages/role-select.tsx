@@ -685,13 +685,14 @@ export default function RoleSelect() {
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Starter</p>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Candidate</p>
               <div className="mb-1">
-                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Free</span>
+                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>£10</span>
+                <span className="text-sm" style={{ color: "#6b7280" }}>/year</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>Perfect for candidates exploring opportunities</p>
+              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>Unlock premium AI matching to land your ideal role faster</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Create candidate profile", "Browse all open jobs", "AI match scoring", "Save favourite jobs", "Email notifications"].map((f) => (
+                {["Full candidate profile with CV upload", "AI-powered job matching & scoring", "Priority visibility to employers", "Save & track favourite jobs", "Application status notifications", "Verified profile badge"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
@@ -716,9 +717,9 @@ export default function RoleSelect() {
                 <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>£199</span>
                 <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For growing companies hiring regularly</p>
+              <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For companies hiring regularly</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Up to 10 active job listings", "AI candidate matching", "Candidate pipeline management", "Skills-based scoring engine", "Priority email support", "Company profile page"].map((f) => (
+                {["Up to 10 active job listings", "AI candidate matching & scoring", "Candidate pipeline management", "Skills-based shortlisting engine", "Priority email support", "Branded company profile page"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
@@ -726,7 +727,7 @@ export default function RoleSelect() {
                 ))}
               </ul>
               <button
-                onClick={() => setShowLogin(true)}
+                onClick={() => { setSignupRole("company"); setShowSignup(true); }}
                 className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90"
                 style={{ backgroundColor: "#4CAF50", color: "#fff" }}
               >
@@ -739,7 +740,7 @@ export default function RoleSelect() {
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Custom</span>
               </div>
-              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large organisations with bespoke needs</p>
+              <p className="text-sm mb-8" style={{ color: "#6b7280" }}>For large companies with high-volume hiring needs</p>
               <ul className="space-y-3 mb-8 flex-1">
                 {["Unlimited job listings", "Advanced AI matching algorithms", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
