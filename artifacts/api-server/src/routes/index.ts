@@ -8,6 +8,7 @@ import storageRouter from "./storage";
 import adminRouter from "./admin";
 import favouritesRouter from "./favourites";
 import contactRouter from "./contact";
+import verificationsRouter from "./verifications";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(storageRouter);
 router.use(adminRouter);
 router.use(favouritesRouter);
 router.use(contactRouter);
+router.use(verificationsRouter);
 
 export default router;

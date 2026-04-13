@@ -34,6 +34,7 @@ import AdminJobMatches from "@/pages/admin-job-matches";
 import AdminCandidateDetail from "@/pages/admin-candidate-detail";
 import AdminCandidateMatches from "@/pages/admin-candidate-matches";
 import AdminSettings from "@/pages/admin-settings";
+import VerifyPage from "@/pages/verify";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -58,6 +59,7 @@ function CompanyRoutes() {
         <Route path="/candidates/:id" component={CandidateDetail} />
         <Route path="/matches" component={MatchesList} />
         <Route path="/company-profile" component={CompanyProfile} />
+        <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -76,6 +78,7 @@ function CandidateRoutes() {
         <Route path="/browse-companies/:id" component={BrowseCompanyDetail} />
         <Route path="/browse-companies" component={BrowseCompanies} />
         <Route path="/jobs/:id" component={CandidateJobDetail} />
+        <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -96,6 +99,7 @@ function AdminRoutes() {
         <Route path="/jobs/:id" component={AdminJobDetail} />
         <Route path="/jobs" component={AdminJobs} />
         <Route path="/settings" component={AdminSettings} />
+        <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -108,6 +112,7 @@ function AppRouter() {
   if (!role) {
     return (
       <Switch>
+        <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/contact-us" component={ContactUs} />
         <Route component={RoleSelect} />
       </Switch>

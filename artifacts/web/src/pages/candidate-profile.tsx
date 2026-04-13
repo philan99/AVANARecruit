@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExperienceEntry {
@@ -121,6 +122,7 @@ export default function CandidateProfile() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cvInputRef = useRef<HTMLInputElement>(null);
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   const { data: candidate, isLoading: profileLoading } = useGetCandidate(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
@@ -247,6 +249,57 @@ export default function CandidateProfile() {
       }
     }
   }, [candidate]);
+
+  const [verifications, setVerifications] = useState<{ id: number; candidateName: string; roleTitle: string; company: string; verifierName: string; verifierEmail: string; status: string; verifierResponse: string | null; verifiedAt: string | null; createdAt: string }[]>([]);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyForm, setVerifyForm] = useState({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "" });
+  const [sendingVerification, setSendingVerification] = useState(false);
+
+  useEffect(() => {
+    if (candidateProfileId) {
+      fetch(`${apiBase}/candidates/${candidateProfileId}/verifications`)
+        .then(r => r.ok ? r.json() : [])
+        .then(setVerifications)
+        .catch(() => {});
+    }
+  }, [candidateProfileId, apiBase]);
+
+  async function handleSendVerification() {
+    if (!verifyForm.roleTitle.trim() || !verifyForm.company.trim() || !verifyForm.verifierName.trim() || !verifyForm.verifierEmail.trim()) {
+      toast({ title: "Error", description: "Please fill in all required fields.", variant: "destructive" });
+      return;
+    }
+    setSendingVerification(true);
+    try {
+      const res = await fetch(`${apiBase}/verifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          candidateId: candidateProfileId,
+          candidateName: candidate?.name || "",
+          roleTitle: verifyForm.roleTitle.trim(),
+          company: verifyForm.company.trim(),
+          verifierName: verifyForm.verifierName.trim(),
+          verifierEmail: verifyForm.verifierEmail.trim(),
+          message: verifyForm.message.trim() || null,
+        }),
+      });
+      if (res.ok) {
+        const v = await res.json();
+        setVerifications(prev => [...prev, v]);
+        setVerifyDialogOpen(false);
+        setVerifyForm({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "" });
+        toast({ title: "Verification Sent", description: `Verification request sent to ${verifyForm.verifierName}.` });
+      } else {
+        const err = await res.json();
+        toast({ title: "Error", description: err.error || "Failed to send request.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to send request.", variant: "destructive" });
+    } finally {
+      setSendingVerification(false);
+    }
+  }
 
   function startEditing() {
     if (candidate) {
@@ -881,6 +934,85 @@ export default function CandidateProfile() {
                       <p className="text-[10px] text-muted-foreground mt-0.5">PDF or Word document</p>
                     </>
                   )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-medium">Verifications</CardTitle>
+              <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Me
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-primary" />
+                      Request Employment Verification
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Send a verification request to a previous employer or colleague to confirm your employment history.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Role / Job Title *</label>
+                        <Input value={verifyForm.roleTitle} onChange={e => setVerifyForm(p => ({ ...p, roleTitle: e.target.value }))} placeholder="e.g. Senior Developer" className="h-8 text-sm" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Company *</label>
+                        <Input value={verifyForm.company} onChange={e => setVerifyForm(p => ({ ...p, company: e.target.value }))} placeholder="e.g. Acme Corp" className="h-8 text-sm" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Verifier's Name *</label>
+                        <Input value={verifyForm.verifierName} onChange={e => setVerifyForm(p => ({ ...p, verifierName: e.target.value }))} placeholder="e.g. John Smith" className="h-8 text-sm" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Verifier's Email *</label>
+                        <Input type="email" value={verifyForm.verifierEmail} onChange={e => setVerifyForm(p => ({ ...p, verifierEmail: e.target.value }))} placeholder="e.g. john@acmecorp.com" className="h-8 text-sm" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Personal Message (optional)</label>
+                        <Textarea value={verifyForm.message} onChange={e => setVerifyForm(p => ({ ...p, message: e.target.value }))} placeholder="Add a personal note to your verifier..." className="min-h-[60px] text-sm" />
+                      </div>
+                    </div>
+                    <Button className="w-full" onClick={handleSendVerification} disabled={sendingVerification}>
+                      <Send className="w-4 h-4 mr-2" />
+                      {sendingVerification ? "Sending..." : "Send Verification Request"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {verifications.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-2">No verification requests yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {verifications.map(v => (
+                    <div key={v.id} className="flex items-start gap-2.5 p-2.5 rounded-lg border bg-muted/10">
+                      <div className="mt-0.5">
+                        {v.status === "verified" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                        {v.status === "pending" && <Clock className="w-4 h-4 text-amber-500" />}
+                        {v.status === "declined" && <XCircle className="w-4 h-4 text-red-500" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium leading-tight truncate">{v.roleTitle}</p>
+                        <p className="text-xs text-muted-foreground">{v.company}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {v.verifierName} &middot;{" "}
+                          <Badge variant={v.status === "verified" ? "default" : v.status === "declined" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
+                            {v.status === "verified" ? "Verified" : v.status === "declined" ? "Declined" : "Pending"}
+                          </Badge>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>

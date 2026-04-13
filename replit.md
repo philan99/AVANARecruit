@@ -54,6 +54,18 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/browse-companies` — Browse all companies on the platform with search/filter (industry, location, size)
 - `/browse-companies/:id` — Company detail with about section, stats, and open positions listing
 - `/jobs/:id` — Job detail (read-only view)
+- `/shortlisted` — Jobs where candidate has been shortlisted/hired
+
+### Employment Verification
+- Candidates can request employment verifications from the Profile page sidebar
+- "Verify Me" button opens dialog to enter role, company, verifier name/email, optional message
+- System sends branded email via Resend with a unique verification link
+- Public verification page at `/verify/:token` allows verifiers to confirm or decline
+- Verification status (Pending/Verified/Declined) shown on candidate profile
+- Token is never exposed to candidates — only sent via email to the verifier
+- Schema: `lib/db/src/schema/verifications.ts`
+- API: `artifacts/api-server/src/routes/verifications.ts`
+- Public page: `artifacts/web/src/pages/verify.tsx`
 
 ### Pages — Admin Portal
 - `/` — Admin dashboard with platform KPIs (total companies, candidates, active candidates) and recent entries
