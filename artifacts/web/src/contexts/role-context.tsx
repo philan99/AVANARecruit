@@ -14,6 +14,7 @@ interface RoleContextType {
   setUserEmail: (email: string | null) => void;
   isImpersonating: boolean;
   impersonateCandidate: (candidateId: number, candidateEmail: string) => void;
+  impersonateCompany: (companyId: number, companyEmail: string) => void;
   exitImpersonation: () => void;
 }
 
@@ -113,6 +114,27 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setIsImpersonating(true);
   }, []);
 
+  const impersonateCompany = useCallback((companyId: number, companyEmail: string) => {
+    const adminState = {
+      role: localStorage.getItem(ROLE_KEY),
+      email: localStorage.getItem(EMAIL_KEY),
+      candidateId: localStorage.getItem(CANDIDATE_ID_KEY),
+      companyId: localStorage.getItem(COMPANY_ID_KEY),
+    };
+    localStorage.setItem(IMPERSONATION_KEY, JSON.stringify(adminState));
+
+    localStorage.setItem(ROLE_KEY, "company");
+    localStorage.setItem(COMPANY_ID_KEY, companyId.toString());
+    localStorage.setItem(EMAIL_KEY, companyEmail);
+    localStorage.removeItem(CANDIDATE_ID_KEY);
+
+    setRoleState("company");
+    setCompanyProfileIdState(companyId);
+    setUserEmailState(companyEmail);
+    setCandidateProfileIdState(null);
+    setIsImpersonating(true);
+  }, []);
+
   const exitImpersonation = useCallback(() => {
     const stored = localStorage.getItem(IMPERSONATION_KEY);
     if (!stored) return;
@@ -135,7 +157,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, userEmail, setUserEmail, isImpersonating, impersonateCandidate, exitImpersonation }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, userEmail, setUserEmail, isImpersonating, impersonateCandidate, impersonateCompany, exitImpersonation }}>
       {children}
     </RoleContext.Provider>
   );

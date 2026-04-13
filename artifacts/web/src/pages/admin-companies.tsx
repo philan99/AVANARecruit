@@ -21,7 +21,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Search, X, KeyRound } from "lucide-react";
+import { Building2, Search, X, KeyRound, LogIn } from "lucide-react";
+import { useRole } from "@/contexts/role-context";
 
 interface CompanyProfile {
   id: number;
@@ -47,6 +48,7 @@ export default function AdminCompanies() {
   const [resetting, setResetting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { impersonateCompany } = useRole();
 
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -283,19 +285,33 @@ export default function AdminCompanies() {
                         {new Date(company.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-2 px-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] gap-1 h-7 px-2"
-                          onClick={() => {
-                            setResetTarget(company);
-                            setNewPassword("");
-                            setConfirmPassword("");
-                          }}
-                        >
-                          <KeyRound className="w-3 h-3" />
-                          Reset
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] gap-1 h-7 px-2"
+                            onClick={() => {
+                              impersonateCompany(company.id, company.email || "");
+                              navigate("/");
+                            }}
+                          >
+                            <LogIn className="w-3 h-3" />
+                            Login
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] gap-1 h-7 px-2"
+                            onClick={() => {
+                              setResetTarget(company);
+                              setNewPassword("");
+                              setConfirmPassword("");
+                            }}
+                          >
+                            <KeyRound className="w-3 h-3" />
+                            Reset
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
+import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   Mail,
   Briefcase,
   ArrowLeft,
+  LogIn,
 } from "lucide-react";
 
 interface Job {
@@ -46,6 +48,7 @@ interface CompanyDetail {
 export default function AdminCompanyDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const { impersonateCompany } = useRole();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,10 +105,24 @@ export default function AdminCompanyDetail() {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
-              {company.industry && (
-                <Badge variant="secondary" className="mt-1 text-xs">{company.industry}</Badge>
-              )}
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
+                {company.industry && (
+                  <Badge variant="secondary" className="text-xs">{company.industry}</Badge>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs h-7 ml-auto"
+                  onClick={() => {
+                    impersonateCompany(company.id, company.email || "");
+                    navigate("/");
+                  }}
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Login as Company
+                </Button>
+              </div>
               {company.description && (
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{company.description}</p>
               )}
