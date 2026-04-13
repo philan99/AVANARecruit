@@ -709,7 +709,7 @@ export default function RoleSelect() {
             </div>
 
             <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#1a2035", border: "2px solid #4CAF50" }}>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Company Professional</p>
+              <p className="text-xs font-semibold tracking-[0.12em] uppercase mb-2 whitespace-nowrap" style={{ color: "#4CAF50" }}>Company Professional</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>£199</span>
                 <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span>
@@ -733,7 +733,7 @@ export default function RoleSelect() {
             </div>
 
             <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Company Enterprise</p>
+              <p className="text-xs font-semibold tracking-[0.12em] uppercase mb-2 whitespace-nowrap" style={{ color: "#4CAF50" }}>Company Enterprise</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Custom</span>
               </div>
