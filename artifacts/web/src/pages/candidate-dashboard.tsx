@@ -239,13 +239,13 @@ export default function CandidateDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/shortlisted")}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Shortlisted</CardTitle>
             <Star className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{shortlistedCount}</div>
+            <div className="text-3xl font-bold text-primary hover:underline">{shortlistedCount}</div>
             <p className="text-xs text-muted-foreground mt-1">Companies interested</p>
           </CardContent>
         </Card>
