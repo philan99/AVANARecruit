@@ -509,6 +509,37 @@ router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
   res.json(GetTopCandidatesResponse.parse(results));
 });
 
+router.get("/dashboard/applicants", async (req, res): Promise<void> => {
+  const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
+  const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+  let query = db
+    .select({
+      id: matchesTable.id,
+      candidateId: matchesTable.candidateId,
+      candidateName: candidatesTable.name,
+      candidateTitle: candidatesTable.currentTitle,
+      jobId: matchesTable.jobId,
+      jobTitle: jobsTable.title,
+      overallScore: matchesTable.overallScore,
+      status: matchesTable.status,
+      createdAt: matchesTable.createdAt,
+    })
+    .from(matchesTable)
+    .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+    .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+    .where(
+      companyProfileId
+        ? and(eq(matchesTable.applied, true), eq(jobsTable.companyProfileId, companyProfileId))
+        : eq(matchesTable.applied, true)
+    )
+    .orderBy(desc(matchesTable.createdAt))
+    .limit(limit);
+
+  const applicants = await query;
+  res.json(applicants);
+});
+
 router.get("/dashboard/skill-demand", async (req, res): Promise<void> => {
   const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
 

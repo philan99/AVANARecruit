@@ -4,7 +4,7 @@ import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTop
 import { useUpload } from "@workspace/object-storage-web";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus, Monitor, GraduationCap, Factory, Heart } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link, useLocation } from "wouter";
@@ -155,20 +155,35 @@ export default function Dashboard() {
   const skillDemandParams = companyProfileId ? { companyProfileId } : undefined;
   const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId], enabled: !!companyProfileId } });
 
+  interface Applicant {
+    id: number;
+    candidateId: number;
+    candidateName: string;
+    candidateTitle: string | null;
+    jobId: number;
+    jobTitle: string;
+    overallScore: number;
+    status: string;
+    createdAt: string;
+  }
+
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const [companyJobs, setCompanyJobs] = useState<RawJob[]>([]);
   const [allCandidates, setAllCandidates] = useState<RawCandidate[]>([]);
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
 
   useEffect(() => {
     if (!companyProfileId) return;
     async function fetchInsightData() {
       try {
-        const [jobsRes, candidatesRes] = await Promise.all([
+        const [jobsRes, candidatesRes, applicantsRes] = await Promise.all([
           fetch(`${basePath}/jobs?companyProfileId=${companyProfileId}`),
           fetch(`${basePath}/candidates`),
+          fetch(`${basePath}/dashboard/applicants?companyProfileId=${companyProfileId}&limit=10`),
         ]);
         if (jobsRes.ok) setCompanyJobs(await jobsRes.json());
         if (candidatesRes.ok) setAllCandidates(await candidatesRes.json());
+        if (applicantsRes.ok) setApplicants(await applicantsRes.json());
       } catch (err) {
         console.error("Failed to fetch insight data", err);
       }
@@ -271,31 +286,46 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Skill Demand Chart */}
-        <Card className="col-span-1 lg:col-span-2 bg-card">
-          <CardHeader>
-            <CardTitle>Skill Demand</CardTitle>
-            <CardDescription>Frequency of skills in job requirements vs candidate profiles</CardDescription>
+        {/* Applicants */}
+        <Card className="col-span-1 lg:col-span-2 bg-card flex flex-col">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4" />
+                Applicants
+              </span>
+              <Link href="/matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+                View all <ArrowUpRight className="w-3 h-3 ml-1" />
+              </Link>
+            </CardTitle>
+            <CardDescription>Candidates who have applied for your jobs</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            {skillDemand && skillDemand.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={skillDemand} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="skill" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                    itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                  <Bar dataKey="jobCount" name="Required in Jobs" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="candidateCount" name="Found in Candidates" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Not enough data to render chart</div>
-            )}
+          <CardContent className="flex-1">
+            <div className="space-y-3">
+              {applicants.length > 0 ? applicants.map((applicant) => (
+                <div key={applicant.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${applicant.candidateId}`)}>
+                  <div className="overflow-hidden flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{applicant.candidateName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{applicant.candidateTitle || "No title"}</p>
+                    <p className="text-xs text-muted-foreground/70 truncate mt-0.5">Applied for: {applicant.jobTitle}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4 shrink-0">
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                      applicant.status === "shortlisted" ? "bg-green-500/10 text-green-500" :
+                      applicant.status === "hired" ? "bg-blue-500/10 text-blue-500" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                      {Math.round(applicant.overallScore)}%
+                    </span>
+                  </div>
+                </div>
+              )) : (
+                <div className="text-sm text-muted-foreground text-center py-4">No applicants yet</div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -540,6 +570,34 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Skill Demand Chart */}
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle>Skill Demand</CardTitle>
+          <CardDescription>Frequency of skills in job requirements vs candidate profiles</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px]">
+          {skillDemand && skillDemand.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={skillDemand} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="skill" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                  itemStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="jobCount" name="Required in Jobs" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="candidateCount" name="Found in Candidates" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Not enough data to render chart</div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
