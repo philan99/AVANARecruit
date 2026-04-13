@@ -713,9 +713,6 @@ export default function RoleSelect() {
             </div>
 
             <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#1a2035", border: "2px solid #4CAF50" }}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
-                Most Popular
-              </div>
               <div className="flex items-center gap-2 mb-2">
                 <Building2 className="w-4 h-4" style={{ color: "#4CAF50" }} />
                 <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>Professional</p>
