@@ -25,8 +25,7 @@ interface MatchResult {
 
 interface CandidateInfo {
   id: number;
-  firstName: string;
-  lastName: string;
+  name: string;
   currentTitle: string;
 }
 
@@ -48,7 +47,7 @@ export default function AdminCandidateMatches() {
         if (matchesRes.ok) setMatches(await matchesRes.json());
         if (candidateRes.ok) {
           const data = await candidateRes.json();
-          setCandidate({ id: data.id, firstName: data.firstName, lastName: data.lastName, currentTitle: data.currentTitle });
+          setCandidate({ id: data.id, name: data.name, currentTitle: data.currentTitle });
         }
       } catch (err) {
         console.error("Failed to fetch candidate matches", err);
@@ -83,7 +82,7 @@ export default function AdminCandidateMatches() {
         {candidate && (
           <p className="text-lg font-semibold text-foreground mt-1">
             <Link href={`/candidates/${id}`} className="text-primary hover:underline">
-              {candidate.firstName} {candidate.lastName}
+              {candidate.name}
             </Link>
             {candidate.currentTitle && <span className="text-sm font-normal text-muted-foreground ml-2">— {candidate.currentTitle}</span>}
           </p>
