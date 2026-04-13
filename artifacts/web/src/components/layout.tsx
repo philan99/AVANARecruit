@@ -157,6 +157,10 @@ export function Layout({ children }: LayoutProps) {
               Terms & Conditions
             </Link>
             <span className="text-[11px] text-sidebar-foreground/15">|</span>
+            <Link href="/privacy-policy" className="text-[11px] text-sidebar-foreground/30 hover:text-sidebar-foreground/50 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-[11px] text-sidebar-foreground/15">|</span>
             <p className="text-[11px] text-sidebar-foreground/30">
               © 2026 AVANA Services Limited. Company Number: 15268633
             </p>

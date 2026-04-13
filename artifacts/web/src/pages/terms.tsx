@@ -181,6 +181,10 @@ export default function Terms() {
                 Terms & Conditions
               </Link>
               <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
+              <Link href="/privacy-policy" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Privacy Policy
+              </Link>
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
                 © 2026 AVANA Services Limited. Company Number: 15268633
               </p>
