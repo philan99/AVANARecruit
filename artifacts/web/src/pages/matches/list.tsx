@@ -119,7 +119,7 @@ export default function MatchesList() {
     <div className="p-8 max-w-[1400px] mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Network className="mr-3 text-primary" /> Intelligence Matches
+          <Network className="mr-3 text-primary" /> Job Role to Candidate Matches
         </h1>
         <p className="text-muted-foreground mt-1">Review AI-generated candidate fits across all jobs.</p>
       </div>
