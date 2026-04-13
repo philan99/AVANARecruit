@@ -312,10 +312,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-card">
+          <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/jobs")}>
             <CardContent className="pt-4 pb-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Matches</p>
-              <p className="text-2xl font-bold mt-1">{insights.totalMatches}</p>
+              <p className="text-2xl font-bold mt-1 text-primary hover:underline">{insights.totalMatches}</p>
               <p className="text-[10px] text-muted-foreground">{insights.avgMatchesPerJob} avg per job</p>
             </CardContent>
           </Card>
