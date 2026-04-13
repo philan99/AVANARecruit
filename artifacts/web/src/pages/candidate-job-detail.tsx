@@ -199,7 +199,7 @@ ${name}`
             <Button
               size="lg"
               variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
-              className="font-mono tracking-tight"
+              className="font-mono tracking-tight cursor-pointer"
               onClick={openApplyDialog}
             >
               <Send className="w-4 h-4 mr-2" /> APPLY
