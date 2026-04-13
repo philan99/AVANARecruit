@@ -49,10 +49,10 @@ router.post("/verifications", async (req, res): Promise<void> => {
     const verifyUrl = `${baseUrl}/verify/${token}`;
 
     try {
-      const { client } = await getResendClient();
+      const { client, fromEmail } = await getResendClient();
 
       await client.emails.send({
-        from: "recruitment@avanaservices.com",
+        from: fromEmail,
         to: verifierEmail.trim().toLowerCase(),
         subject: `AVANA Recruitment – Verification Request for ${candidateName}`,
         html: `

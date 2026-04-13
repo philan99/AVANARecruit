@@ -31,11 +31,11 @@ router.post("/contact", async (req, res) => {
       .returning();
 
     try {
-      const { client } = await getResendClient();
+      const { client, fromEmail } = await getResendClient();
 
       await client.emails.send({
-        from: "recruitment@avanaservices.com",
-        to: "enquiries@avanaservices.com",
+        from: fromEmail,
+        to: fromEmail,
         replyTo: email.trim(),
         subject: `[AVANA Contact] ${subject.trim()}`,
         html: `
