@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight } from "lucide-react";
+import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -36,6 +36,13 @@ interface JobGroup {
 
 type ScoreFilter = "all" | "high" | "mid" | "low";
 
+interface VerificationSummary {
+  total: number;
+  verified: number;
+  pending: number;
+  declined: number;
+}
+
 export default function MatchesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -43,6 +50,7 @@ export default function MatchesList() {
   const [loading, setLoading] = useState(true);
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [verificationMap, setVerificationMap] = useState<Record<number, VerificationSummary>>({});
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const { data: profile } = useCompanyProfile();
@@ -76,6 +84,32 @@ export default function MatchesList() {
           }
         }
         setAllMatches(groups);
+
+        const candidateIds = new Set<number>();
+        for (const g of groups) {
+          for (const m of g.matches) {
+            candidateIds.add(m.candidateId);
+          }
+        }
+
+        const verifResults: Record<number, VerificationSummary> = {};
+        await Promise.all(
+          Array.from(candidateIds).map(async (cid) => {
+            try {
+              const vRes = await fetch(`${basePath}/candidates/${cid}/verifications`);
+              if (vRes.ok) {
+                const verifs: { status: string }[] = await vRes.json();
+                verifResults[cid] = {
+                  total: verifs.length,
+                  verified: verifs.filter(v => v.status === "verified").length,
+                  pending: verifs.filter(v => v.status === "pending").length,
+                  declined: verifs.filter(v => v.status === "declined").length,
+                };
+              }
+            } catch {}
+          })
+        );
+        setVerificationMap(verifResults);
       } catch (err) {
         console.error("Failed to fetch matches", err);
       } finally {
@@ -230,7 +264,21 @@ export default function MatchesList() {
                           <TableRow key={match.id}>
                             <TableCell>
                               <Link href={`/candidates/${match.candidateId}`} className="block hover:text-primary transition-colors">
-                                <div className="font-medium text-foreground">{match.candidateName}</div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-medium text-foreground">{match.candidateName}</span>
+                                  {verificationMap[match.candidateId]?.verified > 0 && (
+                                    <span className="inline-flex items-center gap-0.5 bg-green-500/10 text-green-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide" title={`${verificationMap[match.candidateId].verified} verified employment${verificationMap[match.candidateId].verified > 1 ? "s" : ""}`}>
+                                      <ShieldCheck className="w-3 h-3" />
+                                      Verified
+                                    </span>
+                                  )}
+                                  {verificationMap[match.candidateId]?.total > 0 && verificationMap[match.candidateId].verified === 0 && verificationMap[match.candidateId].pending > 0 && (
+                                    <span className="inline-flex items-center gap-0.5 bg-amber-500/10 text-amber-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide" title="Verification pending">
+                                      <ShieldCheck className="w-3 h-3" />
+                                      Pending
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="text-xs text-muted-foreground mt-0.5">{match.candidateTitle}</div>
                               </Link>
                             </TableCell>
