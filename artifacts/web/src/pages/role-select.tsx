@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2 } from "lucide-react";
+import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
@@ -25,6 +25,11 @@ export default function RoleSelect() {
   const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
   const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [candidateForm, setCandidateForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCompanyPassword, setShowCompanyPassword] = useState(false);
+  const [showCompanyConfirm, setShowCompanyConfirm] = useState(false);
+  const [showCandidatePassword, setShowCandidatePassword] = useState(false);
+  const [showCandidateConfirm, setShowCandidateConfirm] = useState(false);
   const createCompany = useCreateCompanyProfile();
   const createCandidate = useCreateCandidate();
 
@@ -839,14 +844,19 @@ export default function RoleSelect() {
                       <label htmlFor="password" className="text-sm font-medium" style={{ color: "#1a2035" }}>Password</label>
                       <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); setForgotSent(false); }} className="text-xs cursor-pointer hover:underline bg-transparent border-none p-0" style={{ color: "#4CAF50" }}>Forgot password?</button>
                     </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showPassword ? "Hide password" : "Show password"}>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <button
@@ -939,11 +949,21 @@ export default function RoleSelect() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Password <span style={{ color: "#ef4444" }}>*</span></label>
-                    <Input type="password" placeholder="Minimum 8 characters" value={companyForm.password} onChange={(e) => setCompanyForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                    <div className="relative">
+                      <Input type={showCompanyPassword ? "text" : "password"} placeholder="Minimum 8 characters" value={companyForm.password} onChange={(e) => setCompanyForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }} required />
+                      <button type="button" onClick={() => setShowCompanyPassword(!showCompanyPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showCompanyPassword ? "Hide password" : "Show password"}>
+                        {showCompanyPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
-                    <Input type="password" placeholder="Re-enter your password" value={companyForm.confirmPassword} onChange={(e) => setCompanyForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                    <div className="relative">
+                      <Input type={showCompanyConfirm ? "text" : "password"} placeholder="Re-enter your password" value={companyForm.confirmPassword} onChange={(e) => setCompanyForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }} required />
+                      <button type="button" onClick={() => setShowCompanyConfirm(!showCompanyConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showCompanyConfirm ? "Hide password" : "Show password"}>
+                        {showCompanyConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
                     <UserPlus className="w-4 h-4 mr-2 inline" />
@@ -964,11 +984,21 @@ export default function RoleSelect() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Password <span style={{ color: "#ef4444" }}>*</span></label>
-                    <Input type="password" placeholder="Minimum 8 characters" value={candidateForm.password} onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                    <div className="relative">
+                      <Input type={showCandidatePassword ? "text" : "password"} placeholder="Minimum 8 characters" value={candidateForm.password} onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }} required />
+                      <button type="button" onClick={() => setShowCandidatePassword(!showCandidatePassword)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showCandidatePassword ? "Hide password" : "Show password"}>
+                        {showCandidatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
-                    <Input type="password" placeholder="Re-enter your password" value={candidateForm.confirmPassword} onChange={(e) => setCandidateForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                    <div className="relative">
+                      <Input type={showCandidateConfirm ? "text" : "password"} placeholder="Re-enter your password" value={candidateForm.confirmPassword} onChange={(e) => setCandidateForm(f => ({ ...f, confirmPassword: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }} required />
+                      <button type="button" onClick={() => setShowCandidateConfirm(!showCandidateConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showCandidateConfirm ? "Hide password" : "Show password"}>
+                        {showCandidateConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" disabled={createCandidate.isPending} className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
                     <UserPlus className="w-4 h-4 mr-2 inline" />

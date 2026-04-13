@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, CheckCircle } from "lucide-react";
+import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 export default function ResetPassword() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [password, setPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -100,26 +102,36 @@ export default function ResetPassword() {
             <form onSubmit={handleReset} className="space-y-5">
               <div className="space-y-2">
                 <label htmlFor="new-password" className="text-sm font-medium" style={{ color: "#1a2035" }}>New Password</label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                />
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }}
+                  />
+                  <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showNewPassword ? "Hide password" : "Show password"}>
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="confirm-password" className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password</label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none p-0 cursor-pointer" style={{ color: "#6b7280" }} title={showConfirmPassword ? "Hide password" : "Show password"}>
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <button
