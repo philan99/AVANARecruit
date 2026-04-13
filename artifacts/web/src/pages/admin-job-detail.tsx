@@ -165,7 +165,7 @@ export default function AdminJobDetail() {
         <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate(`/jobs/${job.id}/matches`)}>
           <CardContent className="pt-4 pb-4 text-center">
             <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold text-primary hover:underline">{job.matchCount}</p>
+            <p className="text-2xl font-bold text-primary">{job.matchCount}</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Matches</p>
           </CardContent>
         </Card>

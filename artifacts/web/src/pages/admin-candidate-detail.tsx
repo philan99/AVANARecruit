@@ -206,7 +206,7 @@ export default function AdminCandidateDetail() {
         <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate(`/candidates/${candidate.id}/matches`)}>
           <CardContent className="pt-4 pb-4 text-center">
             <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold text-primary hover:underline">{candidate.matchCount}</p>
+            <p className="text-2xl font-bold text-primary">{candidate.matchCount}</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Job Matches</p>
           </CardContent>
         </Card>

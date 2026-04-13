@@ -315,7 +315,7 @@ export default function AdminDashboard() {
           <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/jobs")}>
             <CardContent className="pt-4 pb-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Matches</p>
-              <p className="text-2xl font-bold mt-1 text-primary hover:underline">{insights.totalMatches}</p>
+              <p className="text-2xl font-bold mt-1 text-primary">{insights.totalMatches}</p>
               <p className="text-[10px] text-muted-foreground">{insights.avgMatchesPerJob} avg per job</p>
             </CardContent>
           </Card>

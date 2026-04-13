@@ -245,7 +245,7 @@ export default function CandidateDashboard() {
             <Star className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary hover:underline">{shortlistedCount}</div>
+            <div className="text-3xl font-bold text-primary">{shortlistedCount}</div>
             <p className="text-xs text-muted-foreground mt-1">Companies interested</p>
           </CardContent>
         </Card>
