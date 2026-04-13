@@ -6,25 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles, X } from "lucide-react";
-import { Link, useSearch } from "wouter";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const SCORE_RANGES: Record<string, { label: string; min: number; max: number }> = {
-  "90-100": { label: "90-100%", min: 90, max: 100 },
-  "75-89": { label: "75-89%", min: 75, max: 89 },
-  "50-74": { label: "50-74%", min: 50, max: 74 },
-  "0-49": { label: "Below 50%", min: 0, max: 49 },
-};
+type ScoreFilter = "all" | "high" | "mid" | "low";
 
 export default function CandidateMatches() {
   const { candidateProfileId } = useRole();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
-  const searchString = useSearch();
-  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const scoreRangeKey = params.get("scoreRange");
-  const activeRange = scoreRangeKey ? SCORE_RANGES[scoreRangeKey] : null;
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
@@ -65,10 +57,18 @@ export default function CandidateMatches() {
     );
   }
 
-  const allSorted = matches?.sort((a, b) => b.overallScore - a.overallScore) || [];
-  const sortedMatches = activeRange
-    ? allSorted.filter(m => m.overallScore >= activeRange.min && m.overallScore <= activeRange.max)
-    : allSorted;
+  const allSorted = useMemo(() => [...(matches || [])].sort((a, b) => b.overallScore - a.overallScore), [matches]);
+
+  const sortedMatches = useMemo(() => {
+    if (scoreFilter === "all") return allSorted;
+    return allSorted.filter(m => {
+      const score = Math.round(m.overallScore);
+      if (scoreFilter === "high") return score > 75;
+      if (scoreFilter === "mid") return score >= 50 && score <= 75;
+      if (scoreFilter === "low") return score < 50;
+      return true;
+    });
+  }, [allSorted, scoreFilter]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -78,18 +78,6 @@ export default function CandidateMatches() {
             <Target className="mr-3 text-primary" /> My Job Matches
           </h1>
           <p className="text-muted-foreground mt-1">Jobs that match your skills and experience, ranked by AI scoring.</p>
-          {activeRange && (
-            <div className="flex items-center gap-2 mt-2">
-              <Badge variant="secondary" className="text-xs">
-                Filtered: {activeRange.label}
-              </Badge>
-              <Link href="/my-matches">
-                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground">
-                  <X className="w-3 h-3 mr-1" /> Clear filter
-                </Button>
-              </Link>
-            </div>
-          )}
         </div>
         <Button onClick={handleRunMatching} disabled={isRunning} className="shrink-0">
           <Sparkles className="w-4 h-4 mr-2" />
@@ -99,7 +87,7 @@ export default function CandidateMatches() {
 
       {isLoading ? (
         <div className="py-12 text-center text-muted-foreground font-mono">Loading matches...</div>
-      ) : sortedMatches.length === 0 ? (
+      ) : allSorted.length === 0 ? (
         <Card className="bg-card">
           <CardContent className="p-12 text-center">
             <Target className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
@@ -113,6 +101,35 @@ export default function CandidateMatches() {
           </CardContent>
         </Card>
       ) : (
+        <>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Badge variant="secondary" className="font-mono text-sm px-3 py-1">{allSorted.length} Total Matches</Badge>
+            <div className="flex items-center gap-1 ml-auto">
+              {([
+                { key: "high" as ScoreFilter, label: "> 75%" },
+                { key: "mid" as ScoreFilter, label: "50-75%" },
+                { key: "low" as ScoreFilter, label: "< 50%" },
+                { key: "all" as ScoreFilter, label: "All" },
+              ]).map(f => (
+                <Button
+                  key={f.key}
+                  variant={scoreFilter === f.key ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-8 px-3"
+                  onClick={() => setScoreFilter(f.key)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {scoreFilter !== "all" && (
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{sortedMatches.length}</span> of {allSorted.length} matches
+            </p>
+          )}
+
         <div className="space-y-4">
           {sortedMatches.map((match) => (
             <Card key={match.id} className="bg-card hover:border-primary/50 transition-colors">
@@ -182,6 +199,7 @@ export default function CandidateMatches() {
             </Card>
           ))}
         </div>
+        </>
       )}
     </div>
   );

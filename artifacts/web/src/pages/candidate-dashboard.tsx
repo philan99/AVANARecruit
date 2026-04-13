@@ -350,7 +350,7 @@ export default function CandidateDashboard() {
                     maxBarSize={30}
                     cursor="pointer"
                     onClick={(data: any) => {
-                      if (data?.rangeKey) navigate(`/my-matches?scoreRange=${data.rangeKey}`);
+                      if (data?.rangeKey) navigate(`/my-matches`);
                     }}
                   />
                 </BarChart>
