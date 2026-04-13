@@ -1,7 +1,9 @@
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Link } from "wouter";
+import { useEffect } from "react";
 
 export default function PrivacyPolicy() {
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
