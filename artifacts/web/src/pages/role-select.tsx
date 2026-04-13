@@ -467,7 +467,7 @@ export default function RoleSelect() {
 
       <section className="py-20 lg:py-28" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
                 Built For Everyone
@@ -508,7 +508,7 @@ export default function RoleSelect() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center lg:mt-[104px]">
               <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
@@ -556,7 +556,7 @@ export default function RoleSelect() {
 
       <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
                 Trusted Verification
@@ -598,7 +598,7 @@ export default function RoleSelect() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center lg:mt-[140px]">
               <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
                 <div className="flex items-center gap-3 pb-5 mb-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}>
