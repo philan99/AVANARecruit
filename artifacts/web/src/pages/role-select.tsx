@@ -708,7 +708,7 @@ export default function RoleSelect() {
               </button>
             </div>
 
-            <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#2a3350", border: "1px solid #3d4a6b" }}>
+            <div className="rounded-xl p-8 flex flex-col relative" style={{ backgroundColor: "#354168", border: "1px solid #4a5a82" }}>
               <p className="text-xs font-semibold tracking-[0.12em] uppercase mb-2 whitespace-nowrap" style={{ color: "#4CAF50" }}>Company Professional</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>£199</span>
@@ -732,7 +732,7 @@ export default function RoleSelect() {
               </button>
             </div>
 
-            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#2a3350", border: "1px solid #3d4a6b" }}>
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#354168", border: "1px solid #4a5a82" }}>
               <p className="text-xs font-semibold tracking-[0.12em] uppercase mb-2 whitespace-nowrap" style={{ color: "#4CAF50" }}>Company Enterprise</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#ffffff" }}>Custom</span>
