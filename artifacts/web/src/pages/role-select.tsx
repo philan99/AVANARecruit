@@ -18,6 +18,10 @@ export default function RoleSelect() {
   const [isLoading, setIsLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSending, setForgotSending] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
   const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
   const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [candidateForm, setCandidateForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
@@ -108,6 +112,31 @@ export default function RoleSelect() {
         },
       }
     );
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast({ title: "Please enter your email address", variant: "destructive" });
+      return;
+    }
+    setForgotSending(true);
+    try {
+      const res = await fetch(`${apiBase}/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      if (res.ok) {
+        setForgotSent(true);
+      } else {
+        toast({ title: "Something went wrong. Please try again.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Something went wrong. Please try again.", variant: "destructive" });
+    } finally {
+      setForgotSending(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -696,87 +725,153 @@ export default function RoleSelect() {
               &times;
             </button>
 
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Welcome Back</h2>
-              <p className="text-sm" style={{ color: "#6b7280" }}>Sign in to your AVANA Recruitment account</p>
-            </div>
+            {forgotMode ? (
+              <>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Reset Password</h2>
+                  <p className="text-sm" style={{ color: "#6b7280" }}>
+                    {forgotSent ? "Check your email for the reset link" : "Enter your email to receive a password reset link"}
+                  </p>
+                </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { key: "company" as UserRole, icon: Building2, label: "Company" },
-                    { key: "candidate" as UserRole, icon: UserCircle, label: "Candidate" },
-                    { key: "admin" as UserRole, icon: Shield, label: "Admin" },
-                  ].map((opt) => (
+                {forgotSent ? (
+                  <div className="space-y-5">
+                    <div className="rounded-lg p-4 text-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.08)", border: "1px solid rgba(76, 175, 80, 0.2)" }}>
+                      <p className="text-sm font-medium" style={{ color: "#4CAF50" }}>
+                        If an account with that email exists, we've sent a password reset link. Please check your inbox.
+                      </p>
+                    </div>
                     <button
-                      key={opt.key}
                       type="button"
-                      onClick={() => setSelected(opt.key)}
-                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
-                      style={{
-                        borderColor: selected === opt.key ? "#4CAF50" : "#e5e7eb",
-                        backgroundColor: selected === opt.key ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
-                        color: selected === opt.key ? "#4CAF50" : "#6b7280",
-                      }}
+                      onClick={() => { setForgotMode(false); setForgotSent(false); }}
+                      className="w-full py-3 rounded-md text-sm font-semibold transition-all cursor-pointer"
+                      style={{ backgroundColor: "#4CAF50", color: "#fff" }}
                     >
-                      <opt.icon className="w-4 h-4" />
-                      {opt.label}
+                      Back to Sign In
                     </button>
-                  ))}
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotPassword} className="space-y-5">
+                    <div className="space-y-2">
+                      <label htmlFor="forgot-email" className="text-sm font-medium" style={{ color: "#1a2035" }}>Email</label>
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={forgotSending || !forgotEmail}
+                      className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+                    >
+                      {forgotSending ? "Sending..." : "Send Reset Link"}
+                    </button>
+
+                    <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
+                      Remember your password?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setForgotMode(false)}
+                        className="font-medium cursor-pointer hover:underline"
+                        style={{ color: "#4CAF50" }}
+                      >
+                        Back to Sign In
+                      </button>
+                    </p>
+                  </form>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>Welcome Back</h2>
+                  <p className="text-sm" style={{ color: "#6b7280" }}>Sign in to your AVANA Recruitment account</p>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium" style={{ color: "#1a2035" }}>Email</label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                />
-              </div>
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { key: "company" as UserRole, icon: Building2, label: "Company" },
+                        { key: "candidate" as UserRole, icon: UserCircle, label: "Candidate" },
+                        { key: "admin" as UserRole, icon: Shield, label: "Admin" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setSelected(opt.key)}
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
+                          style={{
+                            borderColor: selected === opt.key ? "#4CAF50" : "#e5e7eb",
+                            backgroundColor: selected === opt.key ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
+                            color: selected === opt.key ? "#4CAF50" : "#6b7280",
+                          }}
+                        >
+                          <opt.icon className="w-4 h-4" />
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium" style={{ color: "#1a2035" }}>Password</label>
-                  <span className="text-xs cursor-pointer hover:underline" style={{ color: "#4CAF50" }}>Forgot password?</span>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
-                />
-              </div>
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium" style={{ color: "#1a2035" }}>Email</label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                    />
+                  </div>
 
-              <button
-                type="submit"
-                disabled={!selected || isLoading || !email || !password}
-                className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                style={{ backgroundColor: "#4CAF50", color: "#fff" }}
-              >
-                <LogIn className="w-4 h-4 mr-2 inline" />
-                {isLoading ? "Signing in..." : "Sign In"}
-              </button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="password" className="text-sm font-medium" style={{ color: "#1a2035" }}>Password</label>
+                      <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); setForgotSent(false); }} className="text-xs cursor-pointer hover:underline bg-transparent border-none p-0" style={{ color: "#4CAF50" }}>Forgot password?</button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                    />
+                  </div>
 
-              <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setShowLogin(false); setShowSignup(true); }}
-                  className="font-medium cursor-pointer hover:underline"
-                  style={{ color: "#4CAF50" }}
-                >
-                  Sign up
-                </button>
-              </p>
-            </form>
+                  <button
+                    type="submit"
+                    disabled={!selected || isLoading || !email || !password}
+                    className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+                  >
+                    <LogIn className="w-4 h-4 mr-2 inline" />
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </button>
+
+                  <p className="text-center text-xs pt-2" style={{ color: "#6b7280" }}>
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => { setShowLogin(false); setShowSignup(true); }}
+                      className="font-medium cursor-pointer hover:underline"
+                      style={{ color: "#4CAF50" }}
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

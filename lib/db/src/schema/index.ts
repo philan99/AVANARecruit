@@ -6,3 +6,4 @@ export * from "./favourites";
 export * from "./admins";
 export * from "./contactSubmissions";
 export * from "./verifications";
+export * from "./passwordResets";

@@ -9,6 +9,7 @@ import adminRouter from "./admin";
 import favouritesRouter from "./favourites";
 import contactRouter from "./contact";
 import verificationsRouter from "./verifications";
+import passwordResetRouter from "./passwordReset";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(adminRouter);
 router.use(favouritesRouter);
 router.use(contactRouter);
 router.use(verificationsRouter);
+router.use(passwordResetRouter);
 
 export default router;
