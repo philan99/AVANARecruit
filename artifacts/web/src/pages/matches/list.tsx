@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetJobMatches, useListJobs, useUpdateMatchStatus, getGetJobMatchesQueryKey } from "@workspace/api-client-react";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,10 +18,6 @@ export default function MatchesList() {
 
   const { data: jobs, isLoading: jobsLoading } = useListJobs({ status: "open" });
   
-  // Since there is no listAllMatches endpoint provided in the API hooks,
-  // we will show matches for the selected job, or default to the first open job if "all" is not an option
-  // Given the API limitations, we require a job to be selected to view detailed matches easily.
-  // We'll auto-select the first job if available.
   const activeJobId = selectedJobId !== "all" ? parseInt(selectedJobId) : (jobs?.[0]?.id || 0);
 
   const { data: matches, isLoading: matchesLoading } = useGetJobMatches(activeJobId, {
@@ -46,8 +41,10 @@ export default function MatchesList() {
     );
   };
 
+  const sortedMatches = matches ? [...matches].sort((a, b) => b.overallScore - a.overallScore) : [];
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 max-w-[1400px] mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
@@ -73,7 +70,7 @@ export default function MatchesList() {
       <Card className="bg-card">
         <CardHeader className="border-b border-border pb-4 flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Match Results</CardTitle>
-          <Badge variant="secondary" className="font-mono">{matches?.length || 0} Matches Found</Badge>
+          <Badge variant="secondary" className="font-mono">{matches?.length || 0} Matches</Badge>
         </CardHeader>
         <CardContent className="p-0">
           {!activeJobId ? (
@@ -83,7 +80,7 @@ export default function MatchesList() {
             </div>
           ) : matchesLoading ? (
              <div className="p-12 text-center text-muted-foreground font-mono">Loading match telemetry...</div>
-          ) : matches?.length === 0 ? (
+          ) : sortedMatches.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
               <Target className="w-12 h-12 text-muted-foreground/30 mb-4" />
               <p>No matches found for this job yet.</p>
@@ -93,16 +90,21 @@ export default function MatchesList() {
             <Table>
               <TableHeader className="bg-secondary/50">
                 <TableRow>
-                  <TableHead className="w-[300px]">Candidate</TableHead>
-                  <TableHead className="text-center font-mono">Score</TableHead>
-                  <TableHead className="hidden md:table-cell">Strengths</TableHead>
+                  <TableHead className="w-[250px]">Candidate</TableHead>
+                  <TableHead className="text-center font-mono">Overall</TableHead>
+                  <TableHead className="text-center font-mono hidden md:table-cell">Skills</TableHead>
+                  <TableHead className="text-center font-mono hidden md:table-cell">Experience</TableHead>
+                  <TableHead className="text-center font-mono hidden lg:table-cell">Education</TableHead>
+                  <TableHead className="text-center font-mono hidden lg:table-cell">Location</TableHead>
+                  <TableHead className="hidden xl:table-cell">Matched Skills</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="hidden xl:table-cell">Assessment</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {matches?.map((match) => (
-                  <TableRow key={match.id} className="group">
+                {sortedMatches.map((match) => (
+                  <TableRow key={match.id}>
                     <TableCell>
                       <Link href={`/candidates/${match.candidateId}`} className="block hover:text-primary transition-colors">
                         <div className="font-medium text-foreground">{match.candidateName}</div>
@@ -110,12 +112,24 @@ export default function MatchesList() {
                       </Link>
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 border border-primary/20 text-primary font-mono font-bold text-lg">
-                        {Math.round(match.overallScore)}
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/20 text-primary font-mono font-bold text-sm">
+                        {Math.round(match.overallScore)}%
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell py-4">
-                      <div className="flex flex-wrap gap-1 max-w-[250px]">
+                    <TableCell className="text-center hidden md:table-cell">
+                      <span className="font-mono text-sm">{Math.round(match.skillScore)}%</span>
+                    </TableCell>
+                    <TableCell className="text-center hidden md:table-cell">
+                      <span className="font-mono text-sm">{Math.round(match.experienceScore)}%</span>
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      <span className="font-mono text-sm">{Math.round(match.educationScore)}%</span>
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      <span className="font-mono text-sm">{Math.round(match.locationScore)}%</span>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
                         {match.matchedSkills.slice(0, 3).map(skill => (
                           <Badge key={skill} variant="outline" className="text-[10px] py-0 h-4 bg-background">
                             {skill}
@@ -135,6 +149,11 @@ export default function MatchesList() {
                       >
                         {match.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      <p className="text-xs text-muted-foreground leading-relaxed max-w-[300px]">
+                        {match.assessment}
+                      </p>
                     </TableCell>
                     <TableCell className="text-right">
                       {match.status === 'pending' && (
