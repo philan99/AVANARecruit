@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, ArrowRight, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -962,15 +962,17 @@ export default function CandidateProfile() {
           <Card className="bg-card">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">Verifications</CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {verifications.length > 0 && (
                   <Link href="/verifications">
-                    <Button variant="ghost" size="sm" className="h-7 text-xs">Show All</Button>
+                    <Button variant="link" size="sm" className="h-7 text-xs text-primary px-2">
+                      Show All <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
                   </Link>
                 )}
               <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                  <Button size="sm" className="h-7 text-xs">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Me
                   </Button>
                 </DialogTrigger>
