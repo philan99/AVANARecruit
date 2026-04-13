@@ -684,7 +684,7 @@ export default function RoleSelect() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+            <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#eef6ee", border: "1px solid #c8e6c9" }}>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Candidate</p>
               <div className="mb-1">
                 <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>£10</span>
