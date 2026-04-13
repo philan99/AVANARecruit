@@ -34,12 +34,15 @@ interface JobGroup {
   matches: MatchItem[];
 }
 
+type ScoreFilter = "all" | "high" | "mid" | "low";
+
 export default function MatchesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [allMatches, setAllMatches] = useState<JobGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const { data: profile } = useCompanyProfile();
@@ -83,6 +86,22 @@ export default function MatchesList() {
   }, [jobs, basePath]);
 
   const totalMatches = useMemo(() => allMatches.reduce((sum, g) => sum + g.matches.length, 0), [allMatches]);
+
+  const filteredGroups = useMemo(() => {
+    if (scoreFilter === "all") return allMatches;
+    return allMatches.map(g => ({
+      ...g,
+      matches: g.matches.filter(m => {
+        const score = Math.round(m.overallScore);
+        if (scoreFilter === "high") return score > 75;
+        if (scoreFilter === "mid") return score >= 50 && score <= 75;
+        if (scoreFilter === "low") return score < 50;
+        return true;
+      })
+    })).filter(g => g.matches.length > 0);
+  }, [allMatches, scoreFilter]);
+
+  const filteredTotal = useMemo(() => filteredGroups.reduce((sum, g) => sum + g.matches.length, 0), [filteredGroups]);
 
   const updateStatus = useUpdateMatchStatus();
 
@@ -138,13 +157,37 @@ export default function MatchesList() {
         </Card>
       ) : (
         <>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge variant="secondary" className="font-mono text-sm px-3 py-1">{totalMatches} Total Matches</Badge>
             <Badge variant="outline" className="font-mono text-sm px-3 py-1">{allMatches.length} Jobs with Matches</Badge>
+            <div className="flex items-center gap-1 ml-auto">
+              {([
+                { key: "high" as ScoreFilter, label: "> 75%" },
+                { key: "mid" as ScoreFilter, label: "50-75%" },
+                { key: "low" as ScoreFilter, label: "< 50%" },
+                { key: "all" as ScoreFilter, label: "All" },
+              ]).map(f => (
+                <Button
+                  key={f.key}
+                  variant={scoreFilter === f.key ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-8 px-3"
+                  onClick={() => setScoreFilter(f.key)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
           </div>
 
+          {scoreFilter !== "all" && (
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{filteredTotal}</span> of {totalMatches} matches
+            </p>
+          )}
+
           <div className="space-y-6">
-            {allMatches.map((group) => (
+            {filteredGroups.map((group) => (
               <Card key={group.jobId} className="bg-card">
                 <CardHeader
                   className="border-b border-border pb-4 cursor-pointer hover:bg-secondary/30 transition-colors"
