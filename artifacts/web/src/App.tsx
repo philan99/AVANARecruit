@@ -12,6 +12,7 @@ import CandidateDashboard from "@/pages/candidate-dashboard";
 import CandidateProfile from "@/pages/candidate-profile";
 import CandidateMatches from "@/pages/candidate-matches";
 import CandidateShortlisted from "@/pages/candidate-shortlisted";
+import CandidateVerifications from "@/pages/candidate-verifications";
 import BrowseJobs from "@/pages/browse-jobs";
 import BrowseCompanies from "@/pages/browse-companies";
 import BrowseCompanyDetail from "@/pages/browse-company-detail";
@@ -76,6 +77,7 @@ function CandidateRoutes() {
         <Route path="/profile" component={CandidateProfile} />
         <Route path="/my-matches" component={CandidateMatches} />
         <Route path="/shortlisted" component={CandidateShortlisted} />
+        <Route path="/verifications" component={CandidateVerifications} />
         <Route path="/browse-jobs" component={BrowseJobs} />
         <Route path="/browse-companies/:id" component={BrowseCompanyDetail} />
         <Route path="/browse-companies" component={BrowseCompanies} />

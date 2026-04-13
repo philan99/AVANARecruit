@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "wouter";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -961,6 +962,12 @@ export default function CandidateProfile() {
           <Card className="bg-card">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">Verifications</CardTitle>
+              <div className="flex items-center gap-2">
+                {verifications.length > 0 && (
+                  <Link href="/verifications">
+                    <Button variant="ghost" size="sm" className="h-7 text-xs">Show All</Button>
+                  </Link>
+                )}
               <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-xs">
@@ -1007,6 +1014,7 @@ export default function CandidateProfile() {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               {verifications.length === 0 ? (
