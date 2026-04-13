@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ interface CompanyDetail {
 
 export default function AdminCompanyDetail() {
   const { id } = useParams<{ id: string }>();
+  const [, navigate] = useLocation();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -206,8 +207,8 @@ export default function AdminCompanyDetail() {
                 </thead>
                 <tbody>
                   {company.jobs.map((job) => (
-                    <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-2 px-2 font-medium">{job.title}</td>
+                    <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
+                      <td className="py-2 px-2 font-medium text-primary hover:underline">{job.title}</td>
                       <td className="py-2 px-2 text-muted-foreground">{job.location}</td>
                       <td className="py-2 px-2">
                         <Badge variant="outline" className="text-[9px] uppercase">{job.experienceLevel}</Badge>
