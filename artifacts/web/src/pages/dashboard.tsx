@@ -4,7 +4,7 @@ import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTop
 import { useUpload } from "@workspace/object-storage-web";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link, useLocation } from "wouter";
@@ -171,19 +171,25 @@ export default function Dashboard() {
   const [companyJobs, setCompanyJobs] = useState<RawJob[]>([]);
   const [allCandidates, setAllCandidates] = useState<RawCandidate[]>([]);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
 
   useEffect(() => {
     if (!companyProfileId) return;
     async function fetchInsightData() {
       try {
-        const [jobsRes, candidatesRes, applicantsRes] = await Promise.all([
+        const [jobsRes, candidatesRes, applicantsRes, bookmarksRes] = await Promise.all([
           fetch(`${basePath}/jobs?companyProfileId=${companyProfileId}`),
           fetch(`${basePath}/candidates`),
           fetch(`${basePath}/dashboard/applicants?companyProfileId=${companyProfileId}&limit=10`),
+          fetch(`${basePath}/companies/${companyProfileId}/bookmarks`),
         ]);
         if (jobsRes.ok) setCompanyJobs(await jobsRes.json());
         if (candidatesRes.ok) setAllCandidates(await candidatesRes.json());
         if (applicantsRes.ok) setApplicants(await applicantsRes.json());
+        if (bookmarksRes.ok) {
+          const bookmarks = await bookmarksRes.json();
+          setBookmarkCount(bookmarks.length);
+        }
       } catch (err) {
         console.error("Failed to fetch insight data", err);
       }
@@ -237,7 +243,7 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Link href="/jobs?status=open">
           <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -270,6 +276,17 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-3xl font-bold text-primary">{stats?.totalMatches || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">{stats?.shortlistedCount || 0} shortlisted</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/candidates?bookmarks=1")}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Bookmarked</CardTitle>
+            <Bookmark className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{bookmarkCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">Saved candidates</p>
           </CardContent>
         </Card>
 

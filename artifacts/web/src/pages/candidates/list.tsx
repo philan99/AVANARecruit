@@ -187,7 +187,7 @@ export default function CandidatesList() {
   const companyProfileId = localStorage.getItem("avanatalent_company_id");
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set());
-  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(urlParams.get("bookmarks") === "1");
 
   const fetchBookmarks = useCallback(async () => {
     if (!isCompany || !companyProfileId) return;
