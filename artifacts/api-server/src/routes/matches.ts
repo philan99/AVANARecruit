@@ -118,14 +118,30 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
   const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
   if (!job) { res.status(404).json({ error: "Job not found" }); return; }
 
+  const result = computeMatch(job, candidate);
+
   const existing = await db.select().from(matchesTable)
     .where(sql`${matchesTable.candidateId} = ${candidateId} AND ${matchesTable.jobId} = ${jobId}`);
+
   if (existing.length > 0) {
-    res.json(existing[0]);
+    const [updated] = await db
+      .update(matchesTable)
+      .set({
+        overallScore: result.overallScore,
+        skillScore: result.skillScore,
+        experienceScore: result.experienceScore,
+        educationScore: result.educationScore,
+        locationScore: result.locationScore,
+        assessment: result.assessment,
+        matchedSkills: result.matchedSkills,
+        missingSkills: result.missingSkills,
+      })
+      .where(eq(matchesTable.id, existing[0].id))
+      .returning();
+    res.json(updated);
     return;
   }
 
-  const result = computeMatch(job, candidate);
   const [match] = await db
     .insert(matchesTable)
     .values({
