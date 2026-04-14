@@ -43,27 +43,54 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
     .from(candidatesTable)
     .where(eq(candidatesTable.status, "active"));
 
-  await db.delete(matchesTable).where(eq(matchesTable.jobId, job.id));
+  const existingMatches = await db.select().from(matchesTable).where(eq(matchesTable.jobId, job.id));
+  const existingMap = new Map(existingMatches.map(m => [m.candidateId, m]));
+  const activeIds = new Set(activeCandidates.map(c => c.id));
 
   const matchResults = [];
   for (const candidate of activeCandidates) {
     const result = computeMatch(job, candidate);
-    const [match] = await db
-      .insert(matchesTable)
-      .values({
-        jobId: job.id,
-        candidateId: candidate.id,
-        overallScore: result.overallScore,
-        skillScore: result.skillScore,
-        experienceScore: result.experienceScore,
-        educationScore: result.educationScore,
-        locationScore: result.locationScore,
-        assessment: result.assessment,
-        matchedSkills: result.matchedSkills,
-        missingSkills: result.missingSkills,
-      })
-      .returning();
-    matchResults.push(match);
+    const existing = existingMap.get(candidate.id);
+    if (existing) {
+      const [updated] = await db
+        .update(matchesTable)
+        .set({
+          overallScore: result.overallScore,
+          skillScore: result.skillScore,
+          experienceScore: result.experienceScore,
+          educationScore: result.educationScore,
+          locationScore: result.locationScore,
+          assessment: result.assessment,
+          matchedSkills: result.matchedSkills,
+          missingSkills: result.missingSkills,
+        })
+        .where(eq(matchesTable.id, existing.id))
+        .returning();
+      matchResults.push(updated);
+    } else {
+      const [match] = await db
+        .insert(matchesTable)
+        .values({
+          jobId: job.id,
+          candidateId: candidate.id,
+          overallScore: result.overallScore,
+          skillScore: result.skillScore,
+          experienceScore: result.experienceScore,
+          educationScore: result.educationScore,
+          locationScore: result.locationScore,
+          assessment: result.assessment,
+          matchedSkills: result.matchedSkills,
+          missingSkills: result.missingSkills,
+        })
+        .returning();
+      matchResults.push(match);
+    }
+  }
+
+  for (const existing of existingMatches) {
+    if (!activeIds.has(existing.candidateId)) {
+      await db.delete(matchesTable).where(eq(matchesTable.id, existing.id));
+    }
   }
 
   matchResults.sort((a, b) => b.overallScore - a.overallScore);
@@ -179,27 +206,54 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
     .from(jobsTable)
     .where(eq(jobsTable.status, "open"));
 
-  await db.delete(matchesTable).where(eq(matchesTable.candidateId, candidate.id));
+  const existingMatches = await db.select().from(matchesTable).where(eq(matchesTable.candidateId, candidate.id));
+  const existingMap = new Map(existingMatches.map(m => [m.jobId, m]));
+  const openJobIds = new Set(openJobs.map(j => j.id));
 
   const matchResults = [];
   for (const job of openJobs) {
     const result = computeMatch(job, candidate);
-    const [match] = await db
-      .insert(matchesTable)
-      .values({
-        jobId: job.id,
-        candidateId: candidate.id,
-        overallScore: result.overallScore,
-        skillScore: result.skillScore,
-        experienceScore: result.experienceScore,
-        educationScore: result.educationScore,
-        locationScore: result.locationScore,
-        assessment: result.assessment,
-        matchedSkills: result.matchedSkills,
-        missingSkills: result.missingSkills,
-      })
-      .returning();
-    matchResults.push(match);
+    const existing = existingMap.get(job.id);
+    if (existing) {
+      const [updated] = await db
+        .update(matchesTable)
+        .set({
+          overallScore: result.overallScore,
+          skillScore: result.skillScore,
+          experienceScore: result.experienceScore,
+          educationScore: result.educationScore,
+          locationScore: result.locationScore,
+          assessment: result.assessment,
+          matchedSkills: result.matchedSkills,
+          missingSkills: result.missingSkills,
+        })
+        .where(eq(matchesTable.id, existing.id))
+        .returning();
+      matchResults.push(updated);
+    } else {
+      const [match] = await db
+        .insert(matchesTable)
+        .values({
+          jobId: job.id,
+          candidateId: candidate.id,
+          overallScore: result.overallScore,
+          skillScore: result.skillScore,
+          experienceScore: result.experienceScore,
+          educationScore: result.educationScore,
+          locationScore: result.locationScore,
+          assessment: result.assessment,
+          matchedSkills: result.matchedSkills,
+          missingSkills: result.missingSkills,
+        })
+        .returning();
+      matchResults.push(match);
+    }
+  }
+
+  for (const existing of existingMatches) {
+    if (!openJobIds.has(existing.jobId)) {
+      await db.delete(matchesTable).where(eq(matchesTable.id, existing.id));
+    }
   }
 
   matchResults.sort((a, b) => b.overallScore - a.overallScore);
