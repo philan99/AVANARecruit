@@ -250,17 +250,6 @@ export default function CandidateDashboard() {
           </Card>
         </Link>
 
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Avg Match Score</CardTitle>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{avgScore}%</div>
-            <p className="text-xs text-muted-foreground mt-1">Across all matches</p>
-          </CardContent>
-        </Card>
-
         <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/shortlisted")}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Shortlisted</CardTitle>
@@ -269,6 +258,17 @@ export default function CandidateDashboard() {
           <CardContent>
             <div className="text-3xl font-bold text-primary">{shortlistedCount}</div>
             <p className="text-xs text-muted-foreground mt-1">Companies interested</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Avg Match Score</CardTitle>
+            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${avgScore > 75 ? 'text-green-500' : avgScore >= 50 ? 'text-orange-500' : 'text-muted-foreground'}`}>{avgScore}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Across all matches</p>
           </CardContent>
         </Card>
       </div>
