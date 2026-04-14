@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, and, isNull, gt } from "drizzle-orm";
 import { db, emailVerificationsTable, candidatesTable, companyProfiles } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
+import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
 
 const router: IRouter = Router();
@@ -23,17 +24,15 @@ async function sendVerificationEmail(email: string, accountType: string, origin:
     from: fromEmail,
     to: email,
     subject: "Verify Your AVANA Recruitment Account",
-    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #1a2035;">Verify Your Email Address</h2>
-      <p>Thank you for creating an AVANA Recruitment account. Please verify your email address to activate your account.</p>
-      <p>Click the button below to verify. This link will expire in 24 hours.</p>
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${verifyUrl}" style="background-color: #4CAF50; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Verify Email</a>
-      </div>
-      <p style="color: #6b7280; font-size: 14px;">If you didn't create this account, you can safely ignore this email.</p>
-      <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px;">AVANA Recruitment</p>
-    </div>`,
+    html: brandedEmail(
+      "Verify Your Email Address",
+      `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Thank you for creating an AVANA Recruitment account. Please verify your email address to activate your account.</p>
+       <p style="font-size: 14px; color: #374151; line-height: 1.6;">Click the button below to verify. This link will expire in 24 hours.</p>
+       <div style="text-align: center; margin: 24px 0;">
+         <a href="${verifyUrl}" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Verify Email</a>
+       </div>`,
+      "If you didn't create this account, you can safely ignore this email."
+    ),
   });
 
   return token;

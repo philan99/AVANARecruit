@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { db, verificationsTable, candidatesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { getResendClient } from "../lib/resend";
+import { brandedEmail } from "../lib/emailTemplate";
 
 const router = Router();
 
@@ -53,38 +54,28 @@ router.post("/verifications", async (req, res): Promise<void> => {
         from: fromEmail,
         to: verifierEmail.trim().toLowerCase(),
         subject: `AVANA Recruitment – Verification Request for ${candidateName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #1a2035; padding: 20px; border-radius: 8px 8px 0 0;">
-              <h1 style="color: #4CAF50; margin: 0; font-size: 20px;">Employment Verification Request</h1>
-            </div>
-            <div style="background: #f9fafb; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
-              <p style="font-size: 14px; color: #374151; line-height: 1.6;">
-                Dear ${verifierName},
-              </p>
-              <p style="font-size: 14px; color: #374151; line-height: 1.6;">
-                <strong>${candidateName}</strong> has listed you as a reference for their role as <strong>${roleTitle}</strong> at <strong>${company}</strong>.
-              </p>
-              ${message ? `
-              <div style="background: #ffffff; border-left: 3px solid #4CAF50; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
-                <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0; font-weight: 600;">Message from ${candidateName}:</p>
-                <p style="font-size: 14px; color: #374151; margin: 0; line-height: 1.5;">${message}</p>
-              </div>
-              ` : ""}
-              <p style="font-size: 14px; color: #374151; line-height: 1.6;">
-                We would greatly appreciate if you could take a moment to verify their employment by clicking the button below.
-              </p>
-              <div style="text-align: center; margin: 24px 0;">
-                <a href="${verifyUrl}" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
-                  Verify Employment
-                </a>
-              </div>
-              <p style="font-size: 12px; color: #9ca3af; line-height: 1.5; margin-top: 24px;">
-                This is an automated request from AVANA Recruitment. If you did not expect this email, you can safely ignore it.
-              </p>
-            </div>
-          </div>
-        `,
+        html: brandedEmail(
+          "Employment Verification Request",
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Dear ${verifierName},</p>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6;">
+             <strong>${candidateName}</strong> has listed you as a reference for their role as <strong>${roleTitle}</strong> at <strong>${company}</strong>.
+           </p>
+           ${message ? `
+           <div style="background: #ffffff; border-left: 3px solid #4CAF50; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+             <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0; font-weight: 600;">Message from ${candidateName}:</p>
+             <p style="font-size: 14px; color: #374151; margin: 0; line-height: 1.5;">${message}</p>
+           </div>
+           ` : ""}
+           <p style="font-size: 14px; color: #374151; line-height: 1.6;">
+             We would greatly appreciate if you could take a moment to verify their employment by clicking the button below.
+           </p>
+           <div style="text-align: center; margin: 24px 0;">
+             <a href="${verifyUrl}" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+               Verify Employment
+             </a>
+           </div>`,
+          "This is an automated request from AVANA Recruitment. If you did not expect this email, you can safely ignore it."
+        ),
       });
     } catch (emailErr) {
       console.error("Failed to send verification email", emailErr);

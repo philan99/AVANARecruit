@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, desc, sql, avg, count, and } from "drizzle-orm";
 import { db, jobsTable, candidatesTable, matchesTable, companyProfiles } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
+import { brandedEmail } from "../lib/emailTemplate";
 import {
   RunJobMatchingParams,
   RunJobMatchingResponse,
@@ -312,11 +313,11 @@ router.post("/candidates/:id/contact", async (req, res): Promise<void> => {
       to: candidate.email,
       subject,
       replyTo: company?.email || undefined,
-      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        ${body.replace(/\n/g, "<br>")}
-        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
-        <p style="color: #6b7280; font-size: 12px;">This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.</p>
-      </div>`,
+      html: brandedEmail(
+        `Message from ${company?.name || "a Company"}`,
+        `<div style="font-size: 14px; color: #374151; line-height: 1.6;">${body.replace(/\n/g, "<br>")}</div>`,
+        `This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.`
+      ),
     });
     res.json({ success: true, message: "Email sent successfully" });
   } catch (err: any) {
@@ -373,11 +374,11 @@ router.post("/matches/:id/contact", async (req, res): Promise<void> => {
       to: match.candidateEmail,
       subject,
       replyTo: company?.email || undefined,
-      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        ${body.replace(/\n/g, "<br>")}
-        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
-        <p style="color: #6b7280; font-size: 12px;">This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.</p>
-      </div>`,
+      html: brandedEmail(
+        `Message from ${company?.name || "a Company"}`,
+        `<div style="font-size: 14px; color: #374151; line-height: 1.6;">${body.replace(/\n/g, "<br>")}</div>`,
+        `This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.`
+      ),
     });
     res.json({ success: true, message: "Email sent successfully" });
   } catch (err: any) {
@@ -435,11 +436,11 @@ router.post("/matches/:id/apply", async (req, res): Promise<void> => {
       to: company.email,
       subject,
       replyTo: match.candidateEmail || undefined,
-      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        ${body.replace(/\n/g, "<br>")}
-        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
-        <p style="color: #6b7280; font-size: 12px;">This application was sent via AVANA Recruitment on behalf of ${match.candidateName}.</p>
-      </div>`,
+      html: brandedEmail(
+        `Job Application from ${match.candidateName}`,
+        `<div style="font-size: 14px; color: #374151; line-height: 1.6;">${body.replace(/\n/g, "<br>")}</div>`,
+        `This application was sent via AVANA Recruitment on behalf of ${match.candidateName}.`
+      ),
     });
     await db.update(matchesTable).set({ applied: true }).where(eq(matchesTable.id, matchId));
     res.json({ success: true, message: "Application sent successfully" });
