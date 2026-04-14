@@ -8,3 +8,4 @@ export * from "./contactSubmissions";
 export * from "./verifications";
 export * from "./passwordResets";
 export * from "./emailVerifications";
+export * from "./bookmarks";

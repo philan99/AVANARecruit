@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck, Loader2,
+  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck, Loader2, Bookmark,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
@@ -86,6 +86,7 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   const { data: companyProfile } = useCompanyProfile();
   const role = localStorage.getItem("avanatalent_role");
   const isCompany = role === "company";
+  const companyProfileIdStr = localStorage.getItem("avanatalent_company_id");
   const { toast } = useToast();
   const [matches, setMatches] = useState<any[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
@@ -93,6 +94,32 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (!isCompany || !companyProfileIdStr) return;
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    fetch(`${basePath}/companies/${companyProfileIdStr}/bookmarks`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setIsBookmarked(data.some((b: any) => b.candidateId === candidateId)))
+      .catch(() => {});
+  }, [isCompany, companyProfileIdStr, candidateId]);
+
+  async function toggleBookmark() {
+    if (!companyProfileIdStr) return;
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    if (isBookmarked) {
+      setIsBookmarked(false);
+      await fetch(`${basePath}/companies/${companyProfileIdStr}/bookmarks/${candidateId}`, { method: "DELETE" });
+    } else {
+      setIsBookmarked(true);
+      await fetch(`${basePath}/companies/${companyProfileIdStr}/bookmarks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId }),
+      });
+    }
+  }
 
   useEffect(() => {
     async function fetchMatches() {
@@ -227,6 +254,12 @@ ${companyName}`
                 <Send className="w-4 h-4" />
                 Contact Candidate
               </Button>
+              {isCompany && (
+                <Button variant={isBookmarked ? "default" : "outline"} className="gap-2" onClick={toggleBookmark}>
+                  <Bookmark className={`w-4 h-4 ${isBookmarked ? "fill-white" : ""}`} />
+                  {isBookmarked ? "Bookmarked" : "Bookmark"}
+                </Button>
+              )}
               <Link href={`/candidates/${candidateId}/verifications`}>
                 <Button variant="outline" className="gap-2 w-full">
                   <ShieldCheck className="w-4 h-4" />

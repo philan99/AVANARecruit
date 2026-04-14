@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useListCandidates, getListCandidatesQueryKey } from "@workspace/api-client-react";
 
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users, Search, MapPin, Mail, X, LayoutGrid, List,
   SlidersHorizontal, ChevronDown, Check, Briefcase,
-  Monitor, GraduationCap, Factory, Clock,
+  Monitor, GraduationCap, Factory, Clock, Bookmark,
 } from "lucide-react";
 
 function MultiSelectDropdown({
@@ -184,6 +184,43 @@ export default function CandidatesList() {
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const role = localStorage.getItem("avanatalent_role");
   const isCompany = role === "company";
+  const companyProfileId = localStorage.getItem("avanatalent_company_id");
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set());
+  const [showBookmarks, setShowBookmarks] = useState(false);
+
+  const fetchBookmarks = useCallback(async () => {
+    if (!isCompany || !companyProfileId) return;
+    try {
+      const res = await fetch(`${apiBase}/companies/${companyProfileId}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedIds(new Set(data.map((b: any) => b.candidateId)));
+      }
+    } catch {}
+  }, [isCompany, companyProfileId, apiBase]);
+
+  useEffect(() => {
+    fetchBookmarks();
+  }, [fetchBookmarks]);
+
+  async function toggleBookmark(e: React.MouseEvent, candidateId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!companyProfileId) return;
+    const isBookmarked = bookmarkedIds.has(candidateId);
+    if (isBookmarked) {
+      setBookmarkedIds(prev => { const next = new Set(prev); next.delete(candidateId); return next; });
+      await fetch(`${apiBase}/companies/${companyProfileId}/bookmarks/${candidateId}`, { method: "DELETE" });
+    } else {
+      setBookmarkedIds(prev => new Set(prev).add(candidateId));
+      await fetch(`${apiBase}/companies/${companyProfileId}/bookmarks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId }),
+      });
+    }
+  }
 
   const initStatus = urlParams.get("status");
   const initLocation = urlParams.get("location");
@@ -269,6 +306,7 @@ export default function CandidatesList() {
 
   const filtered = useMemo(() => {
     return allCandidates.filter(c => {
+      if (showBookmarks && !bookmarkedIds.has(c.id)) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matches = c.name.toLowerCase().includes(q) ||
@@ -305,7 +343,7 @@ export default function CandidatesList() {
       }
       return true;
     });
-  }, [allCandidates, searchQuery, statusFilters, locationFilters, skillFilters, educationFilters, experienceFilters, jobTypeFilters, workplaceFilters, industryFilters]);
+  }, [allCandidates, searchQuery, statusFilters, locationFilters, skillFilters, educationFilters, experienceFilters, jobTypeFilters, workplaceFilters, industryFilters, showBookmarks, bookmarkedIds]);
 
   const activeFilterCount = useMemo(() => {
     return statusFilters.size + locationFilters.size + skillFilters.size + educationFilters.size + experienceFilters.size + jobTypeFilters.size + workplaceFilters.size + industryFilters.size;
@@ -358,6 +396,15 @@ export default function CandidatesList() {
               </span>
             )}
           </Button>
+          {isCompany && (
+            <Button
+              variant={showBookmarks ? "default" : "outline"}
+              onClick={() => setShowBookmarks(!showBookmarks)}
+            >
+              <Bookmark className={`w-4 h-4 mr-2 ${showBookmarks ? "fill-white" : ""}`} />
+              {showBookmarks ? "Show All" : "Bookmarked"}
+            </Button>
+          )}
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
@@ -567,7 +614,14 @@ export default function CandidatesList() {
                     <Badge variant="outline" className={`font-mono text-[10px] uppercase tracking-wider border-0 ${candidate.status === "active" ? "bg-green-500 text-white" : candidate.status === "passive" ? "bg-orange-400 text-white" : "bg-gray-400 text-white"}`}>
                       {formatStatus(candidate.status)}
                     </Badge>
-                    <span className="text-xs text-muted-foreground font-mono shrink-0">{candidate.experienceYears} YOE</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono">{candidate.experienceYears} YOE</span>
+                      {isCompany && (
+                        <button onClick={(e) => toggleBookmark(e, candidate.id)} className="hover:scale-110 transition-transform" title={bookmarkedIds.has(candidate.id) ? "Remove bookmark" : "Bookmark candidate"}>
+                          <Bookmark className={`w-4 h-4 ${bookmarkedIds.has(candidate.id) ? "fill-primary text-primary" : "text-muted-foreground/40 hover:text-primary"}`} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <h3 className="font-semibold text-sm text-foreground leading-tight mb-0.5">{candidate.name}</h3>
                   <p className="text-xs text-muted-foreground truncate mb-3">{candidate.currentTitle}</p>
@@ -626,6 +680,7 @@ export default function CandidatesList() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Matches</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
+                    {isCompany && <th className="text-center py-2 px-2 font-medium text-muted-foreground w-10"></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -670,6 +725,13 @@ export default function CandidatesList() {
                           {formatStatus(candidate.status)}
                         </Badge>
                       </td>
+                      {isCompany && (
+                        <td className="py-2 px-2 text-center">
+                          <button onClick={(e) => { e.stopPropagation(); toggleBookmark(e, candidate.id); }} className="hover:scale-110 transition-transform" title={bookmarkedIds.has(candidate.id) ? "Remove bookmark" : "Bookmark candidate"}>
+                            <Bookmark className={`w-4 h-4 ${bookmarkedIds.has(candidate.id) ? "fill-primary text-primary" : "text-muted-foreground/40 hover:text-primary"}`} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
