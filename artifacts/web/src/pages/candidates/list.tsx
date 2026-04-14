@@ -182,6 +182,8 @@ export default function CandidatesList() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const role = localStorage.getItem("avanatalent_role");
+  const isCompany = role === "company";
 
   const initStatus = urlParams.get("status");
   const initLocation = urlParams.get("location");
@@ -571,14 +573,18 @@ export default function CandidatesList() {
                   <p className="text-xs text-muted-foreground truncate mb-3">{candidate.currentTitle}</p>
 
                   <div className="space-y-1.5 mb-3 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Mail className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{candidate.email}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{candidate.location}</span>
-                    </div>
+                    {!isCompany && (
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{candidate.email}</span>
+                      </div>
+                    )}
+                    {!isCompany && (
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{candidate.location}</span>
+                      </div>
+                    )}
                     {candidate.education && (
                       <div className="flex items-center gap-1.5">
                         <GraduationCap className="w-3 h-3 shrink-0" />
@@ -616,7 +622,7 @@ export default function CandidatesList() {
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Candidate</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
+                    {!isCompany && <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>}
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Experience</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
@@ -634,14 +640,16 @@ export default function CandidatesList() {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-xs text-foreground truncate">{candidate.name}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{candidate.email}</p>
+                            {!isCompany && <p className="text-[10px] text-muted-foreground truncate">{candidate.email}</p>}
                           </div>
                         </div>
                       </td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.currentTitle}</td>
-                      <td className="py-2 px-2 text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
-                      </td>
+                      {!isCompany && (
+                        <td className="py-2 px-2 text-muted-foreground">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
+                        </td>
+                      )}
                       <td className="py-2 px-2 text-muted-foreground font-mono">{candidate.experienceYears} yrs</td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.education || "—"}</td>
                       <td className="py-2 px-2">
