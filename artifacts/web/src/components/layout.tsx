@@ -35,7 +35,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { role, clearRole, userEmail, isImpersonating, exitImpersonation } = useRole();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -165,7 +165,7 @@ export function Layout({ children }: LayoutProps) {
             <span>You are viewing the platform as {userEmail}</span>
           </div>
           <button
-            onClick={exitImpersonation}
+            onClick={() => { exitImpersonation(); navigate("/"); }}
             className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-xs font-medium transition-colors cursor-pointer"
           >
             Return to Admin Console
