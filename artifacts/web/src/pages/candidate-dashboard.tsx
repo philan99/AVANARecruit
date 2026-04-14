@@ -4,7 +4,6 @@ import { useGetCandidate, useGetCandidateMatches, useListJobs, getGetCandidateQu
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
   Briefcase,
   Target,
@@ -17,12 +16,7 @@ import {
   UserCircle,
   Zap,
   CheckCircle2,
-  Clock,
-  GraduationCap,
-  Mail,
   Heart,
-  Phone,
-  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -124,22 +118,26 @@ export default function CandidateDashboard() {
   const shortlistedCount = matches?.filter(m => m.status === "shortlisted" || m.status === "hired").length || 0;
   const highMatches = matches?.filter(m => m.overallScore >= 75).length || 0;
 
-  const profileChecks = candidate ? [
-    { label: "Name", filled: !!candidate.name, icon: UserCircle },
-    { label: "Email", filled: !!candidate.email, icon: Mail },
-    { label: "Phone", filled: !!candidate.phone, icon: Phone },
-    { label: "Location", filled: !!candidate.location, icon: MapPin },
-    { label: "Current Title", filled: !!candidate.currentTitle, icon: Briefcase },
-    { label: "Years of Experience", filled: candidate.experienceYears != null && candidate.experienceYears > 0, icon: Clock },
-    { label: "Profile Photo", filled: !!(candidate as any).profileImage, icon: UserCircle },
-    { label: "Professional Summary", filled: !!candidate.summary, icon: Target },
-    { label: "Skills", filled: (candidate.skills?.length || 0) > 0, icon: Zap },
-    { label: "Experience History", filled: Array.isArray((candidate as any).experience) && (candidate as any).experience.length > 0, icon: Briefcase },
-    { label: "Education", filled: !!candidate.education, icon: GraduationCap },
-    { label: "CV / Resume", filled: !!(candidate as any).cvFile, icon: FileText },
-  ] : [];
-  const filledCount = profileChecks.filter(c => c.filled).length;
-  const profileCompleteness = profileChecks.length ? Math.round((filledCount / profileChecks.length) * 100) : 0;
+  const skillDemandData = (() => {
+    if (!matches?.length) return [];
+    const skillCounts = new Map<string, { matched: number; missing: number }>();
+    for (const m of matches) {
+      for (const s of (m as any).matchedSkills || []) {
+        const entry = skillCounts.get(s) || { matched: 0, missing: 0 };
+        entry.matched++;
+        skillCounts.set(s, entry);
+      }
+      for (const s of (m as any).missingSkills || []) {
+        const entry = skillCounts.get(s) || { matched: 0, missing: 0 };
+        entry.missing++;
+        skillCounts.set(s, entry);
+      }
+    }
+    return Array.from(skillCounts.entries())
+      .map(([skill, counts]) => ({ skill, ...counts, total: counts.matched + counts.missing }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+  })();
 
   const avgSkillScore = matches?.length
     ? Math.round(matches.reduce((s, m) => s + m.skillScore, 0) / matches.length)
@@ -432,43 +430,38 @@ export default function CandidateDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-card">
-          <CardHeader>
-            <CardTitle className="text-base">Profile Strength</CardTitle>
-            <CardDescription>Complete your profile to improve match quality</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold text-foreground">{profileCompleteness}%</span>
-              {profileCompleteness === 100 ? (
-                <Badge className="bg-green-100 text-green-700 border-green-200">Complete</Badge>
-              ) : (
-                <Badge variant="outline">Incomplete</Badge>
-              )}
-            </div>
-            <Progress value={profileCompleteness} className="h-2" />
-            <div className="space-y-2 pt-2">
-              {profileChecks.map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-xs">
-                  {item.filled ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                  ) : (
-                    <div className="w-3.5 h-3.5 rounded-full border border-muted-foreground/30" />
-                  )}
-                  <item.icon className="w-3 h-3 text-muted-foreground" />
-                  <span className={item.filled ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
-                </div>
-              ))}
-            </div>
-            {profileCompleteness < 100 && (
-              <Link href="/profile">
-                <Button size="sm" className="w-full mt-2">
-                  Complete Profile
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
+        {skillDemandData.length > 0 ? (
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Skills in Demand</CardTitle>
+              <CardDescription>Your top skills across matched jobs</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={skillDemandData} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="skill" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={90} />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                  />
+                  <Bar dataKey="matched" name="Matched" stackId="a" fill="hsl(var(--primary))" radius={[0, 0, 0, 0]} maxBarSize={20} />
+                  <Bar dataKey="missing" name="Gap" stackId="a" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} maxBarSize={20} opacity={0.6} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card flex flex-col items-center justify-center">
+            <CardContent className="text-center py-12">
+              <Zap className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">Skills Insights</p>
+              <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
+                Once you have job matches, you'll see which of your skills are in demand.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {matches && matches.length > 0 ? (
           <Card className="bg-card">
