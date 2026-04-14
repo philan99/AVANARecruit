@@ -3,13 +3,19 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck,
+  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck, Loader2,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 const statusStyles: Record<string, string> = {
   active: "bg-green-500 text-white",
@@ -77,8 +83,15 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
     query: { enabled: !!candidateId, queryKey: getGetCandidateQueryKey(candidateId) },
   });
 
+  const { data: companyProfile } = useCompanyProfile();
+  const { toast } = useToast();
   const [matches, setMatches] = useState<any[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [contactMatchId, setContactMatchId] = useState<number | null>(null);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   useEffect(() => {
     async function fetchMatches() {
@@ -98,6 +111,62 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
     }
     if (candidateId) fetchMatches();
   }, [candidateId]);
+
+  const openContactDialog = () => {
+    if (!candidate || !matches.length) return;
+    const bestMatch = matches.reduce((best: any, m: any) =>
+      !best || m.overallScore > best.overallScore ? m : best, null);
+    if (bestMatch) setContactMatchId(bestMatch.id);
+
+    const companyName = companyProfile?.name || "Our Company";
+    const jobTitle = bestMatch?.jobTitle || "an open role";
+
+    setEmailSubject(`Opportunity: ${jobTitle} at ${companyName}`);
+    setEmailBody(
+`Dear ${candidate.name},
+
+I hope this message finds you well. My name is ${companyName} and I came across your profile on AVANA Recruitment.
+
+We are currently looking to fill the ${jobTitle} position and your experience and skills stood out to us as an excellent fit${bestMatch ? ` — with a ${Math.round(bestMatch.overallScore)}% match score` : ""}.
+
+I would love to schedule a brief call to discuss this opportunity in more detail and learn more about your career aspirations. Would you be available for a conversation this week?
+
+Please let me know a time that works for you, and I will be happy to arrange it.
+
+Looking forward to hearing from you.
+
+Best regards,
+${companyName}`
+    );
+    setContactDialogOpen(true);
+  };
+
+  const handleSendContact = async () => {
+    if (!contactMatchId || !companyProfile?.id) return;
+    setSendingEmail(true);
+    try {
+      const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${basePath}/matches/${contactMatchId}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: emailSubject,
+          body: emailBody,
+          companyProfileId: companyProfile.id,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to send email");
+      }
+      toast({ title: "Email Sent", description: `Your message to ${candidate?.name} has been sent successfully.` });
+      setContactDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to send email.", variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   if (candidateLoading) {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading candidate...</div>;
@@ -159,7 +228,7 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
               </div>
             </div>
             <div className="shrink-0 flex flex-col gap-2">
-              <Button className="gap-2" disabled>
+              <Button className="gap-2" onClick={openContactDialog} disabled={!matches.length}>
                 <Send className="w-4 h-4" />
                 Contact Candidate
               </Button>
@@ -530,6 +599,76 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
           </Card>
         </div>
       </div>
+
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Contact {candidate?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {matches.length > 1 && (
+              <div className="space-y-1.5">
+                <Label>Regarding Job</Label>
+                <select
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={contactMatchId || ""}
+                  onChange={(e) => {
+                    const matchId = parseInt(e.target.value, 10);
+                    setContactMatchId(matchId);
+                    const m = matches.find((x: any) => x.id === matchId);
+                    if (m) {
+                      const companyName = companyProfile?.name || "Our Company";
+                      setEmailSubject(`Opportunity: ${m.jobTitle} at ${companyName}`);
+                    }
+                  }}
+                >
+                  {matches.map((m: any) => (
+                    <option key={m.id} value={m.id}>
+                      {m.jobTitle} ({Math.round(m.overallScore)}% match)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label>Subject</Label>
+              <Input
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Email subject"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Message</Label>
+              <Textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                placeholder="Compose your message..."
+                rows={14}
+                className="font-mono text-sm leading-relaxed"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setContactDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendContact}
+              disabled={sendingEmail || !emailSubject.trim() || !emailBody.trim()}
+            >
+              {sendingEmail ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+              ) : (
+                <><Send className="w-4 h-4 mr-2" /> Send Email</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
