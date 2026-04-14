@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
 import { RoleProvider, useRole } from "@/contexts/role-context";
+import { Chatbot } from "@/components/chatbot";
 
 import RoleSelect from "@/pages/role-select";
 import ContactUs from "@/pages/contact-us";
@@ -150,6 +151,7 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <AppRouter />
           </WouterRouter>
+          <Chatbot />
           <Toaster />
         </RoleProvider>
       </TooltipProvider>

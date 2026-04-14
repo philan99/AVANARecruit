@@ -80,6 +80,17 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
+### AI Chatbot
+- Floating chatbot widget available on all pages (bottom-right corner)
+- Uses OpenAI via Replit AI Integrations (gpt-5-mini model)
+- Context-aware based on login state:
+  - **Not logged in**: General platform info, how it works, signup guidance
+  - **Company user**: Help with posting jobs, finding candidates, match scores, recruitment pipeline
+  - **Candidate user**: Help with profile, job search, match scores, applications
+- API route: `artifacts/api-server/src/routes/chat.ts`
+- Frontend component: `artifacts/web/src/components/chatbot.tsx`
+- Streaming responses via SSE
+
 ## Key Files
 
 - `lib/api-spec/openapi.yaml` — OpenAPI specification (source of truth for API contracts)

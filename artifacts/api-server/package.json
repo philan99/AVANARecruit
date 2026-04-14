@@ -22,7 +22,8 @@
     "google-auth-library": "^10.6.2",
     "pino": "^9",
     "pino-http": "^10",
-    "resend": "4.0.0"
+    "resend": "4.0.0",
+    "@workspace/integrations-openai-ai-server": "workspace:*"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

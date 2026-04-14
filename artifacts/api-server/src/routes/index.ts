@@ -12,6 +12,7 @@ import verificationsRouter from "./verifications";
 import passwordResetRouter from "./passwordReset";
 import emailVerificationRouter from "./emailVerification";
 import bookmarksRouter from "./bookmarks";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(contactRouter);
 router.use(verificationsRouter);
 router.use(passwordResetRouter);
 router.use(emailVerificationRouter);
+router.use(chatRouter);
 
 export default router;

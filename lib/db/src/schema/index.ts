@@ -9,3 +9,5 @@ export * from "./verifications";
 export * from "./passwordResets";
 export * from "./emailVerifications";
 export * from "./bookmarks";
+export * from "./conversations";
+export * from "./messages";
