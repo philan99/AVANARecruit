@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Briefcase, Search, Plus, MapPin, Building, Target,
   SlidersHorizontal, X, ChevronDown, Check, GraduationCap,
-  Monitor, PoundSterling, LayoutGrid, List, Clock, Factory,
+  Monitor, PoundSterling, LayoutGrid, List, Clock, Factory, UserCheck,
 } from "lucide-react";
 
 function MultiSelectDropdown({
@@ -243,6 +243,24 @@ export default function JobsList() {
   });
 
   const companyProfileId = companyProfile?.id;
+  const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (role !== "company" || !companyProfileId) return;
+    async function fetchAppliedJobs() {
+      try {
+        const res = await fetch(`${basePath}/dashboard/applicants?companyProfileId=${companyProfileId}&limit=1000`);
+        if (res.ok) {
+          const data = await res.json();
+          setAppliedJobIds(new Set(data.map((a: any) => a.jobId)));
+        }
+      } catch (err) {
+        console.error("Failed to fetch applied jobs", err);
+      }
+    }
+    fetchAppliedJobs();
+  }, [basePath, companyProfileId, role]);
 
   const apiQueryParams = {
     ...(searchQuery ? { search: searchQuery } : {}),
@@ -537,12 +555,20 @@ export default function JobsList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((job) => (
             <Link key={job.id} href={`/jobs/${job.id}`}>
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col">
+              <Card className={`hover:border-primary/50 transition-colors cursor-pointer bg-card h-full flex flex-col ${appliedJobIds.has(job.id) ? "border-l-2 border-l-blue-500" : ""}`}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant={job.status === "open" ? "default" : "secondary"} className="font-mono text-[10px] uppercase tracking-wider">
-                      {job.status}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={job.status === "open" ? "default" : "secondary"} className="font-mono text-[10px] uppercase tracking-wider">
+                        {job.status}
+                      </Badge>
+                      {appliedJobIds.has(job.id) && (
+                        <span className="inline-flex items-center gap-0.5 bg-blue-500/10 text-blue-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide">
+                          <UserCheck className="w-3 h-3" />
+                          Applied
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground font-mono">REQ-{job.id.toString().padStart(4, "0")}</span>
                   </div>
                   <CardTitle className="text-lg leading-tight line-clamp-2">{job.title}</CardTitle>
@@ -626,14 +652,22 @@ export default function JobsList() {
                 </thead>
                 <tbody>
                   {filtered.map((job) => (
-                    <tr key={job.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
+                    <tr key={job.id} className={`border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer ${appliedJobIds.has(job.id) ? "bg-blue-500/5 border-l-2 border-l-blue-500" : ""}`} onClick={() => navigate(`/jobs/${job.id}`)}>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <Briefcase className="w-3.5 h-3.5" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-xs text-foreground truncate max-w-[200px]">{job.title}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-xs text-foreground truncate max-w-[200px]">{job.title}</p>
+                              {appliedJobIds.has(job.id) && (
+                                <span className="inline-flex items-center gap-0.5 bg-blue-500/10 text-blue-600 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide">
+                                  <UserCheck className="w-3 h-3" />
+                                  Applied
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] text-muted-foreground">REQ-{job.id.toString().padStart(4, "0")}</p>
                           </div>
                         </div>
