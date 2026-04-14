@@ -153,7 +153,7 @@ router.post("/candidates", async (req, res): Promise<void> => {
   }
 
   try {
-    const { client, fromEmail } = getResendClient();
+    const { client, fromEmail } = await getResendClient();
     await client.emails.send({
       from: fromEmail,
       to: "avana_resourcing@avanaservices.com",
