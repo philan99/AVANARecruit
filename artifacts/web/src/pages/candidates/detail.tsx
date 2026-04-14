@@ -617,7 +617,7 @@ ${companyName}`
                 onChange={(e) => setEmailBody(e.target.value)}
                 placeholder="Compose your message..."
                 rows={14}
-                className="font-mono text-sm leading-relaxed"
+                className="resize-y"
               />
             </div>
           </div>
