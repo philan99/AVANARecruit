@@ -84,6 +84,8 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   });
 
   const { data: companyProfile } = useCompanyProfile();
+  const role = localStorage.getItem("avanatalent_role");
+  const isCompany = role === "company";
   const { toast } = useToast();
   const [matches, setMatches] = useState<any[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
@@ -209,9 +211,11 @@ ${companyName}`
                 <p className="text-sm text-muted-foreground mt-1">{candidate.currentTitle}</p>
               )}
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
+                {!isCompany && (
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
+                )}
                 <span className="flex items-center gap-1"><Mail className="w-4 h-4" />{candidate.email}</span>
-                {candidate.phone && (
+                {!isCompany && candidate.phone && (
                   <span className="flex items-center gap-1"><Phone className="w-4 h-4" />{candidate.phone}</span>
                 )}
                 <span className="flex items-center gap-1">
@@ -411,8 +415,8 @@ ${companyName}`
             </CardHeader>
             <CardContent>
               <DetailRow icon={Mail} label="Email" value={candidate.email} />
-              <DetailRow icon={Phone} label="Phone" value={candidate.phone || "Not provided"} />
-              <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
+              {!isCompany && <DetailRow icon={Phone} label="Phone" value={candidate.phone || "Not provided"} />}
+              {!isCompany && <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />}
             </CardContent>
           </Card>
 
