@@ -328,6 +328,109 @@ export default function CandidateDashboard() {
         </CardContent>
       </Card>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <span>Top Job Matches</span>
+              <Link href="/my-matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+                View all <ArrowUpRight className="w-3 h-3 ml-1" />
+              </Link>
+            </CardTitle>
+            <CardDescription>Your best-fitting opportunities based on AI matching</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topMatches.length > 0 ? topMatches.map((match) => (
+                <Link key={match.id} href={`/jobs/${match.jobId}`}>
+                  <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
+                    <div className="overflow-hidden flex-1">
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(match.jobId) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                        {match.jobTitle}
+                      </p>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-xs text-muted-foreground truncate flex items-center">
+                          <Building className="w-3 h-3 mr-1 shrink-0" />
+                          {match.jobCompany}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center ml-4 shrink-0 gap-2">
+                      {match.status !== "pending" && (
+                        <Badge variant={match.status === "shortlisted" || match.status === "hired" ? "default" : "secondary"} className="text-[9px] uppercase">
+                          {match.status}
+                        </Badge>
+                      )}
+                      <span className={`text-xs font-mono font-bold px-2 py-1 rounded ${
+                        match.overallScore >= 75
+                          ? "text-green-700 bg-green-100"
+                          : match.overallScore >= 50
+                            ? "text-primary bg-primary/10"
+                            : "text-muted-foreground bg-secondary"
+                      }`}>
+                        {Math.round(match.overallScore)}%
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )) : (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  <Target className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                  No matches yet. Companies will match with your profile soon.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <span>Recent Opportunities</span>
+              <Link href="/browse-jobs" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+                Browse all <ArrowUpRight className="w-3 h-3 ml-1" />
+              </Link>
+            </CardTitle>
+            <CardDescription>Latest open positions on the platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {openJobs && openJobs.length > 0 ? openJobs.slice(0, 5).map((job) => (
+                <Link key={job.id} href={`/jobs/${job.id}`}>
+                  <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
+                    <div className="overflow-hidden flex-1">
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(job.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                        {job.title}
+                      </p>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-xs text-muted-foreground truncate flex items-center">
+                          <Building className="w-3 h-3 mr-1 shrink-0" />
+                          {job.company}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate flex items-center">
+                          <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                          {job.location}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] uppercase shrink-0 ml-2">
+                      {job.experienceLevel}
+                    </Badge>
+                  </div>
+                </Link>
+              )) : (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  <Briefcase className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                  No open positions at the moment.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="bg-card">
           <CardHeader>
@@ -445,109 +548,6 @@ export default function CandidateDashboard() {
             </CardContent>
           </Card>
         )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span>Top Job Matches</span>
-              <Link href="/my-matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
-                View all <ArrowUpRight className="w-3 h-3 ml-1" />
-              </Link>
-            </CardTitle>
-            <CardDescription>Your best-fitting opportunities based on AI matching</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {topMatches.length > 0 ? topMatches.map((match) => (
-                <Link key={match.id} href={`/jobs/${match.jobId}`}>
-                  <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
-                    <div className="overflow-hidden flex-1">
-                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(match.jobId) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
-                        {match.jobTitle}
-                      </p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <p className="text-xs text-muted-foreground truncate flex items-center">
-                          <Building className="w-3 h-3 mr-1 shrink-0" />
-                          {match.jobCompany}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center ml-4 shrink-0 gap-2">
-                      {match.status !== "pending" && (
-                        <Badge variant={match.status === "shortlisted" || match.status === "hired" ? "default" : "secondary"} className="text-[9px] uppercase">
-                          {match.status}
-                        </Badge>
-                      )}
-                      <span className={`text-xs font-mono font-bold px-2 py-1 rounded ${
-                        match.overallScore >= 75
-                          ? "text-green-700 bg-green-100"
-                          : match.overallScore >= 50
-                            ? "text-primary bg-primary/10"
-                            : "text-muted-foreground bg-secondary"
-                      }`}>
-                        {Math.round(match.overallScore)}%
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              )) : (
-                <div className="text-sm text-muted-foreground text-center py-8">
-                  <Target className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-                  No matches yet. Companies will match with your profile soon.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span>Recent Opportunities</span>
-              <Link href="/browse-jobs" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
-                Browse all <ArrowUpRight className="w-3 h-3 ml-1" />
-              </Link>
-            </CardTitle>
-            <CardDescription>Latest open positions on the platform</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {openJobs && openJobs.length > 0 ? openJobs.slice(0, 5).map((job) => (
-                <Link key={job.id} href={`/jobs/${job.id}`}>
-                  <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
-                    <div className="overflow-hidden flex-1">
-                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(job.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
-                        {job.title}
-                      </p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <p className="text-xs text-muted-foreground truncate flex items-center">
-                          <Building className="w-3 h-3 mr-1 shrink-0" />
-                          {job.company}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate flex items-center">
-                          <MapPin className="w-3 h-3 mr-1 shrink-0" />
-                          {job.location}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] uppercase shrink-0 ml-2">
-                      {job.experienceLevel}
-                    </Badge>
-                  </div>
-                </Link>
-              )) : (
-                <div className="text-sm text-muted-foreground text-center py-8">
-                  <Briefcase className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-                  No open positions at the moment.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
     </div>
