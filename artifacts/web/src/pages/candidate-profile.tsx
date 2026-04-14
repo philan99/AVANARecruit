@@ -448,14 +448,18 @@ export default function CandidateProfile() {
   function getProfileCompletion() {
     if (!candidate) return { percent: 0, items: [] };
     const items = [
-      { label: "Name & title", done: !!(candidate.name && candidate.currentTitle) },
-      { label: "Contact info", done: !!(candidate.email && candidate.phone) },
+      { label: "Name", done: !!candidate.name },
+      { label: "Email", done: !!candidate.email },
+      { label: "Phone", done: !!candidate.phone },
       { label: "Location", done: !!candidate.location },
-      { label: "Summary", done: !!candidate.summary },
-      { label: "Skills", done: candidate.skills.length > 0 },
-      { label: "Experience", done: ((candidate as any).experience || []).length > 0 },
+      { label: "Current Title", done: !!candidate.currentTitle },
+      { label: "Years of Experience", done: candidate.experienceYears != null && candidate.experienceYears > 0 },
+      { label: "Profile Photo", done: !!(candidate as any).profileImage },
+      { label: "Professional Summary", done: !!candidate.summary },
+      { label: "Skills", done: (candidate.skills?.length || 0) > 0 },
+      { label: "Experience History", done: Array.isArray((candidate as any).experience) && (candidate as any).experience.length > 0 },
       { label: "Education", done: !!candidate.education },
-      { label: "CV uploaded", done: !!(candidate as any).cvFile },
+      { label: "CV / Resume", done: !!(candidate as any).cvFile },
     ];
     const done = items.filter(i => i.done).length;
     return { percent: Math.round((done / items.length) * 100), items };
