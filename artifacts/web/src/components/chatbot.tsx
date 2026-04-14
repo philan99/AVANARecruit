@@ -93,6 +93,87 @@ export function Chatbot() {
     setIsOpen(false);
   }, [setLocation]);
 
+  const pendingMessageRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const handler = (e: CustomEvent<{ message: string }>) => {
+      pendingMessageRef.current = e.detail.message;
+      if (!hasGreeted) {
+        setMessages([{ role: "assistant", content: getGreeting() }]);
+        setHasGreeted(true);
+      }
+      setIsOpen(true);
+    };
+    window.addEventListener("chatbot:send", handler as EventListener);
+    return () => window.removeEventListener("chatbot:send", handler as EventListener);
+  }, [hasGreeted]);
+
+  useEffect(() => {
+    if (isOpen && pendingMessageRef.current && !isStreaming) {
+      const msg = pendingMessageRef.current;
+      pendingMessageRef.current = null;
+      setInput(msg);
+      setTimeout(() => {
+        setInput("");
+        const userMsg: ChatMessage = { role: "user", content: msg };
+        const newMessages = [...messages, userMsg];
+        setMessages(newMessages);
+        setIsStreaming(true);
+
+        (async () => {
+          try {
+            const res = await fetch(`${basePath}/chat`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+                role: getRole(),
+                companyId: getCompanyId(),
+                candidateId: getCandidateId(),
+              }),
+            });
+            if (!res.ok) throw new Error("Chat request failed");
+            const reader = res.body?.getReader();
+            if (!reader) throw new Error("No response stream");
+            const decoder = new TextDecoder();
+            let assistantContent = "";
+            setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const text = decoder.decode(value, { stream: true });
+              const lines = text.split("\n");
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.done) break;
+                    if (data.content) {
+                      assistantContent += data.content;
+                      const updatedContent = assistantContent;
+                      setMessages((prev) => {
+                        const copy = [...prev];
+                        copy[copy.length - 1] = { role: "assistant", content: updatedContent };
+                        return copy;
+                      });
+                    }
+                  } catch {}
+                }
+              }
+            }
+          } catch {
+            setMessages((prev) => [
+              ...prev,
+              { role: "assistant", content: "Sorry, I'm having trouble responding right now. Please try again." },
+            ]);
+          } finally {
+            setIsStreaming(false);
+          }
+        })();
+      }, 100);
+    }
+  }, [isOpen, isStreaming, messages, basePath]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const currentKey = getSessionKey();

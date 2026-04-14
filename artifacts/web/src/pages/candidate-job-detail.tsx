@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2 } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2, Sparkles } from "lucide-react";
 import { useGetJob, getGetJobQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -382,6 +382,18 @@ ${name}`
                       </div>
                     </div>
                   )}
+                  <Button
+                    className="w-full mt-5 font-mono tracking-tight bg-[#4CAF50] hover:bg-[#43a047] text-white cursor-pointer"
+                    onClick={() => {
+                      const missingList = myMatch.missingSkills?.length > 0 ? myMatch.missingSkills.join(", ") : "none identified";
+                      const matchedList = myMatch.matchedSkills?.length > 0 ? myMatch.matchedSkills.join(", ") : "none";
+                      const msg = `I'm looking at the "${job.title}" role at ${job.company}. My overall match score is ${Math.round(myMatch.overallScore)}% (Skills: ${Math.round(myMatch.skillScore)}%, Experience: ${Math.round(myMatch.experienceScore)}%, Education: ${Math.round(myMatch.educationScore)}%, Location: ${Math.round(myMatch.locationScore)}%). My matched skills are: ${matchedList}. Skills I'm missing: ${missingList}. How can I improve my match score for this job?`;
+                      window.dispatchEvent(new CustomEvent("chatbot:send", { detail: { message: msg } }));
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Improve my Match Score
+                  </Button>
                 </>
               ) : (
                 <div className="text-sm text-muted-foreground text-center py-4">Unable to generate match score</div>
