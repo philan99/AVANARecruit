@@ -265,12 +265,12 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center gap-3">
               <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate("/candidates?status=active"); }}>
-                <div className="text-2xl font-bold text-green-500">{stats?.activeCandidates || 0}</div>
+                <div className="text-3xl font-bold text-green-500">{stats?.activeCandidates || 0}</div>
                 <p className="text-xs text-muted-foreground">Active</p>
               </div>
               <div className="text-xl text-muted-foreground">/</div>
               <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate("/candidates?status=passive"); }}>
-                <div className="text-2xl font-bold text-orange-500">{stats?.passiveCandidates || 0}</div>
+                <div className="text-3xl font-bold text-orange-500">{stats?.passiveCandidates || 0}</div>
                 <p className="text-xs text-muted-foreground">Passive</p>
               </div>
             </div>
