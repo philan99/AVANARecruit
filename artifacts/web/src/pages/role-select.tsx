@@ -825,7 +825,7 @@ export default function RoleSelect() {
         </div>
       </footer>
 
-      {showLogin && (
+      {showLogin && !loginErrorMsg && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div className="absolute inset-0" style={{ backgroundColor: "rgba(26, 32, 53, 0.7)", backdropFilter: "blur(4px)" }} onClick={() => setShowLogin(false)} />
           <div className="relative w-full max-w-md mx-4 rounded-xl shadow-2xl p-8" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
