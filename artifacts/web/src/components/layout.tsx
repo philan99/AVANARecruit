@@ -19,6 +19,16 @@ import {
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
 import { ShieldAlert } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,6 +37,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const { role, clearRole, userEmail, isImpersonating, exitImpersonation } = useRole();
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const companyNavItems = [
@@ -96,7 +107,7 @@ export function Layout({ children }: LayoutProps) {
               )}
             </div>
             <button
-              onClick={clearRole}
+              onClick={() => setShowSignOutDialog(true)}
               className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 mr-1.5" />
@@ -135,7 +146,7 @@ export function Layout({ children }: LayoutProps) {
             })}
             <div className="pt-2 border-t border-sidebar-border mt-2">
               <button
-                onClick={clearRole}
+                onClick={() => { setMobileMenuOpen(false); setShowSignOutDialog(true); }}
                 className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4 mr-3" />
@@ -184,6 +195,20 @@ export function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
+      <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign Out</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to sign out?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={clearRole}>Sign Out</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
