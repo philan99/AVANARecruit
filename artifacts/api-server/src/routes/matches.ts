@@ -509,6 +509,33 @@ router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
   res.json(GetTopCandidatesResponse.parse(results));
 });
 
+router.get("/dashboard/applied-jobs", async (req, res): Promise<void> => {
+  const candidateId = req.query.candidateId ? parseInt(req.query.candidateId as string, 10) : null;
+  if (!candidateId) {
+    res.status(400).json({ error: "candidateId is required" });
+    return;
+  }
+  const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+  const appliedJobs = await db
+    .select({
+      id: matchesTable.id,
+      jobId: matchesTable.jobId,
+      jobTitle: jobsTable.title,
+      jobCompany: jobsTable.company,
+      overallScore: matchesTable.overallScore,
+      status: matchesTable.status,
+      createdAt: matchesTable.createdAt,
+    })
+    .from(matchesTable)
+    .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+    .where(and(eq(matchesTable.candidateId, candidateId), eq(matchesTable.applied, true)))
+    .orderBy(desc(matchesTable.createdAt))
+    .limit(limit);
+
+  res.json(appliedJobs);
+});
+
 router.get("/dashboard/applicants", async (req, res): Promise<void> => {
   const companyProfileId = req.query.companyProfileId ? parseInt(req.query.companyProfileId as string, 10) : null;
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;

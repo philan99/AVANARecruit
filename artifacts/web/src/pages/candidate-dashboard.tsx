@@ -54,6 +54,17 @@ export default function CandidateDashboard() {
     query: { queryKey: ["open-jobs"] },
   });
 
+  interface AppliedJob {
+    id: number;
+    jobId: number;
+    jobTitle: string;
+    jobCompany: string;
+    overallScore: number;
+    status: string;
+    createdAt: string;
+  }
+
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -71,6 +82,17 @@ export default function CandidateDashboard() {
   useEffect(() => {
     fetchFavourites();
   }, [fetchFavourites]);
+
+  useEffect(() => {
+    if (!candidateProfileId) return;
+    async function fetchAppliedJobs() {
+      try {
+        const res = await fetch(`${apiBase}/dashboard/applied-jobs?candidateId=${candidateProfileId}&limit=10`);
+        if (res.ok) setAppliedJobs(await res.json());
+      } catch {}
+    }
+    fetchAppliedJobs();
+  }, [candidateProfileId, apiBase]);
 
   const favouritesCount = favouriteJobIds.size;
 
@@ -369,6 +391,61 @@ export default function CandidateDashboard() {
           </Card>
         )}
       </div>
+
+      <Card className="bg-card">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              Jobs Applied For
+            </span>
+            <Link href="/my-matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+              View all <ArrowUpRight className="w-3 h-3 ml-1" />
+            </Link>
+          </CardTitle>
+          <CardDescription>Jobs you've applied to and their current status</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {appliedJobs.length > 0 ? appliedJobs.map((job) => (
+              <Link key={job.id} href={`/jobs/${job.jobId}`}>
+                <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
+                  <div className="overflow-hidden flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{job.jobTitle}</p>
+                    <p className="text-xs text-muted-foreground truncate flex items-center mt-0.5">
+                      <Building className="w-3 h-3 mr-1 shrink-0" />
+                      {job.jobCompany}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4 shrink-0">
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                      job.status === "shortlisted" ? "bg-green-500/10 text-green-500" :
+                      job.status === "hired" ? "bg-blue-500/10 text-blue-500" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                    </span>
+                    <span className={`text-xs font-mono font-bold px-2 py-1 rounded ${
+                      job.overallScore >= 75
+                        ? "text-green-700 bg-green-100"
+                        : job.overallScore >= 50
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground bg-secondary"
+                    }`}>
+                      {Math.round(job.overallScore)}%
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )) : (
+              <div className="text-sm text-muted-foreground text-center py-8">
+                <Briefcase className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                You haven't applied for any jobs yet. Browse matches to find opportunities.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-card">
