@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2 } from "lucide-react";
 import { useGetJob, getGetJobQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -149,6 +149,7 @@ ${name}`
         throw new Error(data.error || "Failed to send application");
       }
       toast({ title: "Application Sent", description: `Your application for ${job?.title} has been sent to ${job?.company}.` });
+      setMyMatch((prev: any) => prev ? { ...prev, applied: true } : prev);
       setApplyDialogOpen(false);
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to send application.", variant: "destructive" });
@@ -196,14 +197,25 @@ ${name}`
             {isFavourite ? "Favourited" : "Add to Favourites"}
           </Button>
           {myMatch && Math.round(myMatch.overallScore) >= 50 && (
-            <Button
-              size="lg"
-              variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
-              className="font-mono tracking-tight cursor-pointer"
-              onClick={openApplyDialog}
-            >
-              <Send className="w-4 h-4 mr-2" /> APPLY
-            </Button>
+            myMatch.applied ? (
+              <Button
+                size="lg"
+                variant="outline"
+                className="font-mono tracking-tight cursor-default border-green-500/50 text-green-600"
+                disabled
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" /> Applied
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
+                className="font-mono tracking-tight cursor-pointer"
+                onClick={openApplyDialog}
+              >
+                <Send className="w-4 h-4 mr-2" /> APPLY
+              </Button>
+            )
           )}
         </div>
       </div>
