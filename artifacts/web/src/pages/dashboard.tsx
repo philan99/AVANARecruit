@@ -305,7 +305,7 @@ export default function Dashboard() {
             <Target className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.avgMatchScore ? `${Math.round(stats.avgMatchScore)}%` : '0%'}</div>
+            <div className={`text-3xl font-bold ${(stats?.avgMatchScore ?? 0) > 75 ? 'text-green-500' : (stats?.avgMatchScore ?? 0) >= 50 ? 'text-orange-500' : 'text-muted-foreground'}`}>{stats?.avgMatchScore ? `${Math.round(stats.avgMatchScore)}%` : '0%'}</div>
             <p className="text-xs text-muted-foreground mt-1">Across all active jobs</p>
           </CardContent>
         </Card>
