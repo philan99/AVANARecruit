@@ -23,6 +23,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
   const [matchLoading, setMatchLoading] = useState(false);
   const [companyWebsite, setCompanyWebsite] = useState<string | null>(null);
   const [applyDialogOpen, setApplyDialogOpen] = useState(false);
+  const [confirmApplyOpen, setConfirmApplyOpen] = useState(false);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -205,12 +206,21 @@ ${name}`
             >
               <CheckCircle2 className="w-4 h-4 mr-2" /> Applied
             </Button>
+          ) : myMatch && Math.round(myMatch.overallScore) > 75 ? (
+            <Button
+              size="lg"
+              variant="default"
+              className="font-mono tracking-tight cursor-pointer"
+              onClick={openApplyDialog}
+            >
+              <Send className="w-4 h-4 mr-2" /> APPLY
+            </Button>
           ) : myMatch && Math.round(myMatch.overallScore) >= 50 ? (
             <Button
               size="lg"
-              variant={Math.round(myMatch.overallScore) > 75 ? "default" : "outline"}
+              variant="outline"
               className="font-mono tracking-tight cursor-pointer"
-              onClick={openApplyDialog}
+              onClick={() => setConfirmApplyOpen(true)}
             >
               <Send className="w-4 h-4 mr-2" /> APPLY
             </Button>
@@ -410,6 +420,30 @@ ${name}`
           </Card>
         </div>
       </div>
+
+      <Dialog open={confirmApplyOpen} onOpenChange={setConfirmApplyOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Application</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Your match score for this role is <span className="font-bold text-foreground">{myMatch ? Math.round(myMatch.overallScore) : 0}%</span>, which is below the recommended threshold of 75%.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              You can still apply, but you may want to consider improving your profile or skills to strengthen your application.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmApplyOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => { setConfirmApplyOpen(false); openApplyDialog(); }}>
+              Continue to Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={applyDialogOpen} onOpenChange={setApplyDialogOpen}>
         <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
