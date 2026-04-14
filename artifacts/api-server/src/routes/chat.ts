@@ -4,7 +4,7 @@ import { openai } from "@workspace/integrations-openai-ai-server";
 const router = Router();
 
 function getSystemPrompt(role: string | null): string {
-  const base = `You are AVANA, a helpful recruitment assistant for the AVANA Recruitment platform — an AI-powered job matching platform that connects companies with candidates based on skills, experience, education, and location. Be friendly, concise, and professional. Use British English.`;
+  const base = `You are AVANA, a helpful recruitment assistant for the AVANA Recruitment platform — an AI-powered job matching platform that connects companies with candidates based on skills, experience, education, and location. Be friendly, concise, and professional. Use British English. Keep answers short (2-4 sentences) unless the user asks for detail.`;
 
   if (role === "company") {
     return `${base}
@@ -59,9 +59,11 @@ router.post("/chat", async (req, res): Promise<void> => {
 
     const systemPrompt = getSystemPrompt(role || null);
 
+    const recentMessages = messages.slice(-10);
+
     const chatMessages = [
       { role: "system" as const, content: systemPrompt },
-      ...messages.map((m: { role: string; content: string }) => ({
+      ...recentMessages.map((m: { role: string; content: string }) => ({
         role: m.role as "user" | "assistant",
         content: m.content,
       })),
@@ -72,8 +74,8 @@ router.post("/chat", async (req, res): Promise<void> => {
     res.setHeader("Connection", "keep-alive");
 
     const stream = await openai.chat.completions.create({
-      model: "gpt-5-mini",
-      max_completion_tokens: 2048,
+      model: "gpt-4.1-mini",
+      max_completion_tokens: 512,
       messages: chatMessages,
       stream: true,
     });
