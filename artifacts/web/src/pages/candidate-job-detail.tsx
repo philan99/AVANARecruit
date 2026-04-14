@@ -225,15 +225,18 @@ ${name}`
               <Send className="w-4 h-4 mr-2" /> APPLY
             </Button>
           ) : (
-            <Button
-              size="lg"
-              variant="outline"
-              className="font-mono tracking-tight opacity-50 cursor-not-allowed"
-              disabled
+            <span
               title={!myMatch ? "Your match score is being calculated. Please wait a moment." : `Your match score is ${Math.round(myMatch.overallScore)}%. A minimum of 50% is required to apply.`}
             >
-              <Send className="w-4 h-4 mr-2" /> APPLY
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="font-mono tracking-tight opacity-50 pointer-events-none"
+                disabled
+              >
+                <Send className="w-4 h-4 mr-2" /> APPLY
+              </Button>
+            </span>
           )}
         </div>
       </div>
