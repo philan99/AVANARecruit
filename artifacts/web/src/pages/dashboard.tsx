@@ -244,8 +244,8 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Link href="/jobs?status=open">
-          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer">
+        <Link href="/jobs?status=open" className="h-full">
+          <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Open Jobs</CardTitle>
               <Briefcase className="w-4 h-4 text-muted-foreground" />
@@ -257,27 +257,18 @@ export default function Dashboard() {
           </Card>
         </Link>
         
-        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/candidates")}>
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full" onClick={() => navigate("/candidates")}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active / Passive Candidates</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">All Candidates</CardTitle>
             <Users className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate("/candidates?status=active"); }}>
-                <div className="text-3xl font-bold text-green-500">{stats?.activeCandidates || 0}</div>
-                <p className="text-xs text-muted-foreground">Active</p>
-              </div>
-              <div className="text-xl text-muted-foreground">/</div>
-              <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate("/candidates?status=passive"); }}>
-                <div className="text-3xl font-bold text-orange-500">{stats?.passiveCandidates || 0}</div>
-                <p className="text-xs text-muted-foreground">Passive</p>
-              </div>
-            </div>
+            <div className="text-3xl font-bold">{stats?.totalCandidates || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active &amp; passive</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/matches")}>
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full" onClick={() => navigate("/matches")}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Matches</CardTitle>
             <Network className="w-4 h-4 text-primary" />
@@ -288,7 +279,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/candidates?bookmarks=1")}>
+        <Card className="bg-card hover:border-primary/50 transition-colors cursor-pointer h-full" onClick={() => navigate("/candidates?bookmarks=1")}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Bookmarked</CardTitle>
             <Bookmark className="w-4 h-4 text-muted-foreground" />
@@ -299,7 +290,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-card h-full">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Avg Match Score</CardTitle>
             <Target className="w-4 h-4 text-muted-foreground" />
