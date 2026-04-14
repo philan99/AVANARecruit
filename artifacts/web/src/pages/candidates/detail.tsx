@@ -88,7 +88,6 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   const [matches, setMatches] = useState<any[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [contactMatchId, setContactMatchId] = useState<number | null>(null);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -113,25 +112,19 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   }, [candidateId]);
 
   const openContactDialog = () => {
-    if (!candidate || !matches.length) return;
-    const bestMatch = matches.reduce((best: any, m: any) =>
-      !best || m.overallScore > best.overallScore ? m : best, null);
-    if (bestMatch) setContactMatchId(bestMatch.id);
+    if (!candidate) return;
 
     const companyName = companyProfile?.name || "Our Company";
-    const jobTitle = bestMatch?.jobTitle || "an open role";
 
-    setEmailSubject(`Opportunity: ${jobTitle} at ${companyName}`);
+    setEmailSubject(`Introduction from ${companyName} via AVANA Recruitment`);
     setEmailBody(
 `Dear ${candidate.name},
 
-I hope this message finds you well. My name is ${companyName} and I came across your profile on AVANA Recruitment.
+I hope this message finds you well. I came across your profile on AVANA Recruitment and was impressed by your background and experience${candidate.currentTitle ? ` as a ${candidate.currentTitle}` : ""}.
 
-We are currently looking to fill the ${jobTitle} position and your experience and skills stood out to us as an excellent fit${bestMatch ? ` — with a ${Math.round(bestMatch.overallScore)}% match score` : ""}.
+We believe your skills and expertise could be a great fit for opportunities at ${companyName}. I would love to schedule a brief call to introduce ourselves, learn more about your career aspirations, and discuss how we might be able to work together.
 
-I would love to schedule a brief call to discuss this opportunity in more detail and learn more about your career aspirations. Would you be available for a conversation this week?
-
-Please let me know a time that works for you, and I will be happy to arrange it.
+Would you be available for a conversation this week? Please let me know a time that suits you and I will be happy to arrange it.
 
 Looking forward to hearing from you.
 
@@ -142,11 +135,11 @@ ${companyName}`
   };
 
   const handleSendContact = async () => {
-    if (!contactMatchId || !companyProfile?.id) return;
+    if (!companyProfile?.id) return;
     setSendingEmail(true);
     try {
       const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
-      const res = await fetch(`${basePath}/matches/${contactMatchId}/contact`, {
+      const res = await fetch(`${basePath}/candidates/${candidateId}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -228,7 +221,7 @@ ${companyName}`
               </div>
             </div>
             <div className="shrink-0 flex flex-col gap-2">
-              <Button className="gap-2" onClick={openContactDialog} disabled={!matches.length}>
+              <Button className="gap-2" onClick={openContactDialog}>
                 <Send className="w-4 h-4" />
                 Contact Candidate
               </Button>
@@ -609,30 +602,6 @@ ${companyName}`
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            {matches.length > 1 && (
-              <div className="space-y-1.5">
-                <Label>Regarding Job</Label>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={contactMatchId || ""}
-                  onChange={(e) => {
-                    const matchId = parseInt(e.target.value, 10);
-                    setContactMatchId(matchId);
-                    const m = matches.find((x: any) => x.id === matchId);
-                    if (m) {
-                      const companyName = companyProfile?.name || "Our Company";
-                      setEmailSubject(`Opportunity: ${m.jobTitle} at ${companyName}`);
-                    }
-                  }}
-                >
-                  {matches.map((m: any) => (
-                    <option key={m.id} value={m.id}>
-                      {m.jobTitle} ({Math.round(m.overallScore)}% match)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
             <div className="space-y-1.5">
               <Label>Subject</Label>
               <Input

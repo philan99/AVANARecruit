@@ -256,6 +256,59 @@ router.patch("/matches/:id", async (req, res): Promise<void> => {
   res.json(UpdateMatchStatusResponse.parse(match));
 });
 
+router.post("/candidates/:id/contact", async (req, res): Promise<void> => {
+  const candidateId = parseInt(req.params.id, 10);
+  if (isNaN(candidateId)) {
+    res.status(400).json({ error: "Invalid candidate ID" });
+    return;
+  }
+
+  const { subject, body, companyProfileId } = req.body;
+  if (!subject || !body || !companyProfileId) {
+    res.status(400).json({ error: "subject, body, and companyProfileId are required" });
+    return;
+  }
+
+  const [candidate] = await db
+    .select({ name: candidatesTable.name, email: candidatesTable.email })
+    .from(candidatesTable)
+    .where(eq(candidatesTable.id, candidateId));
+
+  if (!candidate) {
+    res.status(404).json({ error: "Candidate not found" });
+    return;
+  }
+
+  if (!candidate.email) {
+    res.status(400).json({ error: "Candidate has no email address on file" });
+    return;
+  }
+
+  const [company] = await db
+    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .from(companyProfiles)
+    .where(eq(companyProfiles.id, companyProfileId));
+
+  try {
+    const { client, fromEmail } = await getResendClient();
+    await client.emails.send({
+      from: fromEmail,
+      to: candidate.email,
+      subject,
+      replyTo: company?.email || undefined,
+      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        ${body.replace(/\n/g, "<br>")}
+        <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 12px;">This email was sent via AVANA Recruitment on behalf of ${company?.name || "a company"}.</p>
+      </div>`,
+    });
+    res.json({ success: true, message: "Email sent successfully" });
+  } catch (err: any) {
+    console.error("Failed to send contact email:", err);
+    res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
 router.post("/matches/:id/contact", async (req, res): Promise<void> => {
   const matchId = parseInt(req.params.id, 10);
   if (isNaN(matchId)) {
