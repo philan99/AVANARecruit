@@ -211,9 +211,7 @@ ${companyName}`
                 <p className="text-sm text-muted-foreground mt-1">{candidate.currentTitle}</p>
               )}
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-                {!isCompany && (
-                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
-                )}
+                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
                 {!isCompany && <span className="flex items-center gap-1"><Mail className="w-4 h-4" />{candidate.email}</span>}
                 {!isCompany && candidate.phone && (
                   <span className="flex items-center gap-1"><Phone className="w-4 h-4" />{candidate.phone}</span>
@@ -416,7 +414,7 @@ ${companyName}`
             <CardContent>
               {!isCompany && <DetailRow icon={Mail} label="Email" value={candidate.email} />}
               {!isCompany && <DetailRow icon={Phone} label="Phone" value={candidate.phone || "Not provided"} />}
-              {!isCompany && <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />}
+              <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
             </CardContent>
           </Card>
 

@@ -579,12 +579,10 @@ export default function CandidatesList() {
                         <span className="truncate">{candidate.email}</span>
                       </div>
                     )}
-                    {!isCompany && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{candidate.location}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{candidate.location}</span>
+                    </div>
                     {candidate.education && (
                       <div className="flex items-center gap-1.5">
                         <GraduationCap className="w-3 h-3 shrink-0" />
@@ -622,7 +620,7 @@ export default function CandidatesList() {
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Candidate</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
-                    {!isCompany && <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>}
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Experience</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
@@ -645,11 +643,9 @@ export default function CandidatesList() {
                         </div>
                       </td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.currentTitle}</td>
-                      {!isCompany && (
-                        <td className="py-2 px-2 text-muted-foreground">
-                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
-                        </td>
-                      )}
+                      <td className="py-2 px-2 text-muted-foreground">
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
+                      </td>
                       <td className="py-2 px-2 text-muted-foreground font-mono">{candidate.experienceYears} yrs</td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.education || "—"}</td>
                       <td className="py-2 px-2">
