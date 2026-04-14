@@ -447,18 +447,21 @@ export default function CandidateProfile() {
 
   function getProfileCompletion() {
     if (!candidate) return { percent: 0, items: [] };
+    const placeholders = ["not specified", "no summary provided"];
+    const filled = (val: any) => !!val && !placeholders.includes(String(val).toLowerCase());
+    const filledSkills = (arr: any) => Array.isArray(arr) && arr.length > 0 && !(arr.length === 1 && arr[0]?.toLowerCase() === "general");
     const items = [
-      { label: "Name", done: !!candidate.name },
-      { label: "Email", done: !!candidate.email },
-      { label: "Phone", done: !!candidate.phone },
-      { label: "Location", done: !!candidate.location },
-      { label: "Current Title", done: !!candidate.currentTitle },
+      { label: "Name", done: filled(candidate.name) },
+      { label: "Email", done: filled(candidate.email) },
+      { label: "Phone", done: filled(candidate.phone) },
+      { label: "Location", done: filled(candidate.location) },
+      { label: "Current Title", done: filled(candidate.currentTitle) },
       { label: "Years of Experience", done: candidate.experienceYears != null && candidate.experienceYears > 0 },
       { label: "Profile Photo", done: !!(candidate as any).profileImage },
-      { label: "Professional Summary", done: !!candidate.summary },
-      { label: "Skills", done: (candidate.skills?.length || 0) > 0 },
+      { label: "Professional Summary", done: filled(candidate.summary) },
+      { label: "Skills", done: filledSkills(candidate.skills) },
       { label: "Experience History", done: Array.isArray((candidate as any).experience) && (candidate as any).experience.length > 0 },
-      { label: "Education", done: !!candidate.education },
+      { label: "Education", done: filled(candidate.education) },
       { label: "CV / Resume", done: !!(candidate as any).cvFile },
     ];
     const done = items.filter(i => i.done).length;
