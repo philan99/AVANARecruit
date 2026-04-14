@@ -29,15 +29,35 @@ function getGreeting(): string {
   return "Hello! I'm AVANA, your recruitment assistant. I can help you learn about our AI-powered job matching platform. Would you like to know how it works?";
 }
 
+function getSessionKey(): string {
+  const role = getRole() || "anonymous";
+  const companyId = getCompanyId() || "";
+  const candidateId = getCandidateId() || "";
+  return `${role}:${companyId}:${candidateId}`;
+}
+
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [sessionKey, setSessionKey] = useState(getSessionKey);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentKey = getSessionKey();
+      if (currentKey !== sessionKey) {
+        setSessionKey(currentKey);
+        setMessages([]);
+        setHasGreeted(false);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sessionKey]);
 
   useEffect(() => {
     if (isOpen && !hasGreeted) {
