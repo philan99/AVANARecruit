@@ -10,6 +10,14 @@ function getRole(): string | null {
   return localStorage.getItem("avanatalent_role");
 }
 
+function getCompanyId(): string | null {
+  return localStorage.getItem("avanatalent_company_id");
+}
+
+function getCandidateId(): string | null {
+  return localStorage.getItem("avanatalent_candidate_id");
+}
+
 function getGreeting(): string {
   const role = getRole();
   if (role === "company") {
@@ -62,6 +70,8 @@ export function Chatbot() {
         body: JSON.stringify({
           messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
           role: getRole(),
+          companyId: getCompanyId(),
+          candidateId: getCandidateId(),
         }),
       });
 

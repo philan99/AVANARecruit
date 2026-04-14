@@ -1,7 +1,164 @@
 import { Router } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { eq, desc, sql, avg, count, and } from "drizzle-orm";
+import { db, jobsTable, candidatesTable, matchesTable, companyProfiles, bookmarksTable, favouritesTable } from "@workspace/db";
 
 const router = Router();
+
+async function getCompanyContext(companyProfileId: number): Promise<string> {
+  try {
+    const [company] = await db
+      .select({ name: companyProfiles.name, industry: companyProfiles.industry, location: companyProfiles.location })
+      .from(companyProfiles)
+      .where(eq(companyProfiles.id, companyProfileId));
+
+    const [jobStats] = await db
+      .select({
+        totalJobs: count(),
+        openJobs: count(sql`CASE WHEN ${jobsTable.status} = 'open' THEN 1 END`),
+      })
+      .from(jobsTable)
+      .where(eq(jobsTable.companyProfileId, companyProfileId));
+
+    const [matchStats] = await db
+      .select({
+        totalMatches: count(),
+        avgScore: avg(matchesTable.overallScore),
+        shortlisted: count(sql`CASE WHEN ${matchesTable.status} = 'shortlisted' THEN 1 END`),
+        hired: count(sql`CASE WHEN ${matchesTable.status} = 'hired' THEN 1 END`),
+      })
+      .from(matchesTable)
+      .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+      .where(eq(jobsTable.companyProfileId, companyProfileId));
+
+    const [applicantStats] = await db
+      .select({ total: count() })
+      .from(matchesTable)
+      .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+      .where(and(eq(jobsTable.companyProfileId, companyProfileId), eq(matchesTable.applied, true)));
+
+    const [bookmarkStats] = await db
+      .select({ total: count() })
+      .from(bookmarksTable)
+      .where(eq(bookmarksTable.companyProfileId, companyProfileId));
+
+    const topCandidates = await db
+      .select({
+        name: candidatesTable.name,
+        title: candidatesTable.currentTitle,
+        score: avg(matchesTable.overallScore),
+      })
+      .from(matchesTable)
+      .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+      .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
+      .where(eq(jobsTable.companyProfileId, companyProfileId))
+      .groupBy(candidatesTable.id, candidatesTable.name, candidatesTable.currentTitle)
+      .orderBy(desc(avg(matchesTable.overallScore)))
+      .limit(5);
+
+    const recentJobs = await db
+      .select({ title: jobsTable.title, status: jobsTable.status })
+      .from(jobsTable)
+      .where(eq(jobsTable.companyProfileId, companyProfileId))
+      .orderBy(desc(jobsTable.createdAt))
+      .limit(5);
+
+    const topCandidatesList = topCandidates
+      .map((c) => `  - ${c.name} (${c.title || "No title"}): avg match ${Number(c.score ?? 0).toFixed(0)}%`)
+      .join("\n");
+
+    const recentJobsList = recentJobs
+      .map((j) => `  - ${j.title} (${j.status})`)
+      .join("\n");
+
+    return `
+--- LIVE DATA FOR THIS COMPANY ---
+Company: ${company?.name || "Unknown"} | Industry: ${company?.industry || "N/A"} | Location: ${company?.location || "N/A"}
+Jobs: ${jobStats.totalJobs} total, ${jobStats.openJobs} open
+Matches: ${matchStats.totalMatches} total | Avg match score: ${Number(matchStats.avgScore ?? 0).toFixed(1)}%
+Applicants: ${applicantStats.total} | Shortlisted: ${matchStats.shortlisted} | Hired: ${matchStats.hired}
+Bookmarked candidates: ${bookmarkStats.total}
+${recentJobs.length > 0 ? `Recent jobs:\n${recentJobsList}` : "No jobs posted yet."}
+${topCandidates.length > 0 ? `Top matched candidates:\n${topCandidatesList}` : "No matches yet."}
+--- END LIVE DATA ---
+
+Use this data to answer questions about their recruitment activity. Never reveal candidate emails or phone numbers.`;
+  } catch (err) {
+    console.error("Error fetching company context:", err);
+    return "";
+  }
+}
+
+async function getCandidateContext(candidateId: number): Promise<string> {
+  try {
+    const [candidate] = await db
+      .select({
+        name: candidatesTable.name,
+        title: candidatesTable.currentTitle,
+        skills: candidatesTable.skills,
+        location: candidatesTable.location,
+        experienceYears: candidatesTable.experienceYears,
+        status: candidatesTable.status,
+      })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.id, candidateId));
+
+    if (!candidate) return "";
+
+    const [matchStats] = await db
+      .select({
+        totalMatches: count(),
+        avgScore: avg(matchesTable.overallScore),
+        shortlisted: count(sql`CASE WHEN ${matchesTable.status} = 'shortlisted' THEN 1 END`),
+      })
+      .from(matchesTable)
+      .where(eq(matchesTable.candidateId, candidateId));
+
+    const [applicationStats] = await db
+      .select({ total: count() })
+      .from(matchesTable)
+      .where(and(eq(matchesTable.candidateId, candidateId), eq(matchesTable.applied, true)));
+
+    const [favouriteStats] = await db
+      .select({ total: count() })
+      .from(favouritesTable)
+      .where(eq(favouritesTable.candidateId, candidateId));
+
+    const topMatches = await db
+      .select({
+        jobTitle: jobsTable.title,
+        company: jobsTable.company,
+        score: matchesTable.overallScore,
+        status: matchesTable.status,
+        applied: matchesTable.applied,
+      })
+      .from(matchesTable)
+      .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
+      .where(eq(matchesTable.candidateId, candidateId))
+      .orderBy(desc(matchesTable.overallScore))
+      .limit(5);
+
+    const topMatchesList = topMatches
+      .map((m) => `  - ${m.jobTitle} at ${m.company}: ${m.score}% match${m.applied ? " (applied)" : ""}${m.status === "shortlisted" ? " ★ shortlisted" : ""}`)
+      .join("\n");
+
+    return `
+--- LIVE DATA FOR THIS CANDIDATE ---
+Name: ${candidate.name} | Title: ${candidate.title || "Not set"} | Location: ${candidate.location || "N/A"}
+Experience: ${candidate.experienceYears ?? 0} years | Status: ${candidate.status}
+Skills: ${candidate.skills?.slice(0, 10).join(", ") || "None listed"}
+Job matches: ${matchStats.totalMatches} | Avg match score: ${Number(matchStats.avgScore ?? 0).toFixed(1)}%
+Applications sent: ${applicationStats.total} | Shortlisted: ${matchStats.shortlisted}
+Saved jobs: ${favouriteStats.total}
+${topMatches.length > 0 ? `Top job matches:\n${topMatchesList}` : "No matches yet."}
+--- END LIVE DATA ---
+
+Use this data to answer questions about their job search, profile, and matches. Help them understand their match scores and suggest improvements.`;
+  } catch (err) {
+    console.error("Error fetching candidate context:", err);
+    return "";
+  }
+}
 
 function getSystemPrompt(role: string | null): string {
   const base = `You are AVANA, a helpful recruitment assistant for the AVANA Recruitment platform — an AI-powered job matching platform that connects companies with candidates based on skills, experience, education, and location. Be friendly, concise, and professional. Use British English. Keep answers short (2-4 sentences) unless the user asks for detail.`;
@@ -50,14 +207,22 @@ Encourage them to create an account to get started. If they ask about specific a
 
 router.post("/chat", async (req, res): Promise<void> => {
   try {
-    const { messages, role } = req.body;
+    const { messages, role, companyId, candidateId } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       res.status(400).json({ error: "messages array is required" });
       return;
     }
 
-    const systemPrompt = getSystemPrompt(role || null);
+    let systemPrompt = getSystemPrompt(role || null);
+
+    if (role === "company" && companyId) {
+      const context = await getCompanyContext(parseInt(companyId, 10));
+      if (context) systemPrompt += "\n" + context;
+    } else if (role === "candidate" && candidateId) {
+      const context = await getCandidateContext(parseInt(candidateId, 10));
+      if (context) systemPrompt += "\n" + context;
+    }
 
     const recentMessages = messages.slice(-10);
 
