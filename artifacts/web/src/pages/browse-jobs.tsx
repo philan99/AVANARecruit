@@ -6,7 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check } from "lucide-react";
+import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check, Monitor, Factory, FileText } from "lucide-react";
+
+const JOB_TYPE_LABELS: Record<string, string> = {
+  permanent_full_time: "Permanent (Full Time)",
+  contract: "Contract",
+  fixed_term_contract: "Fixed Term Contract",
+  part_time: "Part-time",
+};
+
+const WORKPLACE_LABELS: Record<string, string> = {
+  office: "Office",
+  remote: "Remote",
+  hybrid: "Hybrid",
+};
 
 function MultiSelectDropdown({
   label,
@@ -14,13 +27,16 @@ function MultiSelectDropdown({
   options,
   selected,
   onChange,
+  formatLabel,
 }: {
   label: string;
   icon: React.ElementType;
   options: string[];
   selected: Set<string>;
   onChange: (val: Set<string>) => void;
+  formatLabel?: (val: string) => string;
 }) {
+  const fmt = formatLabel || ((v: string) => v);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [filterText, setFilterText] = useState("");
@@ -47,7 +63,7 @@ function MultiSelectDropdown({
   const displayText = selected.size === 0
     ? `All ${label}`
     : selected.size === 1
-    ? Array.from(selected)[0]
+    ? fmt(Array.from(selected)[0])
     : `${selected.size} selected`;
 
   return (
@@ -92,7 +108,7 @@ function MultiSelectDropdown({
                 }`}>
                   {selected.has(option) && <Check className="w-3 h-3 text-primary-foreground" />}
                 </div>
-                <span className="truncate capitalize">{option}</span>
+                <span className="truncate capitalize">{fmt(option)}</span>
               </button>
             ))}
           </div>
@@ -123,6 +139,10 @@ export default function BrowseJobs() {
   const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 200000]);
   const [salaryEnabled, setSalaryEnabled] = useState(false);
   const [skillFilters, setSkillFilters] = useState<Set<string>>(new Set());
+  const [jobTypeFilters, setJobTypeFilters] = useState<Set<string>>(new Set());
+  const [workplaceFilters, setWorkplaceFilters] = useState<Set<string>>(new Set());
+  const [industryFilters, setIndustryFilters] = useState<Set<string>>(new Set());
+  const [educationFilters, setEducationFilters] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [showFavourites, setShowFavourites] = useState(params.get("favourites") === "1");
   const [showFilters, setShowFilters] = useState(false);
@@ -199,6 +219,30 @@ export default function BrowseJobs() {
     return Array.from(skills).sort();
   }, [jobs]);
 
+  const uniqueJobTypes = useMemo(() => {
+    if (!jobs) return [];
+    const types = new Set(jobs.map(j => (j as any).jobType).filter(Boolean));
+    return Array.from(types).sort();
+  }, [jobs]);
+
+  const uniqueWorkplaces = useMemo(() => {
+    if (!jobs) return [];
+    const wp = new Set(jobs.map(j => (j as any).workplace).filter(Boolean));
+    return Array.from(wp).sort();
+  }, [jobs]);
+
+  const uniqueIndustries = useMemo(() => {
+    if (!jobs) return [];
+    const ind = new Set(jobs.map(j => (j as any).industry).filter(Boolean));
+    return Array.from(ind).sort();
+  }, [jobs]);
+
+  const uniqueEducationLevels = useMemo(() => {
+    if (!jobs) return [];
+    const edu = new Set(jobs.map(j => (j as any).educationLevel).filter(Boolean));
+    return Array.from(edu).sort();
+  }, [jobs]);
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (companyFilters.size > 0) count += companyFilters.size;
@@ -206,8 +250,12 @@ export default function BrowseJobs() {
     if (locationFilters.size > 0) count += locationFilters.size;
     if (salaryEnabled) count++;
     if (skillFilters.size > 0) count += skillFilters.size;
+    if (jobTypeFilters.size > 0) count += jobTypeFilters.size;
+    if (workplaceFilters.size > 0) count += workplaceFilters.size;
+    if (industryFilters.size > 0) count += industryFilters.size;
+    if (educationFilters.size > 0) count += educationFilters.size;
     return count;
-  }, [companyFilters, levelFilters, locationFilters, salaryEnabled, skillFilters]);
+  }, [companyFilters, levelFilters, locationFilters, salaryEnabled, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters]);
 
   function clearAllFilters() {
     setCompanyFilters(new Set());
@@ -216,6 +264,10 @@ export default function BrowseJobs() {
     setSalaryEnabled(false);
     setSalaryRange([0, 200000]);
     setSkillFilters(new Set());
+    setJobTypeFilters(new Set());
+    setWorkplaceFilters(new Set());
+    setIndustryFilters(new Set());
+    setEducationFilters(new Set());
     setSearch("");
   }
 
@@ -244,8 +296,20 @@ export default function BrowseJobs() {
     if (skillFilters.size > 0) {
       result = result?.filter((job) => job.skills?.some(s => skillFilters.has(s)));
     }
+    if (jobTypeFilters.size > 0) {
+      result = result?.filter((job) => jobTypeFilters.has((job as any).jobType));
+    }
+    if (workplaceFilters.size > 0) {
+      result = result?.filter((job) => workplaceFilters.has((job as any).workplace));
+    }
+    if (industryFilters.size > 0) {
+      result = result?.filter((job) => industryFilters.has((job as any).industry));
+    }
+    if (educationFilters.size > 0) {
+      result = result?.filter((job) => educationFilters.has((job as any).educationLevel));
+    }
     return result;
-  }, [jobs, showFavourites, favouriteJobIds, companyFilters, levelFilters, locationFilters, salaryEnabled, salaryRange, skillFilters]);
+  }, [jobs, showFavourites, favouriteJobIds, companyFilters, levelFilters, locationFilters, salaryEnabled, salaryRange, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -318,7 +382,7 @@ export default function BrowseJobs() {
         {showFilters && (
           <Card className="bg-card border-border">
             <CardContent className="pt-5 pb-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Company</label>
                   <MultiSelectDropdown
@@ -327,17 +391,6 @@ export default function BrowseJobs() {
                     options={uniqueCompanies}
                     selected={companyFilters}
                     onChange={setCompanyFilters}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Experience Level</label>
-                  <MultiSelectDropdown
-                    label="Levels"
-                    icon={GraduationCap}
-                    options={uniqueLevels}
-                    selected={levelFilters}
-                    onChange={setLevelFilters}
                   />
                 </div>
 
@@ -353,6 +406,41 @@ export default function BrowseJobs() {
                 </div>
 
                 <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Job Type</label>
+                  <MultiSelectDropdown
+                    label="Job Types"
+                    icon={FileText}
+                    options={uniqueJobTypes}
+                    selected={jobTypeFilters}
+                    onChange={setJobTypeFilters}
+                    formatLabel={(v) => JOB_TYPE_LABELS[v] || v}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Workplace</label>
+                  <MultiSelectDropdown
+                    label="Workplaces"
+                    icon={Monitor}
+                    options={uniqueWorkplaces}
+                    selected={workplaceFilters}
+                    onChange={setWorkplaceFilters}
+                    formatLabel={(v) => WORKPLACE_LABELS[v] || v}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Experience Level</label>
+                  <MultiSelectDropdown
+                    label="Levels"
+                    icon={GraduationCap}
+                    options={uniqueLevels}
+                    selected={levelFilters}
+                    onChange={setLevelFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Skill</label>
                   <MultiSelectDropdown
                     label="Skills"
@@ -360,6 +448,28 @@ export default function BrowseJobs() {
                     options={uniqueSkills}
                     selected={skillFilters}
                     onChange={setSkillFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Industry</label>
+                  <MultiSelectDropdown
+                    label="Industries"
+                    icon={Factory}
+                    options={uniqueIndustries}
+                    selected={industryFilters}
+                    onChange={setIndustryFilters}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Education Required</label>
+                  <MultiSelectDropdown
+                    label="Education"
+                    icon={GraduationCap}
+                    options={uniqueEducationLevels}
+                    selected={educationFilters}
+                    onChange={setEducationFilters}
                   />
                 </div>
 
@@ -422,6 +532,30 @@ export default function BrowseJobs() {
                     <span key={`skill-${s}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
                       {s}
                       <button onClick={() => { const n = new Set(skillFilters); n.delete(s); setSkillFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(jobTypeFilters).map(v => (
+                    <span key={`jt-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {JOB_TYPE_LABELS[v] || v}
+                      <button onClick={() => { const n = new Set(jobTypeFilters); n.delete(v); setJobTypeFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(workplaceFilters).map(v => (
+                    <span key={`wp-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {WORKPLACE_LABELS[v] || v}
+                      <button onClick={() => { const n = new Set(workplaceFilters); n.delete(v); setWorkplaceFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(industryFilters).map(v => (
+                    <span key={`ind-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1 capitalize">
+                      {v}
+                      <button onClick={() => { const n = new Set(industryFilters); n.delete(v); setIndustryFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                  {Array.from(educationFilters).map(v => (
+                    <span key={`edu-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1 capitalize">
+                      {v}
+                      <button onClick={() => { const n = new Set(educationFilters); n.delete(v); setEducationFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
                   ))}
                   {salaryEnabled && (
