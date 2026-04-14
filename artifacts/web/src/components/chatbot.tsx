@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useLocation } from "wouter";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 
 interface ChatMessage {
@@ -36,6 +37,45 @@ function getSessionKey(): string {
   return `${role}:${companyId}:${candidateId}`;
 }
 
+function MessageContent({ content, onNavigate }: { content: string; onNavigate: (path: string) => void }) {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts: Array<{ type: "text"; value: string } | { type: "link"; label: string; path: string }> = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: content.slice(lastIndex, match.index) });
+    }
+    parts.push({ type: "link", label: match[1], path: match[2] });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    parts.push({ type: "text", value: content.slice(lastIndex) });
+  }
+
+  if (parts.length === 0) return <>{content}</>;
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.type === "link" ? (
+          <button
+            key={i}
+            onClick={() => onNavigate(part.path)}
+            className="inline-flex items-center gap-0.5 text-[#4CAF50] underline underline-offset-2 hover:text-[#43a047] font-medium cursor-pointer"
+          >
+            {part.label} →
+          </button>
+        ) : (
+          <span key={i}>{part.value}</span>
+        )
+      )}
+    </>
+  );
+}
+
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -43,9 +83,15 @@ export function Chatbot() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
   const [sessionKey, setSessionKey] = useState(getSessionKey);
+  const [, setLocation] = useLocation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  const handleNavigate = useCallback((path: string) => {
+    setLocation(path);
+    setIsOpen(false);
+  }, [setLocation]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -189,7 +235,9 @@ export function Chatbot() {
                       : "bg-secondary text-foreground rounded-bl-md"
                   }`}
                 >
-                  {msg.content || (
+                  {msg.content ? (
+                    <MessageContent content={msg.content} onNavigate={handleNavigate} />
+                  ) : (
                     <span className="flex items-center gap-1 text-muted-foreground">
                       <Loader2 className="w-3 h-3 animate-spin" />
                       Thinking...
