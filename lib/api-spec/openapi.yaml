@@ -949,6 +949,8 @@ components:
           type: integer
         activeCandidates:
           type: integer
+        passiveCandidates:
+          type: integer
         totalMatches:
           type: integer
         avgMatchScore:
@@ -962,6 +964,7 @@ components:
         - openJobs
         - totalCandidates
         - activeCandidates
+        - passiveCandidates
         - totalMatches
         - avgMatchScore
         - shortlistedCount

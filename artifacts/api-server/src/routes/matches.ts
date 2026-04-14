@@ -451,6 +451,7 @@ router.get("/dashboard/stats", async (req, res): Promise<void> => {
   const [candidateStats] = await db.select({
     totalCandidates: count(),
     activeCandidates: count(sql`CASE WHEN ${candidatesTable.status} = 'active' THEN 1 END`),
+    passiveCandidates: count(sql`CASE WHEN ${candidatesTable.status} = 'passive' THEN 1 END`),
   }).from(candidatesTable);
 
   let matchQuery = db.select({
@@ -473,6 +474,7 @@ router.get("/dashboard/stats", async (req, res): Promise<void> => {
     openJobs: jobStats.openJobs,
     totalCandidates: candidateStats.totalCandidates,
     activeCandidates: candidateStats.activeCandidates,
+    passiveCandidates: candidateStats.passiveCandidates,
     totalMatches: matchStats.totalMatches,
     avgMatchScore: Number(matchStats.avgMatchScore ?? 0),
     shortlistedCount: matchStats.shortlistedCount,

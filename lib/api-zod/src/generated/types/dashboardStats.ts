@@ -11,6 +11,7 @@ export interface DashboardStats {
   openJobs: number;
   totalCandidates: number;
   activeCandidates: number;
+  passiveCandidates: number;
   totalMatches: number;
   avgMatchScore: number;
   shortlistedCount: number;

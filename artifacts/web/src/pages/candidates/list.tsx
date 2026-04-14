@@ -277,7 +277,7 @@ export default function CandidatesList() {
 
   const allCandidates = candidates || [];
 
-  const uniqueStatuses = ["active", "passive", "not_looking"];
+  const uniqueStatuses = isCompany ? ["active", "passive"] : ["active", "passive", "not_looking"];
   const experienceRanges = ["0-2", "3-5", "6-10", "10+"];
 
   const uniqueLocations = useMemo(() => {
@@ -306,6 +306,7 @@ export default function CandidatesList() {
 
   const filtered = useMemo(() => {
     return allCandidates.filter(c => {
+      if (isCompany && c.status === "not_looking") return false;
       if (showBookmarks && !bookmarkedIds.has(c.id)) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();

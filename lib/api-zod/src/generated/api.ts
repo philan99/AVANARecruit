@@ -386,6 +386,7 @@ export const GetDashboardStatsResponse = zod.object({
   openJobs: zod.number(),
   totalCandidates: zod.number(),
   activeCandidates: zod.number(),
+  passiveCandidates: zod.number(),
   totalMatches: zod.number(),
   avgMatchScore: zod.number(),
   shortlistedCount: zod.number(),
