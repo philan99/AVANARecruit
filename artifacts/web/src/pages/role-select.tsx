@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
 import { Input } from "@/components/ui/input";
@@ -22,6 +31,7 @@ export default function RoleSelect() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSending, setForgotSending] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [loginErrorMsg, setLoginErrorMsg] = useState<string | null>(null);
   const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
   const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [candidateForm, setCandidateForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
@@ -188,7 +198,7 @@ export default function RoleSelect() {
             setUnverifiedEmail(data.email || email);
             setShowLogin(false);
           } else {
-            toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+            setLoginErrorMsg(data.error || "Invalid email or password");
           }
         }
       } else if (selected === "company") {
@@ -209,12 +219,12 @@ export default function RoleSelect() {
             setUnverifiedEmail(data.email || email);
             setShowLogin(false);
           } else {
-            toast({ title: data.error || "Invalid email or password", variant: "destructive" });
+            setLoginErrorMsg(data.error || "Invalid email or password");
           }
         }
       }
     } catch {
-      toast({ title: "Login failed", variant: "destructive" });
+      setLoginErrorMsg("Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -1124,6 +1134,20 @@ export default function RoleSelect() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!loginErrorMsg} onOpenChange={(open) => { if (!open) setLoginErrorMsg(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign In Failed</AlertDialogTitle>
+            <AlertDialogDescription>
+              {loginErrorMsg}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setLoginErrorMsg(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
