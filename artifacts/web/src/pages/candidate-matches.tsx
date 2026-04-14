@@ -143,12 +143,14 @@ export default function CandidateMatches() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-bold text-foreground">{match.jobTitle}</h3>
+                          {match.status !== "pending" && (
                           <Badge
                             variant={match.status === "shortlisted" ? "default" : match.status === "hired" ? "default" : match.status === "rejected" ? "destructive" : "secondary"}
                             className="text-[10px] uppercase"
                           >
                             {match.status}
                           </Badge>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                           <span className="flex items-center"><Building className="w-3.5 h-3.5 mr-1" />{match.jobCompany}</span>
