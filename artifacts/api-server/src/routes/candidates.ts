@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, ilike, or, sql, count } from "drizzle-orm";
-import { db, candidatesTable, matchesTable } from "@workspace/db";
+import { db, candidatesTable, matchesTable, candidateAlertsTable, jobsTable, companyProfiles } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import {
   ListCandidatesQueryParams,
@@ -14,6 +14,7 @@ import {
 } from "@workspace/api-zod";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
+import { computeMatch } from "../lib/matching";
 
 const router: IRouter = Router();
 
@@ -187,6 +188,8 @@ router.post("/candidates", async (req, res): Promise<void> => {
 
   const result = { ...candidate, matchCount: 0 };
   res.status(201).json(result);
+
+  sendCandidateAlerts(candidate).catch((err) => console.error("Candidate alert error:", err));
 });
 
 router.get("/candidates/:id", async (req, res): Promise<void> => {
@@ -321,5 +324,112 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
 
   res.sendStatus(204);
 });
+
+async function sendCandidateAlerts(candidate: any) {
+  const alertsWithCompanies = await db
+    .select({
+      alertId: candidateAlertsTable.id,
+      companyProfileId: candidateAlertsTable.companyProfileId,
+      minScore: candidateAlertsTable.minScore,
+      keywords: candidateAlertsTable.keywords,
+      locations: candidateAlertsTable.locations,
+      companyName: companyProfiles.name,
+      companyEmail: companyProfiles.email,
+    })
+    .from(candidateAlertsTable)
+    .innerJoin(companyProfiles, eq(candidateAlertsTable.companyProfileId, companyProfiles.id))
+    .where(eq(candidateAlertsTable.enabled, true));
+
+  if (alertsWithCompanies.length === 0) return;
+
+  const allJobs = await db
+    .select()
+    .from(jobsTable)
+    .where(eq(jobsTable.status, "active"));
+
+  if (allJobs.length === 0) return;
+
+  const resend = await getResendClient();
+  let sentCount = 0;
+
+  for (const alert of alertsWithCompanies) {
+    if (!alert.companyEmail) continue;
+
+    const companyJobs = allJobs.filter((j) => j.companyProfileId === alert.companyProfileId);
+    if (companyJobs.length === 0) continue;
+
+    const matchingJobs: { title: string; score: number }[] = [];
+
+    for (const job of companyJobs) {
+      const result = computeMatch(job, candidate);
+      const score = Math.round(result.overallScore);
+
+      if (score < alert.minScore) continue;
+
+      if (alert.keywords && alert.keywords.length > 0) {
+        const candidateText = `${candidate.currentTitle} ${candidate.summary} ${(candidate.skills || []).join(" ")}`.toLowerCase();
+        const hasKeyword = alert.keywords.some((kw: string) => candidateText.includes(kw.toLowerCase()));
+        if (!hasKeyword) continue;
+      }
+
+      if (alert.locations && alert.locations.length > 0) {
+        const candidateLoc = (candidate.location || "").toLowerCase();
+        const matchesLocation = alert.locations.some((loc: string) => candidateLoc.includes(loc.toLowerCase()));
+        if (!matchesLocation) continue;
+      }
+
+      matchingJobs.push({ title: job.title, score });
+    }
+
+    if (matchingJobs.length === 0) continue;
+
+    matchingJobs.sort((a, b) => b.score - a.score);
+
+    const jobRows = matchingJobs
+      .map(
+        (j, i) =>
+          `<tr${i % 2 === 1 ? ' style="background:#f9f9f9;"' : ""}>
+            <td style="padding:8px 12px;">${j.title}</td>
+            <td style="padding:8px 12px; font-weight:700; color:#4CAF50;">${j.score}%</td>
+          </tr>`
+      )
+      .join("");
+
+    try {
+      await resend.emails.send({
+        from: "AVANA Recruitment <notifications@avanaservices.com>",
+        to: alert.companyEmail,
+        subject: `New Candidate Alert: ${candidate.name} — matches ${matchingJobs.length} of your roles`,
+        html: brandedEmail(
+          "New Candidate Match Alert",
+          `<p>Hi ${alert.companyName},</p>
+          <p>A new candidate has registered who matches one or more of your open roles:</p>
+          <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+            <tr><td style="padding:8px 12px; font-weight:600; color:#666; width:120px;">Name</td><td style="padding:8px 12px;">${candidate.name}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Title</td><td style="padding:8px 12px;">${candidate.currentTitle}</td></tr>
+            <tr><td style="padding:8px 12px; font-weight:600; color:#666;">Location</td><td style="padding:8px 12px;">${candidate.location}</td></tr>
+          </table>
+          <p style="font-weight:600; margin-top:20px;">Matching Roles:</p>
+          <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+            <tr style="background:#f0f0f0;">
+              <th style="padding:8px 12px; text-align:left; font-size:13px;">Job Title</th>
+              <th style="padding:8px 12px; text-align:left; font-size:13px;">Match Score</th>
+            </tr>
+            ${jobRows}
+          </table>
+          <p>Log in to your AVANA Recruitment account to view the full candidate profile.</p>`,
+          "You received this because you have candidate alerts enabled on AVANA Recruitment."
+        ),
+      });
+      sentCount++;
+    } catch (err) {
+      console.error(`Failed to send candidate alert to ${alert.companyEmail}:`, err);
+    }
+  }
+
+  if (sentCount > 0) {
+    console.log(`Sent ${sentCount} candidate alert(s) for "${candidate.name}"`);
+  }
+}
 
 export default router;
