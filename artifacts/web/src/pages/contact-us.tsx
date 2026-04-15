@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send, ArrowLeft, Globe, Building2, Mail } from "lucide-react";
-import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
+import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useSearch } from "wouter";

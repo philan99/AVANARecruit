@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Building2, UserCircle, UserPlus, Sparkles, Target, Users, BarChart3 } from "lucide-react";
-import logoUrl from "@assets/AVANA_Recruitment_1775997527320.png";
+import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
