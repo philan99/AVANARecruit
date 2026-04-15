@@ -68,6 +68,7 @@ export default function AdminDevelopment() {
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterPriority, setFilterPriority] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<DevTask | null>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "Other" as string, priority: "medium" as string, status: "todo" as string });
@@ -154,6 +155,7 @@ export default function AdminDevelopment() {
   const filtered = tasks.filter(t => {
     if (filterCategory !== "all" && t.category !== filterCategory) return false;
     if (filterStatus !== "all" && t.status !== filterStatus) return false;
+    if (filterPriority !== "all" && t.priority !== filterPriority) return false;
     return true;
   });
 
@@ -232,8 +234,17 @@ export default function AdminDevelopment() {
             {STATUSES.map(s => <SelectItem key={s} value={s}>{statusConfig[s].label}</SelectItem>)}
           </SelectContent>
         </Select>
-        {(filterCategory !== "all" || filterStatus !== "all") && (
-          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterCategory("all"); setFilterStatus("all"); }}>
+        <Select value={filterPriority} onValueChange={setFilterPriority}>
+          <SelectTrigger className="w-[150px] h-8 text-xs">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            {PRIORITIES.map(p => <SelectItem key={p} value={p}>{priorityConfig[p].label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {(filterCategory !== "all" || filterStatus !== "all" || filterPriority !== "all") && (
+          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterCategory("all"); setFilterStatus("all"); setFilterPriority("all"); }}>
             Clear filters
           </Button>
         )}
