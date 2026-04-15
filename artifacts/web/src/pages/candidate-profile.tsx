@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, ArrowRight, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExperienceEntry {
@@ -255,6 +255,10 @@ export default function CandidateProfile() {
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [verifyForm, setVerifyForm] = useState({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "" });
   const [sendingVerification, setSendingVerification] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (candidateProfileId) {
@@ -425,6 +429,29 @@ export default function CandidateProfile() {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!candidateProfileId || deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete account");
+      localStorage.removeItem("avanatalent_candidate_id");
+      localStorage.removeItem("avanatalent_role");
+      localStorage.removeItem("avanatalent_email");
+      toast({ title: "Account deleted", description: "Your account and all associated data have been permanently removed." });
+      setDeleteDialogOpen(false);
+      setLocation("/");
+      window.location.reload();
+    } catch {
+      toast({ title: "Error", description: "Failed to delete account. Please try again.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -1057,6 +1084,57 @@ export default function CandidateProfile() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-destructive/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
+                <Trash2 className="w-4 h-4" /> Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground mb-3">
+                Permanently delete your account and all associated data including your profile, matches, and applications. This action cannot be undone.
+              </p>
+              <Dialog open={deleteDialogOpen} onOpenChange={(open) => { setDeleteDialogOpen(open); if (!open) setDeleteConfirmText(""); }}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="w-full">
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete My Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      This will permanently delete your candidate profile, all job matches, applications, and any other data associated with your account.
+                    </p>
+                    <p className="text-sm font-medium">
+                      Type <span className="font-mono text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">DELETE</span> to confirm:
+                    </p>
+                    <Input
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="Type DELETE to confirm"
+                      className="font-mono"
+                    />
+                  </div>
+                  <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== "DELETE" || deleting}
+                    >
+                      {deleting ? "Deleting..." : "Permanently Delete"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
