@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListJobs, useUpdateMatchStatus } from "@workspace/api-client-react";
 
@@ -52,6 +52,8 @@ interface VerificationSummary {
 export default function MatchesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const searchString = useSearch();
+  const appliedOnly = new URLSearchParams(searchString).get("applied") === "true";
   const [allMatches, setAllMatches] = useState<JobGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
@@ -133,10 +135,10 @@ export default function MatchesList() {
   const totalMatches = useMemo(() => allMatches.reduce((sum, g) => sum + g.matches.length, 0), [allMatches]);
 
   const filteredGroups = useMemo(() => {
-    if (scoreFilter === "all") return allMatches;
     return allMatches.map(g => ({
       ...g,
       matches: g.matches.filter(m => {
+        if (appliedOnly && !m.applied) return false;
         const score = Math.round(m.overallScore);
         if (scoreFilter === "high") return score > 75;
         if (scoreFilter === "mid") return score >= 50 && score <= 75;
@@ -144,7 +146,7 @@ export default function MatchesList() {
         return true;
       })
     })).filter(g => g.matches.length > 0);
-  }, [allMatches, scoreFilter]);
+  }, [allMatches, scoreFilter, appliedOnly]);
 
   const filteredTotal = useMemo(() => filteredGroups.reduce((sum, g) => sum + g.matches.length, 0), [filteredGroups]);
 

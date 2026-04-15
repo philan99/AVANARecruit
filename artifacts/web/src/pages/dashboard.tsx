@@ -312,7 +312,7 @@ export default function Dashboard() {
                 <UserCheck className="w-4 h-4" />
                 Applicants
               </span>
-              <Link href="/matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+              <Link href="/matches?applied=true" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
                 View all <ArrowUpRight className="w-3 h-3 ml-1" />
               </Link>
             </CardTitle>
