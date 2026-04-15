@@ -75,7 +75,7 @@ export function Layout({ children }: LayoutProps) {
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
         <div className="flex items-center justify-between h-14 px-6">
           <Link href="/" className="flex items-center cursor-pointer">
-            <img src={logoUrl} alt="AVANA Recruitment" className="h-7" />
+            <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -183,7 +183,7 @@ export function Layout({ children }: LayoutProps) {
 
       <footer className="border-t border-sidebar-border bg-sidebar">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 px-6 py-4">
-          <img src={logoUrl} alt="AVANA Recruitment" className="h-5" />
+          <img src={logoUrl} alt="AVANA Recruit" className="h-5" />
           <div className="flex items-center gap-3">
             <Link href="/terms" className="text-[11px] text-sidebar-foreground/30 hover:text-sidebar-foreground/50 transition-colors">
               Terms & Conditions

@@ -53,7 +53,7 @@ router.post("/verifications", async (req, res): Promise<void> => {
       await client.emails.send({
         from: fromEmail,
         to: verifierEmail.trim().toLowerCase(),
-        subject: `AVANA Recruitment – Verification Request for ${candidateName}`,
+        subject: `AVANA Recruit – Verification Request for ${candidateName}`,
         html: brandedEmail(
           "Employment Verification Request",
           `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Dear ${verifierName},</p>
@@ -74,7 +74,7 @@ router.post("/verifications", async (req, res): Promise<void> => {
                Verify Employment
              </a>
            </div>`,
-          "This is an automated request from AVANA Recruitment. If you did not expect this email, you can safely ignore it."
+          "This is an automated request from AVANA Recruit. If you did not expect this email, you can safely ignore it."
         ),
       });
     } catch (emailErr) {

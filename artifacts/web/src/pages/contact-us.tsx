@@ -66,7 +66,7 @@ export default function ContactUs() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logoUrl} alt="AVANA Recruitment" className="h-7" />
+              <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
             </div>
           </Link>
           <button onClick={() => window.history.back()} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors cursor-pointer">
@@ -86,7 +86,7 @@ export default function ContactUs() {
               Get in Touch
             </h1>
             <p className="text-base max-w-lg mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Have a question or want to learn more about how AVANA Recruitment can help? We'd love to hear from you.
+              Have a question or want to learn more about how AVANA Recruit can help? We'd love to hear from you.
             </p>
           </div>
         </section>
@@ -245,7 +245,7 @@ export default function ContactUs() {
       <footer style={{ backgroundColor: "#1a2035", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <img src={logoUrl} alt="AVANA Recruitment" className="h-6" />
+            <img src={logoUrl} alt="AVANA Recruit" className="h-6" />
             <div className="flex items-center gap-4">
               <Link href="/terms" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Terms & Conditions

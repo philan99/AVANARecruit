@@ -9,7 +9,7 @@ export default function Terms() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
           <Link href="/" className="cursor-pointer">
-            <img src={logoUrl} alt="AVANA Recruitment" className="h-7" />
+            <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
         </div>
       </nav>
@@ -22,7 +22,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>1. Introduction</h2>
             <p>
-              These Terms and Conditions ("Terms") govern your use of the AVANA Recruitment platform ("Platform"), operated by AVANA Services Limited, a company registered in England and Wales (Company Number: 15268633) ("we", "us", "our").
+              These Terms and Conditions ("Terms") govern your use of the AVANA Recruit platform ("Platform"), operated by AVANA Services Limited, a company registered in England and Wales (Company Number: 15268633) ("we", "us", "our").
             </p>
             <p className="mt-3">
               By accessing or using our Platform, you agree to be bound by these Terms. If you do not agree to these Terms, you must not use the Platform.
@@ -177,7 +177,7 @@ export default function Terms() {
       <footer style={{ backgroundColor: "#1a2035", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <img src={logoUrl} alt="AVANA Recruitment" className="h-6" />
+            <img src={logoUrl} alt="AVANA Recruit" className="h-6" />
             <div className="flex items-center gap-4">
               <Link href="/terms" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Terms & Conditions

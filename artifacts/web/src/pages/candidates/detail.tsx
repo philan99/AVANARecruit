@@ -145,11 +145,11 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
 
     const companyName = companyProfile?.name || "Our Company";
 
-    setEmailSubject(`Introduction from ${companyName} via AVANA Recruitment`);
+    setEmailSubject(`Introduction from ${companyName} via AVANA Recruit`);
     setEmailBody(
 `Dear ${candidate.name},
 
-I hope this message finds you well. I came across your profile on AVANA Recruitment and was impressed by your background and experience${candidate.currentTitle ? ` as a ${candidate.currentTitle}` : ""}.
+I hope this message finds you well. I came across your profile on AVANA Recruit and was impressed by your background and experience${candidate.currentTitle ? ` as a ${candidate.currentTitle}` : ""}.
 
 We believe your skills and expertise could be a great fit for opportunities at ${companyName}. I would love to schedule a brief call to introduce ourselves, learn more about your career aspirations, and discuss how we might be able to work together.
 

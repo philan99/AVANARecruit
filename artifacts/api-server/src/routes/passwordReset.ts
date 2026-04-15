@@ -48,10 +48,10 @@ router.post("/forgot-password", async (req, res): Promise<void> => {
     await client.emails.send({
       from: fromEmail,
       to: email,
-      subject: "Reset Your AVANA Recruitment Password",
+      subject: "Reset Your AVANA Recruit Password",
       html: brandedEmail(
         "Reset Your Password",
-        `<p style="font-size: 14px; color: #374151; line-height: 1.6;">We received a request to reset your password for your AVANA Recruitment account.</p>
+        `<p style="font-size: 14px; color: #374151; line-height: 1.6;">We received a request to reset your password for your AVANA Recruit account.</p>
          <p style="font-size: 14px; color: #374151; line-height: 1.6;">Click the button below to set a new password. This link will expire in 1 hour.</p>
          <div style="text-align: center; margin: 24px 0;">
            <a href="${resetUrl}" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Reset Password</a>

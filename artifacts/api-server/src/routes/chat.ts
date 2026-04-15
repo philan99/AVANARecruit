@@ -161,7 +161,7 @@ Use this data to answer questions about their job search, profile, and matches. 
 }
 
 function getSystemPrompt(role: string | null): string {
-  const base = `You are AVANA, a helpful recruitment assistant for the AVANA Recruitment platform — an AI-powered job matching platform that connects companies with candidates based on skills, experience, education, and location. Be friendly, concise, and professional. Use British English. Keep answers short (2-4 sentences) unless the user asks for detail.
+  const base = `You are AVANA, a helpful recruitment assistant for the AVANA Recruit platform — an AI-powered job matching platform that connects companies with candidates based on skills, experience, education, and location. Be friendly, concise, and professional. Use British English. Keep answers short (2-4 sentences) unless the user asks for detail.
 
 IMPORTANT: You can link users to pages on the platform using markdown links. When mentioning a page, include a navigation link using this exact format: [Link Text](/path). Only use the paths listed below for the user's role. Always suggest relevant pages when helpful.`;
 
@@ -221,7 +221,7 @@ Available pages for visitors:
 - [Privacy Policy](/privacy-policy) — privacy policy
 
 You are speaking with a visitor who is not logged in. They may be interested in learning about the platform. Help them understand:
-- What AVANA Recruitment does (AI-powered job matching)
+- What AVANA Recruit does (AI-powered job matching)
 - How the platform works for companies and candidates
 - The benefits of using the platform
 - How to sign up or sign in

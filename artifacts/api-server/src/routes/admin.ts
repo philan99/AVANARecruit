@@ -173,17 +173,17 @@ router.post("/admin/admins", async (req, res) => {
         from: fromEmail,
         to: email,
         cc: "avana_resourcing@avanaservices.com",
-        subject: "Welcome to AVANA Recruitment Admin Portal",
+        subject: "Welcome to AVANA Recruit Admin Portal",
         html: brandedEmail(
-          "Welcome to AVANA Recruitment",
+          "Welcome to AVANA Recruit",
           `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Hi ${name},</p>
-           <p style="font-size: 14px; color: #374151; line-height: 1.6;">Your administrator account has been created on the AVANA Recruitment platform. You now have access to the admin portal where you can manage companies, candidates, jobs, and platform settings.</p>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6;">Your administrator account has been created on the AVANA Recruit platform. You now have access to the admin portal where you can manage companies, candidates, jobs, and platform settings.</p>
            <div style="background: #f3f4f6; border-radius: 6px; padding: 16px; margin: 16px 0;">
              <p style="font-size: 13px; color: #374151; margin: 0 0 8px 0;"><strong>Your login details:</strong></p>
              <p style="font-size: 13px; color: #374151; margin: 0;">Email: <strong>${email}</strong></p>
            </div>
            <p style="font-size: 14px; color: #374151; line-height: 1.6;">Please sign in using the credentials provided to you and change your password after your first login.</p>`,
-          "This is an automated message from AVANA Recruitment. If you did not expect this, please contact support."
+          "This is an automated message from AVANA Recruit. If you did not expect this, please contact support."
         ),
       });
     } catch (emailErr) {

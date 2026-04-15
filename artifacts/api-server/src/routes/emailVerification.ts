@@ -23,10 +23,10 @@ async function sendVerificationEmail(email: string, accountType: string, origin:
   await client.emails.send({
     from: fromEmail,
     to: email,
-    subject: "Verify Your AVANA Recruitment Account",
+    subject: "Verify Your AVANA Recruit Account",
     html: brandedEmail(
       "Verify Your Email Address",
-      `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Thank you for creating an AVANA Recruitment account. Please verify your email address to activate your account.</p>
+      `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Thank you for creating an AVANA Recruit account. Please verify your email address to activate your account.</p>
        <p style="font-size: 14px; color: #374151; line-height: 1.6;">Click the button below to verify. This link will expire in 24 hours.</p>
        <div style="text-align: center; margin: 24px 0;">
          <a href="${verifyUrl}" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Verify Email</a>

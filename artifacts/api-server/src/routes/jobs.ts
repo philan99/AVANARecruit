@@ -261,7 +261,7 @@ async function sendJobAlerts(job: any) {
 
     try {
       await resend.emails.send({
-        from: "AVANA Recruitment <notifications@avanaservices.com>",
+        from: "AVANA Recruit <notifications@avanaservices.com>",
         to: alert.candidateEmail,
         subject: `New Job Alert: ${job.title} at ${job.company} — ${score}% Match`,
         html: brandedEmail(
@@ -274,8 +274,8 @@ async function sendJobAlerts(job: any) {
             <tr><td style="padding:8px 12px; font-weight:600; color:#666;">Location</td><td style="padding:8px 12px;">${job.location}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Match Score</td><td style="padding:8px 12px; font-weight:700; color:#4CAF50;">${score}%</td></tr>
           </table>
-          <p>Log in to your AVANA Recruitment account to view the full job details and apply.</p>`,
-          "You received this because you have job alerts enabled on AVANA Recruitment."
+          <p>Log in to your AVANA Recruit account to view the full job details and apply.</p>`,
+          "You received this because you have job alerts enabled on AVANA Recruit."
         ),
       });
       sentCount++;
