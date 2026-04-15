@@ -315,6 +315,7 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
       matchedSkills: matchesTable.matchedSkills,
       missingSkills: matchesTable.missingSkills,
       status: matchesTable.status,
+      applied: matchesTable.applied,
       createdAt: matchesTable.createdAt,
       jobTitle: jobsTable.title,
       jobCompany: jobsTable.company,

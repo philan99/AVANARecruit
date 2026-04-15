@@ -914,6 +914,8 @@ components:
         createdAt:
           type: string
           format: date-time
+        applied:
+          type: boolean
         jobTitle:
           type: string
         jobCompany:

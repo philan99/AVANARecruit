@@ -283,7 +283,7 @@ export default function CandidateDashboard() {
               <CheckCircle2 className="w-4 h-4" />
               Jobs Applied For
             </span>
-            <Link href="/my-matches" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+            <Link href="/my-matches?applied=true" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
               View all <ArrowUpRight className="w-3 h-3 ml-1" />
             </Link>
           </CardTitle>

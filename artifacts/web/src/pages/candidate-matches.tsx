@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles, X } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 type ScoreFilter = "all" | "high" | "mid" | "low";
@@ -15,6 +15,8 @@ export default function CandidateMatches() {
   const { candidateProfileId } = useRole();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const searchString = useSearch();
+  const appliedOnly = new URLSearchParams(searchString).get("applied") === "true";
   const [isRunning, setIsRunning] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
 
@@ -60,15 +62,15 @@ export default function CandidateMatches() {
   const allSorted = useMemo(() => [...(matches || [])].sort((a, b) => b.overallScore - a.overallScore), [matches]);
 
   const sortedMatches = useMemo(() => {
-    if (scoreFilter === "all") return allSorted;
     return allSorted.filter(m => {
+      if (appliedOnly && !m.applied) return false;
       const score = Math.round(m.overallScore);
       if (scoreFilter === "high") return score > 75;
       if (scoreFilter === "mid") return score >= 50 && score <= 75;
       if (scoreFilter === "low") return score < 50;
       return true;
     });
-  }, [allSorted, scoreFilter]);
+  }, [allSorted, scoreFilter, appliedOnly]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">

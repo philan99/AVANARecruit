@@ -22,6 +22,7 @@ export interface MatchWithJob {
   missingSkills: string[];
   status: MatchWithJobStatus;
   createdAt: Date;
+  applied?: boolean;
   jobTitle: string;
   jobCompany: string;
 }

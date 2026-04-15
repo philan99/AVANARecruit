@@ -367,6 +367,7 @@ export const GetCandidateMatchesResponseItem = zod.object({
     "hired",
   ]),
   createdAt: zod.coerce.date(),
+  applied: zod.boolean().optional(),
   jobTitle: zod.string(),
   jobCompany: zod.string(),
 });

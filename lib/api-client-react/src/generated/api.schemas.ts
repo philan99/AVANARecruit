@@ -316,6 +316,7 @@ export interface MatchWithJob {
   missingSkills: string[];
   status: MatchWithJobStatus;
   createdAt: string;
+  applied?: boolean;
   jobTitle: string;
   jobCompany: string;
 }
