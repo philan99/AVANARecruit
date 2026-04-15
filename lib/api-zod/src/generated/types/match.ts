@@ -16,6 +16,7 @@ export interface Match {
   experienceScore: number;
   educationScore: number;
   locationScore: number;
+  verificationScore?: number;
   assessment: string;
   matchedSkills: string[];
   missingSkills: string[];

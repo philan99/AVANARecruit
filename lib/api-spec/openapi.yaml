@@ -783,6 +783,8 @@ components:
           type: number
         locationScore:
           type: number
+        verificationScore:
+          type: number
         assessment:
           type: string
         matchedSkills:
@@ -832,6 +834,8 @@ components:
         educationScore:
           type: number
         locationScore:
+          type: number
+        verificationScore:
           type: number
         assessment:
           type: string
@@ -891,6 +895,8 @@ components:
         educationScore:
           type: number
         locationScore:
+          type: number
+        verificationScore:
           type: number
         assessment:
           type: string

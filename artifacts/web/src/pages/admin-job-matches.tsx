@@ -17,6 +17,7 @@ interface MatchResult {
   experienceScore: number;
   educationScore: number;
   locationScore: number;
+  verificationScore: number;
   matchedSkills: string[];
   assessment: string;
   status: string;
@@ -109,6 +110,7 @@ export default function AdminJobMatches() {
                   <TableHead className="text-center font-mono hidden md:table-cell">Experience</TableHead>
                   <TableHead className="text-center font-mono hidden lg:table-cell">Education</TableHead>
                   <TableHead className="text-center font-mono hidden lg:table-cell">Location</TableHead>
+                  <TableHead className="text-center font-mono hidden lg:table-cell">Verified</TableHead>
                   <TableHead className="hidden xl:table-cell">Matched Skills</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden xl:table-cell">Assessment</TableHead>
@@ -141,6 +143,9 @@ export default function AdminJobMatches() {
                     </TableCell>
                     <TableCell className="text-center hidden lg:table-cell">
                       <span className="font-mono text-sm">{Math.round(match.locationScore)}%</span>
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      <span className="font-mono text-sm">{Math.round(match.verificationScore ?? 0)}%</span>
                     </TableCell>
                     <TableCell className="hidden xl:table-cell">
                       <div className="flex flex-wrap gap-1 max-w-[200px]">

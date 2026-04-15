@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql, avg, count, and } from "drizzle-orm";
-import { db, jobsTable, candidatesTable, matchesTable, companyProfiles } from "@workspace/db";
+import { db, jobsTable, candidatesTable, matchesTable, companyProfiles, verificationsTable } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import {
@@ -47,9 +47,16 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
   const existingMap = new Map(existingMatches.map(m => [m.candidateId, m]));
   const activeIds = new Set(activeCandidates.map(c => c.id));
 
+  const verifiedCounts = await db
+    .select({ candidateId: verificationsTable.candidateId, count: count() })
+    .from(verificationsTable)
+    .where(eq(verificationsTable.status, "verified"))
+    .groupBy(verificationsTable.candidateId);
+  const verifiedMap = new Map(verifiedCounts.map(v => [v.candidateId, v.count]));
+
   const matchResults = [];
   for (const candidate of activeCandidates) {
-    const result = computeMatch(job, candidate);
+    const result = computeMatch(job, candidate, verifiedMap.get(candidate.id) || 0);
     const existing = existingMap.get(candidate.id);
     if (existing) {
       const [updated] = await db
@@ -60,6 +67,7 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
           experienceScore: result.experienceScore,
           educationScore: result.educationScore,
           locationScore: result.locationScore,
+          verificationScore: result.verificationScore,
           assessment: result.assessment,
           matchedSkills: result.matchedSkills,
           missingSkills: result.missingSkills,
@@ -78,6 +86,7 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
           experienceScore: result.experienceScore,
           educationScore: result.educationScore,
           locationScore: result.locationScore,
+          verificationScore: result.verificationScore,
           assessment: result.assessment,
           matchedSkills: result.matchedSkills,
           missingSkills: result.missingSkills,
@@ -114,6 +123,7 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
       experienceScore: matchesTable.experienceScore,
       educationScore: matchesTable.educationScore,
       locationScore: matchesTable.locationScore,
+      verificationScore: matchesTable.verificationScore,
       assessment: matchesTable.assessment,
       matchedSkills: matchesTable.matchedSkills,
       missingSkills: matchesTable.missingSkills,
@@ -146,7 +156,13 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
   const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
   if (!job) { res.status(404).json({ error: "Job not found" }); return; }
 
-  const result = computeMatch(job, candidate);
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
+  const result = computeMatch(job, candidate, verifiedCount);
 
   const existing = await db.select().from(matchesTable)
     .where(sql`${matchesTable.candidateId} = ${candidateId} AND ${matchesTable.jobId} = ${jobId}`);
@@ -160,6 +176,7 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
         experienceScore: result.experienceScore,
         educationScore: result.educationScore,
         locationScore: result.locationScore,
+        verificationScore: result.verificationScore,
         assessment: result.assessment,
         matchedSkills: result.matchedSkills,
         missingSkills: result.missingSkills,
@@ -180,6 +197,7 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
       experienceScore: result.experienceScore,
       educationScore: result.educationScore,
       locationScore: result.locationScore,
+      verificationScore: result.verificationScore,
       assessment: result.assessment,
       matchedSkills: result.matchedSkills,
       missingSkills: result.missingSkills,
@@ -210,9 +228,15 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
   const existingMap = new Map(existingMatches.map(m => [m.jobId, m]));
   const openJobIds = new Set(openJobs.map(j => j.id));
 
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidate.id), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
   const matchResults = [];
   for (const job of openJobs) {
-    const result = computeMatch(job, candidate);
+    const result = computeMatch(job, candidate, verifiedCount);
     const existing = existingMap.get(job.id);
     if (existing) {
       const [updated] = await db
@@ -223,6 +247,7 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
           experienceScore: result.experienceScore,
           educationScore: result.educationScore,
           locationScore: result.locationScore,
+          verificationScore: result.verificationScore,
           assessment: result.assessment,
           matchedSkills: result.matchedSkills,
           missingSkills: result.missingSkills,
@@ -241,6 +266,7 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
           experienceScore: result.experienceScore,
           educationScore: result.educationScore,
           locationScore: result.locationScore,
+          verificationScore: result.verificationScore,
           assessment: result.assessment,
           matchedSkills: result.matchedSkills,
           missingSkills: result.missingSkills,
@@ -284,6 +310,7 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
       experienceScore: matchesTable.experienceScore,
       educationScore: matchesTable.educationScore,
       locationScore: matchesTable.locationScore,
+      verificationScore: matchesTable.verificationScore,
       assessment: matchesTable.assessment,
       matchedSkills: matchesTable.matchedSkills,
       missingSkills: matchesTable.missingSkills,

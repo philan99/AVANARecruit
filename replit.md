@@ -29,10 +29,11 @@ AI-powered recruitment platform that matches job descriptions with candidate pro
 
 ### AI Matching Engine
 Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores based on:
-- **Skill matching** (40% weight): Fuzzy matching using Levenshtein similarity
-- **Experience matching** (25% weight): Compares candidate years vs job level requirements
-- **Education matching** (15% weight): Parses education levels from requirements text
-- **Location matching** (20% weight): Handles remote, exact match, and partial matches
+- **Skill matching** (35% weight): Fuzzy matching using Levenshtein similarity
+- **Experience matching** (20% weight): Compares candidate years vs job level requirements
+- **Education matching** (10% weight): Parses education levels from requirements text
+- **Location matching** (15% weight): Handles remote, exact match, and partial matches
+- **Verification matching** (20% weight): Based on number of verified credentials (0=0%, 1=50%, 2=65%, 3=80%, 4=90%, 5+=100%)
 
 ### Role-Based Portal
 Users select their role on first visit: **Company**, **Candidate**, or **Admin**. The selection is stored in localStorage and determines which portal (routes + sidebar navigation) is shown. Admin login requires server-side credential verification (email/password checked against ADMIN_EMAIL and ADMIN_PASSWORD env vars).

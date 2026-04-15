@@ -189,6 +189,10 @@ export default function CandidateMatches() {
                         <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.locationScore)}%</div>
                         <div className="text-[9px] text-muted-foreground uppercase">Loc</div>
                       </div>
+                      <div className="bg-secondary/50 rounded px-2 py-1 col-span-2">
+                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.verificationScore ?? 0)}%</div>
+                        <div className="text-[9px] text-muted-foreground uppercase">Verified</div>
+                      </div>
                     </div>
                     <Link href={`/jobs/${match.jobId}`}>
                       <Button variant="outline" size="sm" className="text-xs">

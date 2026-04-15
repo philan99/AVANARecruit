@@ -152,12 +152,16 @@ export default function CandidateDashboard() {
   const avgLocScore = matches?.length
     ? Math.round(matches.reduce((s, m) => s + m.locationScore, 0) / matches.length)
     : 0;
+  const avgVerScore = matches?.length
+    ? Math.round(matches.reduce((s, m) => s + (m.verificationScore ?? 0), 0) / matches.length)
+    : 0;
 
   const radarData = [
     { metric: "Skills", score: avgSkillScore },
     { metric: "Experience", score: avgExpScore },
     { metric: "Education", score: avgEduScore },
     { metric: "Location", score: avgLocScore },
+    { metric: "Verified", score: avgVerScore },
   ];
 
   const [, navigate] = useLocation();

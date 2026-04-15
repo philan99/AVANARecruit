@@ -6,6 +6,7 @@ interface MatchResult {
   experienceScore: number;
   educationScore: number;
   locationScore: number;
+  verificationScore: number;
   assessment: string;
   matchedSkills: string[];
   missingSkills: string[];
@@ -141,6 +142,15 @@ function computeLocationScore(jobLocation: string, candidateLocation: string): n
   return 40;
 }
 
+function computeVerificationScore(verifiedCount: number): number {
+  if (verifiedCount >= 5) return 100;
+  if (verifiedCount >= 4) return 90;
+  if (verifiedCount >= 3) return 80;
+  if (verifiedCount >= 2) return 65;
+  if (verifiedCount >= 1) return 50;
+  return 0;
+}
+
 function generateAssessment(result: MatchResult, job: Job, candidate: Candidate): string {
   const parts: string[] = [];
 
@@ -170,10 +180,18 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate)
     parts.push(`Experience level gap may need consideration.`);
   }
 
+  if (result.verificationScore >= 80) {
+    parts.push(`Candidate has strong employment verification.`);
+  } else if (result.verificationScore >= 50) {
+    parts.push(`Candidate has some verified employment history.`);
+  } else if (result.verificationScore > 0) {
+    parts.push(`Limited employment verification on file.`);
+  }
+
   return parts.join(" ");
 }
 
-export function computeMatch(job: Job, candidate: Candidate): MatchResult {
+export function computeMatch(job: Job, candidate: Candidate, verifiedCount: number = 0): MatchResult {
   const { score: skillScore, matched: matchedSkills, missing: missingSkills } = computeSkillScore(
     job.skills,
     candidate.skills
@@ -182,12 +200,14 @@ export function computeMatch(job: Job, candidate: Candidate): MatchResult {
   const experienceScore = computeExperienceScore(job.experienceLevel, candidate.experienceYears);
   const educationScore = computeEducationScore(job.requirements, candidate.education);
   const locationScore = computeLocationScore(job.location, candidate.location);
+  const verificationScore = computeVerificationScore(verifiedCount);
 
   const overallScore = Math.round(
-    skillScore * 0.40 +
-    experienceScore * 0.25 +
-    educationScore * 0.15 +
-    locationScore * 0.20
+    skillScore * 0.35 +
+    experienceScore * 0.20 +
+    educationScore * 0.10 +
+    locationScore * 0.15 +
+    verificationScore * 0.20
   );
 
   const result: MatchResult = {
@@ -196,6 +216,7 @@ export function computeMatch(job: Job, candidate: Candidate): MatchResult {
     experienceScore: Math.round(experienceScore),
     educationScore: Math.round(educationScore),
     locationScore: Math.round(locationScore),
+    verificationScore: Math.round(verificationScore),
     assessment: "",
     matchedSkills,
     missingSkills,

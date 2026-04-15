@@ -373,6 +373,10 @@ ${name}`
                       <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.locationScore)}%</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Location</div>
                     </div>
+                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.verificationScore ?? 0)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Verified</div>
+                    </div>
                   </div>
                   {myMatch.assessment && (
                     <div className="mt-4 p-3 bg-muted/30 rounded-lg">
@@ -408,7 +412,7 @@ ${name}`
                     onClick={() => {
                       const missingList = myMatch.missingSkills?.length > 0 ? myMatch.missingSkills.join(", ") : "none identified";
                       const matchedList = myMatch.matchedSkills?.length > 0 ? myMatch.matchedSkills.join(", ") : "none";
-                      const msg = `I'm looking at the "${job.title}" role at ${job.company}. My overall match score is ${Math.round(myMatch.overallScore)}% (Skills: ${Math.round(myMatch.skillScore)}%, Experience: ${Math.round(myMatch.experienceScore)}%, Education: ${Math.round(myMatch.educationScore)}%, Location: ${Math.round(myMatch.locationScore)}%). My matched skills are: ${matchedList}. Skills I'm missing: ${missingList}. How can I improve my match score for this job?`;
+                      const msg = `I'm looking at the "${job.title}" role at ${job.company}. My overall match score is ${Math.round(myMatch.overallScore)}% (Skills: ${Math.round(myMatch.skillScore)}%, Experience: ${Math.round(myMatch.experienceScore)}%, Education: ${Math.round(myMatch.educationScore)}%, Location: ${Math.round(myMatch.locationScore)}%, Verification: ${Math.round(myMatch.verificationScore ?? 0)}%). My matched skills are: ${matchedList}. Skills I'm missing: ${missingList}. How can I improve my match score for this job?`;
                       window.dispatchEvent(new CustomEvent("chatbot:send", { detail: { message: msg } }));
                     }}
                   >
