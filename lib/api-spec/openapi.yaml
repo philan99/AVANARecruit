@@ -795,7 +795,7 @@ components:
             type: string
         status:
           type: string
-          enum: [pending, shortlisted, rejected, hired]
+          enum: [pending, shortlisted, screened, interviewed, offered, rejected, hired]
         createdAt:
           type: string
           format: date-time
@@ -845,7 +845,7 @@ components:
             type: string
         status:
           type: string
-          enum: [pending, shortlisted, rejected, hired]
+          enum: [pending, shortlisted, screened, interviewed, offered, rejected, hired]
         createdAt:
           type: string
           format: date-time
@@ -904,7 +904,7 @@ components:
             type: string
         status:
           type: string
-          enum: [pending, shortlisted, rejected, hired]
+          enum: [pending, shortlisted, screened, interviewed, offered, rejected, hired]
         createdAt:
           type: string
           format: date-time
@@ -934,7 +934,7 @@ components:
       properties:
         status:
           type: string
-          enum: [pending, shortlisted, rejected, hired]
+          enum: [pending, shortlisted, screened, interviewed, offered, rejected, hired]
       required:
         - status
 

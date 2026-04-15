@@ -149,7 +149,7 @@ export default function MatchesList() {
 
   const updateStatus = useUpdateMatchStatus();
 
-  const handleUpdateStatus = (matchId: number, jobId: number, status: "shortlisted" | "rejected" | "hired" | "pending") => {
+  const handleUpdateStatus = (matchId: number, jobId: number, status: "shortlisted" | "rejected" | "hired" | "pending" | "screened" | "interviewed" | "offered") => {
     updateStatus.mutate(
       { id: matchId, data: { status } },
       {
@@ -378,8 +378,8 @@ ${companyName}`
                             </TableCell>
                             <TableCell>
                               <Badge
-                                variant={match.status === 'shortlisted' ? 'default' : match.status === 'rejected' ? 'destructive' : 'secondary'}
-                                className="text-[10px] uppercase tracking-wider"
+                                variant={match.status === 'shortlisted' ? 'default' : match.status === 'rejected' ? 'destructive' : match.status === 'hired' ? 'default' : 'secondary'}
+                                className={`text-[10px] uppercase tracking-wider ${match.status === 'hired' ? 'bg-green-600 hover:bg-green-700' : match.status === 'interviewed' ? 'bg-cyan-500/15 text-cyan-700 border-cyan-500/30' : match.status === 'screened' ? 'bg-purple-500/15 text-purple-700 border-purple-500/30' : match.status === 'offered' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30' : ''}`}
                               >
                                 {match.status}
                               </Badge>

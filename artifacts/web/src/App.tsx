@@ -27,6 +27,7 @@ import JobDetail from "@/pages/jobs/detail";
 import CandidatesList from "@/pages/candidates/list";
 import CandidateDetail from "@/pages/candidates/detail";
 import MatchesList from "@/pages/matches/list";
+import Pipeline from "@/pages/pipeline";
 import CompanyProfile from "@/pages/company-profile";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCompanies from "@/pages/admin-companies";
@@ -67,6 +68,7 @@ function CompanyRoutes() {
         <Route path="/candidates/:id/verifications" component={CompanyCandidateVerifications} />
         <Route path="/candidates/:id" component={CandidateDetail} />
         <Route path="/matches" component={MatchesList} />
+        <Route path="/pipeline" component={Pipeline} />
         <Route path="/company-profile" component={CompanyProfile} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />

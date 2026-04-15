@@ -11,6 +11,9 @@ export type MatchStatus = (typeof MatchStatus)[keyof typeof MatchStatus];
 export const MatchStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;

@@ -15,6 +15,7 @@ import {
   Building2,
   Menu,
   X,
+  KanbanSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -45,6 +46,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/matches", label: "Matches", icon: Network },
+    { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
     { href: "/company-profile", label: "Company Profile", icon: Settings },
   ];
 

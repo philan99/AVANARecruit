@@ -231,6 +231,9 @@ export type MatchStatus = (typeof MatchStatus)[keyof typeof MatchStatus];
 export const MatchStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;
@@ -257,6 +260,9 @@ export type MatchWithCandidateStatus =
 export const MatchWithCandidateStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;
@@ -286,6 +292,9 @@ export type MatchWithJobStatus =
 export const MatchWithJobStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;
@@ -314,6 +323,9 @@ export type UpdateMatchStatusBodyStatus =
 export const UpdateMatchStatusBodyStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;

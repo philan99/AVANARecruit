@@ -12,6 +12,9 @@ export type MatchWithCandidateStatus =
 export const MatchWithCandidateStatus = {
   pending: "pending",
   shortlisted: "shortlisted",
+  screened: "screened",
+  interviewed: "interviewed",
+  offered: "offered",
   rejected: "rejected",
   hired: "hired",
 } as const;

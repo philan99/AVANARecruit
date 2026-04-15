@@ -44,6 +44,7 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/candidates` — Candidate listings with search/filter, create new
 - `/candidates/:id` — Candidate detail, view match history
 - `/matches` — All match results management
+- `/pipeline` — Kanban-style hiring pipeline with drag-and-drop (stages: Applied → Shortlisted → Screened → Interviewed → Offered → Hired)
 - `/company-profile` — Company profile with logo upload (object storage)
 
 ### Pages — Candidate Portal

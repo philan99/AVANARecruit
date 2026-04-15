@@ -287,7 +287,15 @@ export const RunJobMatchingResponseItem = zod.object({
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
-  status: zod.enum(["pending", "shortlisted", "rejected", "hired"]),
+  status: zod.enum([
+    "pending",
+    "shortlisted",
+    "screened",
+    "interviewed",
+    "offered",
+    "rejected",
+    "hired",
+  ]),
   createdAt: zod.coerce.date(),
 });
 export const RunJobMatchingResponse = zod.array(RunJobMatchingResponseItem);
@@ -311,7 +319,15 @@ export const GetJobMatchesResponseItem = zod.object({
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
-  status: zod.enum(["pending", "shortlisted", "rejected", "hired"]),
+  status: zod.enum([
+    "pending",
+    "shortlisted",
+    "screened",
+    "interviewed",
+    "offered",
+    "rejected",
+    "hired",
+  ]),
   createdAt: zod.coerce.date(),
   candidateName: zod.string(),
   candidateTitle: zod.string(),
@@ -338,7 +354,15 @@ export const GetCandidateMatchesResponseItem = zod.object({
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
-  status: zod.enum(["pending", "shortlisted", "rejected", "hired"]),
+  status: zod.enum([
+    "pending",
+    "shortlisted",
+    "screened",
+    "interviewed",
+    "offered",
+    "rejected",
+    "hired",
+  ]),
   createdAt: zod.coerce.date(),
   jobTitle: zod.string(),
   jobCompany: zod.string(),
@@ -355,7 +379,15 @@ export const UpdateMatchStatusParams = zod.object({
 });
 
 export const UpdateMatchStatusBody = zod.object({
-  status: zod.enum(["pending", "shortlisted", "rejected", "hired"]),
+  status: zod.enum([
+    "pending",
+    "shortlisted",
+    "screened",
+    "interviewed",
+    "offered",
+    "rejected",
+    "hired",
+  ]),
 });
 
 export const UpdateMatchStatusResponse = zod.object({
@@ -370,7 +402,15 @@ export const UpdateMatchStatusResponse = zod.object({
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
-  status: zod.enum(["pending", "shortlisted", "rejected", "hired"]),
+  status: zod.enum([
+    "pending",
+    "shortlisted",
+    "screened",
+    "interviewed",
+    "offered",
+    "rejected",
+    "hired",
+  ]),
   createdAt: zod.coerce.date(),
 });
 
