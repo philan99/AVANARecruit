@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Heart,
 } from "lucide-react";
+import { JobAlertsSettings } from "@/components/job-alerts-settings";
 import { Link, useLocation } from "wouter";
 import {
   ResponsiveContainer,
@@ -429,7 +430,8 @@ export default function CandidateDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <JobAlertsSettings />
         {skillDemandData.length > 0 ? (
           <Card className="bg-card">
             <CardHeader>

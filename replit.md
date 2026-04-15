@@ -48,7 +48,7 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/company-profile` — Company profile with logo upload (object storage)
 
 ### Pages — Candidate Portal
-- `/` — Candidate dashboard with personalized job match overview
+- `/` — Candidate dashboard with personalized job match overview, job alerts settings
 - `/profile` — Create/select/view candidate profile
 - `/my-matches` — View AI-generated job matches with detailed scoring breakdown
 - `/browse-jobs` — Browse all open positions

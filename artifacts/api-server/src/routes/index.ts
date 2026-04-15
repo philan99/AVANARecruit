@@ -13,6 +13,7 @@ import passwordResetRouter from "./passwordReset";
 import emailVerificationRouter from "./emailVerification";
 import bookmarksRouter from "./bookmarks";
 import chatRouter from "./chat";
+import jobAlertsRouter from "./jobAlerts";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(verificationsRouter);
 router.use(passwordResetRouter);
 router.use(emailVerificationRouter);
 router.use(chatRouter);
+router.use(jobAlertsRouter);
 
 export default router;

@@ -11,3 +11,4 @@ export * from "./emailVerifications";
 export * from "./bookmarks";
 export * from "./conversations";
 export * from "./messages";
+export * from "./jobAlerts";
