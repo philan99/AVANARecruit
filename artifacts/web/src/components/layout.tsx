@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   KanbanSquare,
+  Code2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -64,6 +65,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/development", label: "Development", icon: Code2 },
   ];
 
   const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;

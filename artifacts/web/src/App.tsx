@@ -39,6 +39,7 @@ import AdminJobMatches from "@/pages/admin-job-matches";
 import AdminCandidateDetail from "@/pages/admin-candidate-detail";
 import AdminCandidateMatches from "@/pages/admin-candidate-matches";
 import AdminSettings from "@/pages/admin-settings";
+import AdminDevelopment from "@/pages/admin-development";
 import VerifyPage from "@/pages/verify";
 import Terms from "@/pages/terms";
 import PrivacyPolicy from "@/pages/privacy-policy";
@@ -111,6 +112,7 @@ function AdminRoutes() {
         <Route path="/jobs/:id" component={AdminJobDetail} />
         <Route path="/jobs" component={AdminJobs} />
         <Route path="/settings" component={AdminSettings} />
+        <Route path="/development" component={AdminDevelopment} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
       </Switch>
