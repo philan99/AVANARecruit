@@ -47,6 +47,7 @@ import HowItWorks from "@/pages/how-it-works";
 import ResetPassword from "@/pages/reset-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import PortalContactUs from "@/pages/portal-contact-us";
+import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -83,9 +84,12 @@ function CompanyRoutes() {
 
 function CandidateRoutes() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={CandidateDashboard} />
+    <Switch>
+      <Route path="/onboarding" component={Onboarding} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={CandidateDashboard} />
         <Route path="/profile" component={CandidateProfile} />
         <Route path="/my-matches" component={CandidateMatches} />
         <Route path="/shortlisted" component={CandidateShortlisted} />
@@ -97,8 +101,10 @@ function CandidateRoutes() {
         <Route path="/contact-us" component={PortalContactUs} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
-      </Switch>
-    </Layout>
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

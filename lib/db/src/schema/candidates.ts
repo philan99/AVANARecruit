@@ -29,6 +29,7 @@ export const candidatesTable = pgTable("candidates", {
   portfolioUrl: text("portfolio_url"),
   verified: boolean("verified").notNull().default(false),
   status: text("status").notNull().default("active"),
+  onboardingState: jsonb("onboarding_state").default({ currentStep: 1, completedSteps: [], skippedSteps: [], completedAt: null }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

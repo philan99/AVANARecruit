@@ -36,10 +36,21 @@ import {
 
 export default function CandidateDashboard() {
   const { candidateProfileId } = useRole();
+  const [, navigate] = useLocation();
 
   const { data: candidate } = useGetCandidate(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateQueryKey(candidateProfileId!) },
   });
+
+  const onboardingState = (candidate as any)?.onboardingState as { currentStep?: number; completedAt?: string | null; skippedSteps?: number[] } | null | undefined;
+  const onboardingIncomplete = candidate && (!onboardingState || !onboardingState.completedAt);
+  const onboardingNeverStarted = candidate && (!onboardingState || (((onboardingState.currentStep ?? 1) <= 1) && !(onboardingState.skippedSteps?.length)));
+
+  useEffect(() => {
+    if (onboardingNeverStarted) {
+      navigate("/onboarding");
+    }
+  }, [onboardingNeverStarted, navigate]);
 
   const { data: matches } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
@@ -164,8 +175,6 @@ export default function CandidateDashboard() {
     { metric: "Verified", score: avgVerScore },
   ];
 
-  const [, navigate] = useLocation();
-
   const scoreDistribution = [
     { range: "90-100%", rangeKey: "90-100", count: matches?.filter(m => m.overallScore >= 90).length || 0 },
     { range: "75-89%", rangeKey: "75-89", count: matches?.filter(m => m.overallScore >= 75 && m.overallScore < 90).length || 0 },
@@ -175,6 +184,22 @@ export default function CandidateDashboard() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
+      {onboardingIncomplete && !onboardingNeverStarted && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#4CAF50" }}>
+              <CheckCircle2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-semibold" style={{ color: "#1a2035" }}>Finish your profile to get better matches</p>
+              <p className="text-sm text-slate-600">You're on step {onboardingState?.currentStep ?? 1} of 7. It only takes a couple of minutes.</p>
+            </div>
+          </div>
+          <Button onClick={() => navigate("/onboarding")} className="font-semibold shrink-0" style={{ backgroundColor: "#4CAF50" }}>
+            Resume setup
+          </Button>
+        </div>
+      )}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
