@@ -46,8 +46,8 @@ export default function HowItWorks() {
     },
     {
       icon: ShieldCheck,
-      title: "Verify Credentials",
-      description: "Request verification of candidate credentials including qualifications, employment history, and certifications. Verified candidates receive higher match scores.",
+      title: "Verified Candidates",
+      description: "Candidates can get their work history, qualifications, and certifications verified directly through the platform. Verified candidates receive higher match scores, giving you greater confidence in your hiring decisions.",
     },
     {
       icon: KanbanSquare,
