@@ -159,10 +159,52 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       req.log.error(err, "Failed to send candidate welcome email");
     }
   } else {
-    await db
+    const [company] = await db
       .update(companyProfiles)
       .set({ verified: true })
-      .where(eq(companyProfiles.email, record.email));
+      .where(eq(companyProfiles.email, record.email))
+      .returning({ name: companyProfiles.name, email: companyProfiles.email });
+
+    try {
+      const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
+      const { client, fromEmail } = await getResendClient();
+      await client.emails.send({
+        from: fromEmail,
+        to: company.email!,
+        subject: "Welcome to AVANA Recruit — What's Next",
+        html: brandedEmail(
+          `Welcome${company.name ? `, ${company.name}` : ""}!`,
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Your AVANA Recruit company account is now verified and ready to use. Here's how to get up and running and start finding great candidates.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">1. Complete your company profile</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Add your industry, location, website, company description and logo so candidates can learn about your business and what makes you a great place to work.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">2. Post your first job</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Create a detailed job listing with the skills, experience, education and location you're looking for. The more detail you provide, the better our AI can match you with the right candidates.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">3. Review your AI-powered matches</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">As soon as your job is live, our matching engine ranks candidates by skills, experience, location, verifications and education. View match scores and breakdowns to focus on the strongest fits first.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">4. Browse candidates directly</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Search the candidate pool, view full profiles and verifications, and bookmark the people you'd like to engage with.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">5. Manage your hiring pipeline</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Move candidates through the stages — shortlisted, screened, interviewed, offered and hired — all from one Kanban-style view.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">6. Set up candidate alerts</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Get notified when new candidates that match your job criteria join the platform, so you can engage them first.</p>
+
+           <div style="text-align: center; margin: 32px 0 8px 0;">
+             <a href="${origin}/" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Sign In to Your Account</a>
+           </div>
+
+           <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 24px 0 0 0;">If you have any questions or need help getting started, just reply to this email or contact us at <a href="mailto:recruitment@avanarecruit.ai" style="color: #4CAF50; text-decoration: none;">recruitment@avanarecruit.ai</a>.</p>`,
+          "We're excited to help you find your next great hire."
+        ),
+      });
+    } catch (err) {
+      req.log.error(err, "Failed to send company welcome email");
+    }
   }
 
   await db
