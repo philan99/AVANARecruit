@@ -84,7 +84,7 @@ export default function HowItWorks() {
     },
     {
       icon: ShieldCheck,
-      title: "Verify Your Work Experience",
+      title: "Verify Your Experience",
       description: "Request verification from past employers to confirm your work history, qualifications, and certifications. Verified experience boosts your match scores by up to 20%, making you stand out to potential employers.",
     },
     {
