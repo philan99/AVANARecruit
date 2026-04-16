@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, ArrowLeft, Globe, Building2, Mail } from "lucide-react";
+import { Send, ArrowLeft, Building2, Mail } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -208,32 +208,32 @@ export default function ContactUs() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>Email</h3>
-                      <a href="mailto:avana_resourcing@avanaservices.com" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>avana_resourcing@avanaservices.com</a>
+                      <a href="mailto:enquiries@avanarecruit.ai" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>enquiries@avanarecruit.ai</a>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-xl p-6" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-                      <Globe className="w-5 h-5" style={{ color: "#4CAF50" }} />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>Website</h3>
-                      <a href="https://www.avanaservices.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: "#4CAF50" }}>avanaservices.com</a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl p-6" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-4 mb-4">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
                       <Building2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>Office</h3>
-                      <p className="text-sm" style={{ color: "#6b7280" }}>London, United Kingdom</p>
+                      <p className="text-sm" style={{ color: "#6b7280" }}>85 Great Portland Street, London, W1W 7LT</p>
                     </div>
+                  </div>
+                  <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #e5e7eb" }}>
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2482.4!2d-0.1435!3d51.5205!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761ad9a4e4b5e7%3A0x5f8d9c9e0b7e8a0a!2s85%20Great%20Portland%20St%2C%20London%20W1W%207LT%2C%20UK!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk"
+                      width="100%"
+                      height="220"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="AVANA Recruit Office Location"
+                    />
                   </div>
                 </div>
               </div>
