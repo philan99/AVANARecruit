@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Building2, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
+import { useQuery } from "@tanstack/react-query";
 
 export default function PortalContactUs() {
   const { toast } = useToast();
-  const { role, userEmail } = useRole();
+  const { role, userEmail, candidateProfileId } = useRole();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const contactType = role === "company" ? "company" : "candidate";
+
+  const { data: companyProfile } = useCompanyProfile({ enabled: role === "company" });
+
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const { data: candidateProfile } = useQuery({
+    queryKey: ["candidate-profile-contact", candidateProfileId],
+    queryFn: async () => {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}`);
+      if (!res.ok) throw new Error("Failed to fetch candidate profile");
+      return res.json();
+    },
+    enabled: role === "candidate" && !!candidateProfileId,
+  });
+
   const [form, setForm] = useState({
     name: "",
     email: userEmail || "",
@@ -16,6 +32,21 @@ export default function PortalContactUs() {
     message: "",
     company: "",
   });
+
+  useEffect(() => {
+    if (role === "company" && companyProfile) {
+      setForm(f => ({
+        ...f,
+        company: f.company || companyProfile.name || "",
+      }));
+    }
+    if (role === "candidate" && candidateProfile) {
+      setForm(f => ({
+        ...f,
+        name: f.name || candidateProfile.name || "",
+      }));
+    }
+  }, [role, companyProfile, candidateProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +73,7 @@ export default function PortalContactUs() {
         return;
       }
       toast({ title: "Message sent!", description: "We'll get back to you as soon as possible." });
-      setForm({ name: "", email: userEmail || "", subject: "", message: "", company: "" });
+      setForm(f => ({ ...f, subject: "", message: "" }));
     } catch {
       toast({ title: "Failed to send message", variant: "destructive" });
     } finally {
