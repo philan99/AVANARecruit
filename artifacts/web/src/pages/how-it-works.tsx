@@ -186,7 +186,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>For Companies</p>
-              <h2 className="text-2xl lg:text-3xl font-bold" style={{ color: "#1a2035" }}>Hire with Confidence</h2>
+              <h2 className="text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: "#1a2035" }}>Hire with Confidence</h2>
             </div>
           </div>
           <p className="text-base max-w-2xl mb-12" style={{ color: "#6b7280" }}>
@@ -224,7 +224,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>For Candidates</p>
-              <h2 className="text-2xl lg:text-3xl font-bold" style={{ color: "#1a2035" }}>Find Your Perfect Role</h2>
+              <h2 className="text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: "#1a2035" }}>Find Your Perfect Role</h2>
             </div>
           </div>
           <p className="text-base max-w-2xl mb-12" style={{ color: "#6b7280" }}>
