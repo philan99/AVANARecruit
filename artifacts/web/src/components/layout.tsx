@@ -17,6 +17,7 @@ import {
   X,
   KanbanSquare,
   Code2,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -49,6 +50,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/matches", label: "Matches", icon: Network },
     { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
     { href: "/company-profile", label: "Company Profile", icon: Settings },
+    { href: "/contact-us", label: "Contact Us", icon: Mail },
   ];
 
   const candidateNavItems = [
@@ -57,6 +59,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/my-matches", label: "My Matches", icon: Target },
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
     { href: "/browse-companies", label: "Browse Companies", icon: Building2 },
+    { href: "/contact-us", label: "Contact Us", icon: Mail },
   ];
 
   const adminNavItems = [
