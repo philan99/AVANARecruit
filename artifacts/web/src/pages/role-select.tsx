@@ -383,6 +383,9 @@ export default function RoleSelect() {
             >
               Pricing
             </a>
+            <Link href="/how-it-works" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
+              How it Works
+            </Link>
             <Link href="/contact-us" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
               Contact Us
             </Link>
