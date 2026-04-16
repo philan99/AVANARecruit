@@ -516,7 +516,7 @@ router.post("/matches/:id/apply", async (req, res): Promise<void> => {
     await client.emails.send({
       from: fromEmail,
       to: company.email,
-      cc: ["avana_resourcing@avanaservices.com"],
+      cc: ["recruitment@avanarecruit.ai"],
       subject,
       replyTo: match.candidateEmail || undefined,
       html: brandedEmail(

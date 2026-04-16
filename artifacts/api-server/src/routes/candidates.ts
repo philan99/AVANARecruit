@@ -157,7 +157,7 @@ router.post("/candidates", async (req, res): Promise<void> => {
     const { client, fromEmail } = await getResendClient();
     await client.emails.send({
       from: fromEmail,
-      to: "avana_resourcing@avanaservices.com",
+      to: "recruitment@avanarecruit.ai",
       subject: `New Candidate Registration – ${candidate.name || "Unknown"}`,
       html: brandedEmail(
         "New Candidate Registration",

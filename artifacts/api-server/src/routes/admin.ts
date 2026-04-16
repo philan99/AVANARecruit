@@ -172,7 +172,7 @@ router.post("/admin/admins", async (req, res) => {
       await client.emails.send({
         from: fromEmail,
         to: email,
-        cc: "avana_resourcing@avanaservices.com",
+        cc: "recruitment@avanarecruit.ai",
         subject: "Welcome to AVANA Recruit Admin Portal",
         html: brandedEmail(
           "Welcome to AVANA Recruit",

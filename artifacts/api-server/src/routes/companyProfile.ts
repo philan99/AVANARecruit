@@ -164,7 +164,7 @@ router.post("/company-profile", async (req, res) => {
       const { client, fromEmail } = await getResendClient();
       await client.emails.send({
         from: fromEmail,
-        to: "avana_resourcing@avanaservices.com",
+        to: "recruitment@avanarecruit.ai",
         subject: `New Company Registration – ${created.name || "Unknown"}`,
         html: brandedEmail(
           "New Company Registration",
