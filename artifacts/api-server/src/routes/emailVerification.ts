@@ -115,10 +115,49 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
   }
 
   if (record.accountType === "candidate") {
-    await db
+    const [candidate] = await db
       .update(candidatesTable)
       .set({ verified: true })
-      .where(eq(candidatesTable.email, record.email));
+      .where(eq(candidatesTable.email, record.email))
+      .returning({ name: candidatesTable.name, email: candidatesTable.email });
+
+    try {
+      const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
+      const { client, fromEmail } = await getResendClient();
+      await client.emails.send({
+        from: fromEmail,
+        to: candidate.email!,
+        subject: "Welcome to AVANA Recruit — What's Next",
+        html: brandedEmail(
+          `Welcome${candidate.name ? `, ${candidate.name.split(" ")[0]}` : ""}!`,
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Your AVANA Recruit account is now verified and ready to use. Here's how to get the most out of the platform and put yourself in front of the right opportunities.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">1. Complete your profile</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">A complete profile dramatically improves your match scores. Add your skills, experience, education, location and a short professional summary so our AI can match you accurately.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">2. Upload your CV</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Upload your latest CV so companies can review your full background when they shortlist you.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">3. Add references and verifications</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Verifications boost your matching score and build trust with hiring companies. Even one or two verified references makes a real difference.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">4. Browse jobs and companies</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Explore live opportunities, see how you match, and apply to roles that fit you. You can also browse companies directly to discover places you'd love to work.</p>
+
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">5. Set up job alerts</h3>
+           <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Get notified the moment new jobs matching your profile go live, so you never miss an opportunity.</p>
+
+           <div style="text-align: center; margin: 32px 0 8px 0;">
+             <a href="${origin}/" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Sign In to Your Account</a>
+           </div>
+
+           <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 24px 0 0 0;">If you have any questions or need help getting started, just reply to this email or contact us at <a href="mailto:recruitment@avanarecruit.ai" style="color: #4CAF50; text-decoration: none;">recruitment@avanarecruit.ai</a>.</p>`,
+          "We're excited to help you find your next opportunity."
+        ),
+      });
+    } catch (err) {
+      req.log.error(err, "Failed to send candidate welcome email");
+    }
   } else {
     await db
       .update(companyProfiles)
