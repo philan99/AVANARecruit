@@ -246,6 +246,31 @@ router.delete("/companies/:id", async (req, res) => {
 
     await db.delete(companyProfiles).where(eq(companyProfiles.id, id));
 
+    try {
+      const { client, fromEmail } = await getResendClient();
+      const html = brandedEmail({
+        title: "Company account deleted",
+        bodyHtml: `
+          <p>A company account has been deleted from AVANA Recruit.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr><td style="padding:6px 0;color:#64748b;">Company name</td><td style="padding:6px 0;font-weight:600;">${existing.name ?? "—"}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b;">Email</td><td style="padding:6px 0;font-weight:600;">${existing.email ?? "—"}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b;">Company ID</td><td style="padding:6px 0;font-weight:600;">${existing.id}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b;">Deleted at</td><td style="padding:6px 0;font-weight:600;">${new Date().toISOString()}</td></tr>
+          </table>
+          <p>All associated jobs, bookmarks and alerts were removed.</p>
+        `,
+      });
+      await client.emails.send({
+        from: fromEmail,
+        to: "recruitment@avanarecruit.ai",
+        subject: `[AVANA Recruit] Company account deleted — ${existing.name ?? existing.email}`,
+        html,
+      });
+    } catch (mailErr) {
+      req.log.error(mailErr, "Failed to send company-deletion notification");
+    }
+
     res.sendStatus(204);
   } catch (err) {
     req.log.error(err, "Failed to delete company");

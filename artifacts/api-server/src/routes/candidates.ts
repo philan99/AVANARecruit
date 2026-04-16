@@ -327,6 +327,31 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  try {
+    const { client, fromEmail } = await getResendClient();
+    const html = brandedEmail({
+      title: "Candidate account deleted",
+      bodyHtml: `
+        <p>A candidate account has been deleted from AVANA Recruit.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+          <tr><td style="padding:6px 0;color:#64748b;">Name</td><td style="padding:6px 0;font-weight:600;">${candidate.name ?? "—"}</td></tr>
+          <tr><td style="padding:6px 0;color:#64748b;">Email</td><td style="padding:6px 0;font-weight:600;">${candidate.email ?? "—"}</td></tr>
+          <tr><td style="padding:6px 0;color:#64748b;">Candidate ID</td><td style="padding:6px 0;font-weight:600;">${candidate.id}</td></tr>
+          <tr><td style="padding:6px 0;color:#64748b;">Deleted at</td><td style="padding:6px 0;font-weight:600;">${new Date().toISOString()}</td></tr>
+        </table>
+        <p>All associated matches, alerts and bookmarks were removed.</p>
+      `,
+    });
+    await client.emails.send({
+      from: fromEmail,
+      to: "recruitment@avanarecruit.ai",
+      subject: `[AVANA Recruit] Candidate account deleted — ${candidate.name ?? candidate.email}`,
+      html,
+    });
+  } catch (mailErr) {
+    req.log.error(mailErr, "Failed to send candidate-deletion notification");
+  }
+
   res.sendStatus(204);
 });
 
