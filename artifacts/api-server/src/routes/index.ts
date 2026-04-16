@@ -16,9 +16,11 @@ import chatRouter from "./chat";
 import jobAlertsRouter from "./jobAlerts";
 import candidateAlertsRouter from "./candidateAlerts";
 import devTasksRouter from "./devTasks";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
+router.use(authRouter);
 router.use(healthRouter);
 router.use(jobsRouter);
 router.use(candidatesRouter);

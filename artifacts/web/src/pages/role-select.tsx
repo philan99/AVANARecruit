@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, UserCircle, LogIn, Shield, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Building2, UserCircle, LogIn, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
@@ -25,7 +25,6 @@ export default function RoleSelect() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  const [selected, setSelected] = useState<UserRole | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +159,6 @@ export default function RoleSelect() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected) return;
 
     if (!email || !password) {
       toast({ title: "Email and password are required", variant: "destructive" });
@@ -171,60 +169,34 @@ export default function RoleSelect() {
     setIsLoading(true);
 
     try {
-      if (selected === "admin") {
-        const res = await fetch(`${basePath}/admin/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        if (res.ok) {
-          setUserEmail(email);
+      const res = await fetch(`${basePath}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUserEmail(email);
+
+        if (data.role === "admin") {
           setRole("admin");
-          setLocation("/");
-        } else {
-          toast({ title: "Invalid admin credentials", variant: "destructive" });
-        }
-      } else if (selected === "candidate") {
-        const res = await fetch(`${basePath}/candidates/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        if (res.ok) {
-          const data = await res.json();
+        } else if (data.role === "candidate") {
           setCandidateProfileId(data.candidateId);
-          setUserEmail(email);
           setRole("candidate");
-          setLocation("/");
-        } else {
-          const data = await res.json().catch(() => ({}));
-          if (data.unverified) {
-            setUnverifiedEmail(data.email || email);
-            setShowLogin(false);
-          } else {
-            setLoginErrorMsg(data.error || "Invalid email or password");
-          }
-        }
-      } else if (selected === "company") {
-        const res = await fetch(`${basePath}/companies/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        if (res.ok) {
-          const data = await res.json();
+        } else if (data.role === "company") {
           setCompanyProfileId(data.companyId);
-          setUserEmail(email);
           setRole("company");
-          setLocation("/");
+        }
+
+        setLocation("/");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        if (data.unverified) {
+          setUnverifiedEmail(data.email || email);
+          setShowLogin(false);
         } else {
-          const data = await res.json().catch(() => ({}));
-          if (data.unverified) {
-            setUnverifiedEmail(data.email || email);
-            setShowLogin(false);
-          } else {
-            setLoginErrorMsg(data.error || "Invalid email or password");
-          }
+          setLoginErrorMsg(data.error || "Invalid email or password");
         }
       }
     } catch {
@@ -915,32 +887,6 @@ export default function RoleSelect() {
 
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>I am a</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { key: "company" as UserRole, icon: Building2, label: "Company" },
-                        { key: "candidate" as UserRole, icon: UserCircle, label: "Candidate" },
-                        { key: "admin" as UserRole, icon: Shield, label: "Admin" },
-                      ].map((opt) => (
-                        <button
-                          key={opt.key}
-                          type="button"
-                          onClick={() => setSelected(opt.key)}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-md border text-sm font-medium transition-all cursor-pointer"
-                          style={{
-                            borderColor: selected === opt.key ? "#4CAF50" : "#e5e7eb",
-                            backgroundColor: selected === opt.key ? "rgba(76, 175, 80, 0.08)" : "#f9fafb",
-                            color: selected === opt.key ? "#4CAF50" : "#6b7280",
-                          }}
-                        >
-                          <opt.icon className="w-4 h-4" />
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium" style={{ color: "#1a2035" }}>Email</label>
                     <Input
                       id="email"
@@ -974,7 +920,7 @@ export default function RoleSelect() {
 
                   <button
                     type="submit"
-                    disabled={!selected || isLoading || !email || !password}
+                    disabled={isLoading || !email || !password}
                     className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     style={{ backgroundColor: "#4CAF50", color: "#fff" }}
                   >
