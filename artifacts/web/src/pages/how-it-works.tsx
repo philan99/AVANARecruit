@@ -89,7 +89,7 @@ export default function HowItWorks() {
     },
     {
       icon: BarChart3,
-      title: "Track Your Dashboard",
+      title: "Track Your Performance",
       description: "Monitor your match performance with a personal dashboard showing average scores, score distributions, a radar chart of your strengths, and your top matches.",
     },
     {
