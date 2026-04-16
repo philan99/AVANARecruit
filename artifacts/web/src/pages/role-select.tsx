@@ -24,6 +24,10 @@ export default function RoleSelect() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+    if (window.location.pathname !== baseUrl && window.location.pathname !== `${baseUrl}/`) {
+      window.history.replaceState(null, "", baseUrl);
+    }
   }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

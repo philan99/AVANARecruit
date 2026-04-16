@@ -64,6 +64,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setCandidateProfileIdState(null);
     setCompanyProfileIdState(null);
     setUserEmailState(null);
+    const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+    window.history.replaceState(null, "", baseUrl);
   }, []);
 
   const setCandidateProfileId = useCallback((id: number | null) => {
