@@ -357,48 +357,12 @@ export default function RoleSelect() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
-          <a
-            href="#"
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            className="cursor-pointer"
-          >
-            <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
-          </a>
-          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            <a
-              href="#pricing"
-              onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
-            >
-              Pricing
-            </a>
-            <Link href="/how-it-works" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
-              How it Works
-            </Link>
-            <Link href="/contact-us" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
-              Contact Us
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowLogin(true)}
-              className="px-5 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors cursor-pointer"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => setShowSignup(true)}
-              className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer"
-              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
-            >
-              Get Started
-              <ArrowRight className="w-3.5 h-3.5 ml-1.5 inline" />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav
+        active="home"
+        onSignIn={() => setShowLogin(true)}
+        onGetStarted={() => setShowSignup(true)}
+        onPricing={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
+      />
 
       <section className="relative" style={{ backgroundColor: "#1a2035", paddingTop: "72px" }}>
         <div className="absolute inset-0 overflow-hidden" style={{ paddingTop: "72px" }}>
