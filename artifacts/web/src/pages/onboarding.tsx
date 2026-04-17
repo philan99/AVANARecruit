@@ -510,13 +510,16 @@ export default function Onboarding() {
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Highest qualification</label>
                   <Select value={education} onValueChange={setEducation}>
-                    <SelectTrigger><SelectValue placeholder="Select qualification" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="High School">High School</SelectItem>
-                      <SelectItem value="Diploma">Diploma</SelectItem>
-                      <SelectItem value="Bachelor's">Bachelor's</SelectItem>
-                      <SelectItem value="Master's">Master's</SelectItem>
+                      <SelectItem value="GCSE">GCSE</SelectItem>
+                      <SelectItem value="A-Level">A-Level</SelectItem>
+                      <SelectItem value="HND/HNC">HND/HNC</SelectItem>
+                      <SelectItem value="Foundation Degree">Foundation Degree</SelectItem>
+                      <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                      <SelectItem value="Master's Degree">Master's Degree</SelectItem>
                       <SelectItem value="PhD">PhD</SelectItem>
+                      <SelectItem value="Professional Qualification">Professional Qualification</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
