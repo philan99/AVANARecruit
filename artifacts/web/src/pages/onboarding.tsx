@@ -138,13 +138,14 @@ export default function Onboarding() {
   useEffect(() => {
     if (!formHydrated.current && candidate) {
       formHydrated.current = true;
+      const stripPlaceholder = (v?: string | null) => (v && v !== "Not specified" ? v : "");
       setPhone(candidate.phone || "");
-      setLocationField(candidate.location || "");
-      setCurrentTitle(candidate.currentTitle && candidate.currentTitle !== "Not specified" ? candidate.currentTitle : "");
+      setLocationField(stripPlaceholder(candidate.location));
+      setCurrentTitle(stripPlaceholder(candidate.currentTitle));
       setExperienceYears(candidate.experienceYears ? String(candidate.experienceYears) : "");
       setSummary(candidate.summary || "");
       setSkills(candidate.skills || []);
-      setEducation(candidate.education || "");
+      setEducation(stripPlaceholder(candidate.education));
       setEducationDetails(candidate.educationDetails || "");
       setPreferredJobTypes(candidate.preferredJobTypes || []);
       setPreferredWorkplaces(candidate.preferredWorkplaces || []);
