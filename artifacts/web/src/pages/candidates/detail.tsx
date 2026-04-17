@@ -64,6 +64,14 @@ const INDUSTRY_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+function safeHref(url: string | null | undefined): string {
+  if (!url) return "#";
+  const trimmed = url.trim();
+  if (!trimmed) return "#";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
 function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 py-2.5 border-b border-border/40 last:border-0">
