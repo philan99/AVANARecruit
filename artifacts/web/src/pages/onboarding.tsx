@@ -894,16 +894,16 @@ export default function Onboarding() {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Boost your score later</p>
               <div className="space-y-1.5 mb-2">
                 <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Camera className="w-4 h-4 text-amber-500 shrink-0" />
+                  Upload a profile picture
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
                   <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
                   Add references and verifications
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <Heart className="w-4 h-4 text-amber-500 shrink-0" />
                   Set up job alerts
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Camera className="w-4 h-4 text-amber-500 shrink-0" />
-                  Upload a profile picture
                 </div>
               </div>
             </div>
