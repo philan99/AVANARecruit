@@ -508,7 +508,7 @@ export default function Onboarding() {
               <p className="text-sm text-slate-600 mb-5">Your highest qualification helps with role-specific matching.</p>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Highest qualification</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Education</label>
                   <Select value={education} onValueChange={setEducation}>
                     <SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger>
                     <SelectContent>
