@@ -74,7 +74,12 @@ export default function MatchesList() {
   });
 
   useEffect(() => {
-    if (!jobs || jobs.length === 0) return;
+    if (!jobs) return;
+    if (jobs.length === 0) {
+      setAllMatches([]);
+      setLoading(false);
+      return;
+    }
 
     async function fetchAllMatches() {
       setLoading(true);
