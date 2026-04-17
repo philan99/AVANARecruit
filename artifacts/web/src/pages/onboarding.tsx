@@ -15,6 +15,7 @@ import {
   MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe,
 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
+import { CITY_SUGGESTIONS } from "@/lib/cities";
 
 type OnboardingState = {
   currentStep: number;
@@ -470,7 +471,16 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Location</label>
-                  <Input value={location} onChange={(e) => setLocationField(e.target.value)} placeholder="e.g. London, UK" />
+                  <Input
+                    value={location}
+                    onChange={(e) => setLocationField(e.target.value)}
+                    placeholder="Start typing a city, e.g. London"
+                    list="city-suggestions"
+                    autoComplete="off"
+                  />
+                  <datalist id="city-suggestions">
+                    {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
+                  </datalist>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience</label>
