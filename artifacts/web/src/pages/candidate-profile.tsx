@@ -1035,7 +1035,7 @@ export default function CandidateProfile() {
                     <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Me
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md w-[calc(100vw-2rem)] overflow-hidden">
+                <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-primary" />
@@ -1076,21 +1076,18 @@ export default function CandidateProfile() {
                               }
                             }}
                           >
-                            <SelectTrigger className="h-8 text-sm w-full max-w-full min-w-0 [&>span]:!block [&>span]:!min-w-0 [&>span]:!flex-1 [&>span]:!overflow-hidden [&>span]:!text-ellipsis [&>span]:!whitespace-nowrap [&>span]:text-left">
-                              <SelectValue placeholder="Select a role from your experience" asChild>
-                                <span>
-                                  {(() => {
-                                    const idx = experienceList.findIndex(
-                                      ex => ex.jobTitle === verifyForm.roleTitle && ex.company === verifyForm.company
-                                    );
-                                    if (idx >= 0) {
-                                      const ex = experienceList[idx];
-                                      return `${ex.jobTitle || "Untitled role"}${ex.company ? ` — ${ex.company}` : ""}`;
-                                    }
-                                    if (verifyForm.roleTitle) return "Other (enter manually)";
-                                    return "Select a role from your experience";
-                                  })()}
-                                </span>
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue placeholder="Select a role from your experience">
+                                {(() => {
+                                  const idx = experienceList.findIndex(
+                                    ex => ex.jobTitle === verifyForm.roleTitle && ex.company === verifyForm.company
+                                  );
+                                  if (idx >= 0) {
+                                    return experienceList[idx].jobTitle || "Untitled role";
+                                  }
+                                  if (verifyForm.roleTitle) return "Other (enter manually)";
+                                  return undefined;
+                                })()}
                               </SelectValue>
                             </SelectTrigger>
                             <SelectContent className="max-w-[calc(100vw-2rem)]">
