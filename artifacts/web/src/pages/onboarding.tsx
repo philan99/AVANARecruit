@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowRight, ArrowLeft, CheckCircle2, Briefcase, Target, ShieldCheck,
   Upload, FileText, X, Plus, Sparkles, AlertCircle, GraduationCap,
-  MapPin, Heart, Camera,
+  MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe,
 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 
@@ -23,7 +23,7 @@ type OnboardingState = {
   completedAt: string | null;
 };
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 const STEP_TITLES = [
   "Welcome",
   "Upload your CV",
@@ -31,6 +31,7 @@ const STEP_TITLES = [
   "Your skills",
   "Education",
   "What you're looking for",
+  "Social media",
   "All set",
 ];
 
@@ -137,6 +138,10 @@ export default function Onboarding() {
   const [preferredJobTypes, setPreferredJobTypes] = useState<string[]>([]);
   const [preferredWorkplaces, setPreferredWorkplaces] = useState<string[]>([]);
   const [preferredIndustries, setPreferredIndustries] = useState<string[]>([]);
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [twitterUrl, setTwitterUrl] = useState("");
+  const [portfolioUrl, setPortfolioUrl] = useState("");
 
   const formHydrated = useRef(false);
   useEffect(() => {
@@ -154,6 +159,10 @@ export default function Onboarding() {
       setPreferredJobTypes(candidate.preferredJobTypes || []);
       setPreferredWorkplaces(candidate.preferredWorkplaces || []);
       setPreferredIndustries(candidate.preferredIndustries || []);
+      setLinkedinUrl((candidate as any).linkedinUrl || "");
+      setFacebookUrl((candidate as any).facebookUrl || "");
+      setTwitterUrl((candidate as any).twitterUrl || "");
+      setPortfolioUrl((candidate as any).portfolioUrl || "");
     }
   }, [candidate]);
 
@@ -235,6 +244,14 @@ export default function Onboarding() {
         break;
       case 6:
         ok = await patchCandidate({ preferredJobTypes, preferredWorkplaces, preferredIndustries });
+        break;
+      case 7:
+        ok = await patchCandidate({
+          linkedinUrl: linkedinUrl || null,
+          facebookUrl: facebookUrl || null,
+          twitterUrl: twitterUrl || null,
+          portfolioUrl: portfolioUrl || null,
+        });
         break;
     }
     if (!ok) toast({ title: "Couldn't save", description: "Please try again.", variant: "destructive" });
@@ -582,6 +599,31 @@ export default function Onboarding() {
           )}
 
           {step === 7 && (
+            <div>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Social media</h1>
+              <p className="text-sm text-slate-600 mb-5">Adding links helps companies learn more about you. All optional.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn</label>
+                  <Input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Facebook className="w-3.5 h-3.5" /> Facebook</label>
+                  <Input value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/yourprofile" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Twitter className="w-3.5 h-3.5" /> X (Twitter)</label>
+                  <Input value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/yourhandle" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Portfolio / Website</label>
+                  <Input value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} placeholder="https://yourwebsite.com" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 8 && (
             <div>
               <div className="text-center mb-5">
                 <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76,175,80,0.12)" }}>
