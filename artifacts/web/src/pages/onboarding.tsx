@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowRight, ArrowLeft, CheckCircle2, Briefcase, Target, ShieldCheck,
   Upload, FileText, X, Plus, Sparkles, AlertCircle, GraduationCap,
-  MapPin, Heart,
+  MapPin, Heart, Camera,
 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 
@@ -608,6 +608,10 @@ export default function Onboarding() {
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <Heart className="w-4 h-4 text-amber-500 shrink-0" />
                   Set up job alerts
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Camera className="w-4 h-4 text-amber-500 shrink-0" />
+                  Upload a profile picture
                 </div>
               </div>
             </div>
