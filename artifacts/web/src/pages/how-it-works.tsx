@@ -150,9 +150,9 @@ export default function HowItWorks() {
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
           <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            <Link href="/#pricing" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
+            <a href="/#pricing" className="text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
               Pricing
-            </Link>
+            </a>
             <Link href="/how-it-works" className="text-sm font-medium text-white hover:text-white transition-colors cursor-pointer">
               How it Works
             </Link>
