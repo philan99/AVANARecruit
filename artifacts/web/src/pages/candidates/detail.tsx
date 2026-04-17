@@ -268,12 +268,6 @@ ${companyName}`
                   {isBookmarked ? "Bookmarked" : "Bookmark"}
                 </Button>
               )}
-              <Link href={`/candidates/${candidateId}/verifications`}>
-                <Button variant="outline" className="gap-2 w-full">
-                  <ShieldCheck className="w-4 h-4" />
-                  View Verifications
-                </Button>
-              </Link>
             </div>
           </div>
         </CardContent>
@@ -328,11 +322,21 @@ ${companyName}`
 
           {c.experience && c.experience.length > 0 && (
             <Card className="bg-card">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Briefcase className="w-4 h-4" />
                   Experience History
                 </CardTitle>
+                <Link href={`/candidates/${candidateId}/verifications`}>
+                  <Button
+                    size="sm"
+                    className="gap-2 h-8 text-xs text-white hover:opacity-90"
+                    style={{ backgroundColor: "#4CAF50" }}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    View Verifications
+                  </Button>
+                </Link>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
