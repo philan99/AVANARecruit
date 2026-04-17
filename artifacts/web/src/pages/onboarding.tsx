@@ -149,6 +149,8 @@ export default function Onboarding() {
   const [skillDraft, setSkillDraft] = useState("");
   const [education, setEducation] = useState("");
   const [educationDetails, setEducationDetails] = useState("");
+  const [qualifications, setQualifications] = useState<string[]>([]);
+  const [qualificationDraft, setQualificationDraft] = useState("");
   const [preferredJobTypes, setPreferredJobTypes] = useState<string[]>([]);
   const [preferredWorkplaces, setPreferredWorkplaces] = useState<string[]>([]);
   const [preferredIndustries, setPreferredIndustries] = useState<string[]>([]);
@@ -170,6 +172,7 @@ export default function Onboarding() {
       setSkills(candidate.skills || []);
       setEducation(stripPlaceholder(candidate.education));
       setEducationDetails(candidate.educationDetails || "");
+      setQualifications(((candidate as any).qualifications || []) as string[]);
       setPreferredJobTypes(candidate.preferredJobTypes || []);
       setPreferredWorkplaces(candidate.preferredWorkplaces || []);
       setPreferredIndustries(candidate.preferredIndustries || []);
@@ -254,6 +257,7 @@ export default function Onboarding() {
         ok = await patchCandidate({
           education: education || "Not specified",
           educationDetails: educationDetails || null,
+          qualifications,
         });
         break;
       case 6:
@@ -591,6 +595,56 @@ export default function Onboarding() {
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Details (institution, course, year)</label>
                   <Textarea value={educationDetails} onChange={(e) => setEducationDetails(e.target.value)} placeholder="e.g. BSc Computer Science, University College London, 2018" className="h-20" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Qualifications</label>
+                  {qualifications.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {qualifications.map((qual, i) => (
+                        <span key={`${qual}-${i}`} className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full">
+                          {qual}
+                          <button
+                            type="button"
+                            className="rounded-full hover:bg-slate-300/60 p-0.5"
+                            onClick={() => setQualifications(qualifications.filter((_, idx) => idx !== i))}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      value={qualificationDraft}
+                      onChange={(e) => setQualificationDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const val = qualificationDraft.trim();
+                          if (val && !qualifications.includes(val)) {
+                            setQualifications([...qualifications, val]);
+                          }
+                          setQualificationDraft("");
+                        }
+                      }}
+                      placeholder="Type a qualification and press Enter"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const val = qualificationDraft.trim();
+                        if (val && !qualifications.includes(val)) {
+                          setQualifications([...qualifications, val]);
+                        }
+                        setQualificationDraft("");
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5">e.g. AAT Level 3, ACCA, PRINCE2, AWS Solutions Architect</p>
                 </div>
               </div>
             </div>
