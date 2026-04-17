@@ -47,7 +47,11 @@ const JOB_TYPES: { value: string; label: string }[] = [
   { value: "part_time", label: "Part-time" },
   { value: "temporary", label: "Temporary" },
 ];
-const WORKPLACES = ["Remote", "Hybrid", "On-site"];
+const WORKPLACES: { value: string; label: string }[] = [
+  { value: "office", label: "Office" },
+  { value: "remote", label: "Remote" },
+  { value: "hybrid", label: "Hybrid" },
+];
 const INDUSTRIES: { value: string; label: string }[] = [
   { value: "accounting_finance", label: "Accounting & Finance" },
   { value: "agriculture", label: "Agriculture" },
@@ -548,10 +552,10 @@ export default function Onboarding() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Workplace</p>
                   <div className="flex flex-wrap gap-2">
                     {WORKPLACES.map((t) => {
-                      const active = preferredWorkplaces.includes(t);
+                      const active = preferredWorkplaces.includes(t.value);
                       return (
-                        <button key={t} onClick={() => toggleArr(preferredWorkplaces, setPreferredWorkplaces, t)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
-                          {t}
+                        <button key={t.value} onClick={() => toggleArr(preferredWorkplaces, setPreferredWorkplaces, t.value)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
+                          {t.label}
                         </button>
                       );
                     })}
