@@ -294,6 +294,11 @@ export default function Onboarding() {
     try {
       const persisted = await persistOnboarding(TOTAL_STEPS, { completed: true, finishNow: true });
       if (!persisted) return;
+      try {
+        await fetch(`${apiBase}/candidates/${candidateProfileId}/run-matching`, { method: "POST" });
+      } catch (err) {
+        console.error("Failed to run AI matching", err);
+      }
       toast({ title: "All set!", description: "Your profile is ready." });
       setLocation("/my-matches");
     } finally {
