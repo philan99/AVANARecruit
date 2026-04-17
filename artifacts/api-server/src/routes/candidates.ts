@@ -296,9 +296,9 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
 
   try {
     const { client, fromEmail } = await getResendClient();
-    const html = brandedEmail({
-      title: "Candidate account deleted",
-      bodyHtml: `
+    const html = brandedEmail(
+      "Candidate account deleted",
+      `
         <p>A candidate account has been deleted from AVANA Recruit.</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0;">
           <tr><td style="padding:6px 0;color:#64748b;">Name</td><td style="padding:6px 0;font-weight:600;">${candidate.name ?? "—"}</td></tr>
@@ -308,7 +308,7 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
         </table>
         <p>All associated matches, alerts and bookmarks were removed.</p>
       `,
-    });
+    );
     await client.emails.send({
       from: fromEmail,
       to: "recruitment@avanarecruit.ai",

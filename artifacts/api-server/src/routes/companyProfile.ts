@@ -215,9 +215,9 @@ router.delete("/companies/:id", async (req, res) => {
 
     try {
       const { client, fromEmail } = await getResendClient();
-      const html = brandedEmail({
-        title: "Company account deleted",
-        bodyHtml: `
+      const html = brandedEmail(
+        "Company account deleted",
+        `
           <p>A company account has been deleted from AVANA Recruit.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
             <tr><td style="padding:6px 0;color:#64748b;">Company name</td><td style="padding:6px 0;font-weight:600;">${existing.name ?? "—"}</td></tr>
@@ -227,7 +227,7 @@ router.delete("/companies/:id", async (req, res) => {
           </table>
           <p>All associated jobs, bookmarks and alerts were removed.</p>
         `,
-      });
+      );
       await client.emails.send({
         from: fromEmail,
         to: "recruitment@avanarecruit.ai",
