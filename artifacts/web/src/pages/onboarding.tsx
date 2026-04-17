@@ -349,12 +349,27 @@ export default function Onboarding() {
     try {
       const persisted = await persistOnboarding(TOTAL_STEPS, { completed: true, finishNow: true });
       if (!persisted) return;
-      try {
-        await fetch(`${apiBase}/candidates/${candidateProfileId}/run-matching`, { method: "POST" });
-      } catch (err) {
-        console.error("Failed to run AI matching", err);
+
+      let matchingOk = false;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/run-matching`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+          if (res.ok) { matchingOk = true; break; }
+          console.error("run-matching responded", res.status, await res.text().catch(() => ""));
+        } catch (err) {
+          console.error("Failed to run AI matching (attempt " + (attempt + 1) + ")", err);
+        }
+        await new Promise(r => setTimeout(r, 600));
       }
-      toast({ title: "All set!", description: "Your profile is ready." });
+
+      if (matchingOk) {
+        toast({ title: "All set!", description: "Your profile is ready and we've found your matches." });
+      } else {
+        toast({ title: "Profile saved", description: "We're still preparing your matches — tap Run AI Matching on the next page if needed." });
+      }
       setLocation("/my-matches");
     } finally {
       setSaving(false);

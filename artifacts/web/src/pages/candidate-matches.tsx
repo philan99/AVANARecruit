@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,27 +24,41 @@ export default function CandidateMatches() {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
   });
 
-  async function handleRunMatching() {
+  async function handleRunMatching(silent = false) {
     if (!candidateProfileId) return;
     setIsRunning(true);
     try {
       const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
       const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/run-matching`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
         const results = await res.json();
         queryClient.invalidateQueries({ queryKey: getGetCandidateMatchesQueryKey(candidateProfileId) });
-        toast({ title: "AI Matching Complete", description: `Found ${results.length} job matches.` });
-      } else {
+        if (!silent) {
+          toast({ title: "AI Matching Complete", description: `Found ${results.length} job matches.` });
+        }
+      } else if (!silent) {
         toast({ title: "Error", description: "Failed to run matching.", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to run matching.", variant: "destructive" });
+      if (!silent) toast({ title: "Error", description: "Failed to run matching.", variant: "destructive" });
     } finally {
       setIsRunning(false);
     }
   }
+
+  const autoRanRef = useRef(false);
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    if (!candidateProfileId) return;
+    if (isLoading) return;
+    if (matches && matches.length === 0 && !isRunning) {
+      autoRanRef.current = true;
+      handleRunMatching(true);
+    }
+  }, [candidateProfileId, isLoading, matches, isRunning]);
 
   if (!candidateProfileId) {
     return (
