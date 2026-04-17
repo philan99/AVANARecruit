@@ -12,10 +12,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowRight, ArrowLeft, CheckCircle2, Briefcase, Target, ShieldCheck,
   Upload, FileText, X, Plus, Sparkles, AlertCircle, GraduationCap,
-  MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe,
+  MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe, Trash2, Briefcase as BriefcaseIcon,
 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
+
+type ExperienceEntry = {
+  jobTitle: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  description: string;
+};
 
 type OnboardingState = {
   currentStep: number;
@@ -24,13 +33,14 @@ type OnboardingState = {
   completedAt: string | null;
 };
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 const STEP_TITLES = [
   "Welcome",
   "Upload your CV",
   "The basics",
   "Your skills",
   "Education",
+  "Experience",
   "What you're looking for",
   "Social media",
   "All set",
@@ -151,6 +161,7 @@ export default function Onboarding() {
   const [educationDetails, setEducationDetails] = useState("");
   const [qualifications, setQualifications] = useState<string[]>([]);
   const [qualificationDraft, setQualificationDraft] = useState("");
+  const [experienceList, setExperienceList] = useState<ExperienceEntry[]>([]);
   const [preferredJobTypes, setPreferredJobTypes] = useState<string[]>([]);
   const [preferredWorkplaces, setPreferredWorkplaces] = useState<string[]>([]);
   const [preferredIndustries, setPreferredIndustries] = useState<string[]>([]);
@@ -173,6 +184,8 @@ export default function Onboarding() {
       setEducation(stripPlaceholder(candidate.education));
       setEducationDetails(candidate.educationDetails || "");
       setQualifications(((candidate as any).qualifications || []) as string[]);
+      const exp = (candidate as any).experience;
+      if (Array.isArray(exp)) setExperienceList(exp);
       setPreferredJobTypes(candidate.preferredJobTypes || []);
       setPreferredWorkplaces(candidate.preferredWorkplaces || []);
       setPreferredIndustries(candidate.preferredIndustries || []);
@@ -261,9 +274,12 @@ export default function Onboarding() {
         });
         break;
       case 6:
-        ok = await patchCandidate({ preferredJobTypes, preferredWorkplaces, preferredIndustries });
+        ok = await patchCandidate({ experience: experienceList } as any);
         break;
       case 7:
+        ok = await patchCandidate({ preferredJobTypes, preferredWorkplaces, preferredIndustries });
+        break;
+      case 8:
         ok = await patchCandidate({
           linkedinUrl: linkedinUrl || null,
           facebookUrl: facebookUrl || null,
@@ -652,6 +668,132 @@ export default function Onboarding() {
 
           {step === 6 && (
             <div>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Work experience</h1>
+              <p className="text-sm text-slate-600 mb-5">Add your previous roles. The more you share, the better we can match you. This step is optional — you can always add more later.</p>
+
+              <div className="space-y-3">
+                {experienceList.length === 0 && (
+                  <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg">
+                    <BriefcaseIcon className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm text-slate-500">No roles added yet</p>
+                  </div>
+                )}
+
+                {experienceList.map((entry, index) => (
+                  <div key={index} className="border border-slate-200 rounded-lg p-3 space-y-2 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500">Role {experienceList.length - index}</span>
+                      <button
+                        type="button"
+                        onClick={() => setExperienceList(experienceList.filter((_, i) => i !== index))}
+                        className="text-slate-400 hover:text-red-500 p-1 rounded"
+                        aria-label="Remove role"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-medium text-slate-600 mb-0.5 block">Job title</label>
+                        <Input
+                          value={entry.jobTitle}
+                          onChange={(e) => {
+                            const updated = [...experienceList];
+                            updated[index] = { ...updated[index], jobTitle: e.target.value };
+                            setExperienceList(updated);
+                          }}
+                          placeholder="e.g. Senior Developer"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-slate-600 mb-0.5 block">Company</label>
+                        <Input
+                          value={entry.company}
+                          onChange={(e) => {
+                            const updated = [...experienceList];
+                            updated[index] = { ...updated[index], company: e.target.value };
+                            setExperienceList(updated);
+                          }}
+                          placeholder="e.g. Acme Corp"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-slate-600 mb-0.5 block">Start date</label>
+                        <Input
+                          type="month"
+                          value={entry.startDate}
+                          onChange={(e) => {
+                            const updated = [...experienceList];
+                            updated[index] = { ...updated[index], startDate: e.target.value };
+                            setExperienceList(updated);
+                          }}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-slate-600 mb-0.5 block">End date</label>
+                        <Input
+                          type="month"
+                          value={entry.endDate}
+                          onChange={(e) => {
+                            const updated = [...experienceList];
+                            updated[index] = { ...updated[index], endDate: e.target.value };
+                            setExperienceList(updated);
+                          }}
+                          disabled={entry.current}
+                          placeholder={entry.current ? "Present" : ""}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={entry.current}
+                        onChange={(e) => {
+                          const updated = [...experienceList];
+                          updated[index] = { ...updated[index], current: e.target.checked, endDate: e.target.checked ? "" : updated[index].endDate };
+                          setExperienceList(updated);
+                        }}
+                        className="rounded border-slate-300"
+                      />
+                      I currently work here
+                    </label>
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-600 mb-0.5 block">Description (optional)</label>
+                      <Textarea
+                        value={entry.description}
+                        onChange={(e) => {
+                          const updated = [...experienceList];
+                          updated[index] = { ...updated[index], description: e.target.value };
+                          setExperienceList(updated);
+                        }}
+                        placeholder="Key responsibilities and achievements..."
+                        className="min-h-[60px] text-sm"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setExperienceList([
+                    { jobTitle: "", company: "", startDate: "", endDate: "", current: false, description: "" },
+                    ...experienceList,
+                  ])}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add a role
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>What you're looking for</h1>
               <p className="text-sm text-slate-600 mb-5">We'll prioritise jobs that match your preferences.</p>
 
@@ -699,7 +841,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 7 && (
+          {step === 8 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Social media</h1>
               <p className="text-sm text-slate-600 mb-5">Adding links helps companies learn more about you. All optional.</p>
@@ -724,7 +866,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 8 && (
+          {step === 9 && (
             <div>
               <div className="text-center mb-5">
                 <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76,175,80,0.12)" }}>
