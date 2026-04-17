@@ -1049,7 +1049,48 @@ export default function CandidateProfile() {
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Role / Job Title *</label>
-                        <Input value={verifyForm.roleTitle} onChange={e => setVerifyForm(p => ({ ...p, roleTitle: e.target.value }))} placeholder="e.g. Senior Developer" className="h-8 text-sm" />
+                        {experienceList.length > 0 ? (
+                          <Select
+                            value={
+                              experienceList.findIndex(
+                                ex => ex.jobTitle === verifyForm.roleTitle && ex.company === verifyForm.company
+                              ) >= 0
+                                ? String(
+                                    experienceList.findIndex(
+                                      ex => ex.jobTitle === verifyForm.roleTitle && ex.company === verifyForm.company
+                                    )
+                                  )
+                                : verifyForm.roleTitle
+                                  ? "__custom"
+                                  : ""
+                            }
+                            onValueChange={(value) => {
+                              if (value === "__custom") {
+                                setVerifyForm(p => ({ ...p, roleTitle: "", company: "" }));
+                                return;
+                              }
+                              const idx = parseInt(value, 10);
+                              const ex = experienceList[idx];
+                              if (ex) {
+                                setVerifyForm(p => ({ ...p, roleTitle: ex.jobTitle, company: ex.company }));
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue placeholder="Select a role from your experience" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {experienceList.map((ex, i) => (
+                                <SelectItem key={i} value={String(i)}>
+                                  {ex.jobTitle || "Untitled role"}{ex.company ? ` — ${ex.company}` : ""}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="__custom">Other (enter manually)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input value={verifyForm.roleTitle} onChange={e => setVerifyForm(p => ({ ...p, roleTitle: e.target.value }))} placeholder="e.g. Senior Developer" className="h-8 text-sm" />
+                        )}
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Company *</label>
@@ -1065,7 +1106,7 @@ export default function CandidateProfile() {
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Personal Message (optional)</label>
-                        <Textarea value={verifyForm.message} onChange={e => setVerifyForm(p => ({ ...p, message: e.target.value }))} placeholder="Add a personal note to your verifier..." className="min-h-[60px] text-sm" />
+                        <Textarea value={verifyForm.message} onChange={e => setVerifyForm(p => ({ ...p, message: e.target.value }))} placeholder="Add a personal note to your verifier..." className="min-h-[120px] text-sm" />
                       </div>
                     </div>
                     <Button className="w-full" onClick={handleSendVerification} disabled={sendingVerification}>
