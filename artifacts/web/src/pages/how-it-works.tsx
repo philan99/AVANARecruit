@@ -63,14 +63,24 @@ export default function HowItWorks() {
 
   const candidateSteps = [
     {
+      icon: Upload,
+      title: "Upload Your CV",
+      description: "Sign up and upload your CV as the first step of our guided 5-minute setup. Your CV is shared with companies when you're shortlisted, so they can review your full background.",
+    },
+    {
+      icon: Sparkles,
+      title: "AI Pre-Fills Your Profile",
+      description: "Our AI reads your CV and automatically fills in your skills, work experience, education, location, qualifications and more — so you only need to review and tweak. Anything it's unsure about is clearly flagged for you to verify.",
+    },
+    {
       icon: UserCircle,
-      title: "Build Your Profile",
-      description: "Create a comprehensive profile with your skills, experience, education, and location. Upload your CV and profile photo to stand out to employers.",
+      title: "Review & Complete Your Profile",
+      description: "Walk through 7 quick steps — basics, skills, education, experience, preferences and social links. Your progress saves automatically, and you can come back later to finish any time.",
     },
     {
       icon: Target,
-      title: "Get AI-Matched to Jobs",
-      description: "Our AI engine automatically matches you to open positions based on your profile. You'll see a detailed score breakdown showing exactly how well you fit each role.",
+      title: "See Your AI Matches Instantly",
+      description: "As soon as you finish setup, you'll see live jobs ranked by how well you fit them — with a detailed score breakdown showing exactly why each role matches you.",
     },
     {
       icon: Search,
@@ -85,7 +95,7 @@ export default function HowItWorks() {
     {
       icon: ShieldCheck,
       title: "Verify Your Experience",
-      description: "Request verification from past employers to confirm your work history, qualifications, and certifications. Verified experience boosts your match scores by up to 20%, making you stand out to potential employers.",
+      description: "Request verification from past employers to confirm your work history, qualifications, and certifications. Even one or two verified references can boost your match score by up to 30%, helping you stand out to employers.",
     },
     {
       icon: BarChart3,
