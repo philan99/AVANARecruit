@@ -644,7 +644,7 @@ export default function Onboarding() {
                       Add
                     </Button>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1.5">e.g. AAT Level 3, ACCA, PRINCE2, AWS Solutions Architect</p>
+                  <p className="text-[11px] text-slate-500 mt-1.5">e.g. AAT Level 3, ACCA, PRINCE2, ITIL, AWS Solutions Architect</p>
                 </div>
               </div>
             </div>
