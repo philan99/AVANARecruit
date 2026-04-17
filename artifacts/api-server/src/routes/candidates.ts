@@ -154,39 +154,6 @@ router.post("/candidates", async (req, res): Promise<void> => {
     }
   }
 
-  try {
-    const { client, fromEmail } = await getResendClient();
-    await client.emails.send({
-      from: fromEmail,
-      to: "recruitment@avanarecruit.ai",
-      subject: `New Candidate Registration – ${candidate.name || "Unknown"}`,
-      html: brandedEmail(
-        "New Candidate Registration",
-        `<p style="font-size: 14px; color: #374151; line-height: 1.6;">A new candidate has registered on the platform.</p>
-         <table style="width: 100%; border-collapse: collapse;">
-           <tr>
-             <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px; vertical-align: top;"><strong>Name:</strong></td>
-             <td style="padding: 8px 0; font-size: 14px;">${candidate.name || "Not provided"}</td>
-           </tr>
-           <tr>
-             <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Email:</strong></td>
-             <td style="padding: 8px 0; font-size: 14px;">${candidate.email || "Not provided"}</td>
-           </tr>
-           <tr>
-             <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Location:</strong></td>
-             <td style="padding: 8px 0; font-size: 14px;">${candidate.location || "Not provided"}</td>
-           </tr>
-           <tr>
-             <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Current Title:</strong></td>
-             <td style="padding: 8px 0; font-size: 14px;">${candidate.currentTitle || "Not provided"}</td>
-           </tr>
-         </table>`
-      ),
-    });
-  } catch (notifyErr) {
-    console.error("Failed to send new candidate notification:", notifyErr);
-  }
-
   const result = { ...candidate, matchCount: 0 };
   res.status(201).json(result);
 

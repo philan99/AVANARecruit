@@ -119,7 +119,45 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       .update(candidatesTable)
       .set({ verified: true })
       .where(eq(candidatesTable.email, record.email))
-      .returning({ name: candidatesTable.name, email: candidatesTable.email });
+      .returning({
+        name: candidatesTable.name,
+        email: candidatesTable.email,
+        location: candidatesTable.location,
+        currentTitle: candidatesTable.currentTitle,
+      });
+
+    try {
+      const { client, fromEmail } = await getResendClient();
+      await client.emails.send({
+        from: fromEmail,
+        to: "recruitment@avanarecruit.ai",
+        subject: `New Verified Candidate – ${candidate.name || "Unknown"}`,
+        html: brandedEmail(
+          "New Verified Candidate",
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">A new candidate has just verified their account on the platform.</p>
+           <table style="width: 100%; border-collapse: collapse;">
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px; vertical-align: top;"><strong>Name:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${candidate.name || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Email:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${candidate.email || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Location:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${candidate.location || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Current Title:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${candidate.currentTitle || "Not provided"}</td>
+             </tr>
+           </table>`
+        ),
+      });
+    } catch (notifyErr) {
+      req.log.error(notifyErr, "Failed to send verified-candidate notification");
+    }
 
     try {
       const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
@@ -163,7 +201,45 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       .update(companyProfiles)
       .set({ verified: true })
       .where(eq(companyProfiles.email, record.email))
-      .returning({ name: companyProfiles.name, email: companyProfiles.email });
+      .returning({
+        name: companyProfiles.name,
+        email: companyProfiles.email,
+        industry: companyProfiles.industry,
+        location: companyProfiles.location,
+      });
+
+    try {
+      const { client, fromEmail } = await getResendClient();
+      await client.emails.send({
+        from: fromEmail,
+        to: "recruitment@avanarecruit.ai",
+        subject: `New Verified Company – ${company.name || "Unknown"}`,
+        html: brandedEmail(
+          "New Verified Company",
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">A new company has just verified their account on the platform.</p>
+           <table style="width: 100%; border-collapse: collapse;">
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px; vertical-align: top;"><strong>Company:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${company.name || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Email:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${company.email || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Industry:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${company.industry || "Not provided"}</td>
+             </tr>
+             <tr>
+               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Location:</strong></td>
+               <td style="padding: 8px 0; font-size: 14px;">${company.location || "Not provided"}</td>
+             </tr>
+           </table>`
+        ),
+      });
+    } catch (notifyErr) {
+      req.log.error(notifyErr, "Failed to send verified-company notification");
+    }
 
     try {
       const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";

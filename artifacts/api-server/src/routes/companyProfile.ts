@@ -160,39 +160,6 @@ router.post("/company-profile", async (req, res) => {
       }
     }
 
-    try {
-      const { client, fromEmail } = await getResendClient();
-      await client.emails.send({
-        from: fromEmail,
-        to: "recruitment@avanarecruit.ai",
-        subject: `New Company Registration – ${created.name || "Unknown"}`,
-        html: brandedEmail(
-          "New Company Registration",
-          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">A new company has registered on the platform.</p>
-           <table style="width: 100%; border-collapse: collapse;">
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px; vertical-align: top;"><strong>Company:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${created.name || "Not provided"}</td>
-             </tr>
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Email:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${created.email || "Not provided"}</td>
-             </tr>
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Industry:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${created.industry || "Not provided"}</td>
-             </tr>
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Location:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${created.location || "Not provided"}</td>
-             </tr>
-           </table>`
-        ),
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send new company notification:", notifyErr);
-    }
-
     res.json(created);
   } catch (err) {
     req.log.error(err, "Failed to save company profile");
