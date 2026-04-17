@@ -610,7 +610,7 @@ export default function Onboarding() {
         </div>
 
         <div className="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-          {step > 1 && step < TOTAL_STEPS ? (
+          {step > 1 ? (
             <button onClick={handleBack} disabled={saving} className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
