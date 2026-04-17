@@ -35,6 +35,19 @@ const STEP_TITLES = [
   "All set",
 ];
 
+const PHONE_CODES = [
+  { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
+  { code: "+33", flag: "🇫🇷" }, { code: "+49", flag: "🇩🇪" }, { code: "+34", flag: "🇪🇸" },
+  { code: "+39", flag: "🇮🇹" }, { code: "+31", flag: "🇳🇱" }, { code: "+32", flag: "🇧🇪" },
+  { code: "+41", flag: "🇨🇭" }, { code: "+46", flag: "🇸🇪" }, { code: "+47", flag: "🇳🇴" },
+  { code: "+45", flag: "🇩🇰" }, { code: "+358", flag: "🇫🇮" }, { code: "+48", flag: "🇵🇱" },
+  { code: "+43", flag: "🇦🇹" }, { code: "+351", flag: "🇵🇹" }, { code: "+61", flag: "🇦🇺" },
+  { code: "+64", flag: "🇳🇿" }, { code: "+91", flag: "🇮🇳" }, { code: "+81", flag: "🇯🇵" },
+  { code: "+82", flag: "🇰🇷" }, { code: "+86", flag: "🇨🇳" }, { code: "+65", flag: "🇸🇬" },
+  { code: "+852", flag: "🇭🇰" }, { code: "+971", flag: "🇦🇪" }, { code: "+966", flag: "🇸🇦" },
+  { code: "+27", flag: "🇿🇦" }, { code: "+55", flag: "🇧🇷" }, { code: "+52", flag: "🇲🇽" },
+];
+
 const POPULAR_SKILLS = [
   "JavaScript", "TypeScript", "React", "Node.js", "Python",
   "SQL", "AWS", "Docker", "Kubernetes", "GraphQL",
@@ -465,7 +478,31 @@ export default function Onboarding() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Phone (optional)</label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+44 ..." />
+                  <div className="flex gap-2">
+                    <Select
+                      value={phone.match(/^\+\d+/)?.[0] || "+44"}
+                      onValueChange={(code) => {
+                        const numberPart = phone.replace(/^\+\d+\s*/, "");
+                        setPhone(`${code} ${numberPart}`.trim());
+                      }}
+                    >
+                      <SelectTrigger className="w-[110px] shrink-0"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {PHONE_CODES.map(p => (
+                          <SelectItem key={p.code} value={p.code}>{p.flag} {p.code}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={phone.replace(/^\+\d+\s*/, "")}
+                      onChange={(e) => {
+                        const code = phone.match(/^\+\d+/)?.[0] || "+44";
+                        setPhone(`${code} ${e.target.value}`);
+                      }}
+                      placeholder="Phone number"
+                      className="flex-1"
+                    />
+                  </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Professional Summary</label>
