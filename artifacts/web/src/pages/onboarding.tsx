@@ -48,7 +48,38 @@ const JOB_TYPES: { value: string; label: string }[] = [
   { value: "temporary", label: "Temporary" },
 ];
 const WORKPLACES = ["Remote", "Hybrid", "On-site"];
-const INDUSTRIES = ["Technology", "Finance", "Healthcare", "Education", "Retail", "Manufacturing", "Media", "Consulting"];
+const INDUSTRIES: { value: string; label: string }[] = [
+  { value: "accounting_finance", label: "Accounting & Finance" },
+  { value: "agriculture", label: "Agriculture" },
+  { value: "automotive", label: "Automotive" },
+  { value: "banking", label: "Banking" },
+  { value: "construction", label: "Construction" },
+  { value: "consulting", label: "Consulting" },
+  { value: "creative_design", label: "Creative & Design" },
+  { value: "education", label: "Education" },
+  { value: "energy_utilities", label: "Energy & Utilities" },
+  { value: "engineering", label: "Engineering" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "hospitality_tourism", label: "Hospitality & Tourism" },
+  { value: "human_resources", label: "Human Resources" },
+  { value: "insurance", label: "Insurance" },
+  { value: "legal", label: "Legal" },
+  { value: "logistics_supply_chain", label: "Logistics & Supply Chain" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "marketing_advertising", label: "Marketing & Advertising" },
+  { value: "media_entertainment", label: "Media & Entertainment" },
+  { value: "nonprofit", label: "Non-profit" },
+  { value: "pharmaceutical", label: "Pharmaceutical" },
+  { value: "property_real_estate", label: "Property & Real Estate" },
+  { value: "public_sector", label: "Public Sector" },
+  { value: "retail", label: "Retail" },
+  { value: "sales", label: "Sales" },
+  { value: "science_research", label: "Science & Research" },
+  { value: "technology", label: "Technology" },
+  { value: "telecommunications", label: "Telecommunications" },
+  { value: "transport", label: "Transport" },
+  { value: "other", label: "Other" },
+];
 
 export default function Onboarding() {
   const { candidateProfileId } = useRole();
@@ -524,10 +555,10 @@ export default function Onboarding() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Industries</p>
                   <div className="flex flex-wrap gap-2">
                     {INDUSTRIES.map((t) => {
-                      const active = preferredIndustries.includes(t);
+                      const active = preferredIndustries.includes(t.value);
                       return (
-                        <button key={t} onClick={() => toggleArr(preferredIndustries, setPreferredIndustries, t)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
-                          {t}
+                        <button key={t.value} onClick={() => toggleArr(preferredIndustries, setPreferredIndustries, t.value)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
+                          {t.label}
                         </button>
                       );
                     })}
