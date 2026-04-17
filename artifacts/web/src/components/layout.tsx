@@ -76,12 +76,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
-        <div className="relative flex items-center justify-between h-14 px-6">
-          <Link href="/" className="flex items-center cursor-pointer relative z-10">
+        <div className="flex items-center justify-between gap-4 h-14 px-4 sm:px-6">
+          <Link href="/" className="flex items-center cursor-pointer shrink-0">
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
 
-          <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl px-8 items-center justify-between pointer-events-none">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 min-w-0">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -89,21 +89,21 @@ export function Layout({ children }: LayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-3.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap pointer-events-auto",
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-primary"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   )}
                 >
-                  <item.icon className="w-4 h-4 mr-2" />
+                  <item.icon className="w-4 h-4 mr-2 shrink-0" />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex flex-col items-end">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden xl:flex flex-col items-end">
               <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
                 {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
               </span>
@@ -115,7 +115,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
             <button
               onClick={() => setShowSignOutDialog(true)}
-              className="hidden sm:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
+              className="hidden lg:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 mr-1.5" />
               Sign Out
@@ -123,7 +123,8 @@ export function Layout({ children }: LayoutProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-accent rounded-md transition-colors"
+              className="lg:hidden p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-accent rounded-md transition-colors"
+              aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -131,7 +132,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-sidebar-border px-4 py-3 space-y-1">
+          <div className="lg:hidden border-t border-sidebar-border px-4 py-3 space-y-1">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
