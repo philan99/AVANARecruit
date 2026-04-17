@@ -1076,16 +1076,16 @@ export default function CandidateProfile() {
                               }
                             }}
                           >
-                            <SelectTrigger className="h-8 text-sm">
+                            <SelectTrigger className="h-8 text-sm w-full max-w-full [&>span]:truncate [&>span]:block [&>span]:min-w-0 [&>span]:flex-1 [&>span]:text-left">
                               <SelectValue placeholder="Select a role from your experience" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-w-[calc(100vw-2rem)]">
                               {experienceList.map((ex, i) => (
-                                <SelectItem key={i} value={String(i)}>
+                                <SelectItem key={i} value={String(i)} className="whitespace-normal break-words pr-6">
                                   {ex.jobTitle || "Untitled role"}{ex.company ? ` — ${ex.company}` : ""}
                                 </SelectItem>
                               ))}
-                              <SelectItem value="__custom">Other (enter manually)</SelectItem>
+                              <SelectItem value="__custom" className="whitespace-normal break-words pr-6">Other (enter manually)</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
