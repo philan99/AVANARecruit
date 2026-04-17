@@ -1096,8 +1096,8 @@ export default function Onboarding() {
               <button onClick={handleSkip} disabled={saving} className="text-sm text-slate-500 hover:text-slate-700">Skip for now</button>
             )}
             {step < TOTAL_STEPS ? (
-              <Button onClick={handleNext} disabled={saving} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
-                {step === 1 ? "Let's get started" : "Continue"} <ArrowRight className="w-4 h-4 ml-1" />
+              <Button onClick={handleNext} disabled={saving || parsingCv} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
+                {parsingCv ? "Reading your CV…" : step === 1 ? "Let's get started" : "Continue"} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
               <Button onClick={finish} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
