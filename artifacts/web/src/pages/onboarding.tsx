@@ -441,7 +441,7 @@ export default function Onboarding() {
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+44 ..." />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Short summary</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Professional Summary</label>
                   <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="A few sentences about your experience and what you're looking for..." className="h-24" />
                 </div>
               </div>
