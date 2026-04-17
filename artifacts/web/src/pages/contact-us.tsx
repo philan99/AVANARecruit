@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Building2, Mail } from "lucide-react";
+import { Send, Building2, Mail, ArrowRight } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -87,10 +87,11 @@ export default function ContactUs() {
             </a>
             <a
               href="/#signup"
-              className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer"
+              className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer inline-flex items-center"
               style={{ backgroundColor: "#4CAF50", color: "#fff" }}
             >
               Get Started
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5 inline" />
             </a>
           </div>
         </div>
