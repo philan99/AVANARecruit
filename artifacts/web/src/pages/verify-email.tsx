@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useRole } from "@/contexts/role-context";
+
+interface VerifyResponse {
+  success: boolean;
+  message: string;
+  role?: "candidate" | "company";
+  candidateId?: number;
+  companyId?: number;
+  email?: string;
+}
 
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
+  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
+  const [verified, setVerified] = useState<VerifyResponse | null>(null);
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -21,10 +33,11 @@ export default function VerifyEmail() {
 
     fetch(`${apiBase}/verify-email/${token}`)
       .then(async (res) => {
-        const data = await res.json();
+        const data: VerifyResponse & { error?: string } = await res.json();
         if (res.ok) {
           setStatus("success");
           setMessage(data.message || "Email verified successfully!");
+          setVerified(data);
         } else {
           setStatus("error");
           setMessage(data.error || "Verification failed.");
@@ -35,6 +48,27 @@ export default function VerifyEmail() {
         setMessage("Something went wrong. Please try again.");
       });
   }, []);
+
+  const handleSetupProfile = () => {
+    if (!verified) {
+      setLocation("/");
+      return;
+    }
+    if (verified.email) setUserEmail(verified.email);
+    if (verified.role === "candidate" && verified.candidateId) {
+      setCandidateProfileId(verified.candidateId);
+      setRole("candidate");
+      setLocation("/onboarding");
+    } else if (verified.role === "company" && verified.companyId) {
+      setCompanyProfileId(verified.companyId);
+      setRole("company");
+      setLocation("/");
+    } else {
+      setLocation("/");
+    }
+  };
+
+  const buttonLabel = verified?.role === "company" ? "Set up my Company" : "Set up my Profile";
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#f3f4f6" }}>
@@ -55,11 +89,11 @@ export default function VerifyEmail() {
             <h2 className="text-xl font-bold" style={{ color: "#1a2035" }}>Email Verified!</h2>
             <p className="text-sm" style={{ color: "#6b7280" }}>{message}</p>
             <button
-              onClick={() => setLocation("/")}
+              onClick={handleSetupProfile}
               className="w-full py-3 rounded-md text-sm font-semibold cursor-pointer hover:opacity-90 transition-all"
               style={{ backgroundColor: "#4CAF50", color: "#fff" }}
             >
-              Go to Login
+              {buttonLabel}
             </button>
           </div>
         )}

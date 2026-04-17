@@ -114,15 +114,19 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     return;
   }
 
+  let verifiedAccount: { id: number; role: "candidate" | "company"; email: string } | null = null;
+
   if (record.accountType === "candidate") {
     const [candidate] = await db
       .update(candidatesTable)
       .set({ verified: true })
       .where(eq(candidatesTable.email, record.email))
       .returning({
+        id: candidatesTable.id,
         name: candidatesTable.name,
         email: candidatesTable.email,
       });
+    verifiedAccount = { id: candidate.id, role: "candidate", email: candidate.email! };
 
     try {
       const { client, fromEmail } = await getResendClient();
@@ -201,9 +205,11 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       .set({ verified: true })
       .where(eq(companyProfiles.email, record.email))
       .returning({
+        id: companyProfiles.id,
         name: companyProfiles.name,
         email: companyProfiles.email,
       });
+    verifiedAccount = { id: company.id, role: "company", email: company.email! };
 
     try {
       const { client, fromEmail } = await getResendClient();
@@ -277,7 +283,14 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     .set({ usedAt: new Date() })
     .where(eq(emailVerificationsTable.id, record.id));
 
-  res.json({ success: true, message: "Email verified successfully. You can now log in." });
+  res.json({
+    success: true,
+    message: "Email verified successfully.",
+    role: verifiedAccount?.role,
+    candidateId: verifiedAccount?.role === "candidate" ? verifiedAccount.id : undefined,
+    companyId: verifiedAccount?.role === "company" ? verifiedAccount.id : undefined,
+    email: verifiedAccount?.email,
+  });
 });
 
 export { sendVerificationEmail };
