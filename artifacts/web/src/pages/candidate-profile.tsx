@@ -231,6 +231,24 @@ export default function CandidateProfile() {
   }
 
   const [experienceList, setExperienceList] = useState<ExperienceEntry[]>([]);
+  const [verifications, setVerifications] = useState<Array<{ id: number; roleTitle: string; company: string; status: string; verifierName?: string }>>([]);
+
+  useEffect(() => {
+    if (!candidateProfileId) return;
+    const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    fetch(`${apiBase}/candidates/${candidateProfileId}/verifications`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setVerifications(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [candidateProfileId]);
+
+  function findVerification(jobTitle?: string, company?: string) {
+    if (!jobTitle && !company) return null;
+    const norm = (s?: string) => (s || "").trim().toLowerCase();
+    return verifications.find(
+      v => v.status === "verified" && norm(v.roleTitle) === norm(jobTitle) && norm(v.company) === norm(company)
+    ) || null;
+  }
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
@@ -1412,26 +1430,48 @@ export default function CandidateProfile() {
                   {experienceList.length === 0 ? (
                     <p className="text-xs text-muted-foreground text-center py-4">No experience added yet.</p>
                   ) : (
-                    experienceList.map((entry, index) => (
-                      <div key={index} className={`relative pl-6 pb-5 ${index < experienceList.length - 1 ? "border-l-2 border-muted ml-1.5" : "ml-1.5"}`}>
-                        <div className="absolute left-[-5px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-card" />
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h4 className="font-medium text-sm text-foreground">{entry.jobTitle || "Untitled Role"}</h4>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <Briefcase className="w-3 h-3" /> {entry.company || "Unknown Company"}
-                            </p>
+                    experienceList.map((entry, index) => {
+                      const verified = findVerification(entry.jobTitle, entry.company);
+                      const isLast = index === experienceList.length - 1;
+                      return (
+                        <div
+                          key={index}
+                          className={`relative pl-6 pb-5 ${!isLast ? "border-l-2 ml-1.5" : "ml-1.5"} ${verified ? "bg-[#4CAF50]/5 rounded-r-md" : ""}`}
+                          style={!isLast ? { borderLeftColor: verified ? "#4CAF50" : undefined } : undefined}
+                        >
+                          <div
+                            className="absolute left-[-5px] top-1 w-3 h-3 rounded-full border-2 border-card"
+                            style={{ backgroundColor: verified ? "#4CAF50" : undefined }}
+                          />
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="font-medium text-sm text-foreground">{entry.jobTitle || "Untitled Role"}</h4>
+                                {verified && (
+                                  <span
+                                    className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                    style={{ backgroundColor: "rgba(76,175,80,0.15)", color: "#2e7d32" }}
+                                    title={`Verified by ${verified.verifierName ?? "verifier"}`}
+                                  >
+                                    <ShieldCheck className="w-3 h-3" /> Verified
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <Briefcase className="w-3 h-3" /> {entry.company || "Unknown Company"}
+                              </p>
+                            </div>
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0 mt-0.5">
+                              <Calendar className="w-3 h-3" />
+                              {entry.startDate || "?"} — {entry.current ? "Present" : entry.endDate || "?"}
+                            </span>
                           </div>
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0 mt-0.5">
-                            <Calendar className="w-3 h-3" />
-                            {entry.startDate || "?"} — {entry.current ? "Present" : entry.endDate || "?"}
-                          </span>
+                          {entry.description && (
+                            <p className="text-xs text-muted-foreground mt-2 leading-relaxed whitespace-pre-wrap">{entry.description}</p>
+                          )}
                         </div>
-                        {entry.description && (
-                          <p className="text-xs text-muted-foreground mt-2 leading-relaxed whitespace-pre-wrap">{entry.description}</p>
-                        )}
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               )}
