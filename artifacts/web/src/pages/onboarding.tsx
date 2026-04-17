@@ -13,6 +13,7 @@ import {
   ArrowRight, ArrowLeft, CheckCircle2, Briefcase, Target, ShieldCheck,
   Upload, FileText, X, Plus, Sparkles, AlertCircle, GraduationCap,
   MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe, Trash2, Briefcase as BriefcaseIcon,
+  Loader2,
 } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
@@ -170,6 +171,14 @@ export default function Onboarding() {
   const [twitterUrl, setTwitterUrl] = useState("");
   const [portfolioUrl, setPortfolioUrl] = useState("");
 
+  // CV parsing state
+  const [parsingCv, setParsingCv] = useState(false);
+  const [cvParseError, setCvParseError] = useState<string>("");
+  const [prefilledFields, setPrefilledFields] = useState<Set<string>>(new Set());
+  const [lowConfidenceFields, setLowConfidenceFields] = useState<Set<string>>(new Set());
+  const [prefillBannerDismissed, setPrefillBannerDismissed] = useState(false);
+  const [prefillCount, setPrefillCount] = useState(0);
+
   const formHydrated = useRef(false);
   useEffect(() => {
     if (!formHydrated.current && candidate) {
@@ -196,6 +205,64 @@ export default function Onboarding() {
     }
   }, [candidate]);
 
+  function applyCvParse(parsed: any) {
+    const prefilled = new Set<string>();
+    const isEmpty = (v: any) => v === undefined || v === null || (typeof v === "string" && v.trim() === "");
+    const mark = (field: string) => prefilled.add(field);
+
+    if (isEmpty(phone) && parsed.phone) { setPhone(parsed.phone); mark("phone"); }
+    if (isEmpty(location) && parsed.location) { setLocationField(parsed.location); mark("location"); }
+    if (isEmpty(currentTitle) && parsed.currentTitle) { setCurrentTitle(parsed.currentTitle); mark("currentTitle"); }
+    if (isEmpty(experienceYears) && parsed.experienceYears) { setExperienceYears(String(parsed.experienceYears)); mark("experienceYears"); }
+    if (isEmpty(summary) && parsed.summary) { setSummary(parsed.summary); mark("summary"); }
+    if (skills.length === 0 && Array.isArray(parsed.skills) && parsed.skills.length > 0) { setSkills(parsed.skills); mark("skills"); }
+    if (isEmpty(education) && parsed.education) { setEducation(parsed.education); mark("education"); }
+    if (isEmpty(educationDetails) && parsed.educationDetails) { setEducationDetails(parsed.educationDetails); mark("educationDetails"); }
+    if (qualifications.length === 0 && Array.isArray(parsed.qualifications) && parsed.qualifications.length > 0) { setQualifications(parsed.qualifications); mark("qualifications"); }
+    if (experienceList.length === 0 && Array.isArray(parsed.experience) && parsed.experience.length > 0) { setExperienceList(parsed.experience); mark("experience"); }
+    if (preferredJobTypes.length === 0 && Array.isArray(parsed.preferredJobTypes) && parsed.preferredJobTypes.length > 0) { setPreferredJobTypes(parsed.preferredJobTypes); mark("preferredJobTypes"); }
+    if (preferredWorkplaces.length === 0 && Array.isArray(parsed.preferredWorkplaces) && parsed.preferredWorkplaces.length > 0) { setPreferredWorkplaces(parsed.preferredWorkplaces); mark("preferredWorkplaces"); }
+    if (preferredIndustries.length === 0 && Array.isArray(parsed.preferredIndustries) && parsed.preferredIndustries.length > 0) { setPreferredIndustries(parsed.preferredIndustries); mark("preferredIndustries"); }
+    if (isEmpty(linkedinUrl) && parsed.linkedinUrl) { setLinkedinUrl(parsed.linkedinUrl); mark("linkedinUrl"); }
+    if (isEmpty(facebookUrl) && parsed.facebookUrl) { setFacebookUrl(parsed.facebookUrl); mark("facebookUrl"); }
+    if (isEmpty(twitterUrl) && parsed.twitterUrl) { setTwitterUrl(parsed.twitterUrl); mark("twitterUrl"); }
+    if (isEmpty(portfolioUrl) && parsed.portfolioUrl) { setPortfolioUrl(parsed.portfolioUrl); mark("portfolioUrl"); }
+
+    setPrefilledFields(prefilled);
+    setLowConfidenceFields(new Set((parsed.lowConfidenceFields || []) as string[]));
+    setPrefillCount(prefilled.size);
+    setPrefillBannerDismissed(false);
+    return prefilled.size;
+  }
+
+  async function parseCv(candidateId: number) {
+    setParsingCv(true);
+    setCvParseError("");
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateId}/parse-cv`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = (data as any)?.error || "Couldn't read your CV. You can fill in the details manually.";
+        setCvParseError(msg);
+        toast({ title: "CV parsing failed", description: msg, variant: "destructive" });
+        return;
+      }
+      const parsed = await res.json();
+      const count = applyCvParse(parsed);
+      if (count > 0) {
+        toast({ title: "CV processed", description: `We pre-filled ${count} field${count === 1 ? "" : "s"} — please review them.` });
+      } else {
+        toast({ title: "CV processed", description: "Looks like your profile is already filled in. Carry on!" });
+      }
+    } catch (err) {
+      console.error("parse-cv failed", err);
+      setCvParseError("We couldn't read your CV right now. You can still fill in the details manually.");
+      toast({ title: "CV parsing failed", description: "Please continue filling in the details manually.", variant: "destructive" });
+    } finally {
+      setParsingCv(false);
+    }
+  }
+
   const cvFileNameRef = useRef("");
   const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
     basePath: storageBase,
@@ -208,8 +275,10 @@ export default function Onboarding() {
         body: JSON.stringify({ cvFile: response.objectPath, cvFileName: savedName }),
       });
       queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
-      toast({ title: "CV uploaded", description: "Your CV has been saved." });
+      toast({ title: "CV uploaded", description: "Reading your CV with AI…" });
       cvFileNameRef.current = "";
+      // Kick off CV parsing in the background
+      parseCv(candidateProfileId);
     },
     onError: () => toast({ title: "Upload failed", description: "Could not upload CV.", variant: "destructive" }),
   });
@@ -389,6 +458,27 @@ export default function Onboarding() {
     else setArr([...arr, v]);
   }
 
+  // Field-level badge — small "AI" pill, plus "Verify" if low confidence
+  function FieldBadge({ field }: { field: string }) {
+    if (!prefilledFields.has(field)) return null;
+    const lowConf = lowConfidenceFields.has(field);
+    return (
+      <span className="inline-flex items-center gap-1 ml-2 align-middle">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(76,175,80,0.12)", color: "#2e7d32" }}>
+          <Sparkles className="w-2.5 h-2.5" /> AI
+        </span>
+        {lowConf && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+            <AlertCircle className="w-2.5 h-2.5" /> Verify
+          </span>
+        )}
+      </span>
+    );
+  }
+
+  // Banner shown on steps 3-8 after CV parse
+  const showPrefillBanner = prefillCount > 0 && !prefillBannerDismissed && step >= 3 && step <= 8;
+
   const firstName = (candidate?.name || "").split(" ")[0] || "there";
   const progressPct = useMemo(() => Math.round(((step - 1) / TOTAL_STEPS) * 100), [step]);
 
@@ -411,6 +501,28 @@ export default function Onboarding() {
         </div>
 
         <div className="p-6 sm:p-8">
+          {showPrefillBanner && (
+            <div className="mb-5 flex items-start gap-3 p-3 rounded-lg border" style={{ backgroundColor: "rgba(76,175,80,0.08)", borderColor: "rgba(76,175,80,0.3)" }}>
+              <Sparkles className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
+              <div className="flex-1 text-sm">
+                <p className="font-semibold" style={{ color: "#1a2035" }}>
+                  We pre-filled {prefillCount} field{prefillCount === 1 ? "" : "s"} from your CV
+                </p>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Please review them as you go — fields marked <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700"><AlertCircle className="w-2.5 h-2.5" />Verify</span> need a closer look.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPrefillBannerDismissed(true)}
+                className="text-slate-400 hover:text-slate-700 p-1"
+                aria-label="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {step === 1 && (
             <div className="text-center">
               <div className="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76,175,80,0.12)" }}>
@@ -492,6 +604,43 @@ export default function Onboarding() {
                 </label>
               )}
               {isCvUploading && <p className="text-xs text-slate-500">Uploading…</p>}
+
+              {parsingCv && (
+                <div className="flex items-center gap-2 p-3 rounded-lg border" style={{ backgroundColor: "rgba(76,175,80,0.08)", borderColor: "rgba(76,175,80,0.3)" }}>
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#4CAF50" }} />
+                  <div className="text-sm">
+                    <p className="font-semibold" style={{ color: "#1a2035" }}>Reading your CV…</p>
+                    <p className="text-xs text-slate-600">This usually takes 5–15 seconds. We'll pre-fill the next steps for you.</p>
+                  </div>
+                </div>
+              )}
+
+              {!parsingCv && prefillCount > 0 && (
+                <div className="flex items-start gap-2 p-3 rounded-lg border" style={{ backgroundColor: "rgba(76,175,80,0.08)", borderColor: "rgba(76,175,80,0.3)" }}>
+                  <Sparkles className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
+                  <p className="text-sm" style={{ color: "#1a2035" }}>
+                    <span className="font-semibold">Done!</span> We pre-filled {prefillCount} field{prefillCount === 1 ? "" : "s"} from your CV. Hit Continue to review them.
+                  </p>
+                </div>
+              )}
+
+              {!parsingCv && cvParseError && (
+                <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-200 bg-amber-50">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-amber-600" />
+                  <p className="text-sm text-amber-900">{cvParseError}</p>
+                </div>
+              )}
+
+              {candidate?.cvFile && !parsingCv && prefillCount === 0 && !cvParseError && (
+                <button
+                  type="button"
+                  onClick={() => candidateProfileId && parseCv(candidateProfileId)}
+                  className="text-xs font-semibold inline-flex items-center gap-1 hover:underline"
+                  style={{ color: "#4CAF50" }}
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Read my CV with AI to pre-fill the next steps
+                </button>
+              )}
             </div>
           )}
 
@@ -501,11 +650,11 @@ export default function Onboarding() {
               <p className="text-sm text-slate-600 mb-5">These help us match you on location and seniority.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Current job title</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Current job title<FieldBadge field="currentTitle" /></label>
                   <Input value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Location</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Location<FieldBadge field="location" /></label>
                   <Input
                     value={location}
                     onChange={(e) => setLocationField(e.target.value)}
@@ -518,11 +667,11 @@ export default function Onboarding() {
                   </datalist>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
                   <Input type="number" min="0" max="60" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 5" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Phone (optional)</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Phone (optional)<FieldBadge field="phone" /></label>
                   <div className="flex gap-2">
                     <Select
                       value={phone.match(/^\+\d+/)?.[0] || "+44"}
@@ -550,7 +699,7 @@ export default function Onboarding() {
                   </div>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Professional Summary</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Professional Summary<FieldBadge field="summary" /></label>
                   <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Enter your professional summary here" className="h-24" />
                 </div>
               </div>
@@ -559,7 +708,7 @@ export default function Onboarding() {
 
           {step === 4 && (
             <div>
-              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Your skills</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Your skills<FieldBadge field="skills" /></h1>
               <p className="text-sm text-slate-600 mb-4">Skills make up 35% of your match score — the biggest factor.</p>
 
               {skills.length > 0 && (
@@ -607,7 +756,7 @@ export default function Onboarding() {
               <p className="text-sm text-slate-600 mb-5">Your highest qualification helps with role-specific matching.</p>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Education</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Education<FieldBadge field="education" /></label>
                   <Select value={education} onValueChange={setEducation}>
                     <SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger>
                     <SelectContent>
@@ -624,11 +773,11 @@ export default function Onboarding() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Details (institution, course, year)</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Details (institution, course, year)<FieldBadge field="educationDetails" /></label>
                   <Textarea value={educationDetails} onChange={(e) => setEducationDetails(e.target.value)} placeholder="e.g. BSc Computer Science, University College London, 2018" className="h-20" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Qualifications</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Qualifications<FieldBadge field="qualifications" /></label>
                   {qualifications.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {qualifications.map((qual, i) => (
@@ -683,7 +832,7 @@ export default function Onboarding() {
 
           {step === 6 && (
             <div>
-              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Work experience</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Work experience<FieldBadge field="experience" /></h1>
               <p className="text-sm text-slate-600 mb-5">Add your previous roles. The more you share, the better we can match you. This step is optional — you can always add more later.</p>
 
               <div className="space-y-3">
@@ -862,19 +1011,19 @@ export default function Onboarding() {
               <p className="text-sm text-slate-600 mb-5">Adding links helps companies learn more about you. All optional.</p>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn<FieldBadge field="linkedinUrl" /></label>
                   <Input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Facebook className="w-3.5 h-3.5" /> Facebook</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Facebook className="w-3.5 h-3.5" /> Facebook<FieldBadge field="facebookUrl" /></label>
                   <Input value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/yourprofile" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Twitter className="w-3.5 h-3.5" /> X (Twitter)</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Twitter className="w-3.5 h-3.5" /> X (Twitter)<FieldBadge field="twitterUrl" /></label>
                   <Input value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/yourhandle" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Portfolio / Website</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Portfolio / Website<FieldBadge field="portfolioUrl" /></label>
                   <Input value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} placeholder="https://yourwebsite.com" />
                 </div>
               </div>

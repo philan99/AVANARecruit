@@ -17,6 +17,7 @@ import jobAlertsRouter from "./jobAlerts";
 import candidateAlertsRouter from "./candidateAlerts";
 import devTasksRouter from "./devTasks";
 import authRouter from "./auth";
+import parseCvRouter from "./parseCv";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(chatRouter);
 router.use(jobAlertsRouter);
 router.use(candidateAlertsRouter);
 router.use(devTasksRouter);
+router.use(parseCvRouter);
 
 export default router;
