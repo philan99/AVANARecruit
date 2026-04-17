@@ -231,24 +231,6 @@ export default function CandidateProfile() {
   }
 
   const [experienceList, setExperienceList] = useState<ExperienceEntry[]>([]);
-  const [verifications, setVerifications] = useState<Array<{ id: number; roleTitle: string; company: string; status: string; verifierName?: string }>>([]);
-
-  useEffect(() => {
-    if (!candidateProfileId) return;
-    const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
-    fetch(`${apiBase}/candidates/${candidateProfileId}/verifications`)
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setVerifications(Array.isArray(data) ? data : []))
-      .catch(() => {});
-  }, [candidateProfileId]);
-
-  function findVerification(jobTitle?: string, company?: string) {
-    if (!jobTitle && !company) return null;
-    const norm = (s?: string) => (s || "").trim().toLowerCase();
-    return verifications.find(
-      v => v.status === "verified" && norm(v.roleTitle) === norm(jobTitle) && norm(v.company) === norm(company)
-    ) || null;
-  }
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
@@ -1431,7 +1413,10 @@ export default function CandidateProfile() {
                     <p className="text-xs text-muted-foreground text-center py-4">No experience added yet.</p>
                   ) : (
                     experienceList.map((entry, index) => {
-                      const verified = findVerification(entry.jobTitle, entry.company);
+                      const norm = (s?: string) => (s || "").trim().toLowerCase();
+                      const verified = verifications.find(
+                        v => v.status === "verified" && norm(v.roleTitle) === norm(entry.jobTitle) && norm(v.company) === norm(entry.company)
+                      ) || null;
                       const isLast = index === experienceList.length - 1;
                       return (
                         <div
