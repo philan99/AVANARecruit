@@ -23,10 +23,21 @@ export default function RoleSelect() {
   const { toast } = useToast();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const hash = window.location.hash;
     const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
     if (window.location.pathname !== baseUrl && window.location.pathname !== `${baseUrl}/`) {
       window.history.replaceState(null, "", baseUrl);
+    }
+    if (hash === "#login") {
+      setShowLogin(true);
+      window.history.replaceState(null, "", baseUrl);
+    } else if (hash === "#signup") {
+      setShowSignup(true);
+      window.history.replaceState(null, "", baseUrl);
+    } else if (hash === "#pricing") {
+      setTimeout(() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }), 50);
+    } else {
+      window.scrollTo(0, 0);
     }
   }, []);
   const [email, setEmail] = useState("");

@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
 import {
-  ArrowLeft,
   Building2,
   UserCircle,
   Upload,
@@ -160,10 +159,21 @@ export default function HowItWorks() {
               Contact Us
             </Link>
           </div>
-          <Link href="/" className="flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+          <div className="flex items-center gap-2">
+            <a
+              href="/#login"
+              className="px-5 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors cursor-pointer"
+            >
+              Sign In
+            </a>
+            <a
+              href="/#signup"
+              className="px-5 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer"
+              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+            >
+              Get Started
+            </a>
+          </div>
         </div>
       </nav>
 
