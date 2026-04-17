@@ -114,7 +114,7 @@ export default function RoleSelect() {
           email: cEmail.trim(),
           password: cPass,
           currentTitle: "Not specified",
-          summary: "No summary provided",
+          summary: "",
           skills: [],
           experienceYears: 0,
           education: "Not specified",

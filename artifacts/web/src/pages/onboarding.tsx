@@ -143,7 +143,7 @@ export default function Onboarding() {
       setLocationField(stripPlaceholder(candidate.location));
       setCurrentTitle(stripPlaceholder(candidate.currentTitle));
       setExperienceYears(candidate.experienceYears ? String(candidate.experienceYears) : "");
-      setSummary(candidate.summary || "");
+      setSummary(candidate.summary && candidate.summary !== "No summary provided" ? candidate.summary : "");
       setSkills(candidate.skills || []);
       setEducation(stripPlaceholder(candidate.education));
       setEducationDetails(candidate.educationDetails || "");
@@ -448,7 +448,7 @@ export default function Onboarding() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Professional Summary</label>
-                  <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="A few sentences about your experience and what you're looking for..." className="h-24" />
+                  <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Enter your professional summary here" className="h-24" />
                 </div>
               </div>
             </div>
