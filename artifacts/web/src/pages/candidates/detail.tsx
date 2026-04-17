@@ -103,6 +103,23 @@ export default function CandidateDetail({ params }: { params: { id: string } }) 
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [verifications, setVerifications] = useState<Array<{ id: number; roleTitle: string; company: string; status: string }>>([]);
+
+  useEffect(() => {
+    if (!candidateId) return;
+    const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+    fetch(`${basePath}/candidates/${candidateId}/verifications`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setVerifications(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [candidateId]);
+
+  const verifiedRoles = verifications.filter(v => v.status === "verified");
+  function findVerification(jobTitle?: string, company?: string) {
+    if (!jobTitle && !company) return null;
+    const norm = (s?: string) => (s || "").trim().toLowerCase();
+    return verifiedRoles.find(v => norm(v.roleTitle) === norm(jobTitle) && norm(v.company) === norm(company)) || null;
+  }
 
   useEffect(() => {
     if (!isCompany || !companyProfileIdStr) return;
@@ -340,18 +357,40 @@ ${companyName}`
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {c.experience.map((exp: any, i: number) => (
-                    <div key={i} className="border-l-2 border-primary/30 pl-4">
-                      <p className="text-sm font-medium text-foreground">{exp.jobTitle}</p>
-                      <p className="text-xs text-muted-foreground">{exp.company}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {exp.startDate} – {exp.current ? "Present" : exp.endDate}
-                      </p>
-                      {exp.description && (
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{exp.description}</p>
-                      )}
-                    </div>
-                  ))}
+                  {c.experience.map((exp: any, i: number) => {
+                    const verified = findVerification(exp.jobTitle, exp.company);
+                    return (
+                      <div
+                        key={i}
+                        className={`pl-4 rounded-r-md py-2 -my-1 transition-colors ${
+                          verified
+                            ? "border-l-4 bg-[#4CAF50]/5"
+                            : "border-l-2 border-primary/30"
+                        }`}
+                        style={verified ? { borderLeftColor: "#4CAF50" } : undefined}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground">{exp.jobTitle}</p>
+                          {verified && (
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
+                              style={{ backgroundColor: "rgba(76,175,80,0.15)", color: "#2e7d32" }}
+                              title={`Verified by ${verified.verifierName ?? "verifier"}`}
+                            >
+                              <ShieldCheck className="w-3 h-3" /> Verified
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{exp.company}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {exp.startDate} – {exp.current ? "Present" : exp.endDate}
+                        </p>
+                        {exp.description && (
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{exp.description}</p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
