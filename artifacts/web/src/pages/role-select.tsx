@@ -115,7 +115,7 @@ export default function RoleSelect() {
           password: cPass,
           currentTitle: "Not specified",
           summary: "No summary provided",
-          skills: ["General"],
+          skills: [],
           experienceYears: 0,
           education: "Not specified",
           location: "Not specified",
