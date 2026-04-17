@@ -76,7 +76,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-8">
+        <div className="flex items-center justify-between h-14 px-6">
           <Link href="/" className="flex items-center cursor-pointer">
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
@@ -131,7 +131,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-sidebar-border max-w-7xl mx-auto px-8 py-3 space-y-1">
+          <div className="md:hidden border-t border-sidebar-border px-4 py-3 space-y-1">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -185,7 +185,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       <footer className="border-t border-sidebar-border bg-sidebar">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 px-8 py-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2 px-6 py-4">
           <img src={logoUrl} alt="AVANA Recruit" className="h-5" />
           <div className="flex items-center gap-3">
             <Link href="/terms" className="text-[11px] text-sidebar-foreground/30 hover:text-sidebar-foreground/50 transition-colors">
