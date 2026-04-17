@@ -1083,17 +1083,17 @@ export default function Onboarding() {
 
         <div className="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
           {step > 1 ? (
-            <button onClick={handleBack} disabled={saving} className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
+            <button onClick={handleBack} disabled={saving || parsingCv} className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
           ) : <div />}
 
           <div className="flex items-center gap-3">
             {step < TOTAL_STEPS && step > 1 && (
-              <button onClick={handleSkip} disabled={saving} className="text-sm text-slate-500 hover:text-slate-700">Skip</button>
+              <button onClick={handleSkip} disabled={saving || parsingCv} className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">Skip</button>
             )}
             {step === 1 && (
-              <button onClick={handleSkip} disabled={saving} className="text-sm text-slate-500 hover:text-slate-700">Skip for now</button>
+              <button onClick={handleSkip} disabled={saving || parsingCv} className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">Skip for now</button>
             )}
             {step < TOTAL_STEPS ? (
               <Button onClick={handleNext} disabled={saving || parsingCv} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
