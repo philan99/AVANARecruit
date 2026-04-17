@@ -1035,7 +1035,7 @@ export default function CandidateProfile() {
                     <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Me
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="max-w-md w-[calc(100vw-2rem)] overflow-hidden">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-primary" />
@@ -1047,7 +1047,7 @@ export default function CandidateProfile() {
                       Send a verification request to a previous employer or colleague to confirm your employment history.
                     </p>
                     <div className="space-y-3">
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <label className="text-xs font-medium text-muted-foreground">Role / Job Title *</label>
                         {experienceList.length > 0 ? (
                           <Select
