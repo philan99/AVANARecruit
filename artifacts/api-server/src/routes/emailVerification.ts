@@ -122,8 +122,6 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       .returning({
         name: candidatesTable.name,
         email: candidatesTable.email,
-        location: candidatesTable.location,
-        currentTitle: candidatesTable.currentTitle,
       });
 
     try {
@@ -143,14 +141,6 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
              <tr>
                <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Email:</strong></td>
                <td style="padding: 8px 0; font-size: 14px;">${candidate.email || "Not provided"}</td>
-             </tr>
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Location:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${candidate.location || "Not provided"}</td>
-             </tr>
-             <tr>
-               <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;"><strong>Current Title:</strong></td>
-               <td style="padding: 8px 0; font-size: 14px;">${candidate.currentTitle || "Not provided"}</td>
              </tr>
            </table>`
         ),
