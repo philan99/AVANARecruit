@@ -76,12 +76,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
-        <div className="flex items-center justify-between h-14 px-6">
-          <Link href="/" className="flex items-center cursor-pointer">
+        <div className="relative flex items-center justify-between h-14 px-6">
+          <Link href="/" className="flex items-center cursor-pointer relative z-10">
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-2 lg:gap-3">
+          <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl px-8 items-center justify-between pointer-events-none">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -89,7 +89,7 @@ export function Layout({ children }: LayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-3.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                    "flex items-center px-3.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap pointer-events-auto",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-primary"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
