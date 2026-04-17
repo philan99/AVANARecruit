@@ -117,6 +117,21 @@ const PHONE_CODES = [
   { code: "+52", flag: "🇲🇽" },
 ];
 
+function normalizeUrl(url: string): string | null {
+  const trimmed = (url || "").trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
+function safeHref(url: string | null | undefined): string {
+  if (!url) return "#";
+  const trimmed = url.trim();
+  if (!trimmed) return "#";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
 export default function CandidateProfile() {
   const { candidateProfileId } = useRole();
   const [isEditing, setIsEditing] = useState(false);
@@ -408,10 +423,10 @@ export default function CandidateProfile() {
       educationDetails: editForm.educationDetails || null,
       location: editForm.location,
       experience: experienceList,
-      linkedinUrl: editForm.linkedinUrl || null,
-      facebookUrl: editForm.facebookUrl || null,
-      twitterUrl: editForm.twitterUrl || null,
-      portfolioUrl: editForm.portfolioUrl || null,
+      linkedinUrl: normalizeUrl(editForm.linkedinUrl),
+      facebookUrl: normalizeUrl(editForm.facebookUrl),
+      twitterUrl: normalizeUrl(editForm.twitterUrl),
+      portfolioUrl: normalizeUrl(editForm.portfolioUrl),
     };
 
     try {
@@ -921,28 +936,28 @@ export default function CandidateProfile() {
                   ) : (
                     <>
                       {(candidate as any)?.linkedinUrl && (
-                        <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                        <a href={safeHref((candidate as any).linkedinUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
                           <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
                           <span className="text-sm text-foreground truncate flex-1">{(candidate as any).linkedinUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
                           <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </a>
                       )}
                       {(candidate as any)?.facebookUrl && (
-                        <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                        <a href={safeHref((candidate as any).facebookUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
                           <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
                           <span className="text-sm text-foreground truncate flex-1">{(candidate as any).facebookUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
                           <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </a>
                       )}
                       {(candidate as any)?.twitterUrl && (
-                        <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                        <a href={safeHref((candidate as any).twitterUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
                           <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
                           <span className="text-sm text-foreground truncate flex-1">{(candidate as any).twitterUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
                           <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </a>
                       )}
                       {(candidate as any)?.portfolioUrl && (
-                        <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                        <a href={safeHref((candidate as any).portfolioUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
                           <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
                           <span className="text-sm text-foreground truncate flex-1">{(candidate as any).portfolioUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
                           <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -35,6 +35,13 @@ type OnboardingState = {
 };
 
 const TOTAL_STEPS = 9;
+
+function normalizeUrl(url: string): string | null {
+  const trimmed = (url || "").trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
 const STEP_TITLES = [
   "Welcome",
   "Upload your CV",
@@ -350,10 +357,10 @@ export default function Onboarding() {
         break;
       case 8:
         ok = await patchCandidate({
-          linkedinUrl: linkedinUrl || null,
-          facebookUrl: facebookUrl || null,
-          twitterUrl: twitterUrl || null,
-          portfolioUrl: portfolioUrl || null,
+          linkedinUrl: normalizeUrl(linkedinUrl),
+          facebookUrl: normalizeUrl(facebookUrl),
+          twitterUrl: normalizeUrl(twitterUrl),
+          portfolioUrl: normalizeUrl(portfolioUrl),
         });
         break;
     }

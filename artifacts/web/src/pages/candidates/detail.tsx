@@ -458,7 +458,7 @@ ${companyName}`
               </CardHeader>
               <CardContent className="space-y-2">
                 {c.linkedinUrl && (
-                  <a href={c.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref(c.linkedinUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">LinkedIn</p>
@@ -467,7 +467,7 @@ ${companyName}`
                   </a>
                 )}
                 {c.facebookUrl && (
-                  <a href={c.facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref(c.facebookUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Facebook</p>
@@ -476,7 +476,7 @@ ${companyName}`
                   </a>
                 )}
                 {c.twitterUrl && (
-                  <a href={c.twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref(c.twitterUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">X / Twitter</p>
@@ -485,7 +485,7 @@ ${companyName}`
                   </a>
                 )}
                 {c.portfolioUrl && (
-                  <a href={c.portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref(c.portfolioUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Portfolio / Website</p>

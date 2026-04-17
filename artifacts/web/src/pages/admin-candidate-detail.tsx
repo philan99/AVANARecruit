@@ -120,6 +120,14 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
   );
 }
 
+function safeHref(url: string | null | undefined): string {
+  if (!url) return "#";
+  const trimmed = url.trim();
+  if (!trimmed) return "#";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
 export default function AdminCandidateDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -353,7 +361,7 @@ export default function AdminCandidateDetail() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {(candidate as any).linkedinUrl && (
-                  <a href={(candidate as any).linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref((candidate as any).linkedinUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-blue-500/10"><Linkedin className="w-3.5 h-3.5 text-blue-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">LinkedIn</p>
@@ -362,7 +370,7 @@ export default function AdminCandidateDetail() {
                   </a>
                 )}
                 {(candidate as any).facebookUrl && (
-                  <a href={(candidate as any).facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref((candidate as any).facebookUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-blue-600/10"><Facebook className="w-3.5 h-3.5 text-blue-600" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Facebook</p>
@@ -371,7 +379,7 @@ export default function AdminCandidateDetail() {
                   </a>
                 )}
                 {(candidate as any).twitterUrl && (
-                  <a href={(candidate as any).twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref((candidate as any).twitterUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-sky-500/10"><Twitter className="w-3.5 h-3.5 text-sky-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">X / Twitter</p>
@@ -380,7 +388,7 @@ export default function AdminCandidateDetail() {
                   </a>
                 )}
                 {(candidate as any).portfolioUrl && (
-                  <a href={(candidate as any).portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
+                  <a href={safeHref((candidate as any).portfolioUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/30 transition-colors">
                     <div className="p-1.5 rounded-md bg-green-500/10"><Globe className="w-3.5 h-3.5 text-green-500" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Portfolio / Website</p>
