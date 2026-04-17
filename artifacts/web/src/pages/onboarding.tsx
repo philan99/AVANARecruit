@@ -40,7 +40,13 @@ const POPULAR_SKILLS = [
   "Project Management", "Agile", "Scrum", "Communication", "Leadership",
 ];
 
-const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Temporary", "Internship"];
+const JOB_TYPES: { value: string; label: string }[] = [
+  { value: "permanent_full_time", label: "Permanent (Full Time)" },
+  { value: "contract", label: "Contract" },
+  { value: "fixed_term_contract", label: "Fixed Term Contract" },
+  { value: "part_time", label: "Part-time" },
+  { value: "temporary", label: "Temporary" },
+];
 const WORKPLACES = ["Remote", "Hybrid", "On-site"];
 const INDUSTRIES = ["Technology", "Finance", "Healthcare", "Education", "Retail", "Manufacturing", "Media", "Consulting"];
 
@@ -492,10 +498,10 @@ export default function Onboarding() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Job type</p>
                   <div className="flex flex-wrap gap-2">
                     {JOB_TYPES.map((t) => {
-                      const active = preferredJobTypes.includes(t);
+                      const active = preferredJobTypes.includes(t.value);
                       return (
-                        <button key={t} onClick={() => toggleArr(preferredJobTypes, setPreferredJobTypes, t)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
-                          {t}
+                        <button key={t.value} onClick={() => toggleArr(preferredJobTypes, setPreferredJobTypes, t.value)} className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${active ? "text-white border-transparent" : "bg-white text-slate-700 border-slate-300 hover:border-[#4CAF50]"}`} style={active ? { backgroundColor: "#4CAF50" } : {}}>
+                          {t.label}
                         </button>
                       );
                     })}
