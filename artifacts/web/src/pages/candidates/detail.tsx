@@ -334,7 +334,7 @@ ${companyName}`
                     style={{ backgroundColor: "#4CAF50" }}
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    View Verifications
+                    View All Verifications
                   </Button>
                 </Link>
               </CardHeader>
