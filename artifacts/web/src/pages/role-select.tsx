@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Building2, UserCircle, LogIn, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
+import { MarketingNav } from "@/components/marketing-nav";
 import { Input } from "@/components/ui/input";
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useToast } from "@/hooks/use-toast";
