@@ -76,12 +76,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <header className="border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
-        <div className="flex items-center justify-between h-14 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-8">
           <Link href="/" className="flex items-center cursor-pointer">
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-2 lg:gap-3">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -89,7 +89,7 @@ export function Layout({ children }: LayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                    "flex items-center px-3.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-primary"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
@@ -131,7 +131,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-sidebar-border px-4 py-3 space-y-1">
+          <div className="md:hidden border-t border-sidebar-border max-w-7xl mx-auto px-8 py-3 space-y-1">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -185,7 +185,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       <footer className="border-t border-sidebar-border bg-sidebar">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-2 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 px-8 py-4">
           <img src={logoUrl} alt="AVANA Recruit" className="h-5" />
           <div className="flex items-center gap-3">
             <Link href="/terms" className="text-[11px] text-sidebar-foreground/30 hover:text-sidebar-foreground/50 transition-colors">
