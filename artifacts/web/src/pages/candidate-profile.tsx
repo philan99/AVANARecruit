@@ -343,11 +343,13 @@ export default function CandidateProfile() {
 
   function startEditing() {
     if (candidate) {
+      const stripPlaceholder = (v?: string | null) =>
+        v && v !== "Not specified" && v !== "Not provided" ? v : "";
       setEditForm({
         name: candidate.name,
         email: candidate.email,
         phone: candidate.phone || "",
-        currentTitle: candidate.currentTitle,
+        currentTitle: stripPlaceholder(candidate.currentTitle),
         summary: candidate.summary,
         skills: candidate.skills.join(", "),
         qualifications: ((candidate as any).qualifications || []).join(", "),
@@ -355,9 +357,9 @@ export default function CandidateProfile() {
         preferredWorkplaces: (candidate as any).preferredWorkplaces || [],
         preferredIndustries: (candidate as any).preferredIndustries || [],
         experienceYears: candidate.experienceYears,
-        education: candidate.education,
+        education: stripPlaceholder(candidate.education),
         educationDetails: (candidate as any).educationDetails || "",
-        location: candidate.location,
+        location: stripPlaceholder(candidate.location),
         linkedinUrl: (candidate as any).linkedinUrl || "",
         facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
