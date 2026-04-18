@@ -8,6 +8,7 @@ import {
 } from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
 import { useRole } from "@/contexts/role-context";
+import { CITY_SUGGESTIONS } from "@/lib/cities";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -300,7 +301,16 @@ export default function CompanyProfile() {
                   <FormField control={form.control} name="location" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location</FormLabel>
-                      <FormControl><Input placeholder="San Francisco, CA" {...field} /></FormControl>
+                      <FormControl>
+                        <Input
+                          placeholder="Start typing a city..."
+                          list="company-city-suggestions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <datalist id="company-city-suggestions">
+                        {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
+                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )} />
