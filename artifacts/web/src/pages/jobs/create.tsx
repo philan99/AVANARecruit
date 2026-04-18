@@ -147,7 +147,7 @@ export default function CreateJob() {
       skills: [],
       experienceLevel: undefined,
       workplace: undefined,
-      status: undefined,
+      status: "open",
     },
   });
 
@@ -188,7 +188,7 @@ export default function CreateJob() {
         salaryMax: data.salaryMax ?? current.salaryMax,
         skills: Array.isArray(data.skills) && data.skills.length ? data.skills : current.skills,
         description: data.description || current.description,
-        status: current.status || "draft",
+        status: current.status || "open",
       });
       toast({ title: "Draft ready", description: "Review the fields and tweak anything you'd like before posting." });
     } catch (err) {
@@ -479,8 +479,8 @@ export default function CreateJob() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value="open">Open — visible to candidates</SelectItem>
-                          <SelectItem value="draft">Draft — not visible</SelectItem>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
                           <SelectItem value="closed">Closed</SelectItem>
                         </SelectContent>
                       </Select>
