@@ -72,6 +72,9 @@ export function Layout({ children }: LayoutProps) {
     { href: "/companies", label: "Companies", icon: Building2 },
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/candidates", label: "Candidates", icon: Users },
+  ];
+
+  const adminPortalMenuItems = [
     { href: "/settings", label: "Settings", icon: Settings },
     { href: "/development", label: "Development", icon: Code2 },
   ];
@@ -90,6 +93,8 @@ export function Layout({ children }: LayoutProps) {
     role === "company" || role === "candidate"
       ? { href: "/contact-us", label: "Get Support", icon: Mail }
       : null;
+
+  const portalMenuExtras = role === "admin" ? adminPortalMenuItems : [];
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
@@ -148,7 +153,7 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </div>
                 </DropdownMenuLabel>
-                {(profileItem || supportItem) && <DropdownMenuSeparator />}
+                {(profileItem || supportItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
                 {profileItem && (
                   <DropdownMenuItem asChild>
                     <Link href={profileItem.href} className="flex items-center cursor-pointer">
@@ -165,6 +170,14 @@ export function Layout({ children }: LayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                 )}
+                {portalMenuExtras.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild>
+                    <Link href={item.href} className="flex items-center cursor-pointer">
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowSignOutDialog(true)}
@@ -234,6 +247,17 @@ export function Layout({ children }: LayoutProps) {
                   {supportItem.label}
                 </Link>
               )}
+              {portalMenuExtras.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <item.icon className="w-4 h-4 mr-3" />
+                  {item.label}
+                </Link>
+              ))}
               <button
                 onClick={() => { setMobileMenuOpen(false); setShowSignOutDialog(true); }}
                 className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
