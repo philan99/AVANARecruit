@@ -4,10 +4,11 @@ import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { MarketingNav } from "@/components/marketing-nav";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 
 export default function ContactUs() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
   const initialType = params.get("type");
@@ -54,6 +55,8 @@ export default function ContactUs() {
       toast({ title: "Message sent!", description: "We'll get back to you as soon as possible." });
       setForm({ name: "", email: "", subject: "", message: "", company: "" });
       setContactType(null);
+      setLocation("/");
+      window.scrollTo({ top: 0 });
     } catch {
       toast({ title: "Failed to send message", variant: "destructive" });
     } finally {
