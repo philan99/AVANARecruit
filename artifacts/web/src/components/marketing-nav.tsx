@@ -19,6 +19,9 @@ export function MarketingNav({ active = null, onSignIn, onGetStarted, onPricing 
 
   const handleLogoClick = (e: MouseEvent) => {
     e.preventDefault();
+    if (window.location.hash) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
     if (location === "/") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
