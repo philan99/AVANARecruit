@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send, Loader2, Plus } from "lucide-react";
+import { Network, Check, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, ArrowLeft, ArrowRight, Send, Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -409,63 +409,69 @@ ${companyName}`
                               </p>
                             </TableCell>
                             <TableCell className="text-right">
-                              {match.status === 'pending' && (
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "rejected")}
-                                    disabled={updateStatus.isPending}
-                                    title="Reject Candidate"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
-                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "shortlisted")}
-                                    disabled={updateStatus.isPending}
-                                    title="Shortlist Candidate"
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              )}
-                              {match.status === 'shortlisted' && (
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
-                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "pending")}
-                                    disabled={updateStatus.isPending}
-                                    title="Back to Pending"
-                                  >
-                                    <RotateCcw className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
-                                    onClick={() => openContactDialog(match, group.jobTitle)}
-                                    title="Contact Candidate"
-                                  >
-                                    <Send className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="default"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full"
-                                    onClick={() => handleUpdateStatus(match.id, group.jobId, "hired")}
-                                    disabled={updateStatus.isPending}
-                                    title="Mark as Hired"
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              )}
+                              {(() => {
+                                const PIPELINE_ORDER = ["pending", "shortlisted", "screened", "interviewed", "offered", "hired"] as const;
+                                type PipelineStatus = typeof PIPELINE_ORDER[number];
+                                const PIPELINE_LABEL: Record<PipelineStatus, string> = {
+                                  pending: "Applied",
+                                  shortlisted: "Shortlisted",
+                                  screened: "Screened",
+                                  interviewed: "Interviewed",
+                                  offered: "Offered",
+                                  hired: "Hired",
+                                };
+                                const idx = PIPELINE_ORDER.indexOf(match.status as PipelineStatus);
+                                const canGoBack = idx > 0;
+                                const canGoForward = idx >= 0 && idx < PIPELINE_ORDER.length - 2;
+                                const atOffered = match.status === "offered";
+                                const prev = canGoBack ? PIPELINE_ORDER[idx - 1] : null;
+                                const next = canGoForward ? PIPELINE_ORDER[idx + 1] : null;
+                                return (
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="w-8 h-8 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                      onClick={() => prev && handleUpdateStatus(match.id, group.jobId, prev)}
+                                      disabled={!canGoBack || updateStatus.isPending}
+                                      title={prev ? `Move back to ${PIPELINE_LABEL[prev]}` : "Already at first stage"}
+                                    >
+                                      <ArrowLeft className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
+                                      onClick={() => next && handleUpdateStatus(match.id, group.jobId, next)}
+                                      disabled={!canGoForward || updateStatus.isPending}
+                                      title={next ? `Advance to ${PIPELINE_LABEL[next]}` : "Reached final stage before Hired"}
+                                    >
+                                      <ArrowRight className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
+                                      onClick={() => openContactDialog(match, group.jobTitle)}
+                                      title="Contact Candidate"
+                                    >
+                                      <Send className="w-4 h-4" />
+                                    </Button>
+                                    {atOffered && (
+                                      <Button
+                                        variant="default"
+                                        size="icon"
+                                        className="w-8 h-8 rounded-full bg-green-600 hover:bg-green-700"
+                                        onClick={() => handleUpdateStatus(match.id, group.jobId, "hired")}
+                                        disabled={updateStatus.isPending}
+                                        title="Mark as Hired"
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </TableCell>
                           </TableRow>
                         ))}
