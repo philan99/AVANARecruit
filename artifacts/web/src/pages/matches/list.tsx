@@ -396,12 +396,18 @@ ${companyName}`
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge
-                                variant={match.status === 'shortlisted' ? 'default' : match.status === 'rejected' ? 'destructive' : match.status === 'hired' ? 'default' : 'secondary'}
-                                className={`text-[10px] uppercase tracking-wider ${match.status === 'hired' ? 'bg-green-600 hover:bg-green-700' : match.status === 'interviewed' ? 'bg-cyan-500/15 text-cyan-700 border-cyan-500/30' : match.status === 'screened' ? 'bg-purple-500/15 text-purple-700 border-purple-500/30' : match.status === 'offered' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30' : ''}`}
-                              >
-                                {match.status}
-                              </Badge>
+                              {(() => {
+                                const isApplied = match.status === 'pending' && match.applied;
+                                const displayStatus = isApplied ? 'applied' : match.status;
+                                return (
+                                  <Badge
+                                    variant={match.status === 'shortlisted' ? 'default' : match.status === 'rejected' ? 'destructive' : match.status === 'hired' ? 'default' : 'secondary'}
+                                    className={`text-[10px] uppercase tracking-wider ${match.status === 'hired' ? 'bg-green-600 hover:bg-green-700' : match.status === 'interviewed' ? 'bg-cyan-500/15 text-cyan-700 border-cyan-500/30' : match.status === 'screened' ? 'bg-purple-500/15 text-purple-700 border-purple-500/30' : match.status === 'offered' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30' : isApplied ? 'bg-blue-500/15 text-blue-700 border-blue-500/30' : ''}`}
+                                  >
+                                    {displayStatus}
+                                  </Badge>
+                                );
+                              })()}
                             </TableCell>
                             <TableCell className="hidden xl:table-cell">
                               <p className="text-xs text-muted-foreground leading-relaxed max-w-[300px]">
