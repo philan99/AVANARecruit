@@ -438,26 +438,7 @@ ${companyName}`
                                     >
                                       <ArrowLeft className="w-4 h-4" />
                                     </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
-                                      onClick={() => next && handleUpdateStatus(match.id, group.jobId, next)}
-                                      disabled={!canGoForward || updateStatus.isPending}
-                                      title={next ? `Advance to ${PIPELINE_LABEL[next]}` : "Reached final stage before Hired"}
-                                    >
-                                      <ArrowRight className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
-                                      onClick={() => openContactDialog(match, group.jobTitle)}
-                                      title="Contact Candidate"
-                                    >
-                                      <Send className="w-4 h-4" />
-                                    </Button>
-                                    {atOffered && (
+                                    {atOffered ? (
                                       <Button
                                         variant="default"
                                         size="icon"
@@ -468,7 +449,27 @@ ${companyName}`
                                       >
                                         <Check className="w-4 h-4" />
                                       </Button>
+                                    ) : (
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
+                                        onClick={() => next && handleUpdateStatus(match.id, group.jobId, next)}
+                                        disabled={!canGoForward || updateStatus.isPending}
+                                        title={next ? `Advance to ${PIPELINE_LABEL[next]}` : "Reached final stage"}
+                                      >
+                                        <ArrowRight className="w-4 h-4" />
+                                      </Button>
                                     )}
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="w-8 h-8 rounded-full text-primary hover:bg-primary hover:text-primary-foreground border-primary/50"
+                                      onClick={() => openContactDialog(match, group.jobTitle)}
+                                      title="Contact Candidate"
+                                    >
+                                      <Send className="w-4 h-4" />
+                                    </Button>
                                   </div>
                                 );
                               })()}
