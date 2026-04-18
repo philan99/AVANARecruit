@@ -136,6 +136,8 @@ export default function CreateJob() {
   const [drafting, setDrafting] = useState(false);
   const [draftingDescription, setDraftingDescription] = useState(false);
 
+  const aiReady = Boolean(companyProfileId);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -150,6 +152,11 @@ export default function CreateJob() {
   });
 
   async function handleAiDraft() {
+    if (!aiReady) {
+      toast({ title: "Company profile needed", description: "Set up your company profile first so AVANA can tailor the draft.", variant: "destructive" });
+      navigate("/company-profile");
+      return;
+    }
     if (!brief.trim()) {
       toast({ title: "Add a brief", description: "Type a short description of the role first.", variant: "destructive" });
       return;
@@ -161,8 +168,7 @@ export default function CreateJob() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           brief,
-          companyName: companyProfile?.name,
-          companyIndustry: companyProfile?.industry,
+          companyProfileId,
         }),
       });
       const data = await res.json();
@@ -193,6 +199,11 @@ export default function CreateJob() {
   }
 
   async function handleAiDescription() {
+    if (!aiReady) {
+      toast({ title: "Company profile needed", description: "Set up your company profile first so AVANA can tailor the draft.", variant: "destructive" });
+      navigate("/company-profile");
+      return;
+    }
     const v = form.getValues();
     if (!v.title) {
       toast({ title: "Add a job title", description: "We need a title to draft a description.", variant: "destructive" });
@@ -204,6 +215,7 @@ export default function CreateJob() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          companyProfileId,
           title: v.title,
           skills: v.skills,
           experienceLevel: v.experienceLevel,
@@ -211,7 +223,6 @@ export default function CreateJob() {
           workplace: v.workplace,
           location: v.location,
           industry: v.industry,
-          companyName: companyProfile?.name,
         }),
       });
       const data = await res.json();
