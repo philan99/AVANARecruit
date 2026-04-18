@@ -747,13 +747,13 @@ export default function AdminCandidates() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Exp</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Type</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Workplace</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Profile %</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Verified</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Updated</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
@@ -775,9 +775,6 @@ export default function AdminCandidates() {
                       <td className="py-2 px-2 text-muted-foreground">{candidate.currentTitle}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.location}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.experienceYears}y</td>
-                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
-                        {candidate.education || "—"}
-                      </td>
                       <td className="py-2 px-2">
                         <div className="flex flex-wrap gap-1">
                           {(candidate.preferredJobTypes || []).slice(0, 1).map(t => (
@@ -843,6 +840,9 @@ export default function AdminCandidates() {
                           <ShieldCheck className="w-3 h-3" />
                           {candidate.verifiedCount || 0}
                         </span>
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground">
+                        {new Date(candidate.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-2 px-2 text-muted-foreground">
                         {new Date(candidate.updatedAt || candidate.createdAt).toLocaleDateString()}
