@@ -1057,6 +1057,14 @@ components:
           type: ["string", "null"]
         website:
           type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        twitterUrl:
+          type: ["string", "null"]
+        facebookUrl:
+          type: ["string", "null"]
+        instagramUrl:
+          type: ["string", "null"]
         location:
           type: ["string", "null"]
         description:
@@ -1089,6 +1097,14 @@ components:
         industry:
           type: ["string", "null"]
         website:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        twitterUrl:
+          type: ["string", "null"]
+        facebookUrl:
+          type: ["string", "null"]
+        instagramUrl:
           type: ["string", "null"]
         location:
           type: ["string", "null"]

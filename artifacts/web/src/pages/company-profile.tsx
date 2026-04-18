@@ -10,6 +10,7 @@ import { useUpload } from "@workspace/object-storage-web";
 import { useRole } from "@/contexts/role-context";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
 import { useIndustries } from "@/hooks/use-industries";
+import { safeExternalUrl } from "@/lib/safeUrl";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,10 @@ import {
   Camera,
   Mail,
   Trash2,
+  Linkedin,
+  Twitter,
+  Facebook,
+  Instagram,
 } from "lucide-react";
 import {
   Dialog,
@@ -58,6 +63,10 @@ const formSchema = z.object({
   email: z.string().optional(),
   industry: z.string().optional(),
   website: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  twitterUrl: z.string().optional(),
+  facebookUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
   location: z.string().optional(),
   description: z.string().optional(),
   size: z.string().optional(),
@@ -149,6 +158,10 @@ export default function CompanyProfile() {
       email: "",
       industry: "",
       website: "",
+      linkedinUrl: "",
+      twitterUrl: "",
+      facebookUrl: "",
+      instagramUrl: "",
       location: "",
       description: "",
       size: "",
@@ -165,6 +178,10 @@ export default function CompanyProfile() {
         email: profile.email || "",
         industry: profile.industry || "",
         website: profile.website || "",
+        linkedinUrl: profile.linkedinUrl || "",
+        twitterUrl: profile.twitterUrl || "",
+        facebookUrl: profile.facebookUrl || "",
+        instagramUrl: profile.instagramUrl || "",
         location: profile.location || "",
         description: profile.description || "",
         size: profile.size || "",
@@ -314,6 +331,34 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <FormField control={form.control} name="linkedinUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn</FormLabel>
+                      <FormControl><Input placeholder="https://linkedin.com/company/..." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="twitterUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5"><Twitter className="w-3.5 h-3.5" /> X / Twitter</FormLabel>
+                      <FormControl><Input placeholder="https://x.com/..." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="facebookUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5"><Facebook className="w-3.5 h-3.5" /> Facebook</FormLabel>
+                      <FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="instagramUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5"><Instagram className="w-3.5 h-3.5" /> Instagram</FormLabel>
+                      <FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                   <FormField control={form.control} name="location" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location</FormLabel>
@@ -459,6 +504,25 @@ export default function CompanyProfile() {
                   <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> Founded {profile!.founded}</span>
                 )}
               </div>
+              {(() => {
+                const links = [
+                  { url: safeExternalUrl(profile!.linkedinUrl), Icon: Linkedin, label: "LinkedIn" },
+                  { url: safeExternalUrl(profile!.twitterUrl), Icon: Twitter, label: "X / Twitter" },
+                  { url: safeExternalUrl(profile!.facebookUrl), Icon: Facebook, label: "Facebook" },
+                  { url: safeExternalUrl(profile!.instagramUrl), Icon: Instagram, label: "Instagram" },
+                ].filter(l => l.url);
+                if (links.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {links.map(({ url, Icon, label }) => (
+                      <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={label}
+                         className="w-8 h-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </CardContent>

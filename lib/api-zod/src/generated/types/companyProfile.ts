@@ -16,6 +16,14 @@ export interface CompanyProfile {
   /** @nullable */
   website?: string | null;
   /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  twitterUrl?: string | null;
+  /** @nullable */
+  facebookUrl?: string | null;
+  /** @nullable */
+  instagramUrl?: string | null;
+  /** @nullable */
   location?: string | null;
   /** @nullable */
   description?: string | null;

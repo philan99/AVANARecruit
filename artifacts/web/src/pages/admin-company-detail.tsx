@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { formatIndustry } from "@/lib/industries";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,10 @@ import {
   Briefcase,
   ArrowLeft,
   LogIn,
+  Linkedin,
+  Twitter,
+  Facebook,
+  Instagram,
 } from "lucide-react";
 
 interface Job {
@@ -36,6 +41,10 @@ interface CompanyDetail {
   email: string | null;
   industry: string | null;
   website: string | null;
+  linkedinUrl: string | null;
+  twitterUrl: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
   location: string | null;
   description: string | null;
   logoUrl: string | null;
@@ -127,6 +136,25 @@ export default function AdminCompanyDetail() {
               {company.description && (
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{company.description}</p>
               )}
+              {(() => {
+                const links = [
+                  { url: safeExternalUrl(company.linkedinUrl), Icon: Linkedin, label: "LinkedIn" },
+                  { url: safeExternalUrl(company.twitterUrl), Icon: Twitter, label: "X / Twitter" },
+                  { url: safeExternalUrl(company.facebookUrl), Icon: Facebook, label: "Facebook" },
+                  { url: safeExternalUrl(company.instagramUrl), Icon: Instagram, label: "Instagram" },
+                ].filter(l => l.url);
+                if (links.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {links.map(({ url, Icon, label }) => (
+                      <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={label}
+                         className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
+                        <Icon className="w-3.5 h-3.5" />
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </CardContent>
