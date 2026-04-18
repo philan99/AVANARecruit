@@ -439,8 +439,8 @@ ${companyName}`
                                           ? prev === "pending"
                                             ? match.applied
                                               ? "Back to Applied"
-                                              : "Move back to Pending"
-                                            : `Move back to ${PIPELINE_LABEL[prev]}`
+                                              : "Back to Pending"
+                                            : `Back to ${PIPELINE_LABEL[prev]}`
                                           : "Already at first stage"
                                       }
                                     >
