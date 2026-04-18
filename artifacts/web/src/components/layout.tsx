@@ -83,7 +83,7 @@ export function Layout({ children }: LayoutProps) {
   const portalLabel = role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal";
   const profileItem =
     role === "company"
-      ? { href: "/company-profile", label: "Company Profile", icon: Settings }
+      ? { href: "/company-profile", label: "Company Profile", icon: Building2 }
       : role === "candidate"
       ? { href: "/profile", label: "My Profile", icon: UserCircle }
       : null;
