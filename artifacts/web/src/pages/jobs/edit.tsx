@@ -129,28 +129,8 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
     );
   }
 
-  const actionButtons = (
+  const saveCancelButtons = (
     <div className="flex flex-wrap items-center justify-end gap-3">
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button type="button" variant="destructive" disabled={deleteJob.isPending}>
-            <Trash2 className="w-4 h-4 mr-1" />
-            {deleteJob.isPending ? "Deleting..." : "Delete Job"}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this job?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove the job listing and any associated matches. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
       <Button type="button" variant="outline" onClick={() => navigate(`/jobs/${jobId}`)}>
         Cancel
       </Button>
@@ -162,6 +142,29 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
         {updateJob.isPending ? "Saving..." : "Save Changes"}
       </Button>
     </div>
+  );
+
+  const deleteButton = (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button type="button" variant="destructive" disabled={deleteJob.isPending}>
+          <Trash2 className="w-4 h-4 mr-1" />
+          {deleteJob.isPending ? "Deleting..." : "Delete Job"}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently remove the job listing and any associated matches. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 
   return (
@@ -179,7 +182,7 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
           </h1>
           <p className="text-muted-foreground mt-1">Update the details for this job listing.</p>
         </div>
-        {actionButtons}
+        {saveCancelButtons}
       </div>
 
       <Card className="bg-card">
@@ -428,8 +431,9 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                 )}
               />
 
-              <div className="pt-4">
-                {actionButtons}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+                {deleteButton}
+                {saveCancelButtons}
               </div>
             </form>
           </Form>
