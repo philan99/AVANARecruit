@@ -1,15 +1,12 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, useCreateCompanyProfile, getGetCompanyProfileQueryKey, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
-import { useUpload } from "@workspace/object-storage-web";
+import React, { useState, useEffect, useMemo } from "react";
+import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Upload, Camera, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck, Bookmark } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck, Bookmark } from "lucide-react";
 import { CandidateAlertsSettings } from "@/components/candidate-alerts-settings";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link, useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
 
 function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
@@ -51,91 +48,18 @@ interface RawCandidate {
 }
 
 function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string | null } | null }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  const saveProfile = useCreateCompanyProfile();
-  const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
-
-  const { uploadFile, isUploading } = useUpload({
-    basePath,
-    onSuccess: (response) => {
-      const logoUrl = `${import.meta.env.BASE_URL}api/storage${response.objectPath}`.replace(/\/\//g, "/");
-      saveProfile.mutate(
-        { data: { name: profile?.name || "My Company", logoUrl } },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getGetCompanyProfileQueryKey() });
-            toast({ title: "Logo updated", description: "Company logo has been saved." });
-          },
-        }
-      );
-    },
-    onError: (err) => {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
-    },
-  });
-
-  function handleClick() {
-    fileInputRef.current?.click();
-  }
-
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Logo must be under 5MB.", variant: "destructive" });
-      return;
-    }
-    await uploadFile(file);
-    e.target.value = "";
-  }
-
-  const hasLogo = !!profile?.logoUrl;
-
-  return (
-    <div className="relative group">
-      {hasLogo ? (
-        <button onClick={handleClick} disabled={isUploading} className="relative cursor-pointer">
-          <img
-            src={profile.logoUrl!}
-            alt={`${profile.name} logo`}
-            className="w-12 h-12 rounded-lg object-cover border border-border"
-          />
-          <div className="absolute inset-0 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            {isUploading ? (
-              <Upload className="w-4 h-4 text-white animate-pulse" />
-            ) : (
-              <Camera className="w-4 h-4 text-white" />
-            )}
-          </div>
-        </button>
-      ) : (
-        <button
-          onClick={handleClick}
-          disabled={isUploading}
-          className="w-12 h-12 rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 flex items-center justify-center transition-colors cursor-pointer"
-          title="Upload company logo"
-        >
-          {isUploading ? (
-            <Upload className="w-5 h-5 text-muted-foreground animate-pulse" />
-          ) : (
-            <Building2 className="w-5 h-5 text-muted-foreground/50" />
-          )}
-        </button>
-      )}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
+  if (profile?.logoUrl) {
+    return (
+      <img
+        src={profile.logoUrl}
+        alt={`${profile.name} logo`}
+        className="w-12 h-12 rounded-lg object-cover border border-border"
       />
+    );
+  }
+  return (
+    <div className="w-12 h-12 rounded-lg border border-border bg-muted/30 flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-muted-foreground/50" />
     </div>
   );
 }
