@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+import type { MouseEvent } from "react";
+import { Link, useLocation } from "wouter";
 import { ArrowRight } from "lucide-react";
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 
@@ -12,8 +13,19 @@ interface MarketingNavProps {
 }
 
 export function MarketingNav({ active = null, onSignIn, onGetStarted, onPricing }: MarketingNavProps) {
+  const [location, setLocation] = useLocation();
   const linkClass = (target: Active) =>
     `text-sm font-medium ${active === target ? "text-white" : "text-white/70"} hover:text-white transition-colors cursor-pointer`;
+
+  const handleLogoClick = (e: MouseEvent) => {
+    e.preventDefault();
+    if (location === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      setLocation("/");
+      window.scrollTo({ top: 0 });
+    }
+  };
 
   return (
     <nav
@@ -25,9 +37,9 @@ export function MarketingNav({ active = null, onSignIn, onGetStarted, onPricing 
       }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
+        <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer">
           <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
-        </Link>
+        </a>
 
         <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
           {onPricing ? (
