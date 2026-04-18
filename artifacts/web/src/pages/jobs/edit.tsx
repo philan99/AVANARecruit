@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { useGetJob, getGetJobQueryKey, useUpdateJob } from "@workspace/api-client-react";
+import { useGetJob, getGetJobQueryKey, useUpdateJob, type Job } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,47 +44,42 @@ const editFormSchema = z.object({
 
 export default function EditJob({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
-  const [, navigate] = useLocation();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const { data: job, isLoading } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
   });
 
+  if (isLoading || !job) {
+    if (isLoading) return <div className="p-8 text-center text-muted-foreground font-mono">Loading job data...</div>;
+    return <div className="p-8 text-center text-destructive font-mono">Job not found.</div>;
+  }
+
+  return <EditJobForm jobId={jobId} job={job} />;
+}
+
+function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const updateJob = useUpdateJob();
 
   const form = useForm<z.infer<typeof editFormSchema>>({
     resolver: zodResolver(editFormSchema),
     defaultValues: {
-      title: "",
-      location: "",
-      description: "",
-      skills: "",
-      experienceLevel: "mid" as const,
-      workplace: "office" as const,
-      status: "open" as const,
+      title: job.title ?? "",
+      location: job.location ?? "",
+      description: job.description ?? "",
+      skills: Array.isArray(job.skills) ? job.skills.join(", ") : "",
+      experienceLevel: (job.experienceLevel as z.infer<typeof editFormSchema>["experienceLevel"]) ?? "mid",
+      jobType: job.jobType ?? undefined,
+      industry: job.industry ?? undefined,
+      educationLevel: job.educationLevel ?? undefined,
+      workplace: (job.workplace as z.infer<typeof editFormSchema>["workplace"]) ?? "office",
+      salaryMin: job.salaryMin ?? undefined,
+      salaryMax: job.salaryMax ?? undefined,
+      status: (job.status as z.infer<typeof editFormSchema>["status"]) ?? "open",
     },
   });
-
-  useEffect(() => {
-    if (job) {
-      form.reset({
-        title: job.title,
-        location: job.location,
-        description: job.description,
-        skills: job.skills.join(", "),
-        experienceLevel: job.experienceLevel as any,
-        jobType: (job as any).jobType ?? undefined,
-        industry: (job as any).industry ?? undefined,
-        educationLevel: (job as any).educationLevel ?? undefined,
-        workplace: (job as any).workplace ?? "office",
-        salaryMin: job.salaryMin ?? undefined,
-        salaryMax: job.salaryMax ?? undefined,
-        status: job.status as any,
-      });
-    }
-  }, [job]);
 
   function onSubmit(values: z.infer<typeof editFormSchema>) {
     const payload = {
@@ -105,14 +99,6 @@ export default function EditJob({ params }: { params: { id: string } }) {
         },
       }
     );
-  }
-
-  if (isLoading) {
-    return <div className="p-8 text-center text-muted-foreground font-mono">Loading job data...</div>;
-  }
-
-  if (!job) {
-    return <div className="p-8 text-center text-destructive font-mono">Job not found.</div>;
   }
 
   return (
