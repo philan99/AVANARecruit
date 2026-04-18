@@ -88,7 +88,7 @@ export default function CompanyProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { companyProfileId, clearRole } = useRole();
+  const { companyProfileId, clearRole, userEmail } = useRole();
   const [, setLocation] = useLocation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -175,7 +175,7 @@ export default function CompanyProfile() {
     if (profile) {
       form.reset({
         name: profile.name || "",
-        email: profile.email || "",
+        email: profile.email || userEmail || "",
         industry: profile.industry || "",
         website: profile.website || "",
         linkedinUrl: profile.linkedinUrl || "",
@@ -187,6 +187,8 @@ export default function CompanyProfile() {
         size: profile.size || "",
         founded: profile.founded || "",
       });
+    } else if (userEmail) {
+      form.reset({ ...form.getValues(), email: userEmail });
     }
     setIsEditing(true);
   }
