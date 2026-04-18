@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users, Search, MapPin, Mail, X, LayoutGrid, List,
   SlidersHorizontal, ChevronDown, Check, Briefcase,
-  Monitor, GraduationCap, Factory, Clock, Bookmark,
+  Monitor, GraduationCap, Factory, Clock, Bookmark, Plus,
 } from "lucide-react";
 
 function MultiSelectDropdown({
@@ -366,11 +366,18 @@ export default function CandidatesList() {
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Users className="mr-3 text-primary" /> Talent Pool
-        </h1>
-        <p className="text-muted-foreground mt-1">Browse and manage candidate profiles.</p>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Users className="mr-3 text-primary" /> Talent Pool
+          </h1>
+          <p className="text-muted-foreground mt-1">Browse and manage candidate profiles.</p>
+        </div>
+        <Link href="/jobs/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" /> Post Job
+          </Button>
+        </Link>
       </div>
 
       <div className="space-y-3">

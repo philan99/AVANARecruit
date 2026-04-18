@@ -39,6 +39,7 @@ import {
   X,
   Briefcase,
   Loader2,
+  Plus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
@@ -401,6 +402,11 @@ export default function Pipeline() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link href="/jobs/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" /> Post Job
+            </Button>
+          </Link>
           <Badge variant="secondary" className="font-mono text-sm px-3 py-1">
             {totalInPipeline} Candidates
           </Badge>

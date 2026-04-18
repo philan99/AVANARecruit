@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send, Loader2 } from "lucide-react";
+import { Network, Check, X, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, RotateCcw, Send, Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -235,11 +235,18 @@ ${companyName}`
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Network className="mr-3 text-primary" /> Job Role to Candidate Matches
-        </h1>
-        <p className="text-muted-foreground mt-1">Review AI-generated candidate fits across all jobs.</p>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Network className="mr-3 text-primary" /> Job Role to Candidate Matches
+          </h1>
+          <p className="text-muted-foreground mt-1">Review AI-generated candidate fits across all jobs.</p>
+        </div>
+        <Link href="/jobs/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" /> Post Job
+          </Button>
+        </Link>
       </div>
 
       {loading ? (
