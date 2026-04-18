@@ -147,7 +147,7 @@ export default function CreateJob() {
       skills: [],
       experienceLevel: undefined,
       workplace: undefined,
-      status: "open",
+      status: "draft",
     },
   });
 
@@ -188,7 +188,7 @@ export default function CreateJob() {
         salaryMax: data.salaryMax ?? current.salaryMax,
         skills: Array.isArray(data.skills) && data.skills.length ? data.skills : current.skills,
         description: data.description || current.description,
-        status: current.status || "open",
+        status: current.status || "draft",
       });
       toast({ title: "Draft ready", description: "Review the fields and tweak anything you'd like before posting." });
     } catch (err) {
