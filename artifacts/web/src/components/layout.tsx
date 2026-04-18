@@ -18,7 +18,16 @@ import {
   KanbanSquare,
   Code2,
   Mail,
+  ChevronDown,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
 import { ShieldAlert } from "lucide-react";
@@ -49,13 +58,11 @@ export function Layout({ children }: LayoutProps) {
     { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/matches", label: "Matches", icon: Network },
     { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
-    { href: "/company-profile", label: "Company Profile", icon: Settings },
     { href: "/contact-us", label: "Contact Us", icon: Mail },
   ];
 
   const candidateNavItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/profile", label: "My Profile", icon: UserCircle },
     { href: "/my-matches", label: "My Matches", icon: Target },
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
     { href: "/browse-companies", label: "Browse Companies", icon: Building2 },
@@ -72,6 +79,14 @@ export function Layout({ children }: LayoutProps) {
   ];
 
   const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;
+
+  const portalLabel = role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal";
+  const profileItem =
+    role === "company"
+      ? { href: "/company-profile", label: "Company Profile", icon: Settings }
+      : role === "candidate"
+      ? { href: "/profile", label: "My Profile", icon: UserCircle }
+      : null;
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
@@ -102,24 +117,55 @@ export function Layout({ children }: LayoutProps) {
             })}
           </nav>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden xl:flex flex-col items-end">
-              <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">
-                {role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal"}
-              </span>
-              {userEmail && (
-                <span className="text-[10px] text-sidebar-foreground/40 truncate max-w-[180px]">
-                  {userEmail}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => setShowSignOutDialog(true)}
-              className="hidden lg:flex items-center px-2.5 py-1.5 text-xs font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5 mr-1.5" />
-              Sign Out
-            </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60 font-mono leading-tight">
+                      {portalLabel}
+                    </span>
+                    {userEmail && (
+                      <span className="text-[10px] text-sidebar-foreground/45 truncate max-w-[180px] leading-tight">
+                        {userEmail}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-sidebar-foreground/60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
+                      {portalLabel}
+                    </span>
+                    {userEmail && (
+                      <span className="text-xs text-foreground truncate">{userEmail}</span>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                {profileItem && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={profileItem.href} className="flex items-center cursor-pointer">
+                        <profileItem.icon className="w-4 h-4 mr-2" />
+                        {profileItem.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowSignOutDialog(true)}
+                  className="cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -152,7 +198,23 @@ export function Layout({ children }: LayoutProps) {
                 </Link>
               );
             })}
-            <div className="pt-2 border-t border-sidebar-border mt-2">
+            <div className="pt-2 border-t border-sidebar-border mt-2 space-y-1">
+              <div className="px-3 pb-1">
+                <p className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">{portalLabel}</p>
+                {userEmail && (
+                  <p className="text-[11px] text-sidebar-foreground/40 truncate">{userEmail}</p>
+                )}
+              </div>
+              {profileItem && (
+                <Link
+                  href={profileItem.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <profileItem.icon className="w-4 h-4 mr-3" />
+                  {profileItem.label}
+                </Link>
+              )}
               <button
                 onClick={() => { setMobileMenuOpen(false); setShowSignOutDialog(true); }}
                 className="flex items-center w-full px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer"
