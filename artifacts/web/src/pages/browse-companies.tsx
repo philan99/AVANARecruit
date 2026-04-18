@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "wouter";
+import { formatIndustry } from "@/lib/industries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,13 +39,16 @@ function MultiSelectDropdown({
   options,
   selected,
   onChange,
+  formatOption,
 }: {
   label: string;
   icon: React.ElementType;
   options: string[];
   selected: Set<string>;
   onChange: (val: Set<string>) => void;
+  formatOption?: (val: string) => string;
 }) {
+  const fmt = formatOption || ((v: string) => v);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [filterText, setFilterText] = useState("");
@@ -65,13 +69,13 @@ function MultiSelectDropdown({
   }
 
   const filtered = filterText
-    ? options.filter(o => o.toLowerCase().includes(filterText.toLowerCase()))
+    ? options.filter(o => fmt(o).toLowerCase().includes(filterText.toLowerCase()))
     : options;
 
   const displayText = selected.size === 0
     ? `All ${label}`
     : selected.size === 1
-    ? Array.from(selected)[0]
+    ? fmt(Array.from(selected)[0])
     : `${selected.size} selected`;
 
   return (
@@ -116,7 +120,7 @@ function MultiSelectDropdown({
                 }`}>
                   {selected.has(option) && <Check className="w-3 h-3 text-primary-foreground" />}
                 </div>
-                <span className="truncate capitalize">{option}</span>
+                <span className="truncate capitalize">{fmt(option)}</span>
               </button>
             ))}
           </div>
@@ -272,6 +276,7 @@ export default function BrowseCompanies() {
                     options={uniqueIndustries}
                     selected={industryFilters}
                     onChange={setIndustryFilters}
+                    formatOption={formatIndustry}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -361,7 +366,7 @@ export default function BrowseCompanies() {
                       <CardTitle className="text-lg leading-tight line-clamp-1">{company.name}</CardTitle>
                       {company.industry && (
                         <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-wider mt-1">
-                          {company.industry}
+                          {formatIndustry(company.industry)}
                         </Badge>
                       )}
                     </div>
@@ -425,7 +430,7 @@ export default function BrowseCompanies() {
                         </div>
                       </Link>
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{company.industry || "—"}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatIndustry(company.industry) || "—"}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{company.location || "—"}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{company.size || "—"}</td>
                   </tr>

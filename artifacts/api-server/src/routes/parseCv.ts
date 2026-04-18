@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, candidatesTable } from "@workspace/db";
+import { db, candidatesTable, industriesTable } from "@workspace/db";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { extractText, getDocumentProxy } from "unpdf";
@@ -30,15 +30,18 @@ const JOB_TYPE_OPTIONS = [
   "temporary",
 ];
 const WORKPLACE_OPTIONS = ["office", "remote", "hybrid"];
-const INDUSTRY_OPTIONS = [
-  "accounting_finance", "agriculture", "automotive", "banking", "construction",
-  "consulting", "creative_design", "education", "energy_utilities", "engineering",
-  "healthcare", "hospitality_tourism", "human_resources", "insurance", "legal",
-  "logistics_supply_chain", "manufacturing", "marketing_advertising",
-  "media_entertainment", "nonprofit", "pharmaceutical", "property_real_estate",
-  "public_sector", "retail", "sales", "science_research", "technology",
-  "telecommunications", "transport", "other",
-];
+
+async function loadIndustryCodes(): Promise<string[]> {
+  try {
+    const rows = await db.select({ code: industriesTable.code }).from(industriesTable);
+    const codes = rows.map(r => r.code);
+    if (!codes.includes("other")) codes.push("other");
+    return codes;
+  } catch (err) {
+    console.error("Failed to load industry codes:", err);
+    return ["other"];
+  }
+}
 
 async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -60,7 +63,7 @@ async function extractCvText(buffer: Buffer, fileName: string): Promise<string> 
   return Array.isArray(text) ? text.join("\n") : text;
 }
 
-const SYSTEM_PROMPT = `You are an expert CV/resume parser. Extract structured candidate information from the CV text provided. Return ONLY valid JSON matching the schema below — no commentary, no markdown.
+const buildSystemPrompt = (industryOptions: string[]) => `You are an expert CV/resume parser. Extract structured candidate information from the CV text provided. Return ONLY valid JSON matching the schema below — no commentary, no markdown.
 
 Rules:
 - Use British English where applicable.
@@ -72,7 +75,7 @@ Rules:
 - qualifications: array of certifications/professional qualifications (e.g. "AWS Certified", "PRINCE2", "CIPD Level 5"). Empty array if none.
 - skills: array of technical/professional skills mentioned. Aim for 5-20 relevant items.
 - experience: array of jobs in REVERSE chronological order (most recent first). Each: { jobTitle, company, startDate (YYYY-MM or YYYY), endDate (YYYY-MM, YYYY, or "" if current), current (boolean), description (1-3 sentence summary of responsibilities/achievements) }.
-- preferredJobTypes / preferredWorkplaces / preferredIndustries: ONLY include if the CV explicitly states preferences (most CVs won't). Use only these enum values: jobTypes=[${JOB_TYPE_OPTIONS.join(",")}], workplaces=[${WORKPLACE_OPTIONS.join(",")}], industries=[${INDUSTRY_OPTIONS.join(",")}]. Empty arrays if not stated.
+- preferredJobTypes / preferredWorkplaces / preferredIndustries: ONLY include if the CV explicitly states preferences (most CVs won't). Use only these enum values: jobTypes=[${JOB_TYPE_OPTIONS.join(",")}], workplaces=[${WORKPLACE_OPTIONS.join(",")}], industries=[${industryOptions.join(",")}]. Empty arrays if not stated.
 - Social URLs: linkedinUrl, twitterUrl, facebookUrl, portfolioUrl. Empty string if not present.
 - summary: 1-3 sentence professional summary (use the CV's own profile/summary if present, otherwise generate one).
 - lowConfidenceFields: array of field names where you had to guess or the CV was ambiguous. Examples: "phone", "location", "experienceYears", "education", "preferredJobTypes". Be honest — flag anything not directly stated.
@@ -102,6 +105,7 @@ Schema:
 }
 
 If a field cannot be determined at all, use an empty string "" or empty array [] (never null). If the document does not appear to be a CV, return all-empty values and add "not_a_cv" to lowConfidenceFields.`;
+
 
 router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
   try {
@@ -145,12 +149,13 @@ router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
     // Cap at ~30k chars to keep tokens reasonable
     if (cvText.length > 30000) cvText = cvText.slice(0, 30000);
 
+    const INDUSTRY_OPTIONS = await loadIndustryCodes();
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       max_completion_tokens: 4096,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: buildSystemPrompt(INDUSTRY_OPTIONS) },
         { role: "user", content: `CV text:\n\n${cvText}` },
       ],
     });

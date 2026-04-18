@@ -9,38 +9,7 @@ import {
 import { useUpload } from "@workspace/object-storage-web";
 import { useRole } from "@/contexts/role-context";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
-
-const INDUSTRIES: { value: string; label: string }[] = [
-  { value: "accounting_finance", label: "Accounting & Finance" },
-  { value: "agriculture", label: "Agriculture" },
-  { value: "automotive", label: "Automotive" },
-  { value: "banking", label: "Banking" },
-  { value: "construction", label: "Construction" },
-  { value: "consulting", label: "Consulting" },
-  { value: "creative_design", label: "Creative & Design" },
-  { value: "education", label: "Education" },
-  { value: "energy_utilities", label: "Energy & Utilities" },
-  { value: "engineering", label: "Engineering" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "hospitality_tourism", label: "Hospitality & Tourism" },
-  { value: "human_resources", label: "Human Resources" },
-  { value: "insurance", label: "Insurance" },
-  { value: "legal", label: "Legal" },
-  { value: "logistics_supply_chain", label: "Logistics & Supply Chain" },
-  { value: "manufacturing", label: "Manufacturing" },
-  { value: "marketing_advertising", label: "Marketing & Advertising" },
-  { value: "media_entertainment", label: "Media & Entertainment" },
-  { value: "nonprofit", label: "Non-profit" },
-  { value: "pharmaceutical", label: "Pharmaceutical" },
-  { value: "property_real_estate", label: "Property & Real Estate" },
-  { value: "public_sector", label: "Public Sector" },
-  { value: "retail", label: "Retail" },
-  { value: "sales", label: "Sales" },
-  { value: "science_research", label: "Science & Research" },
-  { value: "technology", label: "Technology" },
-  { value: "telecommunications", label: "Telecommunications" },
-  { value: "transport", label: "Transport" },
-];
+import { useIndustries } from "@/hooks/use-industries";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,6 +137,10 @@ export default function CompanyProfile() {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     },
   });
+
+  const { data: industries = [] } = useIndustries();
+  const industryLabel = (code: string | null | undefined) =>
+    industries.find(i => i.value === code)?.label || code || "";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -326,8 +299,8 @@ export default function CompanyProfile() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {INDUSTRIES.map((ind) => (
-                            <SelectItem key={ind.value} value={ind.label}>{ind.label}</SelectItem>
+                          {industries.map((ind) => (
+                            <SelectItem key={ind.value} value={ind.value}>{ind.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -465,7 +438,7 @@ export default function CompanyProfile() {
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-foreground mb-1">{profile!.name}</h2>
               {profile!.industry && (
-                <p className="text-lg text-primary font-medium mb-3">{profile!.industry}</p>
+                <p className="text-lg text-primary font-medium mb-3">{industryLabel(profile!.industry)}</p>
               )}
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                 {profile!.email && (

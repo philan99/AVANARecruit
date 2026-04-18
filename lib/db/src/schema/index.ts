@@ -14,3 +14,4 @@ export * from "./messages";
 export * from "./jobAlerts";
 export * from "./candidateAlerts";
 export * from "./devTasks";
+export * from "./industries";

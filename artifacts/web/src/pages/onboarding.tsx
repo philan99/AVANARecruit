@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
+import { useIndustries } from "@/hooks/use-industries";
 
 type ExperienceEntry = {
   jobTitle: string;
@@ -85,41 +86,14 @@ const WORKPLACES: { value: string; label: string }[] = [
   { value: "remote", label: "Remote" },
   { value: "hybrid", label: "Hybrid" },
 ];
-const INDUSTRIES: { value: string; label: string }[] = [
-  { value: "accounting_finance", label: "Accounting & Finance" },
-  { value: "agriculture", label: "Agriculture" },
-  { value: "automotive", label: "Automotive" },
-  { value: "banking", label: "Banking" },
-  { value: "construction", label: "Construction" },
-  { value: "consulting", label: "Consulting" },
-  { value: "creative_design", label: "Creative & Design" },
-  { value: "education", label: "Education" },
-  { value: "energy_utilities", label: "Energy & Utilities" },
-  { value: "engineering", label: "Engineering" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "hospitality_tourism", label: "Hospitality & Tourism" },
-  { value: "human_resources", label: "Human Resources" },
-  { value: "insurance", label: "Insurance" },
-  { value: "legal", label: "Legal" },
-  { value: "logistics_supply_chain", label: "Logistics & Supply Chain" },
-  { value: "manufacturing", label: "Manufacturing" },
-  { value: "marketing_advertising", label: "Marketing & Advertising" },
-  { value: "media_entertainment", label: "Media & Entertainment" },
-  { value: "nonprofit", label: "Non-profit" },
-  { value: "pharmaceutical", label: "Pharmaceutical" },
-  { value: "property_real_estate", label: "Property & Real Estate" },
-  { value: "public_sector", label: "Public Sector" },
-  { value: "retail", label: "Retail" },
-  { value: "sales", label: "Sales" },
-  { value: "science_research", label: "Science & Research" },
-  { value: "technology", label: "Technology" },
-  { value: "telecommunications", label: "Telecommunications" },
-  { value: "transport", label: "Transport" },
-  { value: "other", label: "Other" },
-];
 
 export default function Onboarding() {
   const { candidateProfileId } = useRole();
+  const { data: industriesData = [] } = useIndustries();
+  const INDUSTRIES = useMemo(
+    () => [...industriesData, { value: "other", label: "Other" }],
+    [industriesData],
+  );
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();

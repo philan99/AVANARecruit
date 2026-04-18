@@ -5,6 +5,7 @@ import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpload } from "@workspace/object-storage-web";
+import { useIndustries } from "@/hooks/use-industries";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,42 +67,8 @@ const WORKPLACE_OPTIONS = [
   { value: "hybrid", label: "Hybrid" },
 ];
 
-const INDUSTRY_OPTIONS = [
-  { value: "accounting_finance", label: "Accounting & Finance" },
-  { value: "agriculture", label: "Agriculture" },
-  { value: "automotive", label: "Automotive" },
-  { value: "banking", label: "Banking" },
-  { value: "construction", label: "Construction" },
-  { value: "consulting", label: "Consulting" },
-  { value: "creative_design", label: "Creative & Design" },
-  { value: "education", label: "Education" },
-  { value: "energy_utilities", label: "Energy & Utilities" },
-  { value: "engineering", label: "Engineering" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "hospitality_tourism", label: "Hospitality & Tourism" },
-  { value: "human_resources", label: "Human Resources" },
-  { value: "insurance", label: "Insurance" },
-  { value: "legal", label: "Legal" },
-  { value: "logistics_supply_chain", label: "Logistics & Supply Chain" },
-  { value: "manufacturing", label: "Manufacturing" },
-  { value: "marketing_advertising", label: "Marketing & Advertising" },
-  { value: "media_entertainment", label: "Media & Entertainment" },
-  { value: "nonprofit", label: "Non-profit" },
-  { value: "pharmaceutical", label: "Pharmaceutical" },
-  { value: "property_real_estate", label: "Property & Real Estate" },
-  { value: "public_sector", label: "Public Sector" },
-  { value: "retail", label: "Retail" },
-  { value: "sales", label: "Sales" },
-  { value: "science_research", label: "Science & Research" },
-  { value: "technology", label: "Technology" },
-  { value: "telecommunications", label: "Telecommunications" },
-  { value: "transport", label: "Transport" },
-  { value: "other", label: "Other" },
-];
-
 const JOB_TYPE_LABELS: Record<string, string> = Object.fromEntries(JOB_TYPE_OPTIONS.map(o => [o.value, o.label]));
 const WORKPLACE_LABELS: Record<string, string> = Object.fromEntries(WORKPLACE_OPTIONS.map(o => [o.value, o.label]));
-const INDUSTRY_LABELS: Record<string, string> = Object.fromEntries(INDUSTRY_OPTIONS.map(o => [o.value, o.label]));
 
 const PHONE_CODES = [
   { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
@@ -134,6 +101,9 @@ function safeHref(url: string | null | undefined): string {
 
 export default function CandidateProfile() {
   const { candidateProfileId } = useRole();
+  const { data: industriesData = [] } = useIndustries();
+  const INDUSTRY_OPTIONS = [...industriesData, { value: "other", label: "Other" }];
+  const INDUSTRY_LABELS: Record<string, string> = Object.fromEntries(INDUSTRY_OPTIONS.map(o => [o.value, o.label]));
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();

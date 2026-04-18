@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
+import { formatIndustry } from "@/lib/industries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ export default function BrowseCompanyDetail() {
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {company.industry && (
               <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
-                {company.industry}
+                {formatIndustry(company.industry)}
               </Badge>
             )}
             {company.location && (
@@ -141,7 +142,7 @@ export default function BrowseCompanyDetail() {
         </Card>
         <Card className="bg-card">
           <CardContent className="pt-5 pb-5 text-center">
-            <div className="text-3xl font-bold text-foreground">{company.industry || "—"}</div>
+            <div className="text-3xl font-bold text-foreground">{formatIndustry(company.industry) || "—"}</div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Industry</div>
           </CardContent>
         </Card>

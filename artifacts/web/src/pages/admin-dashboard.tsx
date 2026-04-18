@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
+import { formatIndustry } from "@/lib/industries";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,20 +19,6 @@ import {
 const JOB_TYPE_LABELS: Record<string, string> = {
   permanent_full_time: "Permanent (Full Time)", contract: "Contract",
   fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary",
-};
-
-const INDUSTRY_LABELS: Record<string, string> = {
-  accounting_finance: "Accounting & Finance", agriculture: "Agriculture", automotive: "Automotive",
-  banking: "Banking", construction: "Construction", consulting: "Consulting",
-  creative_design: "Creative & Design", education: "Education", energy_utilities: "Energy & Utilities",
-  engineering: "Engineering", healthcare: "Healthcare", hospitality_tourism: "Hospitality & Tourism",
-  human_resources: "Human Resources", insurance: "Insurance", legal: "Legal",
-  logistics_supply_chain: "Logistics & Supply Chain", manufacturing: "Manufacturing",
-  marketing_advertising: "Marketing & Advertising", media_entertainment: "Media & Entertainment",
-  nonprofit: "Non-profit", pharmaceutical: "Pharmaceutical", property_real_estate: "Property & Real Estate",
-  public_sector: "Public Sector", retail: "Retail", sales: "Sales",
-  science_research: "Science & Research", technology: "Technology",
-  telecommunications: "Telecommunications", transport: "Transport", other: "Other",
 };
 
 function formatWorkplaceLabel(val: string) {
@@ -420,7 +407,7 @@ export default function AdminDashboard() {
                   {insights.topIndustries.map(([ind, count]) => (
                     <InsightBar
                       key={ind}
-                      label={ind}
+                      label={ind === "Unspecified" ? ind : formatIndustry(ind)}
                       value={count}
                       max={insights.topIndustries[0][1]}
                       color="bg-emerald-500/70"
@@ -594,7 +581,7 @@ export default function AdminDashboard() {
               {insights.topJobIndustries.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topJobIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={INDUSTRY_LABELS[ind] || ind} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate(`/jobs?industry=${encodeURIComponent(ind)}`)} />
+                    <InsightBar key={ind} label={ind === "Unspecified" ? ind : formatIndustry(ind)} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate(`/jobs?industry=${encodeURIComponent(ind)}`)} />
                   ))}
                 </div>
               ) : (
@@ -615,7 +602,7 @@ export default function AdminDashboard() {
               {insights.topPrefIndustries.length > 0 ? (
                 <div className="space-y-2.5">
                   {insights.topPrefIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={INDUSTRY_LABELS[ind] || ind} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
+                    <InsightBar key={ind} label={ind === "Unspecified" ? ind : formatIndustry(ind)} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
                   ))}
                 </div>
               ) : (
@@ -686,7 +673,7 @@ export default function AdminDashboard() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {company.industry || "No industry"} {company.location ? `· ${company.location}` : ""}
+                          {formatIndustry(company.industry) || "No industry"} {company.location ? `· ${company.location}` : ""}
                         </p>
                       </div>
                     </div>

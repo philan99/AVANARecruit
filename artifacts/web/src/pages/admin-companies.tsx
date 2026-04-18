@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation, useSearch } from "wouter";
+import { formatIndustry } from "@/lib/industries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -187,7 +188,7 @@ export default function AdminCompanies() {
                 <SelectContent>
                   <SelectItem value="all">All Industries</SelectItem>
                   {uniqueIndustries.map(ind => (
-                    <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                    <SelectItem key={ind} value={ind}>{formatIndustry(ind)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -270,7 +271,7 @@ export default function AdminCompanies() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-2 px-2 text-muted-foreground">{company.industry || "—"}</td>
+                      <td className="py-2 px-2 text-muted-foreground">{formatIndustry(company.industry) || "—"}</td>
                       <td className="py-2 px-2 text-muted-foreground">{company.location || "—"}</td>
                       <td className="py-2 px-2 text-muted-foreground">{company.size || "—"}</td>
                       <td className="py-2 px-2 text-muted-foreground">

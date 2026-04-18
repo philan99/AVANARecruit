@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
+import { formatIndustry } from "@/lib/industries";
 import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +109,7 @@ export default function AdminCompanyDetail() {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
                 {company.industry && (
-                  <Badge variant="secondary" className="text-xs">{company.industry}</Badge>
+                  <Badge variant="secondary" className="text-xs">{formatIndustry(company.industry)}</Badge>
                 )}
                 <Button
                   variant="outline"
