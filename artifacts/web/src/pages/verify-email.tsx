@@ -62,7 +62,7 @@ export default function VerifyEmail() {
     } else if (verified.role === "company" && verified.companyId) {
       setCompanyProfileId(verified.companyId);
       setRole("company");
-      setLocation("/");
+      setLocation("/company-profile");
     } else {
       setLocation("/");
     }
