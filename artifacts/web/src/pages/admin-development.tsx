@@ -168,10 +168,93 @@ export default function AdminDevelopment() {
   };
 
   const categoryCounts = CATEGORIES.map(cat => ({
-    category: cat,
+    key: cat as string,
+    label: cat,
     total: tasks.filter(t => t.category === cat).length,
-    done: tasks.filter(t => t.category === cat && t.status === "done").length,
   }));
+  const priorityCounts = PRIORITIES.map(p => ({
+    key: p as string,
+    label: priorityConfig[p].label,
+    total: tasks.filter(t => t.priority === p).length,
+    color: priorityConfig[p].color,
+  }));
+  const statusCounts = STATUSES.map(s => ({
+    key: s as string,
+    label: statusConfig[s].label,
+    total: tasks.filter(t => t.status === s).length,
+    color: statusConfig[s].color,
+  }));
+
+  const maxCategory = Math.max(1, ...categoryCounts.map(c => c.total));
+  const maxPriority = Math.max(1, ...priorityCounts.map(c => c.total));
+  const maxStatus = Math.max(1, ...statusCounts.map(c => c.total));
+
+  const PRIORITY_BAR: Record<string, string> = {
+    high: "bg-red-500",
+    medium: "bg-yellow-500",
+    low: "bg-muted-foreground/40",
+  };
+  const STATUS_BAR: Record<string, string> = {
+    "todo": "bg-muted-foreground/40",
+    "in-progress": "bg-blue-500",
+    "done": "bg-green-500",
+  };
+
+  function BarChart({
+    title,
+    items,
+    max,
+    activeKey,
+    onToggle,
+    barColorFor,
+  }: {
+    title: string;
+    items: { key: string; label: string; total: number }[];
+    max: number;
+    activeKey: string;
+    onToggle: (k: string) => void;
+    barColorFor: (key: string) => string;
+  }) {
+    return (
+      <Card className="bg-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 pb-4">
+          {items.map(it => {
+            const pct = (it.total / max) * 100;
+            const active = activeKey === it.key;
+            return (
+              <button
+                key={it.key}
+                onClick={() => onToggle(it.key)}
+                className={`w-full text-left group ${active ? "" : "opacity-90 hover:opacity-100"}`}
+              >
+                <div className="flex items-center justify-between text-xs mb-0.5">
+                  <span className={`font-medium ${active ? "text-primary" : ""}`}>{it.label}</span>
+                  <span className="text-muted-foreground tabular-nums">{it.total}</span>
+                </div>
+                <div className="h-2 rounded bg-muted overflow-hidden">
+                  <div
+                    className={`h-full ${barColorFor(it.key)} ${active ? "ring-2 ring-primary/40" : ""} transition-all`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </button>
+            );
+          })}
+          {activeKey !== "all" && (
+            <button
+              onClick={() => onToggle(activeKey)}
+              className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2"
+            >
+              Clear filter
+            </button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading) {
     return (
@@ -194,65 +277,47 @@ export default function AdminDevelopment() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {categoryCounts.map(({ category, total, done }) => {
-          const cfg = categoryConfig[category as Category];
-          const Icon = cfg.icon;
-          return (
-            <Card key={category} className="bg-card cursor-pointer hover:border-primary/30 transition-colors" onClick={() => setFilterCategory(filterCategory === category ? "all" : category)}>
-              <CardContent className="pt-4 pb-3">
-                <div className="flex items-center justify-between mb-2">
-                  <Icon className={`w-5 h-5 ${cfg.color}`} />
-                  <span className="text-2xl font-bold">{total}</span>
-                </div>
-                <p className="text-xs font-medium">{category}</p>
-                <p className="text-[11px] text-muted-foreground">{done}/{total} completed</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <BarChart
+          title="Category"
+          items={categoryCounts}
+          max={maxCategory}
+          activeKey={filterCategory}
+          onToggle={k => setFilterCategory(filterCategory === k ? "all" : k)}
+          barColorFor={() => "bg-primary"}
+        />
+        <BarChart
+          title="Priority"
+          items={priorityCounts}
+          max={maxPriority}
+          activeKey={filterPriority}
+          onToggle={k => setFilterPriority(filterPriority === k ? "all" : k)}
+          barColorFor={k => PRIORITY_BAR[k] || "bg-primary"}
+        />
+        <BarChart
+          title="Status"
+          items={statusCounts}
+          max={maxStatus}
+          activeKey={filterStatus}
+          onToggle={k => setFilterStatus(filterStatus === k ? "all" : k)}
+          barColorFor={k => STATUS_BAR[k] || "bg-primary"}
+        />
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Filter:</span>
-        </div>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-[150px] h-8 text-xs">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px] h-8 text-xs">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {STATUSES.map(s => <SelectItem key={s} value={s}>{statusConfig[s].label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-[150px] h-8 text-xs">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            {PRIORITIES.map(p => <SelectItem key={p} value={p}>{priorityConfig[p].label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        {(filterCategory !== "all" || filterStatus !== "all" || filterPriority !== "all") && (
-          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterCategory("all"); setFilterStatus("all"); setFilterPriority("all"); }}>
-            Clear filters
+      {(filterCategory !== "all" || filterStatus !== "all" || filterPriority !== "all") && (
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>Active filters:</span>
+          {filterCategory !== "all" && <Badge variant="outline">Category: {filterCategory}</Badge>}
+          {filterPriority !== "all" && <Badge variant="outline">Priority: {priorityConfig[filterPriority as Priority]?.label || filterPriority}</Badge>}
+          {filterStatus !== "all" && <Badge variant="outline">Status: {statusConfig[filterStatus as Status]?.label || filterStatus}</Badge>}
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setFilterCategory("all"); setFilterStatus("all"); setFilterPriority("all"); }}>
+            Clear all
           </Button>
-        )}
-        <div className="ml-auto text-xs text-muted-foreground">
-          {counts.todo} to do &middot; {counts.inProgress} in progress &middot; {counts.done} done
+          <div className="ml-auto">
+            {counts.todo} to do &middot; {counts.inProgress} in progress &middot; {counts.done} done
+          </div>
         </div>
-      </div>
+      )}
 
       {filtered.length === 0 ? (
         <Card className="bg-card">
