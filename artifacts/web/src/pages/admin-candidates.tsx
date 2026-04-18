@@ -615,6 +615,146 @@ export default function AdminCandidates() {
         )}
       </div>
 
+      {candidates.length > 0 && (() => {
+        const statusCounts = new Map<string, number>();
+        const locationCounts = new Map<string, number>();
+        const jobTypeCounts = new Map<string, number>();
+        for (const c of candidates) {
+          if (c.status) statusCounts.set(c.status, (statusCounts.get(c.status) || 0) + 1);
+          if (c.location) locationCounts.set(c.location, (locationCounts.get(c.location) || 0) + 1);
+          for (const t of c.preferredJobTypes || []) {
+            jobTypeCounts.set(t, (jobTypeCounts.get(t) || 0) + 1);
+          }
+        }
+        const statusOrder = ["active", "passive", "not_looking"];
+        const statusEntries = statusOrder
+          .filter(s => statusCounts.has(s))
+          .map(s => [s, statusCounts.get(s)!] as [string, number]);
+        const locationEntries = Array.from(locationCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const jobTypeEntries = Array.from(jobTypeCounts.entries()).sort((a, b) => b[1] - a[1]);
+        const statusColors: Record<string, string> = {
+          active: "bg-green-500",
+          passive: "bg-orange-400",
+          not_looking: "bg-gray-400",
+        };
+        const formatStatus = (s: string) =>
+          s === "not_looking" ? "Not Looking" : s.charAt(0).toUpperCase() + s.slice(1);
+
+        const Bar = ({
+          label,
+          value,
+          max,
+          active,
+          color,
+          onClick,
+        }: { label: string; value: number; max: number; active: boolean; color: string; onClick: () => void }) => (
+          <button
+            onClick={onClick}
+            className={`w-full text-left group ${active ? "opacity-100" : "opacity-90 hover:opacity-100"}`}
+          >
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className={`truncate pr-2 ${active ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>
+                {label}
+              </span>
+              <span className={`tabular-nums ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{value}</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full ${color} ${active ? "" : "opacity-70 group-hover:opacity-100"} transition-all`}
+                style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }}
+              />
+            </div>
+          </button>
+        );
+
+        const toggle = <T,>(set: Set<T>, value: T, setter: (s: Set<T>) => void) => {
+          const n = new Set(set);
+          if (n.has(value)) n.delete(value); else n.add(value);
+          setter(n);
+        };
+
+        const statusMax = Math.max(1, ...statusEntries.map(([, v]) => v));
+        const locationMax = Math.max(1, ...locationEntries.map(([, v]) => v));
+        const jobTypeMax = Math.max(1, ...jobTypeEntries.map(([, v]) => v));
+
+        return (
+          <Card className="bg-card">
+            <CardContent className="pt-5 pb-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Candidates by Status</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {statusEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : statusEntries.map(([s, v]) => (
+                      <Bar
+                        key={s}
+                        label={formatStatus(s)}
+                        value={v}
+                        max={statusMax}
+                        active={statusFilters.has(s)}
+                        color={statusColors[s] || "bg-primary"}
+                        onClick={() => toggle(statusFilters, s, setStatusFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Candidates by Location</h3>
+                    {locationCounts.size > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {locationEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : locationEntries.map(([l, v]) => (
+                      <Bar
+                        key={l}
+                        label={l}
+                        value={v}
+                        max={locationMax}
+                        active={locationFilters.has(l)}
+                        color="bg-blue-500"
+                        onClick={() => toggle(locationFilters, l, setLocationFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Candidates by Pref. Type</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {jobTypeEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : jobTypeEntries.map(([t, v]) => (
+                      <Bar
+                        key={t}
+                        label={formatJobType(t)}
+                        value={v}
+                        max={jobTypeMax}
+                        active={jobTypeFilters.has(t)}
+                        color="bg-purple-500"
+                        onClick={() => toggle(jobTypeFilters, t, setJobTypeFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {hasActiveFilters && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
