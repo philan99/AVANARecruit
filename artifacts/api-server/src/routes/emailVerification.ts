@@ -101,22 +101,49 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
   const [record] = await db
     .select()
     .from(emailVerificationsTable)
-    .where(
-      and(
-        eq(emailVerificationsTable.token, token),
-        isNull(emailVerificationsTable.usedAt),
-        gt(emailVerificationsTable.expiresAt, new Date())
-      )
-    );
+    .where(eq(emailVerificationsTable.token, token));
 
   if (!record) {
-    res.status(400).json({ error: "Invalid or expired verification link." });
+    res.status(400).json({ error: "Invalid verification link." });
     return;
   }
+
+  if (record.expiresAt && record.expiresAt.getTime() < Date.now()) {
+    res.status(400).json({ error: "This verification link has expired. Please request a new one." });
+    return;
+  }
+
+  const alreadyUsed = !!record.usedAt;
 
   let verifiedAccount: { id: number; role: "candidate" | "company"; email: string } | null = null;
 
   if (record.accountType === "candidate") {
+    const [existing] = await db
+      .select({
+        id: candidatesTable.id,
+        name: candidatesTable.name,
+        email: candidatesTable.email,
+        verified: candidatesTable.verified,
+      })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.email, record.email));
+
+    if (!existing) {
+      res.status(400).json({ error: "We couldn't find an account for this email. It may have been removed." });
+      return;
+    }
+
+    if (alreadyUsed || existing.verified) {
+      res.json({
+        success: true,
+        message: "Email already verified. You can sign in.",
+        role: "candidate",
+        candidateId: existing.id,
+        email: existing.email,
+      });
+      return;
+    }
+
     const [candidate] = await db
       .update(candidatesTable)
       .set({ verified: true })
@@ -190,6 +217,32 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       req.log.error(err, "Failed to send candidate welcome email");
     }
   } else {
+    const [existing] = await db
+      .select({
+        id: companyProfiles.id,
+        name: companyProfiles.name,
+        email: companyProfiles.email,
+        verified: companyProfiles.verified,
+      })
+      .from(companyProfiles)
+      .where(eq(companyProfiles.email, record.email));
+
+    if (!existing) {
+      res.status(400).json({ error: "We couldn't find a company account for this email. It may have been removed." });
+      return;
+    }
+
+    if (alreadyUsed || existing.verified) {
+      res.json({
+        success: true,
+        message: "Email already verified. You can sign in.",
+        role: "company",
+        companyId: existing.id,
+        email: existing.email,
+      });
+      return;
+    }
+
     const [company] = await db
       .update(companyProfiles)
       .set({ verified: true })
