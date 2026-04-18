@@ -295,23 +295,30 @@ export default function AdminDashboard() {
             </Card>
           </Link>
 
-          <Link href="/candidates">
-            <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors h-full">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{candidates.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {insights.activeCandidates} active · {insights.passiveCandidates} passive
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
+          <Card className="bg-card">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Candidate Status</CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
+                <span className="text-xs font-medium">{insights.activeCandidates}</span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-orange-400 ml-1" />
+                <span className="text-xs font-medium">{insights.passiveCandidates}</span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-gray-400 ml-1" />
+                <span className="text-xs font-medium">{insights.notLooking}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] text-muted-foreground">Active</span>
+                <span className="text-[10px] text-muted-foreground ml-1">Passive</span>
+                <span className="text-[10px] text-muted-foreground ml-1">Not looking</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/jobs")}>
             <CardContent className="pt-4 pb-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Matches</p>
@@ -333,24 +340,6 @@ export default function AdminDashboard() {
                 {insights.avgSalary > 0 ? `£${insights.avgSalary.toLocaleString()}` : "—"}
               </p>
               <p className="text-[10px] text-muted-foreground">{insights.jobsWithSalary} jobs with salary data</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card">
-            <CardContent className="pt-4 pb-4">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Candidate Status</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
-                <span className="text-xs">{insights.activeCandidates}</span>
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-orange-400 ml-1" />
-                <span className="text-xs">{insights.passiveCandidates}</span>
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-gray-400 ml-1" />
-                <span className="text-xs">{insights.notLooking}</span>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[9px] text-muted-foreground">Active</span>
-                <span className="text-[9px] text-muted-foreground ml-1">Passive</span>
-                <span className="text-[9px] text-muted-foreground ml-1">Not looking</span>
-              </div>
             </CardContent>
           </Card>
         </div>
