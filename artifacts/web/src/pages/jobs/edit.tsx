@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useGetJob, getGetJobQueryKey, useUpdateJob, type Job } from "@workspace/api-client-react";
+import { useGetJob, getGetJobQueryKey, useUpdateJob, useDeleteJob, getListJobsQueryKey, type Job } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const editFormSchema = z.object({
@@ -62,6 +73,7 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const updateJob = useUpdateJob();
+  const deleteJob = useDeleteJob();
 
   const form = useForm<z.infer<typeof editFormSchema>>({
     resolver: zodResolver(editFormSchema),
@@ -101,6 +113,57 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
     );
   }
 
+  function handleDelete() {
+    deleteJob.mutate(
+      { id: jobId },
+      {
+        onSuccess: () => {
+          toast({ title: "Job deleted", description: "The job has been removed." });
+          queryClient.invalidateQueries({ queryKey: getListJobsQueryKey() });
+          navigate("/jobs");
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Failed to delete job.", variant: "destructive" });
+        },
+      }
+    );
+  }
+
+  const actionButtons = (
+    <div className="flex flex-wrap items-center justify-end gap-3">
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button type="button" variant="destructive" disabled={deleteJob.isPending}>
+            <Trash2 className="w-4 h-4 mr-1" />
+            {deleteJob.isPending ? "Deleting..." : "Delete Job"}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the job listing and any associated matches. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <Button type="button" variant="outline" onClick={() => navigate(`/jobs/${jobId}`)}>
+        Cancel
+      </Button>
+      <Button
+        type="button"
+        onClick={form.handleSubmit(onSubmit)}
+        disabled={updateJob.isPending}
+      >
+        {updateJob.isPending ? "Saving..." : "Save Changes"}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
@@ -109,11 +172,14 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
         </Button>
       </div>
 
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Pencil className="mr-3 text-primary" /> Edit Job
-        </h1>
-        <p className="text-muted-foreground mt-1">Update the details for this job listing.</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Pencil className="mr-3 text-primary" /> Edit Job
+          </h1>
+          <p className="text-muted-foreground mt-1">Update the details for this job listing.</p>
+        </div>
+        {actionButtons}
       </div>
 
       <Card className="bg-card">
@@ -362,13 +428,8 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                 )}
               />
 
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => navigate(`/jobs/${jobId}`)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateJob.isPending}>
-                  {updateJob.isPending ? "Saving..." : "Save Changes"}
-                </Button>
+              <div className="pt-4">
+                {actionButtons}
               </div>
             </form>
           </Form>
