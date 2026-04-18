@@ -1,3 +1,4 @@
+import { useState, KeyboardEvent } from "react";
 import { useLocation } from "wouter";
 import { useCreateJob, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,6 +11,8 @@ import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -26,14 +29,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { ArrowLeft, Briefcase } from "lucide-react";
+import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(1, "Description is required"),
-  skills: z.string().min(1, "Skills are required (comma separated)"),
+  skills: z.array(z.string().min(1)).min(1, "At least one skill is required"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"], { required_error: "Experience level is required" }),
   jobType: z.string().min(1, "Job type is required"),
   industry: z.string().min(1, "Industry is required"),
@@ -43,6 +46,78 @@ const formSchema = z.object({
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"], { required_error: "Status is required" }),
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
+const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+function SectionHeader({ step, title, description }: { step: number; title: string; description?: string }) {
+  return (
+    <div className="flex items-start gap-3 pb-2 border-b border-border/60">
+      <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+        {step}
+      </div>
+      <div>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+      </div>
+    </div>
+  );
+}
+
+function SkillsInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const [input, setInput] = useState("");
+
+  function addSkill(raw: string) {
+    const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return;
+    const next = [...value];
+    for (const p of parts) {
+      if (!next.some(s => s.toLowerCase() === p.toLowerCase())) next.push(p);
+    }
+    onChange(next);
+    setInput("");
+  }
+
+  function removeSkill(idx: number) {
+    onChange(value.filter((_, i) => i !== idx));
+  }
+
+  function onKey(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (input.trim()) addSkill(input);
+    } else if (e.key === "Backspace" && !input && value.length > 0) {
+      removeSkill(value.length - 1);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 rounded-md border border-input bg-background min-h-10 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
+      {value.map((s, i) => (
+        <Badge key={`${s}-${i}`} variant="secondary" className="gap-1 pr-1 py-0.5 text-xs">
+          {s}
+          <button
+            type="button"
+            onClick={() => removeSkill(i)}
+            className="ml-0.5 hover:bg-foreground/10 rounded-sm p-0.5"
+            aria-label={`Remove ${s}`}
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </Badge>
+      ))}
+      <input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={onKey}
+        onBlur={() => input.trim() && addSkill(input)}
+        placeholder={value.length === 0 ? "Type a skill and press Enter" : ""}
+        className="flex-1 min-w-[140px] bg-transparent outline-none text-sm py-1"
+      />
+    </div>
+  );
+}
 
 export default function CreateJob() {
   const [, navigate] = useLocation();
@@ -57,24 +132,106 @@ export default function CreateJob() {
   const companyProfileId = companyProfile?.id;
   const createJob = useCreateJob();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const [brief, setBrief] = useState("");
+  const [drafting, setDrafting] = useState(false);
+  const [draftingDescription, setDraftingDescription] = useState(false);
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       location: "",
       description: "",
-      skills: "",
+      skills: [],
       experienceLevel: undefined,
       workplace: undefined,
       status: undefined,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function handleAiDraft() {
+    if (!brief.trim()) {
+      toast({ title: "Add a brief", description: "Type a short description of the role first.", variant: "destructive" });
+      return;
+    }
+    setDrafting(true);
+    try {
+      const res = await fetch(`${apiBase}/jobs/draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brief,
+          companyName: companyProfile?.name,
+          companyIndustry: companyProfile?.industry,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+
+      const current = form.getValues();
+      form.reset({
+        ...current,
+        title: data.title || current.title,
+        jobType: data.jobType || current.jobType,
+        workplace: data.workplace || current.workplace,
+        location: data.location || current.location,
+        experienceLevel: data.experienceLevel || current.experienceLevel,
+        industry: data.industry || current.industry,
+        educationLevel: data.educationLevel || current.educationLevel,
+        salaryMin: data.salaryMin ?? current.salaryMin,
+        salaryMax: data.salaryMax ?? current.salaryMax,
+        skills: Array.isArray(data.skills) && data.skills.length ? data.skills : current.skills,
+        description: data.description || current.description,
+        status: current.status || "draft",
+      });
+      toast({ title: "Draft ready", description: "Review the fields and tweak anything you'd like before posting." });
+    } catch (err) {
+      toast({ title: "AI draft failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setDrafting(false);
+    }
+  }
+
+  async function handleAiDescription() {
+    const v = form.getValues();
+    if (!v.title) {
+      toast({ title: "Add a job title", description: "We need a title to draft a description.", variant: "destructive" });
+      return;
+    }
+    setDraftingDescription(true);
+    try {
+      const res = await fetch(`${apiBase}/jobs/draft-description`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: v.title,
+          skills: v.skills,
+          experienceLevel: v.experienceLevel,
+          jobType: v.jobType,
+          workplace: v.workplace,
+          location: v.location,
+          industry: v.industry,
+          companyName: companyProfile?.name,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      if (data.description) {
+        form.setValue("description", data.description, { shouldValidate: true, shouldDirty: true });
+        toast({ title: "Description drafted", description: "Edit the text to make it your own." });
+      }
+    } catch (err) {
+      toast({ title: "AI description failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setDraftingDescription(false);
+    }
+  }
+
+  function onSubmit(values: FormValues) {
     const payload = {
       ...values,
       company: companyProfile?.name ?? "",
-      skills: values.skills.split(",").map(s => s.trim()).filter(Boolean),
+      skills: values.skills,
       ...(companyProfileId ? { companyProfileId } : {}),
     };
 
@@ -102,37 +259,62 @@ export default function CreateJob() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
           <Briefcase className="mr-3 text-primary" /> Post New Job
         </h1>
-        <p className="text-muted-foreground mt-1">Fill in the details below to create a new job listing.</p>
+        <p className="text-muted-foreground mt-1">Fill in the details below to create a new job listing — or let AVANA draft it for you.</p>
       </div>
+
+      <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-md bg-primary/15 text-primary flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">Draft with AI</h3>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-3">
+                Describe the role in a sentence or two and AVANA will fill in the form for you. Example: <em>“Senior React developer in London, hybrid, £70-90k, fintech experience preferred.”</em>
+              </p>
+              <Textarea
+                value={brief}
+                onChange={e => setBrief(e.target.value)}
+                placeholder="Describe the role you'd like to post..."
+                rows={2}
+                className="bg-background/80"
+                disabled={drafting}
+              />
+              <div className="flex items-center justify-end gap-2 mt-2">
+                <Button type="button" onClick={handleAiDraft} disabled={drafting || !brief.trim()} size="sm">
+                  {drafting ? (
+                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Drafting...</>
+                  ) : (
+                    <><Sparkles className="w-3.5 h-3.5 mr-1.5" /> Draft with AI</>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="bg-card">
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* SECTION 1: BASICS */}
+              <div className="space-y-4">
+                <SectionHeader step={1} title="The basics" description="What is the role and where does it sit?" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <FormField control={form.control} name="title" render={({ field }) => (
+                    <FormItem className="md:col-span-2 lg:col-span-3">
                       <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl><Input placeholder="e.g. Senior Frontend Engineer" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="jobType"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="jobType" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Job Type <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select job type" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select job type" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="permanent_full_time">Permanent (Full Time)</SelectItem>
                           <SelectItem value="contract">Contract</SelectItem>
@@ -143,20 +325,12 @@ export default function CreateJob() {
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="workplace"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="workplace" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Workplace <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select workplace" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select workplace" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="office">Office</SelectItem>
                           <SelectItem value="remote">Remote</SelectItem>
@@ -165,31 +339,26 @@ export default function CreateJob() {
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="location" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl><Input placeholder="e.g. London or Remote" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="experienceLevel"
-                  render={({ field }) => (
+                  )} />
+                </div>
+              </div>
+
+              {/* SECTION 2: REQUIREMENTS */}
+              <div className="space-y-4">
+                <SectionHeader step={2} title="Requirements" description="Who you're looking for." />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <FormField control={form.control} name="experienceLevel" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Experience Level <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="junior">Junior</SelectItem>
                           <SelectItem value="mid">Mid-Level</SelectItem>
@@ -200,20 +369,12 @@ export default function CreateJob() {
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="industry"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="industry" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Industry <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select industry" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="accounting_finance">Accounting & Finance</SelectItem>
                           <SelectItem value="agriculture">Agriculture</SelectItem>
@@ -249,20 +410,12 @@ export default function CreateJob() {
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="educationLevel"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="educationLevel" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Education Level</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select education level" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="GCSE">GCSE</SelectItem>
                           <SelectItem value="A-Level">A-Level</SelectItem>
@@ -277,86 +430,95 @@ export default function CreateJob() {
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="salaryMin"
-                  render={({ field }) => (
+                  )} />
+                </div>
+                <FormField control={form.control} name="skills" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Required Skills <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <SkillsInput value={field.value || []} onChange={field.onChange} />
+                    </FormControl>
+                    <p className="text-[11px] text-muted-foreground">Press Enter or use commas to add a skill.</p>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              {/* SECTION 3: COMPENSATION & STATUS */}
+              <div className="space-y-4">
+                <SectionHeader step={3} title="Compensation & visibility" description="Pay range and whether the job goes live." />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField control={form.control} name="salaryMin" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Salary Min (£)</FormLabel>
-                      <FormControl><Input type="number" {...field} /></FormControl>
+                      <FormControl><Input type="number" placeholder="40000" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="salaryMax"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="salaryMax" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Salary Max (£)</FormLabel>
-                      <FormControl><Input type="number" {...field} /></FormControl>
+                      <FormControl><Input type="number" placeholder="60000" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
+                  )} />
+                  <FormField control={form.control} name="status" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="open">Open — visible to candidates</SelectItem>
+                          <SelectItem value="draft">Draft — not visible</SelectItem>
                           <SelectItem value="closed">Closed</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  )} />
+                </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="skills"
-                render={({ field }) => (
+              {/* SECTION 4: DESCRIPTION */}
+              <div className="space-y-4">
+                <SectionHeader step={4} title="The pitch" description="What candidates will read on the job page." />
+                <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Required Skills (comma separated) <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="React, TypeScript, Node.js" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAiDescription}
+                        disabled={draftingDescription}
+                        className="h-7 text-xs"
+                      >
+                        {draftingDescription ? (
+                          <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Drafting...</>
+                        ) : (
+                          <><Sparkles className="w-3 h-3 mr-1.5" /> {field.value ? "Redraft with AI" : "Draft with AI"}</>
+                        )}
+                      </Button>
+                    </div>
                     <FormControl>
                       <RichTextEditor value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                )} />
+              </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-border/60">
                 <Button type="button" variant="outline" onClick={() => navigate("/jobs")}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createJob.isPending}>
-                  {createJob.isPending ? "Posting..." : "Post Job"}
+                  {createJob.isPending ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Posting...</>
+                  ) : (
+                    <><Plus className="w-4 h-4 mr-2" /> Post Job</>
+                  )}
                 </Button>
               </div>
             </form>
