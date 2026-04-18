@@ -15,7 +15,7 @@ import {
   MapPin, Heart, Camera, Linkedin, Facebook, Twitter, Globe, Trash2, Briefcase as BriefcaseIcon,
   Loader2,
 } from "lucide-react";
-import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
+import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
 
 type ExperienceEntry = {

@@ -1,4 +1,4 @@
-import logoUrl from "@assets/AVANA_Recruit_1776280304155.png";
+import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { Link } from "wouter";
 import { useEffect } from "react";
 
