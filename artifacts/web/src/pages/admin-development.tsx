@@ -19,11 +19,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, CheckCircle2, Circle, Clock, AlertTriangle, ArrowUp, ArrowDown, ArrowRight, Home, Building2, UserCircle, Code2 } from "lucide-react";
+import { Plus, Trash2, Edit, CheckCircle2, Circle, Clock, AlertTriangle, ArrowUp, ArrowDown, ArrowRight, Home, Building2, UserCircle, Code2, Megaphone } from "lucide-react";
 
 const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
-const CATEGORIES = ["Homepage", "Company", "Candidate", "Other"] as const;
+const CATEGORIES = ["Homepage", "Company", "Candidate", "Marketing", "Other"] as const;
 type Category = typeof CATEGORIES[number];
 
 const STATUSES = ["todo", "in-progress", "done"] as const;
@@ -59,6 +59,7 @@ const categoryConfig: Record<Category, { icon: typeof Home; color: string }> = {
   "Homepage": { icon: Home, color: "text-purple-500" },
   "Company": { icon: Building2, color: "text-blue-500" },
   "Candidate": { icon: UserCircle, color: "text-green-500" },
+  "Marketing": { icon: Megaphone, color: "text-pink-500" },
   "Other": { icon: Code2, color: "text-orange-500" },
 };
 
