@@ -28,13 +28,6 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       }
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (adminEmail && adminPassword && lowerEmail === adminEmail.toLowerCase() && password === adminPassword) {
-      res.json({ success: true, role: "admin" });
-      return;
-    }
-
     const [candidate] = await db
       .select({
         id: candidatesTable.id,
