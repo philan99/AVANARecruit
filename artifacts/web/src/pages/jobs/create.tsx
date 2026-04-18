@@ -247,9 +247,34 @@ export default function CreateJob() {
     };
 
     createJob.mutate({ data: payload }, {
-      onSuccess: (data) => {
-        toast({ title: "Job posted", description: "The job has been posted successfully." });
+      onSuccess: async (data) => {
+        toast({ title: "Job posted", description: "Running AI matching against your candidate pool..." });
         queryClient.invalidateQueries({ queryKey: getListJobsQueryKey() });
+        try {
+          const res = await fetch(`${apiBase}/jobs/${data.id}/run-matching`, { method: "POST" });
+          if (res.ok) {
+            const result = await res.json().catch(() => null);
+            const count = result?.matchesCreated ?? result?.count;
+            toast({
+              title: "Matching complete",
+              description: typeof count === "number"
+                ? `Found ${count} candidate match${count === 1 ? "" : "es"}.`
+                : "AI matching finished. Review results on the matches page.",
+            });
+          } else {
+            toast({
+              title: "Matching didn't run",
+              description: "Job was posted, but AI matching failed. You can run it manually from the job page.",
+              variant: "destructive",
+            });
+          }
+        } catch {
+          toast({
+            title: "Matching didn't run",
+            description: "Job was posted, but AI matching failed. You can run it manually from the job page.",
+            variant: "destructive",
+          });
+        }
         navigate(`/jobs/${data.id}`);
       },
       onError: () => {
