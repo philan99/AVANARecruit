@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, Pencil, Send } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
@@ -54,6 +54,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: job, isLoading: jobLoading } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) },
@@ -92,8 +93,8 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center text-sm text-muted-foreground mb-4">
-        <button onClick={() => window.history.back()} className="hover:text-primary flex items-center cursor-pointer bg-transparent border-none p-0">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        <button onClick={() => navigate("/jobs")} className="hover:text-primary flex items-center cursor-pointer bg-transparent border-none p-0">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Jobs
         </button>
       </div>
 
