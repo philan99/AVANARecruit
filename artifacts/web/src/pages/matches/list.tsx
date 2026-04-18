@@ -434,7 +434,15 @@ ${companyName}`
                                       className="w-8 h-8 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
                                       onClick={() => prev && handleUpdateStatus(match.id, group.jobId, prev)}
                                       disabled={!canGoBack || updateStatus.isPending}
-                                      title={prev ? `Move back to ${PIPELINE_LABEL[prev]}` : "Already at first stage"}
+                                      title={
+                                        prev
+                                          ? prev === "pending"
+                                            ? match.applied
+                                              ? "Back to Applied"
+                                              : "Move back to Pending"
+                                            : `Move back to ${PIPELINE_LABEL[prev]}`
+                                          : "Already at first stage"
+                                      }
                                     >
                                       <ArrowLeft className="w-4 h-4" />
                                     </Button>
