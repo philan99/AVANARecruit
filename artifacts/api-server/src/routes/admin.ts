@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles, candidatesTable, jobsTable, adminsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, companyProfiles, candidatesTable, jobsTable, adminsTable, verificationsTable } from "@workspace/db";
+import { eq, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
@@ -60,7 +60,13 @@ router.get("/admin/companies/:id", async (req, res) => {
 router.get("/admin/candidates", async (req, res) => {
   try {
     const candidates = await db.select().from(candidatesTable);
-    res.json(candidates);
+    const verificationCounts = await db
+      .select({ candidateId: verificationsTable.candidateId, total: count() })
+      .from(verificationsTable)
+      .where(eq(verificationsTable.status, "verified"))
+      .groupBy(verificationsTable.candidateId);
+    const countMap = new Map(verificationCounts.map(v => [v.candidateId, Number(v.total)]));
+    res.json(candidates.map(c => ({ ...c, verifiedCount: countMap.get(c.id) || 0 })));
   } catch (err) {
     req.log.error(err, "Failed to list candidates");
     res.status(500).json({ error: "Internal server error" });

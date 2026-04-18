@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 
 function MultiSelectDropdown({
@@ -197,6 +197,34 @@ interface Candidate {
   preferredWorkplaces: string[];
   preferredIndustries: string[];
   qualifications: string[];
+  verifiedCount?: number;
+}
+
+const PLACEHOLDER_VALUES = ["not specified", "not provided"];
+function isFilled(val: any): boolean {
+  if (val === null || val === undefined) return false;
+  const s = String(val).trim().toLowerCase();
+  if (!s) return false;
+  return !PLACEHOLDER_VALUES.includes(s);
+}
+function profileCompletion(c: Candidate): number {
+  const checks: boolean[] = [
+    isFilled(c.name),
+    isFilled(c.email),
+    isFilled(c.phone),
+    isFilled(c.location),
+    isFilled(c.currentTitle),
+    c.experienceYears > 0,
+    isFilled(c.summary),
+    Array.isArray(c.skills) && c.skills.length > 0 && !(c.skills.length === 1 && c.skills[0]?.toLowerCase() === "general"),
+    isFilled(c.education),
+    Array.isArray(c.qualifications) && c.qualifications.length > 0,
+    Array.isArray(c.preferredJobTypes) && c.preferredJobTypes.length > 0,
+    Array.isArray(c.preferredWorkplaces) && c.preferredWorkplaces.length > 0,
+    Array.isArray(c.preferredIndustries) && c.preferredIndustries.length > 0,
+  ];
+  const done = checks.filter(Boolean).length;
+  return Math.round((done / checks.length) * 100);
 }
 
 export default function AdminCandidates() {
@@ -672,6 +700,38 @@ export default function AdminCandidates() {
                     )}
                   </div>
                 </div>
+
+                {(() => {
+                  const pct = profileCompletion(candidate);
+                  const verified = candidate.verifiedCount || 0;
+                  const updated = new Date(candidate.updatedAt || candidate.createdAt);
+                  return (
+                    <div className="pt-3 mt-3 border-t border-border space-y-2">
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                          <span>Profile completion</span>
+                          <span className={`font-semibold ${pct >= 80 ? "text-green-600" : pct >= 50 ? "text-yellow-600" : "text-orange-600"}`}>{pct}%</span>
+                        </div>
+                        <div className="h-1.5 rounded bg-muted overflow-hidden">
+                          <div
+                            className={`h-full ${pct >= 80 ? "bg-green-500" : pct >= 50 ? "bg-yellow-500" : "bg-orange-500"}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <ShieldCheck className={`w-3 h-3 ${verified > 0 ? "text-green-600" : "text-muted-foreground/60"}`} />
+                          {verified} verified
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          Updated {updated.toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
@@ -692,7 +752,9 @@ export default function AdminCandidates() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Workplace</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Profile %</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Verified</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Updated</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
@@ -760,8 +822,30 @@ export default function AdminCandidates() {
                           {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                         </Badge>
                       </td>
+                      <td className="py-2 px-2">
+                        {(() => {
+                          const pct = profileCompletion(candidate);
+                          return (
+                            <div className="flex items-center gap-1.5 min-w-[80px]">
+                              <div className="h-1.5 flex-1 rounded bg-muted overflow-hidden">
+                                <div
+                                  className={`h-full ${pct >= 80 ? "bg-green-500" : pct >= 50 ? "bg-yellow-500" : "bg-orange-500"}`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <span className={`text-[10px] font-semibold tabular-nums ${pct >= 80 ? "text-green-600" : pct >= 50 ? "text-yellow-600" : "text-orange-600"}`}>{pct}%</span>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="py-2 px-2">
+                        <span className={`inline-flex items-center gap-1 text-[11px] ${(candidate.verifiedCount || 0) > 0 ? "text-green-600 font-medium" : "text-muted-foreground"}`}>
+                          <ShieldCheck className="w-3 h-3" />
+                          {candidate.verifiedCount || 0}
+                        </span>
+                      </td>
                       <td className="py-2 px-2 text-muted-foreground">
-                        {new Date(candidate.createdAt).toLocaleDateString()}
+                        {new Date(candidate.updatedAt || candidate.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-2 px-2">
                         <div className="flex items-center gap-1">
