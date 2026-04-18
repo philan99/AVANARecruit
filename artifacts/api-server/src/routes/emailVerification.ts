@@ -162,37 +162,27 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
         subject: "Welcome to AVANA Recruit — What's Next",
         html: brandedEmail(
           `Welcome${candidate.name ? `, ${candidate.name.split(" ")[0]}` : ""}!`,
-          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Your AVANA Recruit account is now verified and ready to use. When you sign in, we'll take you through a quick guided setup — it only takes about 5 minutes, and your progress saves automatically as you go.</p>
+          `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Your AVANA Recruit account is now verified. Thanks for completing the guided sign-up — your profile is already in place and ready to start matching you to live roles.</p>
 
            <div style="background: #f5f9f5; border: 1px solid rgba(76,175,80,0.3); border-radius: 8px; padding: 16px; margin: 20px 0;">
-             <p style="font-size: 14px; color: #1a2035; line-height: 1.6; margin: 0 0 6px 0;"><strong>✨ Upload your CV and AI will do the heavy lifting</strong></p>
-             <p style="font-size: 13px; color: #374151; line-height: 1.6; margin: 0;">In the first step we'll ask you to upload your CV. Our AI then reads it and pre-fills your skills, experience, education, location and more — so you only need to review and tweak. Fields it's unsure about are flagged for you.</p>
+             <p style="font-size: 14px; color: #1a2035; line-height: 1.6; margin: 0 0 6px 0;"><strong>✨ Your CV has done most of the work</strong></p>
+             <p style="font-size: 13px; color: #374151; line-height: 1.6; margin: 0;">Our AI has read your CV and pre-filled your skills, experience, education, location and more. When you sign in, just take a minute to review what it captured — anything it wasn't sure about is flagged for you to confirm or tweak.</p>
            </div>
 
-           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">What's in the guided setup</h3>
-           <ol style="font-size: 14px; color: #374151; line-height: 1.7; margin: 0 0 12px 0; padding-left: 20px;">
-             <li><strong>Upload your CV</strong> — for AI pre-fill and so companies can see your full background.</li>
-             <li><strong>The basics</strong> — current job title, location, years of experience, phone and a short professional summary.</li>
-             <li><strong>Your skills</strong> — these make up 35% of your match score, the biggest single factor.</li>
-             <li><strong>Education and qualifications</strong> — your highest qualification plus any certifications.</li>
-             <li><strong>Work experience</strong> — your previous roles with dates and a short description.</li>
-             <li><strong>What you're looking for</strong> — preferred job types, workplace style and industries.</li>
-             <li><strong>Social links</strong> — LinkedIn, portfolio and other profiles (all optional).</li>
-           </ol>
-
-           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">After you're set up</h3>
+           <h3 style="font-size: 16px; color: #1a2035; margin: 24px 0 8px 0;">A few things worth doing next</h3>
            <ul style="font-size: 14px; color: #374151; line-height: 1.7; margin: 0 0 12px 0; padding-left: 20px;">
-             <li><strong>See your AI matches instantly</strong> — we rank live jobs by how well they fit your profile.</li>
+             <li><strong>Review your profile</strong> — give your skills, experience and preferences a quick once-over so your matches are as accurate as possible.</li>
+             <li><strong>See your AI matches</strong> — we've already started ranking live jobs by how well they fit your profile.</li>
              <li><strong>Add references and verifications</strong> — even one or two verified references can boost your match score by up to 30%.</li>
              <li><strong>Browse jobs and companies</strong> — explore opportunities and discover places you'd love to work.</li>
              <li><strong>Set up job alerts</strong> — be the first to know when matching roles go live.</li>
            </ul>
 
            <div style="text-align: center; margin: 32px 0 8px 0;">
-             <a href="${origin}/" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Sign In and Start Setup</a>
+             <a href="${origin}/" style="background: #4CAF50; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Sign In to My Profile</a>
            </div>
 
-           <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 24px 0 0 0;">If you have any questions or need help getting started, just reply to this email or contact us at <a href="mailto:recruitment@avanarecruit.ai" style="color: #4CAF50; text-decoration: none;">recruitment@avanarecruit.ai</a>.</p>`,
+           <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 24px 0 0 0;">If you have any questions or need a hand, just reply to this email or contact us at <a href="mailto:recruitment@avanarecruit.ai" style="color: #4CAF50; text-decoration: none;">recruitment@avanarecruit.ai</a>.</p>`,
           "We're excited to help you find your next opportunity."
         ),
       });
