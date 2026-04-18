@@ -58,7 +58,6 @@ export function Layout({ children }: LayoutProps) {
     { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/matches", label: "Matches", icon: Network },
     { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
-    { href: "/contact-us", label: "Contact Us", icon: Mail },
   ];
 
   const candidateNavItems = [
@@ -66,7 +65,6 @@ export function Layout({ children }: LayoutProps) {
     { href: "/my-matches", label: "My Matches", icon: Target },
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
     { href: "/browse-companies", label: "Browse Companies", icon: Building2 },
-    { href: "/contact-us", label: "Contact Us", icon: Mail },
   ];
 
   const adminNavItems = [
@@ -86,6 +84,11 @@ export function Layout({ children }: LayoutProps) {
       ? { href: "/company-profile", label: "Company Profile", icon: Building2 }
       : role === "candidate"
       ? { href: "/profile", label: "My Profile", icon: UserCircle }
+      : null;
+
+  const supportItem =
+    role === "company" || role === "candidate"
+      ? { href: "/contact-us", label: "Get Support", icon: Mail }
       : null;
 
   return (
@@ -145,16 +148,22 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </div>
                 </DropdownMenuLabel>
+                {(profileItem || supportItem) && <DropdownMenuSeparator />}
                 {profileItem && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={profileItem.href} className="flex items-center cursor-pointer">
-                        <profileItem.icon className="w-4 h-4 mr-2" />
-                        {profileItem.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem asChild>
+                    <Link href={profileItem.href} className="flex items-center cursor-pointer">
+                      <profileItem.icon className="w-4 h-4 mr-2" />
+                      {profileItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {supportItem && (
+                  <DropdownMenuItem asChild>
+                    <Link href={supportItem.href} className="flex items-center cursor-pointer">
+                      <supportItem.icon className="w-4 h-4 mr-2" />
+                      {supportItem.label}
+                    </Link>
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -213,6 +222,16 @@ export function Layout({ children }: LayoutProps) {
                 >
                   <profileItem.icon className="w-4 h-4 mr-3" />
                   {profileItem.label}
+                </Link>
+              )}
+              {supportItem && (
+                <Link
+                  href={supportItem.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <supportItem.icon className="w-4 h-4 mr-3" />
+                  {supportItem.label}
                 </Link>
               )}
               <button
