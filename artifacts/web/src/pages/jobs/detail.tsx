@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Briefcase, Building, Calendar, MapPin, Target, ArrowLeft, Loader2, Network, Pencil, Send } from "lucide-react";
 import { useGetJob, getGetJobQueryKey, useGetJobMatches, getGetJobMatchesQueryKey, useRunJobMatching } from "@workspace/api-client-react";
@@ -8,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+type ScoreFilter = "all" | "high" | "mid" | "low";
 
 const JOB_TYPE_LABELS: Record<string, string> = {
   permanent_full_time: "Permanent (Full Time)",
@@ -63,6 +66,20 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   const { data: matches, isLoading: matchesLoading } = useGetJobMatches(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobMatchesQueryKey(jobId) },
   });
+
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+
+  const filteredMatches = useMemo(() => {
+    if (!matches) return [];
+    if (scoreFilter === "all") return matches;
+    return matches.filter((m: any) => {
+      const s = m.overallScore;
+      if (scoreFilter === "high") return s > 75;
+      if (scoreFilter === "mid") return s >= 50 && s <= 75;
+      if (scoreFilter === "low") return s < 50;
+      return true;
+    });
+  }, [matches, scoreFilter]);
 
   const runMatching = useRunJobMatching();
 
@@ -219,6 +236,32 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                   {matches?.length || 0} TOTAL
                 </Badge>
               </CardTitle>
+              {!!matches?.length && (
+                <div className="flex items-center gap-1 pt-3 flex-wrap">
+                  {([
+                    { key: "high" as ScoreFilter, label: "> 75%" },
+                    { key: "mid" as ScoreFilter, label: "50-75%" },
+                    { key: "low" as ScoreFilter, label: "< 50%" },
+                    { key: "all" as ScoreFilter, label: "All" },
+                  ]).map(f => (
+                    <Button
+                      key={f.key}
+                      variant={scoreFilter === f.key ? "default" : "outline"}
+                      size="sm"
+                      className="text-xs h-7 px-2.5"
+                      onClick={() => setScoreFilter(f.key)}
+                      data-testid={`button-score-filter-${f.key}`}
+                    >
+                      {f.label}
+                    </Button>
+                  ))}
+                  {scoreFilter !== "all" && (
+                    <span className="text-xs text-muted-foreground ml-1">
+                      {filteredMatches.length} of {matches.length}
+                    </span>
+                  )}
+                </div>
+              )}
             </CardHeader>
             <CardContent className="p-0">
               {matchesLoading ? (
@@ -228,9 +271,13 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                   <Target className="w-8 h-8 text-muted-foreground/30 mb-2" />
                   No matches yet. Run AI matching to find candidates.
                 </div>
+              ) : filteredMatches.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  No matches in this score range.
+                </div>
               ) : (
                 <div className="divide-y divide-border">
-                  {matches?.map((match: any) => (
+                  {filteredMatches.map((match: any) => (
                     <Link key={match.id} href={`/candidates/${match.candidateId}`}>
                       <div className={`p-4 hover:bg-secondary/50 transition-colors cursor-pointer group ${match.applied ? "bg-blue-500/5 border-l-2 border-l-blue-500" : ""}`}>
                         <div className="flex justify-between items-start mb-2">
