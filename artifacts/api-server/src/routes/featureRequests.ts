@@ -45,7 +45,7 @@ router.post("/feature-requests", async (req, res) => {
       const { client, fromEmail } = await getResendClient();
       await client.emails.send({
         from: fromEmail,
-        to: fromEmail,
+        to: "enhancements@avanarecruit.ai",
         replyTo: email.trim(),
         subject: `[AVANA Feature Request] ${title.trim()}`,
         html: brandedEmail(
