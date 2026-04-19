@@ -87,7 +87,7 @@ export default function CompanyProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { companyProfileId, clearRole, userEmail, companyUserRole } = useRole();
+  const { companyProfileId, clearRole, userEmail, companyUserId, companyUserRole, setCompanyUserRole } = useRole();
   const [, setLocation] = useLocation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -95,6 +95,23 @@ export default function CompanyProfile() {
 
   const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
   const apiBasePath2 = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+
+  useEffect(() => {
+    if (!companyProfileId || !companyUserId || companyUserRole) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBasePath2}/companies/${companyProfileId}/team`, {
+          headers: { "x-company-user-id": String(companyUserId) },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const me = Array.isArray(data.users) ? data.users.find((u: any) => u.id === companyUserId) : null;
+        if (!cancelled && me?.role) setCompanyUserRole(me.role);
+      } catch { /* noop */ }
+    })();
+    return () => { cancelled = true; };
+  }, [apiBasePath2, companyProfileId, companyUserId, companyUserRole, setCompanyUserRole]);
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: getGetCompanyProfileQueryKey(),
