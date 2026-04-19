@@ -147,7 +147,8 @@ export default function FeatureRequest() {
               <Input
                 placeholder="Your name"
                 value={form.name}
-                onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+                readOnly
+                className="bg-muted cursor-not-allowed"
                 required
               />
             </div>
@@ -159,7 +160,8 @@ export default function FeatureRequest() {
                 type="email"
                 placeholder="you@example.com"
                 value={form.email}
-                onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+                readOnly
+                className="bg-muted cursor-not-allowed"
                 required
               />
             </div>
@@ -238,7 +240,7 @@ export default function FeatureRequest() {
               value={form.problem}
               onChange={(e) => setForm(f => ({ ...f, problem: e.target.value }))}
               rows={4}
-              className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-background border-input"
+              className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-white border-input"
             />
           </div>
 
@@ -251,7 +253,7 @@ export default function FeatureRequest() {
               value={form.proposal}
               onChange={(e) => setForm(f => ({ ...f, proposal: e.target.value }))}
               rows={6}
-              className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-background border-input"
+              className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-white border-input"
               required
             />
           </div>
