@@ -60,7 +60,7 @@ interface Row {
 
 const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
   owner: { label: "Owner", cls: "bg-primary/15 text-primary border-primary/30" },
-  admin: { label: "Admin", cls: "bg-accent/15 text-accent border-accent/30" },
+  admin: { label: "Admin", cls: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40" },
   member: { label: "Member", cls: "bg-secondary text-foreground border-border" },
 };
 
@@ -357,27 +357,25 @@ export default function AdminCompanies() {
                         data-testid={`row-company-user-${c.id}-${u?.id ?? "empty"}`}
                       >
                         <td className="py-2 px-2 align-top">
-                          {showCompanyMeta ? (
-                            <button
-                              type="button"
-                              onClick={() => navigate(`/companies/${c.id}`)}
-                              className="flex items-center gap-2 text-left"
-                            >
-                              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
-                                {c.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-medium text-xs text-primary hover:underline truncate">{c.name}</p>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/companies/${c.id}`)}
+                            className="flex items-center gap-2 text-left"
+                          >
+                            <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
+                              {c.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-xs text-primary hover:underline truncate">{c.name}</p>
+                              {showCompanyMeta && (
                                 <p className="text-[10px] text-muted-foreground truncate">
                                   {c.users.length === 0
                                     ? "No team members"
                                     : `${c.users.length} member${c.users.length === 1 ? "" : "s"}`}
                                 </p>
-                              </div>
-                            </button>
-                          ) : (
-                            <div className="pl-9 text-muted-foreground/40 text-[10px]">↳</div>
-                          )}
+                              )}
+                            </div>
+                          </button>
                         </td>
                         <td className="py-2 px-2 align-top">
                           {u ? (
@@ -393,8 +391,8 @@ export default function AdminCompanies() {
                           )}
                         </td>
                         <td className="py-2 px-2 align-top">{u ? roleBadge(u.role) : "—"}</td>
-                        <td className="py-2 px-2 text-muted-foreground align-top">{showCompanyMeta ? (formatIndustry(c.industry) || "—") : ""}</td>
-                        <td className="py-2 px-2 text-muted-foreground align-top">{showCompanyMeta ? (c.location || "—") : ""}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">{formatIndustry(c.industry) || "—"}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">{c.location || "—"}</td>
                         <td className="py-2 px-2 text-muted-foreground align-top">
                           {u?.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "—"}
                         </td>
