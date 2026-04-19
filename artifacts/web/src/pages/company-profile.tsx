@@ -96,8 +96,10 @@ export default function CompanyProfile() {
   const basePath = `${import.meta.env.BASE_URL}api/storage`.replace(/\/\//g, "/");
   const apiBasePath2 = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
+  const [resolvedRole, setResolvedRole] = useState<string | null>(companyUserRole);
+
   useEffect(() => {
-    if (!companyProfileId || !companyUserId || companyUserRole) return;
+    if (!companyProfileId || !companyUserId) return;
     let cancelled = false;
     (async () => {
       try {
@@ -110,7 +112,10 @@ export default function CompanyProfile() {
           ?? (Array.isArray(data.users)
             ? data.users.find((u: any) => Number(u.id) === Number(companyUserId))?.role
             : null);
-        if (!cancelled && role) setCompanyUserRole(role);
+        if (!cancelled && role) {
+          setResolvedRole(role);
+          if (role !== companyUserRole) setCompanyUserRole(role);
+        }
       } catch { /* noop */ }
     })();
     return () => { cancelled = true; };
@@ -441,6 +446,59 @@ export default function CompanyProfile() {
             </Form>
           </CardContent>
         </Card>
+
+        {resolvedRole === "owner" && hasProfile && (
+          <Card className="bg-card border-destructive/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
+                <Trash2 className="w-4 h-4" /> Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground mb-3">
+                Permanently delete your company account and all associated data including your profile, jobs, matches, bookmarks, and candidate alerts. This action cannot be undone.
+              </p>
+              <Dialog open={deleteDialogOpen} onOpenChange={(open) => { setDeleteDialogOpen(open); if (!open) setDeleteConfirmText(""); }}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete Company Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-destructive">Delete Company Account</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      This will permanently delete your company profile, all job postings, matches, applications, bookmarks, candidate alerts, and any other data associated with your account.
+                    </p>
+                    <p className="text-sm font-medium">
+                      Type <span className="font-mono text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">DELETE</span> to confirm:
+                    </p>
+                    <Input
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="Type DELETE to confirm"
+                      className="font-mono"
+                    />
+                  </div>
+                  <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== "DELETE" || deleting}
+                    >
+                      {deleting ? "Deleting..." : "Permanently Delete"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
@@ -549,58 +607,6 @@ export default function CompanyProfile() {
         </Card>
       )}
 
-      {companyUserRole === "owner" && isEditing && (
-      <Card className="bg-card border-destructive/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
-            <Trash2 className="w-4 h-4" /> Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xs text-muted-foreground mb-3">
-            Permanently delete your company account and all associated data including your profile, jobs, matches, bookmarks, and candidate alerts. This action cannot be undone.
-          </p>
-          <Dialog open={deleteDialogOpen} onOpenChange={(open) => { setDeleteDialogOpen(open); if (!open) setDeleteConfirmText(""); }}>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete Company Account
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="text-destructive">Delete Company Account</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  This will permanently delete your company profile, all job postings, matches, applications, bookmarks, candidate alerts, and any other data associated with your account.
-                </p>
-                <p className="text-sm font-medium">
-                  Type <span className="font-mono text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">DELETE</span> to confirm:
-                </p>
-                <Input
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="Type DELETE to confirm"
-                  className="font-mono"
-                />
-              </div>
-              <DialogFooter className="gap-2 sm:gap-0">
-                <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteAccount}
-                  disabled={deleteConfirmText !== "DELETE" || deleting}
-                >
-                  {deleting ? "Deleting..." : "Permanently Delete"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
-      )}
     </div>
   );
 }
