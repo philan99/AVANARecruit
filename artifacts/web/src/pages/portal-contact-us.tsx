@@ -87,7 +87,7 @@ export default function PortalContactUs() {
     setForm(f => ({
       ...f,
       topic: topic.id,
-      subject: f.subject || topic.label,
+      subject: topic.label,
     }));
   };
 
