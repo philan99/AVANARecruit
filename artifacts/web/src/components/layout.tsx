@@ -181,6 +181,7 @@ export function Layout({ children }: LayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                 )}
+                {profileItem && supportItem && <DropdownMenuSeparator />}
                 {supportItem && (
                   <DropdownMenuItem asChild>
                     <Link href={supportItem.href} className="flex items-center cursor-pointer">
