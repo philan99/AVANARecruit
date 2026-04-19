@@ -36,13 +36,13 @@ export default function HowItWorks() {
     },
     {
       icon: Upload,
-      title: "Post Job Openings",
-      description: "Create detailed job listings with required skills, experience levels, education requirements, salary ranges, and location preferences. The more detail you provide, the better the AI matching.",
+      title: "Post Jobs Three Ways",
+      description: "Create a job listing the way that suits you: describe the role in a sentence and let AI draft it, upload an existing job description (PDF, DOCX or TXT) and let AI fill the form, or fill it in manually. You stay in full control of the final wording.",
     },
     {
       icon: Sparkles,
       title: "Run AI Matching",
-      description: "Our AI engine analyses every candidate in the system against your job requirements, scoring them across five dimensions: Skills (35%), Experience (20%), Location (15%), Verification (20%), and Education (10%).",
+      description: "Our AI engine analyses every candidate in the system against your job requirements, scoring them across six weighted dimensions: Skills (30%), Experience (20%), Preferences (15%), Verification (15%), Location (10%) and Education (10%).",
     },
     {
       icon: BarChart3,
@@ -118,7 +118,7 @@ export default function HowItWorks() {
     {
       icon: Sparkles,
       title: "AI-Powered Matching",
-      description: "Advanced algorithms score candidates across five weighted dimensions for accurate, unbiased matching.",
+      description: "Advanced algorithms score candidates across six weighted dimensions — including the candidate's own workplace, job-type and industry preferences — for accurate, unbiased matching.",
     },
     {
       icon: ShieldCheck,
@@ -289,16 +289,17 @@ export default function HowItWorks() {
               How We Score Every Match
             </h2>
             <p className="text-base max-w-2xl mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Every candidate-job match is scored across five weighted dimensions, producing an overall percentage and a detailed assessment.
+              Every candidate-job match is scored across six weighted dimensions, producing an overall percentage and a detailed assessment.
             </p>
           </div>
-          <div className="grid md:grid-cols-5 gap-4 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
             {[
-              { label: "Skills", weight: "35%", desc: "Fuzzy matching of candidate skills against job requirements" },
+              { label: "Skills", weight: "30%", desc: "Fuzzy matching of candidate skills against job requirements" },
               { label: "Experience", weight: "20%", desc: "Years of experience compared to job level expectations" },
-              { label: "Location", weight: "15%", desc: "Remote, exact city match, or regional proximity" },
-              { label: "Verification", weight: "20%", desc: "Number of verified credentials and qualifications" },
-              { label: "Education", weight: "10%", desc: "Education level matched against job requirements" },
+              { label: "Preferences", weight: "15%", desc: "Workplace, job type and industry alignment with candidate preferences" },
+              { label: "Verification", weight: "15%", desc: "Number of verified credentials and qualifications" },
+              { label: "Location", weight: "10%", desc: "Remote, exact city match, or regional proximity" },
+              { label: "Education", weight: "10%", desc: "Candidate's qualification level versus the role's requirement" },
             ].map((item) => (
               <div key={item.label} className="rounded-xl p-5 text-center" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="text-2xl font-bold font-mono mb-1" style={{ color: "#4CAF50" }}>{item.weight}</div>
