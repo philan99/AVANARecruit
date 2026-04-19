@@ -218,6 +218,42 @@ async function extractDocumentText(buffer: Buffer, fileName: string): Promise<st
   return Array.isArray(text) ? text.join("\n") : text;
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+async function buildDescriptionHtml(buffer: Buffer, fileName: string): Promise<string> {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith(".docx")) {
+    try {
+      const { value } = await mammoth.convertToHtml({ buffer });
+      const html = cleanHtml(value || "");
+      if (html) return html;
+    } catch (err) {
+      console.error("mammoth convertToHtml failed, falling back:", err);
+    }
+  }
+  // PDF / TXT / DOCX fallback: plain text → paragraphs preserving line breaks
+  let text = "";
+  try {
+    text = await extractDocumentText(buffer, fileName);
+  } catch {
+    text = "";
+  }
+  const normalised = text.replace(/\r\n/g, "\n").trim();
+  if (!normalised) return "";
+  const paragraphs = normalised.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+  const html = paragraphs
+    .map(p => `<p>${escapeHtml(p).replace(/\n/g, "<br />")}</p>`)
+    .join("");
+  return cleanHtml(html);
+}
+
 router.post("/jobs/draft-from-document", largeJson, requireCompany, rateLimit, async (req, res) => {
   try {
     const { fileName, fileBase64 } = req.body as { fileName?: string; fileBase64?: string };
@@ -268,7 +304,7 @@ router.post("/jobs/draft-from-document", largeJson, requireCompany, rateLimit, a
     }
     if (docText.length > 30000) docText = docText.slice(0, 30000);
 
-    const system = `You are a recruitment assistant that turns an existing job description document into a structured job posting. Use British English. Salary is in GBP (£). Return ONLY a JSON object — no prose, no markdown.
+    const system = `You are a recruitment assistant. Read the job description document and extract ONLY the structured metadata fields below. DO NOT rewrite, summarise, or generate the job description itself. Use British English. Salary is in GBP (£). Return ONLY a JSON object — no prose, no markdown.
 
 The JSON object MUST match this shape:
 {
@@ -281,11 +317,10 @@ The JSON object MUST match this shape:
   "educationLevel": one of ${JSON.stringify(ALLOWED_EDU)} or "",
   "salaryMin": number or null (annual GBP),
   "salaryMax": number or null (annual GBP),
-  "skills": string[] (5-10 concrete skills/technologies actually mentioned in the document),
-  "description": string (HTML; use only <p>, <ul>, <li>, <strong>, <em>; include sections: About the role, Key responsibilities, What we're looking for, Nice to have. ~250-350 words. Base it on the document, do NOT invent.)
+  "skills": string[] (5-10 concrete skills/technologies actually mentioned in the document)
 }
 
-Extract values directly from the document where possible. If a field is not mentioned, infer a reasonable default but DO NOT invent salary — use null when not stated.`;
+Extract values directly from the document. If a field is not mentioned, infer a reasonable default but DO NOT invent salary — use null when not stated. Do NOT include a "description" field.`;
 
     const user = `${company?.name ? `Company: ${company.name}\n` : ""}${company?.industry ? `Company industry: ${company.industry}\n\n` : "\n"}Job description document:\n\n${docText}`;
 
@@ -315,6 +350,8 @@ Extract values directly from the document where possible. If a field is not ment
         ? v.filter(s => typeof s === "string" && s.trim()).map(s => (s as string).trim().slice(0, 60)).slice(0, 20)
         : [];
 
+    const descriptionHtml = await buildDescriptionHtml(buffer, fileName);
+
     res.json({
       title: toStr(parsed.title),
       jobType: pickEnum(parsed.jobType, ALLOWED_JOB_TYPES),
@@ -326,7 +363,7 @@ Extract values directly from the document where possible. If a field is not ment
       salaryMin: toNum(parsed.salaryMin),
       salaryMax: toNum(parsed.salaryMax),
       skills: toArr(parsed.skills),
-      description: cleanHtml(typeof parsed.description === "string" ? parsed.description : ""),
+      description: descriptionHtml,
     });
   } catch (err) {
     console.error("jobs/draft-from-document error:", err);
