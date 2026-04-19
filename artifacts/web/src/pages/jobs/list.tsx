@@ -184,7 +184,8 @@ export default function JobsList() {
   const [, navigate] = useLocation();
   const { role, companyUserId } = useRole();
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
-  const [postedByMe, setPostedByMe] = useState(false);
+  const [postedByUserId, setPostedByUserId] = useState<string>("all");
+  const [teamMembers, setTeamMembers] = useState<Array<{ id: number; name: string | null; email: string }>>([]);
 
   const initStatus = urlParams.get("status");
   const initLocation = urlParams.get("location");
@@ -263,10 +264,31 @@ export default function JobsList() {
     fetchAppliedJobs();
   }, [basePath, companyProfileId, role]);
 
+  useEffect(() => {
+    if (role !== "company" || !companyProfileId) return;
+    let cancelled = false;
+    async function fetchTeam() {
+      try {
+        const res = await fetch(`${basePath}/companies/${companyProfileId}/team`, {
+          headers: companyUserId ? { "x-company-user-id": String(companyUserId) } : {},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.users)) setTeamMembers(data.users);
+      } catch (err) {
+        console.error("Failed to fetch team members", err);
+      }
+    }
+    fetchTeam();
+    return () => { cancelled = true; };
+  }, [basePath, companyProfileId, companyUserId, role]);
+
   const apiQueryParams = {
     ...(searchQuery ? { search: searchQuery } : {}),
     ...(role === "company" && companyProfileId ? { companyProfileId } : {}),
-    ...(role === "company" && postedByMe && companyUserId ? { createdByUserId: companyUserId } : {}),
+    ...(role === "company" && postedByUserId !== "all"
+      ? { createdByUserId: parseInt(postedByUserId, 10) }
+      : {}),
   };
 
   const { data: jobs, isLoading } = useListJobs(apiQueryParams, {
@@ -376,17 +398,6 @@ export default function JobsList() {
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
             </Button>
           )}
-          {role === "company" && companyUserId && (
-            <Button
-              variant={postedByMe ? "default" : "outline"}
-              size="sm"
-              onClick={() => setPostedByMe(v => !v)}
-              data-testid="button-posted-by-me"
-            >
-              <UserCheck className="w-3.5 h-3.5 mr-1.5" />
-              Posted by me
-            </Button>
-          )}
           <div className="flex-1" />
           <div className="flex items-center border border-border rounded-md bg-card overflow-hidden">
             <button
@@ -491,6 +502,34 @@ export default function JobsList() {
                     onChange={setEducationFilters}
                   />
                 </div>
+
+                {role === "company" && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Posted By</label>
+                    <div className="relative">
+                      <UserCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
+                      <select
+                        value={postedByUserId}
+                        onChange={(e) => setPostedByUserId(e.target.value)}
+                        className="flex w-full h-9 pl-9 pr-3 rounded-md border border-input bg-background text-sm hover:bg-accent/50 transition-colors appearance-none cursor-pointer"
+                        data-testid="select-posted-by"
+                      >
+                        <option value="all">All team members</option>
+                        {companyUserId && (
+                          <option value={String(companyUserId)}>Me</option>
+                        )}
+                        {teamMembers
+                          .filter(u => u.id !== companyUserId)
+                          .map(u => (
+                            <option key={u.id} value={String(u.id)}>
+                              {u.name?.trim() || u.email}
+                            </option>
+                          ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {activeFilterCount > 0 && (
