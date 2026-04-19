@@ -21,8 +21,22 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Search, X, KeyRound, LogIn } from "lucide-react";
+import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
 
 interface CompanyTeamUser {
@@ -88,6 +102,7 @@ export default function AdminCompanies() {
   const urlParams = new URLSearchParams(searchString);
 
   const [companyQuery, setCompanyQuery] = useState(urlParams.get("company") || "");
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(false);
   const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
   const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
   const [sizeFilter, setSizeFilter] = useState(urlParams.get("size") || "all");
@@ -225,18 +240,92 @@ export default function AdminCompanies() {
       <Card className="bg-card">
         <CardContent className="pt-5 pb-4">
           <div className="flex flex-wrap items-end gap-3">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-[220px]">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Company</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Search by company name..."
-                  value={companyQuery}
-                  onChange={(e) => setCompanyQuery(e.target.value)}
-                  className="pl-8 h-9 text-xs"
-                  data-testid="input-company-search"
-                />
-              </div>
+              <Popover open={companyPickerOpen} onOpenChange={setCompanyPickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={companyPickerOpen}
+                    className="w-full h-9 justify-between text-xs font-normal px-2.5"
+                    data-testid="button-company-picker"
+                  >
+                    <span className={cn("truncate", !companyQuery && "text-muted-foreground")}>
+                      {companyQuery || "All companies"}
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {companyQuery && (
+                        <X
+                          className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCompanyQuery("");
+                          }}
+                        />
+                      )}
+                      <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start">
+                  <Command
+                    filter={(value, search) =>
+                      value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+                    }
+                  >
+                    <CommandInput
+                      placeholder="Type a company name..."
+                      value={companyQuery}
+                      onValueChange={setCompanyQuery}
+                      className="text-xs"
+                      data-testid="input-company-search"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="py-3 text-xs text-muted-foreground text-center">
+                        No companies match. Press Enter to filter by "{companyQuery}".
+                      </CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value=""
+                          onSelect={() => {
+                            setCompanyQuery("");
+                            setCompanyPickerOpen(false);
+                          }}
+                          className="text-xs"
+                        >
+                          <Check className={cn("mr-2 h-3.5 w-3.5", !companyQuery ? "opacity-100" : "opacity-0")} />
+                          All companies
+                        </CommandItem>
+                        {[...companies]
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((c) => (
+                            <CommandItem
+                              key={c.id}
+                              value={c.name}
+                              onSelect={(val) => {
+                                setCompanyQuery(val);
+                                setCompanyPickerOpen(false);
+                              }}
+                              className="text-xs"
+                              data-testid={`option-company-${c.id}`}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-3.5 w-3.5",
+                                  companyQuery.trim().toLowerCase() === c.name.toLowerCase()
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              {c.name}
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="w-[140px]">
