@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link, useSearch, useLocation } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
+import { useIndustries } from "@/hooks/use-industries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +15,33 @@ const JOB_TYPE_LABELS: Record<string, string> = {
   fixed_term_contract: "Fixed Term Contract",
   part_time: "Part-time",
 };
+const JOB_TYPE_OPTIONS = Object.keys(JOB_TYPE_LABELS);
 
 const WORKPLACE_LABELS: Record<string, string> = {
   office: "Office",
   remote: "Remote",
   hybrid: "Hybrid",
 };
+const WORKPLACE_OPTIONS = Object.keys(WORKPLACE_LABELS);
+
+const EXPERIENCE_LEVEL_LABELS: Record<string, string> = {
+  junior: "Junior",
+  mid: "Mid-Level",
+  senior: "Senior",
+  lead: "Lead",
+  executive: "Executive",
+};
+const EXPERIENCE_LEVEL_OPTIONS = Object.keys(EXPERIENCE_LEVEL_LABELS);
+
+const EDUCATION_LEVEL_OPTIONS = [
+  "GCSE",
+  "A-Level",
+  "HND/HNC",
+  "Foundation Degree",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "PhD",
+];
 
 function MultiSelectDropdown({
   label,
@@ -195,53 +217,44 @@ export default function BrowseJobs() {
     query: { queryKey: getListJobsQueryKey(queryParams) },
   });
 
+  const allOpenParams = { status: "open" as const };
+  const { data: allOpenJobs } = useListJobs(allOpenParams, {
+    query: { queryKey: getListJobsQueryKey(allOpenParams) },
+  });
+
+  const { data: industriesData = [] } = useIndustries();
+
   const uniqueCompanies = useMemo(() => {
-    if (!jobs) return [];
-    const companies = new Set(jobs.map(j => j.company).filter(Boolean));
+    if (!allOpenJobs) return [];
+    const companies = new Set(allOpenJobs.map(j => j.company).filter(Boolean));
     return Array.from(companies).sort();
-  }, [jobs]);
+  }, [allOpenJobs]);
 
   const uniqueLocations = useMemo(() => {
-    if (!jobs) return [];
-    const locations = new Set(jobs.map(j => j.location).filter(Boolean));
+    if (!allOpenJobs) return [];
+    const locations = new Set(allOpenJobs.map(j => j.location).filter(Boolean));
     return Array.from(locations).sort();
-  }, [jobs]);
-
-  const uniqueLevels = useMemo(() => {
-    if (!jobs) return [];
-    const levels = new Set(jobs.map(j => j.experienceLevel).filter(Boolean));
-    return Array.from(levels).sort();
-  }, [jobs]);
+  }, [allOpenJobs]);
 
   const uniqueSkills = useMemo(() => {
-    if (!jobs) return [];
-    const skills = new Set(jobs.flatMap(j => j.skills || []));
+    if (!allOpenJobs) return [];
+    const skills = new Set(allOpenJobs.flatMap(j => j.skills || []));
     return Array.from(skills).sort();
-  }, [jobs]);
+  }, [allOpenJobs]);
 
-  const uniqueJobTypes = useMemo(() => {
-    if (!jobs) return [];
-    const types = new Set(jobs.map(j => (j as any).jobType).filter(Boolean));
-    return Array.from(types).sort();
-  }, [jobs]);
-
-  const uniqueWorkplaces = useMemo(() => {
-    if (!jobs) return [];
-    const wp = new Set(jobs.map(j => (j as any).workplace).filter(Boolean));
-    return Array.from(wp).sort();
-  }, [jobs]);
-
-  const uniqueIndustries = useMemo(() => {
-    if (!jobs) return [];
-    const ind = new Set(jobs.map(j => (j as any).industry).filter(Boolean));
-    return Array.from(ind).sort();
-  }, [jobs]);
-
-  const uniqueEducationLevels = useMemo(() => {
-    if (!jobs) return [];
-    const edu = new Set(jobs.map(j => (j as any).educationLevel).filter(Boolean));
-    return Array.from(edu).sort();
-  }, [jobs]);
+  const uniqueLevels = EXPERIENCE_LEVEL_OPTIONS;
+  const uniqueJobTypes = JOB_TYPE_OPTIONS;
+  const uniqueWorkplaces = WORKPLACE_OPTIONS;
+  const uniqueIndustries = useMemo(
+    () => industriesData.map((i) => i.value),
+    [industriesData],
+  );
+  const industryLabelMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    industriesData.forEach((i) => { m[i.value] = i.label; });
+    return m;
+  }, [industriesData]);
+  const uniqueEducationLevels = EDUCATION_LEVEL_OPTIONS;
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -459,6 +472,7 @@ export default function BrowseJobs() {
                     options={uniqueIndustries}
                     selected={industryFilters}
                     onChange={setIndustryFilters}
+                    formatLabel={(v) => industryLabelMap[v] || v}
                   />
                 </div>
 
@@ -547,8 +561,8 @@ export default function BrowseJobs() {
                     </span>
                   ))}
                   {Array.from(industryFilters).map(v => (
-                    <span key={`ind-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1 capitalize">
-                      {v}
+                    <span key={`ind-${v}`} className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-medium pl-2.5 pr-1 py-0.5 gap-1">
+                      {industryLabelMap[v] || v}
                       <button onClick={() => { const n = new Set(industryFilters); n.delete(v); setIndustryFilters(n); }} className="hover:bg-primary/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </span>
                   ))}
