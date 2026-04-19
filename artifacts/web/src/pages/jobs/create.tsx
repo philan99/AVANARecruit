@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from "react";
+import { useState, KeyboardEvent, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCreateJob, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,7 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus, Upload, FileText, PencilLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -135,6 +136,9 @@ export default function CreateJob() {
   const [brief, setBrief] = useState("");
   const [drafting, setDrafting] = useState(false);
   const [draftingDescription, setDraftingDescription] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const aiReady = Boolean(companyProfileId);
 
@@ -195,6 +199,70 @@ export default function CreateJob() {
       toast({ title: "AI draft failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
     } finally {
       setDrafting(false);
+    }
+  }
+
+  function applyDraftToForm(data: Record<string, unknown>) {
+    const current = form.getValues();
+    form.reset({
+      ...current,
+      title: (data.title as string) || current.title,
+      jobType: (data.jobType as string) || current.jobType,
+      workplace: (data.workplace as FormValues["workplace"]) || current.workplace,
+      location: (data.location as string) || current.location,
+      experienceLevel: (data.experienceLevel as FormValues["experienceLevel"]) || current.experienceLevel,
+      industry: (data.industry as string) || current.industry,
+      educationLevel: (data.educationLevel as string) || current.educationLevel,
+      salaryMin: (data.salaryMin as number) ?? current.salaryMin,
+      salaryMax: (data.salaryMax as number) ?? current.salaryMax,
+      skills: Array.isArray(data.skills) && data.skills.length ? (data.skills as string[]) : current.skills,
+      description: (data.description as string) || current.description,
+      status: current.status || "draft",
+    });
+  }
+
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(",").pop() || "");
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleAiUpload() {
+    if (!aiReady) {
+      toast({ title: "Company profile needed", description: "Set up your company profile first so AVANA can tailor the draft.", variant: "destructive" });
+      navigate("/company-profile");
+      return;
+    }
+    if (!uploadFile) {
+      toast({ title: "Choose a file", description: "Upload a PDF, DOCX, or TXT job description first.", variant: "destructive" });
+      return;
+    }
+    if (uploadFile.size > 6 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please upload a document under 6MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const fileBase64 = await fileToBase64(uploadFile);
+      const res = await fetch(`${apiBase}/jobs/draft-from-document`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyProfileId, fileName: uploadFile.name, fileBase64 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      applyDraftToForm(data);
+      toast({ title: "Draft ready", description: "Review the fields and tweak anything you'd like before posting." });
+    } catch (err) {
+      toast({ title: "AI read failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -300,13 +368,29 @@ export default function CreateJob() {
 
       <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
         <CardContent className="pt-5 pb-5">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-md bg-primary/15 text-primary flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-foreground">Draft with AI</h3>
-              <p className="text-xs text-muted-foreground mt-0.5 mb-3">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" /> How would you like to start?
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Pick the easiest way to create your job — let AVANA do the heavy lifting, upload an existing job spec, or fill it in yourself.
+            </p>
+          </div>
+          <Tabs defaultValue="ai" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="ai" data-testid="tab-create-ai">
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Create with AI
+              </TabsTrigger>
+              <TabsTrigger value="upload" data-testid="tab-create-upload">
+                <Upload className="w-3.5 h-3.5 mr-1.5" /> Upload document
+              </TabsTrigger>
+              <TabsTrigger value="manual" data-testid="tab-create-manual">
+                <PencilLine className="w-3.5 h-3.5 mr-1.5" /> Fill in manually
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="ai" className="mt-4">
+              <p className="text-xs text-muted-foreground mb-2">
                 Describe the role in a sentence or two and AVANA will fill in the form for you. Example: <em>“Senior React developer in London, hybrid, £70-90k, fintech experience preferred.”</em>
               </p>
               <Textarea
@@ -316,9 +400,10 @@ export default function CreateJob() {
                 rows={2}
                 className="bg-background/80"
                 disabled={drafting}
+                data-testid="input-job-brief"
               />
               <div className="flex items-center justify-end gap-2 mt-2">
-                <Button type="button" onClick={handleAiDraft} disabled={drafting || !brief.trim()} size="sm">
+                <Button type="button" onClick={handleAiDraft} disabled={drafting || !brief.trim()} size="sm" data-testid="button-draft-ai">
                   {drafting ? (
                     <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Drafting...</>
                   ) : (
@@ -326,8 +411,70 @@ export default function CreateJob() {
                   )}
                 </Button>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="upload" className="mt-4">
+              <p className="text-xs text-muted-foreground mb-3">
+                Already have a job description? Upload it (PDF, DOCX, or TXT — up to 6MB) and AVANA will read it and fill in the form for you.
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  setUploadFile(f);
+                }}
+                data-testid="input-job-document"
+              />
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  data-testid="button-choose-document"
+                >
+                  <Upload className="w-3.5 h-3.5 mr-1.5" />
+                  {uploadFile ? "Choose a different file" : "Choose a file"}
+                </Button>
+                {uploadFile && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/80 rounded-md px-2.5 py-1.5 border border-border min-w-0">
+                    <FileText className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span className="truncate">{uploadFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => { setUploadFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="ml-1 hover:bg-foreground/10 rounded p-0.5"
+                      aria-label="Remove file"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end gap-2 mt-3">
+                <Button type="button" onClick={handleAiUpload} disabled={uploading || !uploadFile} size="sm" data-testid="button-draft-upload">
+                  {uploading ? (
+                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Reading document...</>
+                  ) : (
+                    <><Sparkles className="w-3.5 h-3.5 mr-1.5" /> Read &amp; fill form</>
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="manual" className="mt-4">
+              <div className="flex items-start gap-3 text-xs text-muted-foreground">
+                <PencilLine className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p>
+                  Prefer to fill it in yourself? No problem — just complete the form below. You can still ask AVANA to write the job description for you in the Description section.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
