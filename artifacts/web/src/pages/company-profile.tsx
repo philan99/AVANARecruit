@@ -313,6 +313,10 @@ export default function CompanyProfile() {
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                    Company Details
+                  </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
@@ -387,6 +391,14 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                    Social Media
+                  </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="linkedinUrl" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn</FormLabel>
@@ -415,6 +427,7 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                </div>
                 </div>
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
