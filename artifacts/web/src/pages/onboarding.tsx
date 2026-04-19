@@ -91,10 +91,7 @@ const WORKPLACES: { value: string; label: string }[] = [
 export default function Onboarding() {
   const { candidateProfileId } = useRole();
   const { data: industriesData = [] } = useIndustries();
-  const INDUSTRIES = useMemo(
-    () => [...industriesData, { value: "other", label: "Other" }],
-    [industriesData],
-  );
+  const INDUSTRIES = industriesData;
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();

@@ -102,7 +102,7 @@ function safeHref(url: string | null | undefined): string {
 export default function CandidateProfile() {
   const { candidateProfileId } = useRole();
   const { data: industriesData = [] } = useIndustries();
-  const INDUSTRY_OPTIONS = [...industriesData, { value: "other", label: "Other" }];
+  const INDUSTRY_OPTIONS = industriesData;
   const INDUSTRY_LABELS: Record<string, string> = Object.fromEntries(INDUSTRY_OPTIONS.map(o => [o.value, o.label]));
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
