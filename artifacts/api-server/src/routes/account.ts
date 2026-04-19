@@ -123,6 +123,37 @@ router.post("/account/change-email", async (req, res): Promise<void> => {
   }
 });
 
+router.post("/account/change-phone", async (req, res): Promise<void> => {
+  try {
+    const { accountType, accountId, phone } = req.body || {};
+    if (accountType !== "candidate" || !Number.isFinite(Number(accountId))) {
+      res.status(400).json({ error: "Invalid account" });
+      return;
+    }
+    const trimmed = typeof phone === "string" ? phone.trim() : "";
+    if (trimmed && trimmed.length > 32) {
+      res.status(400).json({ error: "Phone number is too long" });
+      return;
+    }
+
+    const acct = await loadAccount("candidate", Number(accountId));
+    if (!acct) {
+      res.status(404).json({ error: "Account not found" });
+      return;
+    }
+
+    await db
+      .update(candidatesTable)
+      .set({ phone: trimmed || null })
+      .where(eq(candidatesTable.id, Number(accountId)));
+
+    res.json({ success: true, phone: trimmed || null });
+  } catch (err) {
+    console.error("Failed to change phone:", err);
+    res.status(500).json({ error: "Failed to change phone" });
+  }
+});
+
 router.post("/account/change-password", async (req, res): Promise<void> => {
   try {
     const { accountType, accountId, currentPassword, newPassword } = req.body || {};

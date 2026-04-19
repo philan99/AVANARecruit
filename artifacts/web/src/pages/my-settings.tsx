@@ -1,9 +1,29 @@
 import { useState, useEffect } from "react";
 import { Settings as SettingsIcon, Mail, Lock, User, Phone, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const PHONE_CODES = [
+  { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
+  { code: "+33", flag: "🇫🇷" }, { code: "+49", flag: "🇩🇪" }, { code: "+34", flag: "🇪🇸" },
+  { code: "+39", flag: "🇮🇹" }, { code: "+31", flag: "🇳🇱" }, { code: "+32", flag: "🇧🇪" },
+  { code: "+41", flag: "🇨🇭" }, { code: "+46", flag: "🇸🇪" }, { code: "+47", flag: "🇳🇴" },
+  { code: "+45", flag: "🇩🇰" }, { code: "+358", flag: "🇫🇮" }, { code: "+48", flag: "🇵🇱" },
+  { code: "+43", flag: "🇦🇹" }, { code: "+351", flag: "🇵🇹" }, { code: "+61", flag: "🇦🇺" },
+  { code: "+64", flag: "🇳🇿" }, { code: "+91", flag: "🇮🇳" }, { code: "+81", flag: "🇯🇵" },
+  { code: "+82", flag: "🇰🇷" }, { code: "+86", flag: "🇨🇳" }, { code: "+65", flag: "🇸🇬" },
+  { code: "+852", flag: "🇭🇰" }, { code: "+971", flag: "🇦🇪" }, { code: "+966", flag: "🇸🇦" },
+  { code: "+27", flag: "🇿🇦" }, { code: "+55", flag: "🇧🇷" }, { code: "+52", flag: "🇲🇽" },
+];
 
 const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -34,14 +54,56 @@ export default function MySettings() {
 
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [phoneForm, setPhoneForm] = useState({ dialCode: "+44", number: "" });
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [pwSubmitting, setPwSubmitting] = useState(false);
+  const [phoneSubmitting, setPhoneSubmitting] = useState(false);
 
   useEffect(() => {
     if (account?.email) {
       setEmailForm(f => (f.newEmail ? f : { ...f, newEmail: account.email }));
     }
-  }, [account?.email]);
+    if (accountType === "candidate") {
+      const raw = account?.phone || "";
+      const match = raw.match(/^(\+\d+)\s*(.*)$/);
+      setPhoneForm(f => {
+        if (f.number) return f;
+        return {
+          dialCode: match?.[1] || "+44",
+          number: match?.[2] || raw,
+        };
+      });
+    }
+  }, [account?.email, account?.phone, accountType]);
+
+  async function handlePhoneSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!accountId || accountType !== "candidate") return;
+    const trimmedNumber = phoneForm.number.trim();
+    const fullPhone = trimmedNumber ? `${phoneForm.dialCode} ${trimmedNumber}` : "";
+    setPhoneSubmitting(true);
+    try {
+      const res = await fetch(`${apiBase}/account/change-phone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountType, accountId, phone: fullPhone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast({ title: "Failed to update phone", description: data.error || "Please try again", variant: "destructive" });
+        return;
+      }
+      toast({
+        title: trimmedNumber ? "Phone number updated" : "Phone number cleared",
+        description: trimmedNumber ? "Your contact phone number has been changed." : "Your phone number has been removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["my-account"] });
+    } catch {
+      toast({ title: "Failed to update phone", variant: "destructive" });
+    } finally {
+      setPhoneSubmitting(false);
+    }
+  }
 
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -212,6 +274,52 @@ export default function MySettings() {
           </button>
         </form>
       </div>
+
+      {accountType === "candidate" && (
+        <div className="rounded-xl p-6 lg:p-8 bg-card border mb-6">
+          <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+            <Phone className="w-5 h-5" style={{ color: "#4CAF50" }} /> Change Phone Number
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Optional. Leave the number blank to remove your phone number.
+          </p>
+          <form onSubmit={handlePhoneSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Phone Number</label>
+              <div className="flex gap-2">
+                <Select
+                  value={phoneForm.dialCode}
+                  onValueChange={(code) => setPhoneForm(f => ({ ...f, dialCode: code }))}
+                >
+                  <SelectTrigger className="w-[120px] shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PHONE_CODES.map(p => (
+                      <SelectItem key={p.code} value={p.code}>{p.flag} {p.code}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  value={phoneForm.number}
+                  onChange={(e) => setPhoneForm(f => ({ ...f, number: e.target.value }))}
+                  placeholder="Phone number"
+                  className="flex-1"
+                  inputMode="tel"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={phoneSubmitting}
+              className="px-5 py-2.5 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90"
+              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+            >
+              {phoneSubmitting ? "Updating..." : "Update Phone"}
+            </button>
+          </form>
+        </div>
+      )}
 
       <div className="rounded-xl p-6 lg:p-8 bg-card border">
         <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
