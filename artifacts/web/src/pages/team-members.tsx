@@ -267,7 +267,7 @@ export default function TeamMembers() {
           <CardContent className="p-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline" /></CardContent>
         </Card>
       ) : (
-        (["admin", "owner", "member"] as const).map((roleKey) => {
+        (["owner", "admin", "member"] as const).map((roleKey) => {
           const group = users.filter((u) => u.role === roleKey);
           return (
             <Card key={roleKey}>
