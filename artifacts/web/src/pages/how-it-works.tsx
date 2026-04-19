@@ -294,7 +294,7 @@ export default function HowItWorks() {
           </div>
           <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
             {[
-              { label: "Skills", weight: "30%", desc: "Fuzzy matching of candidate skills against job requirements" },
+              { label: "Skills", weight: "30%", desc: "Candidate skills compared against the role's required skills" },
               { label: "Experience", weight: "20%", desc: "Years of experience compared to job level expectations" },
               { label: "Preferences", weight: "15%", desc: "Workplace, job type and industry alignment with candidate preferences" },
               { label: "Verification", weight: "15%", desc: "Number of verified credentials and qualifications" },
