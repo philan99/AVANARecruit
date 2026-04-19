@@ -8,6 +8,7 @@ import * as z from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CityCombobox } from "@/components/city-combobox";
 import {
   Form,
   FormControl,
@@ -253,7 +254,9 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl>
+                        <CityCombobox value={field.value ?? ""} onChange={field.onChange} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

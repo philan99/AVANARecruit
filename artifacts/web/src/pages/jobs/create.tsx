@@ -11,6 +11,7 @@ import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CityCombobox } from "@/components/city-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -587,7 +588,9 @@ export default function CreateJob() {
                   <FormField control={form.control} name="location" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
-                      <FormControl><Input placeholder="e.g. London or Remote" {...field} /></FormControl>
+                      <FormControl>
+                        <CityCombobox value={field.value ?? ""} onChange={field.onChange} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
