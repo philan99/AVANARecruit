@@ -106,8 +106,11 @@ export default function CompanyProfile() {
         });
         if (!res.ok) return;
         const data = await res.json();
-        const me = Array.isArray(data.users) ? data.users.find((u: any) => u.id === companyUserId) : null;
-        if (!cancelled && me?.role) setCompanyUserRole(me.role);
+        const role = data.actingUserRole
+          ?? (Array.isArray(data.users)
+            ? data.users.find((u: any) => Number(u.id) === Number(companyUserId))?.role
+            : null);
+        if (!cancelled && role) setCompanyUserRole(role);
       } catch { /* noop */ }
     })();
     return () => { cancelled = true; };
