@@ -479,9 +479,6 @@ export default function CompanyProfile() {
                 <p className="text-lg text-primary font-medium mb-3">{industryLabel(profile!.industry)}</p>
               )}
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {userEmail && (
-                  <span className="flex items-center"><Mail className="w-4 h-4 mr-1.5" /> {userEmail}</span>
-                )}
                 {profile!.location && (
                   <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {profile!.location}</span>
                 )}
