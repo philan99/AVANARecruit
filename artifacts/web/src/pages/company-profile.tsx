@@ -536,7 +536,7 @@ export default function CompanyProfile() {
       {profile!.description && (
         <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-lg">About</CardTitle>
+            <CardTitle className="text-lg">Company Description</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{profile!.description}</p>
