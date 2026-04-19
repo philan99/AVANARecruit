@@ -96,6 +96,7 @@ export default function TeamMembers() {
   const [inviting, setInviting] = useState(false);
 
   const [removeUser, setRemoveUser] = useState<TeamUser | null>(null);
+  const [cancelInviteTarget, setCancelInviteTarget] = useState<TeamInvite | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const canManage = companyUserRole === "owner" || companyUserRole === "admin";
@@ -234,7 +235,11 @@ export default function TeamMembers() {
         toast({ title: data.error || "Failed to cancel invite", variant: "destructive" });
         return;
       }
-      toast({ title: "Invitation cancelled" });
+      toast({
+        title: "Invitation cancelled",
+        description: "The link in the original email will no longer work.",
+      });
+      setCancelInviteTarget(null);
       load();
     } finally {
       setBusyId(null);
@@ -369,7 +374,8 @@ export default function TeamMembers() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => cancelInvite(inv)}
+                        title="Cancel invite (invalidates the link in the email)"
+                        onClick={() => setCancelInviteTarget(inv)}
                         disabled={busyId === `i${inv.id}`}
                         data-testid={`button-cancel-invite-${inv.id}`}
                       >
@@ -427,6 +433,31 @@ export default function TeamMembers() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={cancelInviteTarget !== null} onOpenChange={(o) => !o && setCancelInviteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this invitation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The invitation email to <strong>{cancelInviteTarget?.email}</strong> has already been sent and can't be recalled, but cancelling will invalidate the link inside it — if they click it, they'll see a "This invite has been cancelled" message and won't be able to join.
+              <br /><br />
+              You can always send a fresh invitation later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep invitation</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (cancelInviteTarget) cancelInvite(cancelInviteTarget);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Cancel invitation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={removeUser !== null} onOpenChange={(o) => !o && setRemoveUser(null)}>
         <AlertDialogContent>
