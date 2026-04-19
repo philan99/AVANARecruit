@@ -19,7 +19,7 @@ export async function backfillCompanyUsers(): Promise<void> {
         cp.id,
         cp.email,
         cp.password,
-        cp.name,
+        NULL::text,
         'owner',
         COALESCE(cp.verified, false),
         COALESCE(cp.created_at, now()),
@@ -44,6 +44,26 @@ export async function backfillCompanyUsers(): Promise<void> {
 
     if (inserted > 0) {
       logger.info({ inserted }, "Backfilled company_users from company_profiles");
+    }
+
+    const cleanup = await db.execute(sql`
+      UPDATE ${companyUsers} cu
+      SET name = NULL, updated_at = now()
+      FROM ${companyProfiles} cp
+      WHERE cu.company_profile_id = cp.id
+        AND cu.invited_at IS NULL
+        AND cu.role = 'owner'
+        AND cu.name IS NOT NULL
+        AND cu.name = cp.name
+      RETURNING cu.id
+    `);
+
+    const cleaned = Array.isArray((cleanup as { rows?: unknown[] }).rows)
+      ? (cleanup as { rows: unknown[] }).rows.length
+      : 0;
+
+    if (cleaned > 0) {
+      logger.info({ cleaned }, "Cleared company-name-as-person-name on backfilled owners");
     }
   } catch (err) {
     logger.error({ err }, "company_users backfill failed");
