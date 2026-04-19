@@ -298,16 +298,31 @@ export default function CreateJob() {
         });
         return;
       }
-      injectedCompanyBlockRef.current = block;
+      const prevLen = current.length;
       setIncludeCompanyDescription(true);
       form.setValue("description", block + current, { shouldValidate: true, shouldDirty: true });
+      // The rich-text editor normalises HTML on update (e.g. <br /> -> <br>),
+      // so we can't trust the exact string we just injected. Capture whatever
+      // ends up in the form on the next tick and slice off the prefix that
+      // wasn't there before.
+      setTimeout(() => {
+        const after = form.getValues("description") || "";
+        if (after.length > prevLen) {
+          injectedCompanyBlockRef.current = after.slice(0, after.length - prevLen);
+        } else {
+          injectedCompanyBlockRef.current = block;
+        }
+      }, 0);
     } else {
       const injected = injectedCompanyBlockRef.current;
       setIncludeCompanyDescription(false);
-      if (injected && current.includes(injected)) {
+      injectedCompanyBlockRef.current = null;
+      if (!injected) return;
+      if (current.startsWith(injected)) {
+        form.setValue("description", current.slice(injected.length), { shouldValidate: true, shouldDirty: true });
+      } else if (current.includes(injected)) {
         form.setValue("description", current.replace(injected, ""), { shouldValidate: true, shouldDirty: true });
       }
-      injectedCompanyBlockRef.current = null;
     }
   }
 
