@@ -83,6 +83,11 @@ export function Layout({ children }: LayoutProps) {
   const navItems = role === "admin" ? adminNavItems : role === "candidate" ? candidateNavItems : companyNavItems;
 
   const portalLabel = role === "admin" ? "Admin Console" : role === "candidate" ? "Candidate Portal" : "Company Portal";
+  const settingsItem =
+    role === "company" || role === "candidate"
+      ? { href: "/my-settings", label: "My Settings", icon: Settings }
+      : null;
+
   const profileItem =
     role === "company"
       ? { href: "/company-profile", label: "Company Profile", icon: Building2 }
@@ -159,7 +164,15 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </div>
                 </DropdownMenuLabel>
-                {(profileItem || supportItem || featureRequestItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
+                {(settingsItem || profileItem || supportItem || featureRequestItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
+                {settingsItem && (
+                  <DropdownMenuItem asChild>
+                    <Link href={settingsItem.href} className="flex items-center cursor-pointer">
+                      <settingsItem.icon className="w-4 h-4 mr-2" />
+                      {settingsItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {profileItem && (
                   <DropdownMenuItem asChild>
                     <Link href={profileItem.href} className="flex items-center cursor-pointer">
