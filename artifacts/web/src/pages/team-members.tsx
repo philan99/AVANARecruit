@@ -303,7 +303,7 @@ export default function TeamMembers() {
                           <div className="text-xs text-muted-foreground truncate">{u.email}</div>
                         </div>
                         <RoleBadge role={u.role} />
-                        {canManage && u.id !== companyUserId && (
+                        {canManage && u.id !== companyUserId && u.role !== "owner" && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" disabled={busyId === `u${u.id}`} data-testid={`button-user-actions-${u.id}`}>
