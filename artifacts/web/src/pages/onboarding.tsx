@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
+import { CityCombobox } from "@/components/city-combobox";
 import { useIndustries } from "@/hooks/use-industries";
 
 type ExperienceEntry = {
@@ -636,16 +637,10 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Location<FieldBadge field="location" /></label>
-                  <Input
+                  <CityCombobox
                     value={location}
-                    onChange={(e) => setLocationField(e.target.value)}
-                    placeholder="Start typing a city, e.g. London"
-                    list="city-suggestions"
-                    autoComplete="off"
+                    onChange={setLocationField}
                   />
-                  <datalist id="city-suggestions">
-                    {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
-                  </datalist>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>

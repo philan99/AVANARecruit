@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { CITY_SUGGESTIONS } from "@/lib/cities";
+import { CityCombobox } from "@/components/city-combobox";
 import { Link, useLocation } from "wouter";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
@@ -635,16 +635,10 @@ export default function CandidateProfile() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">Location</label>
-                  <Input
+                  <CityCombobox
                     value={editForm.location}
-                    onChange={e => updateField("location", e.target.value)}
-                    placeholder="Start typing a city, e.g. London"
-                    list="city-suggestions-profile"
-                    autoComplete="off"
+                    onChange={(v) => updateField("location", v)}
                   />
-                  <datalist id="city-suggestions-profile">
-                    {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
-                  </datalist>
                 </div>
               </CardContent>
             </Card>
