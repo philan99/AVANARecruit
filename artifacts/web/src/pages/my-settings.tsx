@@ -40,6 +40,9 @@ const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 interface Account {
   id: number;
   name: string;
+  personName: string | null;
+  companyName: string | null;
+  userId: number | null;
   email: string;
   phone: string | null;
   accountType: "candidate" | "company";
@@ -48,20 +51,23 @@ interface Account {
 export default function MySettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { role, candidateProfileId, companyProfileId, setUserEmail } = useRole();
+  const { role, candidateProfileId, companyProfileId, companyUserId, setUserEmail } = useRole();
   const accountType = role === "company" ? "company" : "candidate";
   const accountId = accountType === "company" ? companyProfileId : candidateProfileId;
 
   const { data: account, isLoading } = useQuery<Account>({
-    queryKey: ["my-account", accountType, accountId],
+    queryKey: ["my-account", accountType, accountId, companyUserId],
     queryFn: async () => {
-      const res = await fetch(`${apiBase}/account?accountType=${accountType}&accountId=${accountId}`);
+      const cu = accountType === "company" && companyUserId ? `&companyUserId=${companyUserId}` : "";
+      const res = await fetch(`${apiBase}/account?accountType=${accountType}&accountId=${accountId}${cu}`);
       if (!res.ok) throw new Error("Failed to load account");
       return res.json();
     },
     enabled: !!accountId,
   });
 
+  const [nameForm, setNameForm] = useState({ name: "" });
+  const [nameSubmitting, setNameSubmitting] = useState(false);
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [phoneForm, setPhoneForm] = useState({ dialCode: "+44", number: "" });
@@ -96,6 +102,10 @@ export default function MySettings() {
   useEffect(() => {
     if (account?.email) {
       setEmailForm(f => (f.newEmail ? f : { ...f, newEmail: account.email }));
+    }
+    if (accountType === "company") {
+      const current = account?.personName ?? "";
+      setNameForm(f => (f.name ? f : { name: current }));
     }
     if (accountType === "candidate") {
       const raw = account?.phone || "";
@@ -136,6 +146,40 @@ export default function MySettings() {
       toast({ title: "Failed to update phone", variant: "destructive" });
     } finally {
       setPhoneSubmitting(false);
+    }
+  }
+
+  async function handleNameSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!accountId) return;
+    const trimmed = nameForm.name.trim();
+    if (!trimmed) {
+      toast({ title: "Please enter your name", variant: "destructive" });
+      return;
+    }
+    setNameSubmitting(true);
+    try {
+      const res = await fetch(`${apiBase}/account/change-name`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountType,
+          accountId,
+          companyUserId: accountType === "company" ? companyUserId : undefined,
+          name: trimmed,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast({ title: "Failed to update name", description: data.error || "Please try again", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Name updated", description: "Your display name has been saved." });
+      queryClient.invalidateQueries({ queryKey: ["my-account"] });
+    } catch {
+      toast({ title: "Failed to update name", variant: "destructive" });
+    } finally {
+      setNameSubmitting(false);
     }
   }
 
@@ -243,8 +287,20 @@ export default function MySettings() {
                 {accountType === "company" ? <Building2 className="w-4 h-4" /> : <User className="w-4 h-4" />}
                 {accountType === "company" ? "Company" : "Name"}
               </dt>
-              <dd className="font-medium text-foreground">{account.name}</dd>
+              <dd className="font-medium text-foreground">
+                {accountType === "company" ? (account.companyName ?? account.name) : account.name}
+              </dd>
             </div>
+            {accountType === "company" && (
+              <div>
+                <dt className="text-muted-foreground flex items-center gap-2 mb-1">
+                  <User className="w-4 h-4" /> Your Name
+                </dt>
+                <dd className="font-medium text-foreground">
+                  {account.personName || <span className="italic text-muted-foreground">Not set</span>}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-muted-foreground flex items-center gap-2 mb-1">
                 <SettingsIcon className="w-4 h-4" /> Account Type
@@ -270,6 +326,40 @@ export default function MySettings() {
           <p className="text-sm text-destructive">Could not load account.</p>
         )}
       </div>
+
+      {accountType === "company" && (
+        <div className="rounded-xl p-6 lg:p-8 bg-card border mb-6">
+          <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+            <User className="w-5 h-5" style={{ color: "#4CAF50" }} /> Your Name
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            This is how you appear to your team and across the app. Your company name is managed from the Company Profile page.
+          </p>
+          <form onSubmit={handleNameSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Full Name</label>
+              <Input
+                type="text"
+                placeholder="e.g. Jane Smith"
+                value={nameForm.name}
+                onChange={(e) => setNameForm({ name: e.target.value })}
+                maxLength={120}
+                required
+                data-testid="input-person-name"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={nameSubmitting || !nameForm.name.trim() || nameForm.name.trim() === (account?.personName ?? "")}
+              style={{ backgroundColor: "#4CAF50", color: "white" }}
+              className="px-5 py-2.5 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90"
+              data-testid="button-save-name"
+            >
+              {nameSubmitting ? "Saving…" : "Save Name"}
+            </button>
+          </form>
+        </div>
+      )}
 
       <div className="rounded-xl p-6 lg:p-8 bg-card border mb-6">
         <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">

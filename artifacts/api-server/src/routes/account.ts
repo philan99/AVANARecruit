@@ -7,7 +7,7 @@ const router: IRouter = Router();
 
 type AccountType = "candidate" | "company";
 
-async function loadAccount(accountType: AccountType, accountId: number) {
+async function loadAccount(accountType: AccountType, accountId: number, companyUserId?: number | null) {
   if (accountType === "candidate") {
     const [row] = await db
       .select({ id: candidatesTable.id, name: candidatesTable.name, email: candidatesTable.email, password: candidatesTable.password, phone: candidatesTable.phone })
@@ -15,22 +15,36 @@ async function loadAccount(accountType: AccountType, accountId: number) {
       .where(eq(candidatesTable.id, accountId));
     return row ? { ...row, type: "candidate" as const } : null;
   }
-  // For companies, accountId is the companyProfileId. In stage (a) there is exactly
-  // one user (the Owner) per company, so we resolve to that owner row. Stage (b) will
-  // pass the specific companyUserId and look up by that instead.
+  // For companies, accountId is the companyProfileId. If a specific companyUserId
+  // is provided (stage (b)+), resolve to that user row — otherwise fall back to
+  // the Owner row for backward compatibility with older sessions.
+  const userPredicate = Number.isFinite(Number(companyUserId))
+    ? and(eq(companyUsers.companyProfileId, accountId), eq(companyUsers.id, Number(companyUserId)))
+    : and(eq(companyUsers.companyProfileId, accountId), eq(companyUsers.role, "owner"));
   const [row] = await db
     .select({
       id: companyProfiles.id,
       userId: companyUsers.id,
-      name: companyProfiles.name,
+      companyName: companyProfiles.name,
+      personName: companyUsers.name,
       email: companyUsers.email,
       password: companyUsers.password,
     })
     .from(companyUsers)
     .innerJoin(companyProfiles, eq(companyProfiles.id, companyUsers.companyProfileId))
-    .where(and(eq(companyUsers.companyProfileId, accountId), eq(companyUsers.role, "owner")));
+    .where(userPredicate);
   return row
-    ? { id: row.id, userId: row.userId, name: row.name, email: row.email, password: row.password, phone: null as string | null, type: "company" as const }
+    ? {
+        id: row.id,
+        userId: row.userId,
+        name: row.companyName,
+        personName: row.personName,
+        companyName: row.companyName,
+        email: row.email,
+        password: row.password,
+        phone: null as string | null,
+        type: "company" as const,
+      }
     : null;
 }
 
@@ -66,11 +80,13 @@ router.get("/account", async (req, res): Promise<void> => {
   try {
     const accountType = req.query.accountType as AccountType;
     const accountId = parseInt(String(req.query.accountId || ""), 10);
+    const companyUserIdRaw = req.query.companyUserId;
+    const companyUserId = companyUserIdRaw != null && companyUserIdRaw !== "" ? parseInt(String(companyUserIdRaw), 10) : null;
     if (!["candidate", "company"].includes(accountType) || !Number.isFinite(accountId)) {
       res.status(400).json({ error: "Invalid account" });
       return;
     }
-    const acct = await loadAccount(accountType, accountId);
+    const acct = await loadAccount(accountType, accountId, companyUserId);
     if (!acct) {
       res.status(404).json({ error: "Account not found" });
       return;
@@ -78,6 +94,9 @@ router.get("/account", async (req, res): Promise<void> => {
     res.json({
       id: acct.id,
       name: acct.name,
+      personName: (acct as { personName?: string | null }).personName ?? null,
+      companyName: (acct as { companyName?: string | null }).companyName ?? null,
+      userId: (acct as { userId?: number }).userId ?? null,
       email: acct.email,
       phone: acct.phone,
       accountType: acct.type,
@@ -170,6 +189,63 @@ router.post("/account/change-phone", async (req, res): Promise<void> => {
   } catch (err) {
     console.error("Failed to change phone:", err);
     res.status(500).json({ error: "Failed to change phone" });
+  }
+});
+
+router.post("/account/change-name", async (req, res): Promise<void> => {
+  try {
+    const { accountType, accountId, companyUserId, name } = req.body || {};
+    if (!["candidate", "company"].includes(accountType) || !Number.isFinite(Number(accountId))) {
+      res.status(400).json({ error: "Invalid account" });
+      return;
+    }
+    const trimmed = typeof name === "string" ? name.trim() : "";
+    if (!trimmed) {
+      res.status(400).json({ error: "Name is required" });
+      return;
+    }
+    if (trimmed.length > 120) {
+      res.status(400).json({ error: "Name is too long (max 120 characters)" });
+      return;
+    }
+
+    if (accountType === "candidate") {
+      await db.update(candidatesTable).set({ name: trimmed }).where(eq(candidatesTable.id, Number(accountId)));
+      res.json({ success: true, name: trimmed });
+      return;
+    }
+
+    // company: require an explicit companyUserId scoped to this company. Falls
+    // back to the Owner row only when no companyUserId is supplied (legacy
+    // sessions from before stage (b)).
+    let targetUserId: number | null = null;
+    if (Number.isFinite(Number(companyUserId))) {
+      const [target] = await db
+        .select({ id: companyUsers.id })
+        .from(companyUsers)
+        .where(and(eq(companyUsers.id, Number(companyUserId)), eq(companyUsers.companyProfileId, Number(accountId))));
+      if (!target) {
+        res.status(404).json({ error: "Team member not found for this company" });
+        return;
+      }
+      targetUserId = target.id;
+    } else {
+      const [owner] = await db
+        .select({ id: companyUsers.id })
+        .from(companyUsers)
+        .where(and(eq(companyUsers.companyProfileId, Number(accountId)), eq(companyUsers.role, "owner")));
+      if (!owner) {
+        res.status(404).json({ error: "Owner not found for this company" });
+        return;
+      }
+      targetUserId = owner.id;
+    }
+    await db.update(companyUsers).set({ name: trimmed, updatedAt: new Date() }).where(eq(companyUsers.id, targetUserId));
+
+    res.json({ success: true, name: trimmed });
+  } catch (err) {
+    console.error("Failed to change name:", err);
+    res.status(500).json({ error: "Failed to change name" });
   }
 });
 
