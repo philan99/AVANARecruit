@@ -43,14 +43,8 @@ router.post("/feature-requests", async (req, res) => {
 
     try {
       const { client, fromEmail } = await getResendClient();
-      await client.emails.send({
-        from: fromEmail,
-        to: "enhancements@avanarecruit.ai",
-        replyTo: email.trim(),
-        subject: `[AVANA Feature Request] ${title.trim()}`,
-        html: brandedEmail(
-          "New Feature Request",
-          `<table style="width: 100%; border-collapse: collapse;">
+
+      const detailsBlock = `<table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 130px; vertical-align: top;"><strong>From:</strong></td>
                 <td style="padding: 8px 0; font-size: 14px;">${requesterType === "company" ? "Company" : "Candidate"}</td>
@@ -87,10 +81,33 @@ router.post("/feature-requests", async (req, res) => {
             <div style="margin-top: 16px;">
               <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0;"><strong>Proposed feature:</strong></p>
               <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(proposal.trim())}</div>
-            </div>`,
-          "Reply directly to this email to follow up with the requester."
-        ),
+            </div>`;
+
+      await client.emails.send({
+        from: fromEmail,
+        to: "enhancements@avanarecruit.ai",
+        replyTo: email.trim(),
+        subject: `[AVANA Feature Request] ${title.trim()}`,
+        html: brandedEmail("New Feature Request", detailsBlock, "Reply directly to this email to follow up with the requester."),
       });
+
+      try {
+        await client.emails.send({
+          from: fromEmail,
+          to: email.trim(),
+          subject: `We've received your feature request: ${title.trim()}`,
+          html: brandedEmail(
+            "Thanks for your idea",
+            `<p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Hi ${escapeHtml(name.trim())},</p>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 16px 0;">Thanks for sharing your feature request with AVANA Recruit. Our team reviews every suggestion and will be in touch if we need any more detail.</p>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 8px 0;"><strong>For your records, here's a copy of what you submitted:</strong></p>
+             ${detailsBlock}`,
+            "If you didn't submit this, you can safely ignore this email."
+          ),
+        });
+      } catch (confirmError) {
+        console.error("Failed to send feature request confirmation email:", confirmError);
+      }
     } catch (emailError) {
       console.error("Failed to send feature request email:", emailError);
       return res.status(500).json({ error: "Failed to submit feature request" });
