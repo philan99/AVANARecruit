@@ -339,10 +339,28 @@ export default function AdminDevelopment() {
             const CategoryIcon = cc.icon;
 
             return (
-              <Card key={task.id} className={`bg-card transition-all hover:border-primary/20 ${task.status === "done" ? "opacity-60" : ""}`}>
+              <Card
+                key={task.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openEditDialog(task)}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return;
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openEditDialog(task);
+                  }
+                }}
+                className={`bg-card cursor-pointer transition-all hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${task.status === "done" ? "opacity-60" : ""}`}
+                title="Click to edit task"
+              >
                 <CardContent className="py-3 px-4">
                   <div className="flex items-start gap-3">
-                    <button onClick={() => handleStatusToggle(task)} className={`mt-0.5 shrink-0 ${sc.color} hover:opacity-70 transition-opacity`} title={`Click to change status`}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleStatusToggle(task); }}
+                      className={`mt-0.5 shrink-0 ${sc.color} hover:opacity-70 transition-opacity`}
+                      title="Click to change status"
+                    >
                       <StatusIcon className="w-5 h-5" />
                     </button>
                     <div className="flex-1 min-w-0">
@@ -364,10 +382,7 @@ export default function AdminDevelopment() {
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(task)}>
-                        <Edit className="w-3.5 h-3.5" />
-                      </Button>
+                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {deleteConfirmId === task.id ? (
                         <div className="flex items-center gap-1">
                           <Button variant="destructive" size="sm" className="h-7 text-xs px-2" onClick={() => handleDelete(task.id)}>
