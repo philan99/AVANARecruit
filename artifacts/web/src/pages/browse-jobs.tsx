@@ -14,6 +14,7 @@ const JOB_TYPE_LABELS: Record<string, string> = {
   contract: "Contract",
   fixed_term_contract: "Fixed Term Contract",
   part_time: "Part-time",
+  temporary: "Temporary",
 };
 const JOB_TYPE_OPTIONS = Object.keys(JOB_TYPE_LABELS);
 
