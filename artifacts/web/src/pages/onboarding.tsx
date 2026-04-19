@@ -153,6 +153,7 @@ export default function Onboarding() {
   // CV parsing state
   const [parsingCv, setParsingCv] = useState(false);
   const [cvParseError, setCvParseError] = useState<string>("");
+  const [cvSummaryMode, setCvSummaryMode] = useState<"verbatim" | "ai">("verbatim");
   const [prefilledFields, setPrefilledFields] = useState<Set<string>>(new Set());
   const [lowConfidenceFields, setLowConfidenceFields] = useState<Set<string>>(new Set());
   const [prefillBannerDismissed, setPrefillBannerDismissed] = useState(false);
@@ -214,11 +215,15 @@ export default function Onboarding() {
     return prefilled.size;
   }
 
-  async function parseCv(candidateId: number) {
+  async function parseCv(candidateId: number, mode: "verbatim" | "ai" = cvSummaryMode) {
     setParsingCv(true);
     setCvParseError("");
     try {
-      const res = await fetch(`${apiBase}/candidates/${candidateId}/parse-cv`, { method: "POST" });
+      const res = await fetch(`${apiBase}/candidates/${candidateId}/parse-cv`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summaryMode: mode }),
+      });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         const msg = (data as any)?.error || "Couldn't read your CV. You can fill in the details manually.";
@@ -540,7 +545,47 @@ export default function Onboarding() {
           {step === 2 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Upload your CV</h1>
-              <p className="text-sm text-slate-600 mb-5">Recruiters will see this when they review your profile. PDF or DOCX recommended.</p>
+              <p className="text-sm text-slate-600 mb-4">Recruiters will see this when they review your profile. PDF or DOCX recommended.</p>
+
+              <div className="mb-5 p-4 rounded-lg border border-slate-200 bg-slate-50">
+                <p className="text-sm font-semibold mb-1" style={{ color: "#1a2035" }}>How should we handle your role descriptions?</p>
+                <p className="text-xs text-slate-600 mb-3">We'll always pull out your job titles, companies and dates. Choose how to handle the wording under each role.</p>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="cvSummaryMode"
+                      value="verbatim"
+                      checked={cvSummaryMode === "verbatim"}
+                      onChange={() => setCvSummaryMode("verbatim")}
+                      disabled={parsingCv}
+                      className="mt-1 accent-[#4CAF50]"
+                    />
+                    <span className="text-sm" style={{ color: "#1a2035" }}>
+                      <span className="font-semibold">Keep my wording</span>
+                      <span className="block text-xs text-slate-600">Copy the descriptions from my CV as written.</span>
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="cvSummaryMode"
+                      value="ai"
+                      checked={cvSummaryMode === "ai"}
+                      onChange={() => setCvSummaryMode("ai")}
+                      disabled={parsingCv}
+                      className="mt-1 accent-[#4CAF50]"
+                    />
+                    <span className="text-sm" style={{ color: "#1a2035" }}>
+                      <span className="font-semibold">Let AI summarise</span>
+                      <span className="block text-xs text-slate-600">Generate a concise 1–3 sentence summary for each role.</span>
+                    </span>
+                  </label>
+                </div>
+                {!!candidate?.cvFile && (
+                  <p className="text-xs text-slate-500 mt-2">You can change this and re-read by clicking <em>Replace</em> above or <em>Read my CV with AI</em> below.</p>
+                )}
+              </div>
 
               {candidate?.cvFile ? (
                 <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
@@ -610,14 +655,14 @@ export default function Onboarding() {
                 </div>
               )}
 
-              {candidate?.cvFile && !parsingCv && prefillCount === 0 && !cvParseError && (
+              {candidate?.cvFile && !parsingCv && (
                 <button
                   type="button"
                   onClick={() => candidateProfileId && parseCv(candidateProfileId)}
-                  className="text-xs font-semibold inline-flex items-center gap-1 hover:underline"
+                  className="text-xs font-semibold inline-flex items-center gap-1 hover:underline mt-2"
                   style={{ color: "#4CAF50" }}
                 >
-                  <Sparkles className="w-3.5 h-3.5" /> Read my CV with AI to pre-fill the next steps
+                  <Sparkles className="w-3.5 h-3.5" /> {prefillCount > 0 ? "Re-read my CV" : "Read my CV with AI to pre-fill the next steps"}
                 </button>
               )}
             </div>

@@ -63,7 +63,7 @@ async function extractCvText(buffer: Buffer, fileName: string): Promise<string> 
   return Array.isArray(text) ? text.join("\n") : text;
 }
 
-const buildSystemPrompt = (industryOptions: string[]) => `You are an expert CV/resume parser. Extract structured candidate information from the CV text provided. Return ONLY valid JSON matching the schema below — no commentary, no markdown.
+const buildSystemPrompt = (industryOptions: string[], summaryMode: "verbatim" | "ai" = "verbatim") => `You are an expert CV/resume parser. Extract structured candidate information from the CV text provided. Return ONLY valid JSON matching the schema below — no commentary, no markdown.
 
 Rules:
 - Use British English where applicable.
@@ -74,10 +74,14 @@ Rules:
 - educationDetails: free-text describing the institution, degree subject, dates, etc.
 - qualifications: array of certifications/professional qualifications (e.g. "AWS Certified", "PRINCE2", "CIPD Level 5"). Empty array if none.
 - skills: array of technical/professional skills mentioned. Aim for 5-20 relevant items.
-- experience: array of jobs in REVERSE chronological order (most recent first). Each: { jobTitle, company, startDate (YYYY-MM or YYYY), endDate (YYYY-MM, YYYY, or "" if current), current (boolean), description (1-3 sentence summary of responsibilities/achievements) }.
+- experience: array of jobs in REVERSE chronological order (most recent first). Each: { jobTitle, company, startDate (YYYY-MM or YYYY), endDate (YYYY-MM, YYYY, or "" if current), current (boolean), description }. ${
+  summaryMode === "verbatim"
+    ? "For description, COPY THE TEXT FROM THE CV VERBATIM (the candidate's own bullet points or paragraphs under that role). Do NOT rewrite, paraphrase, summarise or invent. Preserve the candidate's wording. You may collapse line breaks into newlines (\\n) to keep readability, but do not change words. If a role has no description text in the CV, return an empty string."
+    : "For description, write a 1-3 sentence summary of the responsibilities and achievements based on what the CV says."
+}
 - preferredJobTypes / preferredWorkplaces / preferredIndustries: ONLY include if the CV explicitly states preferences (most CVs won't). Use only these enum values: jobTypes=[${JOB_TYPE_OPTIONS.join(",")}], workplaces=[${WORKPLACE_OPTIONS.join(",")}], industries=[${industryOptions.join(",")}]. Empty arrays if not stated.
 - Social URLs: linkedinUrl, twitterUrl, facebookUrl, portfolioUrl. Empty string if not present.
-- summary: 1-3 sentence professional summary (use the CV's own profile/summary if present, otherwise generate one).
+- summary: ${summaryMode === "verbatim" ? "use the CV's own profile/summary VERBATIM if present (preserve wording). If no profile section exists, return an empty string — do NOT generate one." : "1-3 sentence professional summary (use the CV's own profile/summary if present, otherwise generate one)."}
 - lowConfidenceFields: array of field names where you had to guess or the CV was ambiguous. Examples: "phone", "location", "experienceYears", "education", "preferredJobTypes". Be honest — flag anything not directly stated.
 
 Schema:
@@ -149,13 +153,16 @@ router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
     // Cap at ~30k chars to keep tokens reasonable
     if (cvText.length > 30000) cvText = cvText.slice(0, 30000);
 
+    const summaryMode: "verbatim" | "ai" =
+      (req.body?.summaryMode === "ai" ? "ai" : "verbatim");
+
     const INDUSTRY_OPTIONS = await loadIndustryCodes();
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       max_completion_tokens: 4096,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: buildSystemPrompt(INDUSTRY_OPTIONS) },
+        { role: "system", content: buildSystemPrompt(INDUSTRY_OPTIONS, summaryMode) },
         { role: "user", content: `CV text:\n\n${cvText}` },
       ],
     });
