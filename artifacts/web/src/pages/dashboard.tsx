@@ -69,16 +69,23 @@ export default function Dashboard() {
   const { data: profile } = useCompanyProfile();
   const companyProfileId = profile?.id;
 
+  const autoRefresh = {
+    refetchOnMount: "always" as const,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
+    staleTime: 0,
+  };
+
   const statsParams = companyProfileId ? { companyProfileId } : {};
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats(statsParams, {
-    query: { queryKey: getGetDashboardStatsQueryKey(statsParams), enabled: !!companyProfileId },
+    query: { queryKey: getGetDashboardStatsQueryKey(statsParams), enabled: !!companyProfileId, ...autoRefresh },
   });
   const recentMatchesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
-  const { data: recentMatches } = useGetRecentMatches(recentMatchesParams, { query: { queryKey: ["recent-matches", companyProfileId], enabled: !!companyProfileId } });
+  const { data: recentMatches } = useGetRecentMatches(recentMatchesParams, { query: { queryKey: ["recent-matches", companyProfileId], enabled: !!companyProfileId, ...autoRefresh } });
   const topCandidatesParams = companyProfileId ? { limit: 5, companyProfileId } : { limit: 5 };
-  const { data: topCandidates } = useGetTopCandidates(topCandidatesParams, { query: { queryKey: ["top-candidates", companyProfileId], enabled: !!companyProfileId } });
+  const { data: topCandidates } = useGetTopCandidates(topCandidatesParams, { query: { queryKey: ["top-candidates", companyProfileId], enabled: !!companyProfileId, ...autoRefresh } });
   const skillDemandParams = companyProfileId ? { companyProfileId } : undefined;
-  const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId], enabled: !!companyProfileId } });
+  const { data: skillDemand } = useGetSkillDemand(skillDemandParams, { query: { queryKey: ["skill-demand", companyProfileId], enabled: !!companyProfileId, ...autoRefresh } });
 
   interface Applicant {
     id: number;
