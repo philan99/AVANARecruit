@@ -25,6 +25,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Building2, Search, X, KeyRound, LogIn } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 
+interface CompanyTeamUser {
+  id: number;
+  companyProfileId: number;
+  name: string | null;
+  email: string;
+  role: string;
+  verified: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
 interface CompanyProfile {
   id: number;
   name: string;
@@ -38,18 +49,40 @@ interface CompanyProfile {
   founded: string | null;
   createdAt: string;
   updatedAt: string;
+  users: CompanyTeamUser[];
+}
+
+interface Row {
+  company: CompanyProfile;
+  user: CompanyTeamUser | null;
+  isFirstForCompany: boolean;
+}
+
+const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
+  owner: { label: "Owner", cls: "bg-primary/15 text-primary border-primary/30" },
+  admin: { label: "Admin", cls: "bg-accent/15 text-accent border-accent/30" },
+  member: { label: "Member", cls: "bg-secondary text-foreground border-border" },
+};
+
+function roleBadge(role: string) {
+  const meta = ROLE_BADGE[role] ?? { label: role, cls: "bg-secondary text-foreground border-border" };
+  return (
+    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${meta.cls}`}>
+      {meta.label}
+    </Badge>
+  );
 }
 
 export default function AdminCompanies() {
   const [companies, setCompanies] = useState<CompanyProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [resetTarget, setResetTarget] = useState<CompanyProfile | null>(null);
+  const [resetTarget, setResetTarget] = useState<{ company: CompanyProfile; user: CompanyTeamUser } | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetting, setResetting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { impersonateCompany } = useRole();
+  const { impersonateCompanyUser } = useRole();
 
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -58,6 +91,7 @@ export default function AdminCompanies() {
   const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
   const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
   const [sizeFilter, setSizeFilter] = useState(urlParams.get("size") || "all");
+  const [roleFilter, setRoleFilter] = useState(urlParams.get("role") || "all");
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -90,30 +124,65 @@ export default function AdminCompanies() {
     return Array.from(vals).sort();
   }, [companies]);
 
-  const filtered = useMemo(() => {
-    return companies.filter(c => {
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const matches = c.name.toLowerCase().includes(q) ||
-          (c.email && c.email.toLowerCase().includes(q)) ||
-          (c.industry && c.industry.toLowerCase().includes(q)) ||
-          (c.location && c.location.toLowerCase().includes(q));
-        if (!matches) return false;
-      }
-      if (industryFilter !== "all" && c.industry !== industryFilter) return false;
-      if (locationFilter !== "all" && c.location !== locationFilter) return false;
-      if (sizeFilter !== "all" && c.size !== sizeFilter) return false;
-      return true;
-    });
-  }, [companies, searchQuery, industryFilter, locationFilter, sizeFilter]);
+  const filteredRows: Row[] = useMemo(() => {
+    const rows: Row[] = [];
+    const sortedCompanies = [...companies].sort((a, b) => a.name.localeCompare(b.name));
+    for (const company of sortedCompanies) {
+      if (industryFilter !== "all" && company.industry !== industryFilter) continue;
+      if (locationFilter !== "all" && company.location !== locationFilter) continue;
+      if (sizeFilter !== "all" && company.size !== sizeFilter) continue;
 
-  const hasActiveFilters = searchQuery || industryFilter !== "all" || locationFilter !== "all" || sizeFilter !== "all";
+      const usersForCompany = company.users.filter(u => {
+        if (roleFilter !== "all" && u.role !== roleFilter) return false;
+        return true;
+      });
+
+      // The base list (before search): if no users, show one synthetic empty row.
+      const baseUsers: (CompanyTeamUser | null)[] =
+        usersForCompany.length > 0 ? usersForCompany : (roleFilter === "all" ? [null] : []);
+
+      // Apply search across both company fields and user fields.
+      const matchedUsers = baseUsers.filter(u => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        const companyMatch =
+          company.name.toLowerCase().includes(q) ||
+          (company.email && company.email.toLowerCase().includes(q)) ||
+          (company.industry && company.industry.toLowerCase().includes(q)) ||
+          (company.location && company.location.toLowerCase().includes(q));
+        const userMatch = u && (
+          (u.email && u.email.toLowerCase().includes(q)) ||
+          (u.name && u.name.toLowerCase().includes(q)) ||
+          u.role.toLowerCase().includes(q)
+        );
+        return companyMatch || userMatch;
+      });
+
+      matchedUsers.forEach((u, idx) => {
+        rows.push({ company, user: u, isFirstForCompany: idx === 0 });
+      });
+    }
+    return rows;
+  }, [companies, searchQuery, industryFilter, locationFilter, sizeFilter, roleFilter]);
+
+  const totalCompaniesShown = useMemo(
+    () => new Set(filteredRows.map(r => r.company.id)).size,
+    [filteredRows],
+  );
+
+  const hasActiveFilters =
+    !!searchQuery ||
+    industryFilter !== "all" ||
+    locationFilter !== "all" ||
+    sizeFilter !== "all" ||
+    roleFilter !== "all";
 
   function clearFilters() {
     setSearchQuery("");
     setIndustryFilter("all");
     setLocationFilter("all");
     setSizeFilter("all");
+    setRoleFilter("all");
   }
 
   async function handleResetPassword() {
@@ -129,13 +198,16 @@ export default function AdminCompanies() {
 
     setResetting(true);
     try {
-      const res = await fetch(`${basePath}/admin/companies/${resetTarget.id}/reset-password`, {
+      const res = await fetch(`${basePath}/admin/company-users/${resetTarget.user.id}/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPassword }),
       });
       if (res.ok) {
-        toast({ title: "Password Reset", description: `Password has been reset for ${resetTarget.name}.` });
+        toast({
+          title: "Password Reset",
+          description: `Password has been reset for ${resetTarget.user.name ?? resetTarget.user.email}.`,
+        });
         setResetTarget(null);
         setNewPassword("");
         setConfirmPassword("");
@@ -160,7 +232,9 @@ export default function AdminCompanies() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
           <Building2 className="mr-3 text-primary" /> Companies
         </h1>
-        <p className="text-muted-foreground mt-1">{companies.length} companies registered on the platform.</p>
+        <p className="text-muted-foreground mt-1">
+          {companies.length} companies registered, {filteredRows.length} team members shown.
+        </p>
       </div>
 
       <Card className="bg-card">
@@ -171,12 +245,27 @@ export default function AdminCompanies() {
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Name, email, industry, or location..."
+                  placeholder="Company name, user email or name, industry, location..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 h-9 text-xs"
                 />
               </div>
+            </div>
+
+            <div className="w-[140px]">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Role</Label>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="w-[160px]">
@@ -234,7 +323,7 @@ export default function AdminCompanies() {
 
           {hasActiveFilters && (
             <p className="text-[11px] text-muted-foreground mt-3">
-              Showing {filtered.length} of {companies.length} companies
+              Showing {filteredRows.length} team members across {totalCompaniesShown} companies
             </p>
           )}
         </CardContent>
@@ -242,86 +331,117 @@ export default function AdminCompanies() {
 
       <Card className="bg-card">
         <CardContent className="pt-6">
-          {filtered.length > 0 ? (
+          {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Company</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Team Member</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Role</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Industry</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Size</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Website</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Founded</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Last login</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((company) => (
-                    <tr key={company.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("a")) return; navigate(`/companies/${company.id}`); }}>
-                      <td className="py-2 px-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
-                            {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  {filteredRows.map((row, idx) => {
+                    const c = row.company;
+                    const u = row.user;
+                    const showCompanyMeta = row.isFirstForCompany;
+                    return (
+                      <tr
+                        key={`${c.id}-${u?.id ?? "empty"}-${idx}`}
+                        className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${showCompanyMeta ? "" : "bg-secondary/10"}`}
+                        data-testid={`row-company-user-${c.id}-${u?.id ?? "empty"}`}
+                      >
+                        <td className="py-2 px-2 align-top">
+                          {showCompanyMeta ? (
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/companies/${c.id}`)}
+                              className="flex items-center gap-2 text-left"
+                            >
+                              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[9px] shrink-0">
+                                {c.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-medium text-xs text-primary hover:underline truncate">{c.name}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {c.users.length === 0
+                                    ? "No team members"
+                                    : `${c.users.length} member${c.users.length === 1 ? "" : "s"}`}
+                                </p>
+                              </div>
+                            </button>
+                          ) : (
+                            <div className="pl-9 text-muted-foreground/40 text-[10px]">↳</div>
+                          )}
+                        </td>
+                        <td className="py-2 px-2 align-top">
+                          {u ? (
+                            <div className="min-w-0">
+                              <p className="font-medium text-xs text-foreground truncate">{u.name ?? u.email}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{u.email}</p>
+                              {!u.verified && (
+                                <span className="text-[9px] text-amber-600 dark:text-amber-400">Unverified</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground italic">No team members</span>
+                          )}
+                        </td>
+                        <td className="py-2 px-2 align-top">{u ? roleBadge(u.role) : "—"}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">{showCompanyMeta ? (formatIndustry(c.industry) || "—") : ""}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">{showCompanyMeta ? (c.location || "—") : ""}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">
+                          {u?.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "—"}
+                        </td>
+                        <td className="py-2 px-2 align-top">
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-[10px] gap-1 h-7 px-2"
+                              disabled={!u}
+                              data-testid={u ? `button-login-as-${u.id}` : undefined}
+                              onClick={() => {
+                                if (!u) return;
+                                impersonateCompanyUser(c.id, u.id, u.role, u.email);
+                                navigate("/");
+                              }}
+                            >
+                              <LogIn className="w-3 h-3" />
+                              Login
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-[10px] gap-1 h-7 px-2"
+                              disabled={!u}
+                              data-testid={u ? `button-reset-password-${u.id}` : undefined}
+                              onClick={() => {
+                                if (!u) return;
+                                setResetTarget({ company: c, user: u });
+                                setNewPassword("");
+                                setConfirmPassword("");
+                              }}
+                            >
+                              <KeyRound className="w-3 h-3" />
+                              Reset
+                            </Button>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-xs text-foreground truncate text-primary hover:underline">{company.name}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{company.email || "—"}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-2 px-2 text-muted-foreground">{formatIndustry(company.industry) || "—"}</td>
-                      <td className="py-2 px-2 text-muted-foreground">{company.location || "—"}</td>
-                      <td className="py-2 px-2 text-muted-foreground">{company.size || "—"}</td>
-                      <td className="py-2 px-2 text-muted-foreground">
-                        {company.website ? (
-                          <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                            {(() => { try { return new URL(company.website).hostname; } catch { return company.website; } })()}
-                          </a>
-                        ) : "—"}
-                      </td>
-                      <td className="py-2 px-2 text-muted-foreground">{company.founded || "—"}</td>
-                      <td className="py-2 px-2 text-muted-foreground">
-                        {new Date(company.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="py-2 px-2">
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[10px] gap-1 h-7 px-2"
-                            onClick={() => {
-                              impersonateCompany(company.id, company.email || "");
-                              navigate("/");
-                            }}
-                          >
-                            <LogIn className="w-3 h-3" />
-                            Login
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[10px] gap-1 h-7 px-2"
-                            onClick={() => {
-                              setResetTarget(company);
-                              setNewPassword("");
-                              setConfirmPassword("");
-                            }}
-                          >
-                            <KeyRound className="w-3 h-3" />
-                            Reset
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              {hasActiveFilters ? "No companies match your filters." : "No companies registered yet."}
+              {hasActiveFilters ? "No team members match your filters." : "No companies registered yet."}
             </p>
           )}
         </CardContent>
@@ -332,7 +452,12 @@ export default function AdminCompanies() {
           <DialogHeader>
             <DialogTitle>Reset Password</DialogTitle>
             <DialogDescription>
-              Set a new password for <span className="font-medium text-foreground">{resetTarget?.name}</span> ({resetTarget?.email || "no email"})
+              Set a new password for{" "}
+              <span className="font-medium text-foreground">
+                {resetTarget?.user.name ?? resetTarget?.user.email}
+              </span>{" "}
+              ({resetTarget?.user.email}) on{" "}
+              <span className="font-medium text-foreground">{resetTarget?.company.name}</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">

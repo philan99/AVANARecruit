@@ -19,6 +19,7 @@ interface RoleContextType {
   isImpersonating: boolean;
   impersonateCandidate: (candidateId: number, candidateEmail: string) => void;
   impersonateCompany: (companyId: number, companyEmail: string) => void;
+  impersonateCompanyUser: (companyId: number, userId: number, userRole: string, userEmail: string) => void;
   exitImpersonation: () => void;
 }
 
@@ -186,6 +187,33 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setIsImpersonating(true);
   }, []);
 
+  const impersonateCompanyUser = useCallback((companyId: number, userId: number, userRole: string, userEmail: string) => {
+    const adminState = {
+      role: localStorage.getItem(ROLE_KEY),
+      email: localStorage.getItem(EMAIL_KEY),
+      candidateId: localStorage.getItem(CANDIDATE_ID_KEY),
+      companyId: localStorage.getItem(COMPANY_ID_KEY),
+      companyUserId: localStorage.getItem(COMPANY_USER_ID_KEY),
+      companyUserRole: localStorage.getItem(COMPANY_USER_ROLE_KEY),
+    };
+    localStorage.setItem(IMPERSONATION_KEY, JSON.stringify(adminState));
+
+    localStorage.setItem(ROLE_KEY, "company");
+    localStorage.setItem(COMPANY_ID_KEY, companyId.toString());
+    localStorage.setItem(COMPANY_USER_ID_KEY, userId.toString());
+    localStorage.setItem(COMPANY_USER_ROLE_KEY, userRole);
+    localStorage.setItem(EMAIL_KEY, userEmail);
+    localStorage.removeItem(CANDIDATE_ID_KEY);
+
+    setRoleState("company");
+    setCompanyProfileIdState(companyId);
+    setCompanyUserIdState(userId);
+    setCompanyUserRoleState(userRole);
+    setUserEmailState(userEmail);
+    setCandidateProfileIdState(null);
+    setIsImpersonating(true);
+  }, []);
+
   const exitImpersonation = useCallback(() => {
     const stored = localStorage.getItem(IMPERSONATION_KEY);
     if (!stored) return;
@@ -214,7 +242,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, companyUserId, setCompanyUserId, companyUserRole, setCompanyUserRole, userEmail, setUserEmail, isImpersonating, impersonateCandidate, impersonateCompany, exitImpersonation }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, companyUserId, setCompanyUserId, companyUserRole, setCompanyUserRole, userEmail, setUserEmail, isImpersonating, impersonateCandidate, impersonateCompany, impersonateCompanyUser, exitImpersonation }}>
       {children}
     </RoleContext.Provider>
   );

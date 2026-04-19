@@ -35,9 +35,71 @@ router.post("/admin/login", async (req, res) => {
 router.get("/admin/companies", async (req, res) => {
   try {
     const companies = await db.select().from(companyProfiles);
-    res.json(companies);
+    const users = await db
+      .select({
+        id: companyUsers.id,
+        companyProfileId: companyUsers.companyProfileId,
+        name: companyUsers.name,
+        email: companyUsers.email,
+        role: companyUsers.role,
+        verified: companyUsers.verified,
+        lastLoginAt: companyUsers.lastLoginAt,
+        createdAt: companyUsers.createdAt,
+      })
+      .from(companyUsers);
+
+    const usersByCompany = new Map<number, typeof users>();
+    for (const u of users) {
+      const arr = usersByCompany.get(u.companyProfileId) ?? [];
+      arr.push(u);
+      usersByCompany.set(u.companyProfileId, arr);
+    }
+    const ROLE_ORDER: Record<string, number> = { owner: 0, admin: 1, member: 2 };
+    for (const arr of usersByCompany.values()) {
+      arr.sort((a, b) => {
+        const ra = ROLE_ORDER[a.role] ?? 99;
+        const rb = ROLE_ORDER[b.role] ?? 99;
+        if (ra !== rb) return ra - rb;
+        return (a.email || "").localeCompare(b.email || "");
+      });
+    }
+
+    res.json(
+      companies.map((c) => ({
+        ...c,
+        users: usersByCompany.get(c.id) ?? [],
+      })),
+    );
   } catch (err) {
     req.log.error(err, "Failed to list companies");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/admin/company-users/:userId/reset-password", async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    if (!Number.isFinite(userId)) {
+      return res.status(400).json({ error: "Invalid user id" });
+    }
+    const { password } = req.body;
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db
+      .update(companyUsers)
+      .set({ password: hashedPassword })
+      .where(eq(companyUsers.id, userId))
+      .returning({ id: companyUsers.id });
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Team member not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error(err, "Failed to reset team member password");
     res.status(500).json({ error: "Internal server error" });
   }
 });
