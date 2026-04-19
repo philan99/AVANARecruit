@@ -66,7 +66,7 @@ export default function RoleSelect() {
   const createCompany = useCreateCompanyProfile();
   const createCandidate = useCreateCandidate();
 
-  const { setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
+  const { setCandidateProfileId, setCompanyProfileId, setCompanyUserId, setCompanyUserRole, setUserEmail } = useRole();
   const [, setLocation] = useLocation();
 
   const handleCompanySignUp = async (e: React.FormEvent) => {
@@ -202,6 +202,8 @@ export default function RoleSelect() {
           setRole("candidate");
         } else if (data.role === "company") {
           setCompanyProfileId(data.companyId);
+          if (data.companyUserId) setCompanyUserId(data.companyUserId);
+          if (data.companyUserRole) setCompanyUserRole(data.companyUserRole);
           setRole("company");
         }
 

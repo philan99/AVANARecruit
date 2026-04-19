@@ -49,6 +49,8 @@ import VerifyEmailPage from "@/pages/verify-email";
 import PortalContactUs from "@/pages/portal-contact-us";
 import FeatureRequest from "@/pages/feature-request";
 import MySettings from "@/pages/my-settings";
+import TeamMembers from "@/pages/team-members";
+import AcceptInvite from "@/pages/accept-invite";
 import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
@@ -77,6 +79,7 @@ function CompanyRoutes() {
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/company-profile" component={CompanyProfile} />
         <Route path="/my-settings" component={MySettings} />
+        <Route path="/team" component={TeamMembers} />
         <Route path="/contact-us" component={PortalContactUs} />
         <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
@@ -138,6 +141,15 @@ function AdminRoutes() {
 
 function AppRouter() {
   const { role } = useRole();
+  const isAcceptInvite = typeof window !== "undefined" && window.location.pathname.endsWith("/accept-invite");
+
+  if (isAcceptInvite) {
+    return (
+      <Switch>
+        <Route path="/accept-invite" component={AcceptInvite} />
+      </Switch>
+    );
+  }
 
   if (!role) {
     return (

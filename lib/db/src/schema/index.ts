@@ -3,6 +3,7 @@ export * from "./candidates";
 export * from "./matches";
 export * from "./companyProfiles";
 export * from "./companyUsers";
+export * from "./companyUserInvites";
 export * from "./favourites";
 export * from "./admins";
 export * from "./contactSubmissions";

@@ -20,6 +20,7 @@ import {
   Mail,
   Lightbulb,
   ChevronDown,
+  UsersRound,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -86,6 +87,11 @@ export function Layout({ children }: LayoutProps) {
   const settingsItem =
     role === "company" || role === "candidate"
       ? { href: "/my-settings", label: "My Settings", icon: Settings }
+      : null;
+
+  const teamItem =
+    role === "company"
+      ? { href: "/team", label: "Team Members", icon: UsersRound }
       : null;
 
   const profileItem =
@@ -181,7 +187,15 @@ export function Layout({ children }: LayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                {profileItem && supportItem && <DropdownMenuSeparator />}
+                {teamItem && (
+                  <DropdownMenuItem asChild>
+                    <Link href={teamItem.href} className="flex items-center cursor-pointer" data-testid="link-team-members">
+                      <teamItem.icon className="w-4 h-4 mr-2" />
+                      {teamItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {(profileItem || teamItem) && supportItem && <DropdownMenuSeparator />}
                 {supportItem && (
                   <DropdownMenuItem asChild>
                     <Link href={supportItem.href} className="flex items-center cursor-pointer">
@@ -273,6 +287,16 @@ export function Layout({ children }: LayoutProps) {
                 >
                   <profileItem.icon className="w-4 h-4 mr-3" />
                   {profileItem.label}
+                </Link>
+              )}
+              {teamItem && (
+                <Link
+                  href={teamItem.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <teamItem.icon className="w-4 h-4 mr-3" />
+                  {teamItem.label}
                 </Link>
               )}
               {supportItem && (
