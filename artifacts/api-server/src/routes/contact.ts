@@ -61,9 +61,11 @@ router.post("/contact", async (req, res) => {
               <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message.trim()}</div>
             </div>`;
 
+      const supportInbox = contactType === "company" ? "employers@avanarecruit.ai" : "candidates@avanarecruit.ai";
+
       await client.emails.send({
         from: fromEmail,
-        to: fromEmail,
+        to: supportInbox,
         replyTo: email.trim(),
         subject: `[AVANA Contact] ${subject.trim()}`,
         html: brandedEmail(
