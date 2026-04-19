@@ -150,8 +150,6 @@ router.post("/account/change-email", async (req, res): Promise<void> => {
       if (userId) {
         await db.update(companyUsers).set({ email: lowerNew }).where(eq(companyUsers.id, userId));
       }
-      // Mirror onto company_profiles for legacy reads (until columns are dropped in stage c).
-      await db.update(companyProfiles).set({ email: lowerNew }).where(eq(companyProfiles.id, Number(accountId)));
     }
 
     res.json({ success: true, email: lowerNew });

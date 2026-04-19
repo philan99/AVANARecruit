@@ -13,6 +13,8 @@ export interface CreateJobBody {
   company: string;
   /** @nullable */
   companyProfileId?: number | null;
+  /** @nullable */
+  createdByUserId?: number | null;
   location: string;
   description: string;
   requirements?: string;

@@ -176,17 +176,21 @@ export default function AdminCompanyDetail() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {company.email && (
-          <Card className="bg-card">
-            <CardContent className="pt-4 pb-4 flex items-center gap-3">
-              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Email</p>
-                <p className="text-sm font-medium truncate">{company.email}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {(() => {
+          const owner = (company.users || []).find((u: any) => u.role === "owner") || (company.users || [])[0];
+          if (!owner?.email) return null;
+          return (
+            <Card className="bg-card">
+              <CardContent className="pt-4 pb-4 flex items-center gap-3">
+                <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Owner Email</p>
+                  <p className="text-sm font-medium truncate">{owner.email}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
         {company.location && (
           <Card className="bg-card">
             <CardContent className="pt-4 pb-4 flex items-center gap-3">

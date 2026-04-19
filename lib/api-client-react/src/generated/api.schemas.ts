@@ -34,6 +34,8 @@ export interface Job {
   company: string;
   /** @nullable */
   companyProfileId?: number | null;
+  /** @nullable */
+  createdByUserId?: number | null;
   location: string;
   description: string;
   requirements: string;
@@ -82,6 +84,8 @@ export interface CreateJobBody {
   company: string;
   /** @nullable */
   companyProfileId?: number | null;
+  /** @nullable */
+  createdByUserId?: number | null;
   location: string;
   description: string;
   requirements?: string;
@@ -379,8 +383,6 @@ export interface CompanyProfile {
   id: number;
   name: string;
   /** @nullable */
-  email?: string | null;
-  /** @nullable */
   industry?: string | null;
   /** @nullable */
   website?: string | null;
@@ -408,8 +410,6 @@ export interface CompanyProfile {
 
 export interface CompanyProfileBody {
   name: string;
-  /** @nullable */
-  email?: string | null;
   /** @nullable */
   industry?: string | null;
   /** @nullable */
@@ -457,6 +457,7 @@ export type ListJobsParams = {
   status?: ListJobsStatus;
   search?: string;
   companyProfileId?: number;
+  createdByUserId?: number;
 };
 
 export type ListJobsStatus =

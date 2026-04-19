@@ -182,8 +182,9 @@ export default function JobsList() {
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const [, navigate] = useLocation();
-  const { role } = useRole();
+  const { role, companyUserId } = useRole();
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [postedByMe, setPostedByMe] = useState(false);
 
   const initStatus = urlParams.get("status");
   const initLocation = urlParams.get("location");
@@ -265,6 +266,7 @@ export default function JobsList() {
   const apiQueryParams = {
     ...(searchQuery ? { search: searchQuery } : {}),
     ...(role === "company" && companyProfileId ? { companyProfileId } : {}),
+    ...(role === "company" && postedByMe && companyUserId ? { createdByUserId: companyUserId } : {}),
   };
 
   const { data: jobs, isLoading } = useListJobs(apiQueryParams, {
@@ -372,6 +374,17 @@ export default function JobsList() {
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
+            </Button>
+          )}
+          {role === "company" && companyUserId && (
+            <Button
+              variant={postedByMe ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPostedByMe(v => !v)}
+              data-testid="button-posted-by-me"
+            >
+              <UserCheck className="w-3.5 h-3.5 mr-1.5" />
+              Posted by me
             </Button>
           )}
           <div className="flex-1" />

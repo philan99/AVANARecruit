@@ -60,7 +60,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Company name is required"),
-  email: z.string().optional(),
   industry: z.string().optional(),
   website: z.string().optional(),
   linkedinUrl: z.string().optional(),
@@ -155,7 +154,6 @@ export default function CompanyProfile() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
       industry: "",
       website: "",
       linkedinUrl: "",
@@ -175,7 +173,6 @@ export default function CompanyProfile() {
     if (profile) {
       form.reset({
         name: profile.name || "",
-        email: profile.email || userEmail || "",
         industry: profile.industry || "",
         website: profile.website || "",
         linkedinUrl: profile.linkedinUrl || "",
@@ -187,8 +184,6 @@ export default function CompanyProfile() {
         size: profile.size || "",
         founded: profile.founded || "",
       });
-    } else if (userEmail) {
-      form.reset({ ...form.getValues(), email: userEmail });
     }
     setIsEditing(true);
   }
@@ -298,13 +293,6 @@ export default function CompanyProfile() {
                     <FormItem>
                       <FormLabel>Company Name *</FormLabel>
                       <FormControl><Input placeholder="Acme Inc." {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl><Input type="email" placeholder="admin@acme.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -491,8 +479,8 @@ export default function CompanyProfile() {
                 <p className="text-lg text-primary font-medium mb-3">{industryLabel(profile!.industry)}</p>
               )}
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {profile!.email && (
-                  <span className="flex items-center"><Mail className="w-4 h-4 mr-1.5" /> {profile!.email}</span>
+                {userEmail && (
+                  <span className="flex items-center"><Mail className="w-4 h-4 mr-1.5" /> {userEmail}</span>
                 )}
                 {profile!.location && (
                   <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5" /> {profile!.location}</span>

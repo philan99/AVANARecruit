@@ -9,12 +9,14 @@ interface VerifyResponse {
   role?: "candidate" | "company";
   candidateId?: number;
   companyId?: number;
+  companyUserId?: number;
+  companyUserRole?: string;
   email?: string;
 }
 
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
-  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail } = useRole();
+  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail, setCompanyUserId, setCompanyUserRole } = useRole();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const [verified, setVerified] = useState<VerifyResponse | null>(null);
@@ -64,6 +66,8 @@ export default function VerifyEmail() {
       window.location.assign(`${baseUrl}/onboarding`);
     } else if (verified.role === "company" && verified.companyId) {
       setCompanyProfileId(verified.companyId);
+      if (verified.companyUserId) setCompanyUserId(verified.companyUserId);
+      if (verified.companyUserRole) setCompanyUserRole(verified.companyUserRole);
       setRole("company");
       window.location.assign(`${baseUrl}/company-profile`);
     } else {

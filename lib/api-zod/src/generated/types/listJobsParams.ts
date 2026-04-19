@@ -11,4 +11,5 @@ export type ListJobsParams = {
   status?: ListJobsStatus;
   search?: string;
   companyProfileId?: number;
+  createdByUserId?: number;
 };

@@ -125,7 +125,7 @@ export default function CreateJob() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { role } = useRole();
+  const { role, companyUserId } = useRole();
 
   const { data: companyProfile } = useCompanyProfile({
     enabled: role === "company",
@@ -372,6 +372,7 @@ export default function CreateJob() {
       company: companyProfile?.name ?? "",
       skills: values.skills,
       ...(companyProfileId ? { companyProfileId } : {}),
+      ...(companyUserId ? { createdByUserId: companyUserId } : {}),
     };
 
     createJob.mutate({ data: payload }, {

@@ -22,6 +22,7 @@ export const ListJobsQueryParams = zod.object({
   status: zod.enum(["open", "closed", "draft"]).optional(),
   search: zod.coerce.string().optional(),
   companyProfileId: zod.coerce.number().optional(),
+  createdByUserId: zod.coerce.number().optional(),
 });
 
 export const ListJobsResponseItem = zod.object({
@@ -29,6 +30,7 @@ export const ListJobsResponseItem = zod.object({
   title: zod.string(),
   company: zod.string(),
   companyProfileId: zod.number().nullish(),
+  createdByUserId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -54,6 +56,7 @@ export const CreateJobBody = zod.object({
   title: zod.string(),
   company: zod.string(),
   companyProfileId: zod.number().nullish(),
+  createdByUserId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string().optional(),
@@ -82,6 +85,7 @@ export const GetJobResponse = zod.object({
   title: zod.string(),
   company: zod.string(),
   companyProfileId: zod.number().nullish(),
+  createdByUserId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -130,6 +134,7 @@ export const UpdateJobResponse = zod.object({
   title: zod.string(),
   company: zod.string(),
   companyProfileId: zod.number().nullish(),
+  createdByUserId: zod.number().nullish(),
   location: zod.string(),
   description: zod.string(),
   requirements: zod.string(),
@@ -485,7 +490,6 @@ export const GetTopCandidatesResponse = zod.array(GetTopCandidatesResponseItem);
 export const GetCompanyProfileResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
-  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   linkedinUrl: zod.string().nullish(),
@@ -506,7 +510,6 @@ export const GetCompanyProfileResponse = zod.object({
  */
 export const CreateCompanyProfileBody = zod.object({
   name: zod.string(),
-  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   linkedinUrl: zod.string().nullish(),
@@ -523,7 +526,6 @@ export const CreateCompanyProfileBody = zod.object({
 export const CreateCompanyProfileResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
-  email: zod.string().nullish(),
   industry: zod.string().nullish(),
   website: zod.string().nullish(),
   linkedinUrl: zod.string().nullish(),

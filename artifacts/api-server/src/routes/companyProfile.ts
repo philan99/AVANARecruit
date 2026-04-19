@@ -176,14 +176,12 @@ router.post("/company-profile", async (req, res) => {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
+    const { email: _ignoreEmail, ...profileBody } = body as Record<string, unknown>;
+
     const created = await db.transaction(async (tx) => {
       const [profile] = await tx
         .insert(companyProfiles)
-        .values({
-          ...body,
-          ...(lowerEmail ? { email: lowerEmail } : {}),
-          ...(hashedPassword ? { password: hashedPassword } : {}),
-        })
+        .values(profileBody as typeof companyProfiles.$inferInsert)
         .returning();
 
       if (lowerEmail && hashedPassword) {
@@ -200,17 +198,17 @@ router.post("/company-profile", async (req, res) => {
       return profile;
     });
 
-    if (created.email && password) {
+    if (lowerEmail && password) {
       try {
         const { sendVerificationEmail } = await import("./emailVerification");
         const origin = req.get("origin") || req.get("referer")?.replace(/\/[^/]*$/, "") || "https://avana.replit.app";
-        await sendVerificationEmail(created.email, "company", origin);
+        await sendVerificationEmail(lowerEmail, "company", origin);
       } catch (err) {
         console.error("Failed to send verification email:", err);
       }
     }
 
-    res.json(created);
+    res.json({ ...created, email: lowerEmail });
   } catch (err) {
     req.log.error(err, "Failed to save company profile");
     res.status(500).json({ error: "Internal server error" });
@@ -229,7 +227,7 @@ router.patch("/company-profile/:id", async (req, res) => {
       return res.status(404).json({ error: "Company not found" });
     }
 
-    const { password: _pw, id: _id, createdAt: _ca, ...updateFields } = req.body;
+    const { password: _pw, id: _id, createdAt: _ca, email: _em, verified: _v, ...updateFields } = req.body;
 
     const [updated] = await db
       .update(companyProfiles)
@@ -259,6 +257,14 @@ router.delete("/companies/:id", async (req, res) => {
       return res.status(404).json({ error: "Company not found" });
     }
 
+    const [owner] = await db
+      .select({ email: companyUsers.email })
+      .from(companyUsers)
+      .where(eq(companyUsers.companyProfileId, id))
+      .orderBy(companyUsers.id)
+      .limit(1);
+    const ownerEmail = owner?.email ?? "—";
+
     await db.delete(jobsTable).where(eq(jobsTable.companyProfileId, id));
 
     await db.delete(companyProfiles).where(eq(companyProfiles.id, id));
@@ -271,7 +277,7 @@ router.delete("/companies/:id", async (req, res) => {
           <p>A company account has been deleted from AVANA Recruit.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
             <tr><td style="padding:6px 0;color:#64748b;">Company name</td><td style="padding:6px 0;font-weight:600;">${existing.name ?? "—"}</td></tr>
-            <tr><td style="padding:6px 0;color:#64748b;">Email</td><td style="padding:6px 0;font-weight:600;">${existing.email ?? "—"}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b;">Owner email</td><td style="padding:6px 0;font-weight:600;">${ownerEmail}</td></tr>
             <tr><td style="padding:6px 0;color:#64748b;">Company ID</td><td style="padding:6px 0;font-weight:600;">${existing.id}</td></tr>
             <tr><td style="padding:6px 0;color:#64748b;">Deleted at</td><td style="padding:6px 0;font-weight:600;">${new Date().toISOString()}</td></tr>
           </table>
@@ -281,7 +287,7 @@ router.delete("/companies/:id", async (req, res) => {
       await client.emails.send({
         from: fromEmail,
         to: "recruitment@avanarecruit.ai",
-        subject: `[AVANA Recruit] Company account deleted — ${existing.name ?? existing.email}`,
+        subject: `[AVANA Recruit] Company account deleted — ${existing.name ?? ownerEmail}`,
         html,
       });
     } catch (mailErr) {

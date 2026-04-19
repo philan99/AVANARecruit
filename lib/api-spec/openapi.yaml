@@ -57,6 +57,10 @@ paths:
           in: query
           schema:
             type: integer
+        - name: createdByUserId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: List of jobs
@@ -512,6 +516,8 @@ components:
           type: string
         companyProfileId:
           type: ["integer", "null"]
+        createdByUserId:
+          type: ["integer", "null"]
         location:
           type: string
         description:
@@ -570,6 +576,8 @@ components:
         company:
           type: string
         companyProfileId:
+          type: ["integer", "null"]
+        createdByUserId:
           type: ["integer", "null"]
         location:
           type: string
@@ -1051,8 +1059,6 @@ components:
           type: integer
         name:
           type: string
-        email:
-          type: ["string", "null"]
         industry:
           type: ["string", "null"]
         website:
@@ -1092,8 +1098,6 @@ components:
       properties:
         name:
           type: string
-        email:
-          type: ["string", "null"]
         industry:
           type: ["string", "null"]
         website:

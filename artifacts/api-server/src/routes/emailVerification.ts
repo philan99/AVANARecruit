@@ -249,25 +249,23 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       return;
     }
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(companyUsers)
-        .set({ verified: true })
-        .where(eq(companyUsers.id, existing.userId));
-
-      // Mirror onto company_profiles for legacy reads (until those are removed in stage c).
-      await tx
-        .update(companyProfiles)
-        .set({ verified: true })
-        .where(eq(companyProfiles.id, existing.companyProfileId));
-    });
+    await db
+      .update(companyUsers)
+      .set({ verified: true })
+      .where(eq(companyUsers.id, existing.userId));
 
     const company = {
       id: existing.companyProfileId,
       name: existing.companyName,
       email: existing.email,
     };
-    verifiedAccount = { id: company.id, role: "company", email: company.email! };
+    verifiedAccount = {
+      id: company.id,
+      role: "company",
+      email: company.email!,
+      companyUserId: existing.userId,
+      companyUserRole: "owner",
+    };
 
     try {
       const { client, fromEmail } = await getResendClient();
@@ -347,6 +345,8 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     role: verifiedAccount?.role,
     candidateId: verifiedAccount?.role === "candidate" ? verifiedAccount.id : undefined,
     companyId: verifiedAccount?.role === "company" ? verifiedAccount.id : undefined,
+    companyUserId: verifiedAccount?.role === "company" ? (verifiedAccount as { companyUserId?: number }).companyUserId : undefined,
+    companyUserRole: verifiedAccount?.role === "company" ? (verifiedAccount as { companyUserRole?: string }).companyUserRole : undefined,
     email: verifiedAccount?.email,
   });
 });
