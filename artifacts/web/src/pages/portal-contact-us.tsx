@@ -256,7 +256,7 @@ export default function PortalContactUs() {
                   value={form.message}
                   onChange={(e) => setForm(f => ({ ...f, message: e.target.value }))}
                   rows={6}
-                  className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-background border-input"
+                  className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-offset-0 bg-white border-input"
                   required
                 />
               </div>
