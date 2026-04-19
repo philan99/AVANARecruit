@@ -339,6 +339,47 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <FormField control={form.control} name="location" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Start typing a city..."
+                          list="company-city-suggestions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <datalist id="company-city-suggestions">
+                        {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
+                      </datalist>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="founded" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Founded Year</FormLabel>
+                      <FormControl><Input placeholder="2020" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="size" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Size</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {companySizes.map((size) => (
+                            <SelectItem key={size} value={size}>{size} employees</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                   <FormField control={form.control} name="website" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Website</FormLabel>
@@ -371,47 +412,6 @@ export default function CompanyProfile() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-1.5"><Instagram className="w-3.5 h-3.5" /> Instagram</FormLabel>
                       <FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="location" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Start typing a city..."
-                          list="company-city-suggestions"
-                          {...field}
-                        />
-                      </FormControl>
-                      <datalist id="company-city-suggestions">
-                        {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
-                      </datalist>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="size" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company Size</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select size" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {companySizes.map((size) => (
-                            <SelectItem key={size} value={size}>{size} employees</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="founded" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Founded Year</FormLabel>
-                      <FormControl><Input placeholder="2020" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
