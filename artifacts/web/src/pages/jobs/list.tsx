@@ -398,6 +398,21 @@ export default function JobsList() {
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
             </Button>
           )}
+          {role === "company" && companyUserId && (
+            <Button
+              variant={postedByUserId === String(companyUserId) ? "default" : "outline"}
+              size="sm"
+              onClick={() =>
+                setPostedByUserId(v =>
+                  v === String(companyUserId) ? "all" : String(companyUserId)
+                )
+              }
+              data-testid="button-posted-by-me"
+            >
+              <UserCheck className="w-3.5 h-3.5 mr-1.5" />
+              Posted by me
+            </Button>
+          )}
           <div className="flex-1" />
           <div className="flex items-center border border-border rounded-md bg-card overflow-hidden">
             <button
