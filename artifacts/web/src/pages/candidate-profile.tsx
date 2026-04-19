@@ -643,37 +643,13 @@ export default function CandidateProfile() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">Email</label>
-                  <Input type="email" value={editForm.email} onChange={e => updateField("email", e.target.value)} />
+                  <Input type="email" value={editForm.email} readOnly disabled className="bg-muted cursor-not-allowed" />
+                  <p className="text-[11px] text-muted-foreground">Manage in My Settings</p>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">Phone</label>
-                  <div className="flex gap-2">
-                    <Select
-                      value={editForm.phone.match(/^\+\d+/)?.[0] || "+44"}
-                      onValueChange={(code) => {
-                        const numberPart = editForm.phone.replace(/^\+\d+\s*/, "");
-                        updateField("phone", `${code} ${numberPart}`);
-                      }}
-                    >
-                      <SelectTrigger className="w-[100px] shrink-0 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PHONE_CODES.map(p => (
-                          <SelectItem key={p.code} value={p.code}>{p.flag} {p.code}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      value={editForm.phone.replace(/^\+\d+\s*/, "")}
-                      onChange={e => {
-                        const code = editForm.phone.match(/^\+\d+/)?.[0] || "+44";
-                        updateField("phone", `${code} ${e.target.value}`);
-                      }}
-                      placeholder="Phone number"
-                      className="flex-1"
-                    />
-                  </div>
+                  <Input value={editForm.phone || "Not set"} readOnly disabled className="bg-muted cursor-not-allowed" />
+                  <p className="text-[11px] text-muted-foreground">Manage in My Settings</p>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">Current Title</label>
