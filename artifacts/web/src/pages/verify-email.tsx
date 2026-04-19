@@ -55,14 +55,17 @@ export default function VerifyEmail() {
       return;
     }
     if (verified.email) setUserEmail(verified.email);
+    const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
     if (verified.role === "candidate" && verified.candidateId) {
       setCandidateProfileId(verified.candidateId);
       setRole("candidate");
-      setLocation("/onboarding");
+      // Hard navigation so the app re-boots with the candidate role hydrated
+      // from localStorage before the router resolves /onboarding.
+      window.location.assign(`${baseUrl}/onboarding`);
     } else if (verified.role === "company" && verified.companyId) {
       setCompanyProfileId(verified.companyId);
       setRole("company");
-      setLocation("/company-profile");
+      window.location.assign(`${baseUrl}/company-profile`);
     } else {
       setLocation("/");
     }
