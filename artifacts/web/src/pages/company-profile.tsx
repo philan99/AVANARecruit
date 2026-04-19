@@ -536,7 +536,10 @@ export default function CompanyProfile() {
       </div>
 
       <Card className="bg-card">
-        <CardContent className="p-6">
+        <CardContent className="p-6 space-y-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
+            Company Details
+          </h3>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="relative group shrink-0">
               {profile!.logoUrl ? (
@@ -590,36 +593,44 @@ export default function CompanyProfile() {
                   <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5" /> Founded {profile!.founded}</span>
                 )}
               </div>
-              {(() => {
-                const links = [
-                  { url: safeExternalUrl(profile!.linkedinUrl), Icon: Linkedin, label: "LinkedIn" },
-                  { url: safeExternalUrl(profile!.twitterUrl), Icon: Twitter, label: "X / Twitter" },
-                  { url: safeExternalUrl(profile!.facebookUrl), Icon: Facebook, label: "Facebook" },
-                  { url: safeExternalUrl(profile!.instagramUrl), Icon: Instagram, label: "Instagram" },
-                ].filter(l => l.url);
-                if (links.length === 0) return null;
-                return (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {links.map(({ url, Icon, label }) => (
-                      <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={label}
-                         className="w-8 h-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    ))}
-                  </div>
-                );
-              })()}
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {(() => {
+        const links = [
+          { url: safeExternalUrl(profile!.linkedinUrl), Icon: Linkedin, label: "LinkedIn" },
+          { url: safeExternalUrl(profile!.twitterUrl), Icon: Twitter, label: "X / Twitter" },
+          { url: safeExternalUrl(profile!.facebookUrl), Icon: Facebook, label: "Facebook" },
+          { url: safeExternalUrl(profile!.instagramUrl), Icon: Instagram, label: "Instagram" },
+        ].filter(l => l.url);
+        if (links.length === 0) return null;
+        return (
+          <Card className="bg-card">
+            <CardContent className="p-6 space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
+                Social Media
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {links.map(({ url, Icon, label }) => (
+                  <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={label}
+                     className="w-9 h-9 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
+                    <Icon className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {profile!.description && (
         <Card className="bg-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Company Description</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
+              Company Description
+            </h3>
             <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{profile!.description}</p>
           </CardContent>
         </Card>
