@@ -35,6 +35,13 @@ interface Job {
   createdAt: string;
 }
 
+interface CompanyTeamUser {
+  id: number;
+  name: string | null;
+  email: string;
+  role: string;
+}
+
 interface CompanyDetail {
   id: number;
   name: string;
@@ -53,12 +60,13 @@ interface CompanyDetail {
   createdAt: string;
   updatedAt: string;
   jobs: Job[];
+  users: CompanyTeamUser[];
 }
 
 export default function AdminCompanyDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { impersonateCompany } = useRole();
+  const { impersonateCompanyUser } = useRole();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -120,18 +128,25 @@ export default function AdminCompanyDetail() {
                 {company.industry && (
                   <Badge variant="secondary" className="text-xs">{formatIndustry(company.industry)}</Badge>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 text-xs h-7 ml-auto"
-                  onClick={() => {
-                    impersonateCompany(company.id, company.email || "");
-                    navigate("/");
-                  }}
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  Login as Company
-                </Button>
+                {(() => {
+                  const owner = (company.users || []).find(u => u.role === "owner") || (company.users || [])[0];
+                  if (!owner) return null;
+                  return (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs h-7 ml-auto"
+                      onClick={() => {
+                        impersonateCompanyUser(company.id, owner.id, owner.role, owner.email);
+                        navigate("/");
+                      }}
+                      data-testid="button-login-as-owner"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      Login as Owner
+                    </Button>
+                  );
+                })()}
               </div>
               {company.description && (
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{company.description}</p>

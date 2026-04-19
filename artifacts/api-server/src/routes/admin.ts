@@ -112,7 +112,26 @@ router.get("/admin/companies/:id", async (req, res) => {
       return res.status(404).json({ error: "Company not found" });
     }
     const jobs = await db.select().from(jobsTable).where(eq(jobsTable.companyProfileId, companyId));
-    res.json({ ...company, jobs });
+    const users = await db
+      .select({
+        id: companyUsers.id,
+        name: companyUsers.name,
+        email: companyUsers.email,
+        role: companyUsers.role,
+        verified: companyUsers.verified,
+        lastLoginAt: companyUsers.lastLoginAt,
+        createdAt: companyUsers.createdAt,
+      })
+      .from(companyUsers)
+      .where(eq(companyUsers.companyProfileId, companyId));
+    const ROLE_ORDER: Record<string, number> = { owner: 0, admin: 1, member: 2 };
+    users.sort((a, b) => {
+      const ra = ROLE_ORDER[a.role] ?? 99;
+      const rb = ROLE_ORDER[b.role] ?? 99;
+      if (ra !== rb) return ra - rb;
+      return (a.email || "").localeCompare(b.email || "");
+    });
+    res.json({ ...company, jobs, users });
   } catch (err) {
     req.log.error(err, "Failed to fetch company detail");
     res.status(500).json({ error: "Internal server error" });
