@@ -196,7 +196,8 @@ export default function PortalContactUs() {
                   <Input
                     placeholder="Your name"
                     value={form.name}
-                    onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+                    readOnly
+                    className="bg-muted cursor-not-allowed"
                     required
                   />
                 </div>
@@ -208,7 +209,8 @@ export default function PortalContactUs() {
                     type="email"
                     placeholder="you@example.com"
                     value={form.email}
-                    onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+                    readOnly
+                    className="bg-muted cursor-not-allowed"
                     required
                   />
                 </div>
@@ -222,7 +224,8 @@ export default function PortalContactUs() {
                   <Input
                     placeholder="Your company name"
                     value={form.company}
-                    onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
+                    readOnly
+                    className="bg-muted cursor-not-allowed"
                     required
                   />
                 </div>
