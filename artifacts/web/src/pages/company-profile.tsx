@@ -406,6 +406,9 @@ export default function CompanyProfile() {
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Company Description</FormLabel>
+                    <p className="text-xs text-muted-foreground -mt-1">
+                      You can choose to include this in your job descriptions when posting a job.
+                    </p>
                     <FormControl>
                       <Textarea
                         className="h-32"
