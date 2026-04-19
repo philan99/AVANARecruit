@@ -34,14 +34,7 @@ router.post("/contact", async (req, res) => {
     try {
       const { client, fromEmail } = await getResendClient();
 
-      await client.emails.send({
-        from: fromEmail,
-        to: fromEmail,
-        replyTo: email.trim(),
-        subject: `[AVANA Contact] ${subject.trim()}`,
-        html: brandedEmail(
-          "New Contact Form Submission",
-          `<table style="width: 100%; border-collapse: collapse;">
+      const detailsTable = `<table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px; vertical-align: top;"><strong>Type:</strong></td>
                 <td style="padding: 8px 0; font-size: 14px;">${contactType === "company" ? "Company" : "Candidate"}</td>
@@ -66,10 +59,37 @@ router.post("/contact", async (req, res) => {
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0;"><strong>Message:</strong></p>
               <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message.trim()}</div>
-            </div>`,
+            </div>`;
+
+      await client.emails.send({
+        from: fromEmail,
+        to: fromEmail,
+        replyTo: email.trim(),
+        subject: `[AVANA Contact] ${subject.trim()}`,
+        html: brandedEmail(
+          "New Contact Form Submission",
+          detailsTable,
           `Submission ID: ${submission.id} &bull; Reply directly to this email to respond to the sender.`
         ),
       });
+
+      try {
+        await client.emails.send({
+          from: fromEmail,
+          to: email.trim(),
+          subject: `We've received your message: ${subject.trim()}`,
+          html: brandedEmail(
+            "Thanks for getting in touch",
+            `<p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 12px 0;">Hi ${name.trim()},</p>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 16px 0;">Thanks for contacting AVANA Recruit. We've received your message and a member of our team will get back to you as soon as possible.</p>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6; margin: 0 0 8px 0;"><strong>For your records, here's a copy of what you submitted:</strong></p>
+             ${detailsTable}`,
+            `Submission ID: ${submission.id} &bull; If you didn't submit this, you can safely ignore this email.`
+          ),
+        });
+      } catch (confirmError) {
+        console.error("Failed to send contact confirmation email to submitter:", confirmError);
+      }
     } catch (emailError) {
       console.error("Failed to send contact email notification:", emailError);
     }
