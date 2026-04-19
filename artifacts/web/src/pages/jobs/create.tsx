@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus, Upload, FileText, PencilLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -139,6 +140,8 @@ export default function CreateJob() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [includeCompanyDescription, setIncludeCompanyDescription] = useState(false);
+  const injectedCompanyBlockRef = useRef<string | null>(null);
 
   const aiReady = Boolean(companyProfileId);
 
@@ -263,6 +266,48 @@ export default function CreateJob() {
       toast({ title: "AI read failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
     } finally {
       setUploading(false);
+    }
+  }
+
+  function buildCompanyDescriptionBlock(): string {
+    const name = (companyProfile?.name || "").toString().trim();
+    const desc = (companyProfile?.description || "").toString().trim();
+    if (!desc) return "";
+    const escape = (s: string) => s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const paragraphs = desc
+      .split(/\n{2,}/)
+      .map(block => block.split(/\n/).map(escape).join("<br />"))
+      .map(html => `<p>${html}</p>`)
+      .join("");
+    const heading = name ? `<h3>About ${escape(name)}</h3>` : `<h3>About the company</h3>`;
+    return `${heading}${paragraphs}<p></p>`;
+  }
+
+  function handleToggleCompanyDescription(checked: boolean) {
+    const current = form.getValues("description") || "";
+    if (checked) {
+      const block = buildCompanyDescriptionBlock();
+      if (!block) {
+        toast({
+          title: "No company description",
+          description: "Add a description to your company profile first.",
+          variant: "destructive",
+        });
+        return;
+      }
+      injectedCompanyBlockRef.current = block;
+      setIncludeCompanyDescription(true);
+      form.setValue("description", block + current, { shouldValidate: true, shouldDirty: true });
+    } else {
+      const injected = injectedCompanyBlockRef.current;
+      setIncludeCompanyDescription(false);
+      if (injected && current.includes(injected)) {
+        form.setValue("description", current.replace(injected, ""), { shouldValidate: true, shouldDirty: true });
+      }
+      injectedCompanyBlockRef.current = null;
     }
   }
 
@@ -687,6 +732,25 @@ export default function CreateJob() {
                     <FormControl>
                       <RichTextEditor value={field.value} onChange={field.onChange} />
                     </FormControl>
+                    <div className="flex items-start gap-2 pt-1">
+                      <Checkbox
+                        id="include-company-description"
+                        checked={includeCompanyDescription}
+                        onCheckedChange={(v) => handleToggleCompanyDescription(Boolean(v))}
+                        disabled={!companyProfile?.description?.trim()}
+                      />
+                      <label
+                        htmlFor="include-company-description"
+                        className="text-xs text-muted-foreground leading-snug cursor-pointer select-none"
+                      >
+                        Add Your Company Description
+                        {!companyProfile?.description?.trim() && (
+                          <span className="block text-[11px] text-muted-foreground/70 mt-0.5">
+                            Add a description to your company profile to enable this option.
+                          </span>
+                        )}
+                      </label>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )} />
