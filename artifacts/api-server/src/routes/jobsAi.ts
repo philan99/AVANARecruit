@@ -320,7 +320,12 @@ The JSON object MUST match this shape:
   "skills": string[] (5-10 concrete skills/technologies actually mentioned in the document)
 }
 
-Extract values directly from the document. If a field is not mentioned, infer a reasonable default but DO NOT invent salary — use null when not stated. Do NOT include a "description" field.`;
+CRITICAL rules:
+- Only fill a field if the document clearly states or strongly implies it.
+- If a field is NOT in the document, return an empty string "" (for text/enum fields), null (for numbers), or [] (for skills). Leave it blank.
+- NEVER write placeholder text such as "Not specified", "N/A", "TBD", "Unknown", "To be confirmed", "See description", "Various", or any similar filler.
+- Do NOT invent a job title, location, salary, industry, or experience level. Empty is better than guessed.
+- Do NOT include a "description" field.`;
 
     const user = `${company?.name ? `Company: ${company.name}\n` : ""}${company?.industry ? `Company industry: ${company.industry}\n\n` : "\n"}Job description document:\n\n${docText}`;
 
@@ -341,22 +346,34 @@ Extract values directly from the document. If a field is not mentioned, infer a 
       return;
     }
 
+    const PLACEHOLDER_RE = /^\s*(n\/?a|none|null|nil|unknown|unspecified|not\s+(specified|stated|provided|mentioned|listed|given|available|applicable)|tbd|tba|to\s+be\s+(confirmed|determined|advised|decided)|see\s+(description|above|below|details?|job\s+description)|various|any|-{1,3}|\.+|empty)\s*\.?\s*$/i;
+    const cleanStr = (v: unknown): string => {
+      if (typeof v !== "string") return "";
+      const trimmed = v.trim();
+      if (!trimmed) return "";
+      if (PLACEHOLDER_RE.test(trimmed)) return "";
+      return trimmed.slice(0, 200);
+    };
     const pickEnum = (val: unknown, allowed: string[]) =>
       typeof val === "string" && allowed.includes(val) ? val : "";
-    const toStr = (v: unknown) => (typeof v === "string" ? v.slice(0, 200) : "");
     const toNum = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
     const toArr = (v: unknown) =>
       Array.isArray(v)
-        ? v.filter(s => typeof s === "string" && s.trim()).map(s => (s as string).trim().slice(0, 60)).slice(0, 20)
+        ? v
+            .filter(s => typeof s === "string" && s.trim())
+            .map(s => (s as string).trim())
+            .filter(s => !PLACEHOLDER_RE.test(s))
+            .map(s => s.slice(0, 60))
+            .slice(0, 20)
         : [];
 
     const descriptionHtml = await buildDescriptionHtml(buffer, fileName);
 
     res.json({
-      title: toStr(parsed.title),
+      title: cleanStr(parsed.title),
       jobType: pickEnum(parsed.jobType, ALLOWED_JOB_TYPES),
       workplace: pickEnum(parsed.workplace, ALLOWED_WORKPLACES),
-      location: toStr(parsed.location),
+      location: cleanStr(parsed.location),
       experienceLevel: pickEnum(parsed.experienceLevel, ALLOWED_EXP),
       industry: pickEnum(parsed.industry, ALLOWED_INDUSTRIES),
       educationLevel: pickEnum(parsed.educationLevel, ALLOWED_EDU),
