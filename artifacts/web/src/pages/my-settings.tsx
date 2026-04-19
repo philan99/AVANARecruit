@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Mail, Lock, User, Phone, Building2 } from "lucide-react";
+import { Settings as SettingsIcon, Mail, Lock, User, Phone, Building2, Trash2 } from "lucide-react";
+import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -58,6 +68,30 @@ export default function MySettings() {
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [pwSubmitting, setPwSubmitting] = useState(false);
   const [phoneSubmitting, setPhoneSubmitting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [, setLocation] = useLocation();
+
+  async function handleDeleteAccount() {
+    if (!accountId || accountType !== "candidate" || deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`${apiBase}/candidates/${accountId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete account");
+      localStorage.removeItem("avanatalent_candidate_id");
+      localStorage.removeItem("avanatalent_role");
+      localStorage.removeItem("avanatalent_email");
+      toast({ title: "Account deleted", description: "Your account and all associated data have been permanently removed." });
+      setDeleteDialogOpen(false);
+      setLocation("/");
+      window.location.reload();
+    } catch {
+      toast({ title: "Error", description: "Failed to delete account. Please try again.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   useEffect(() => {
     if (account?.email) {
@@ -373,6 +407,55 @@ export default function MySettings() {
           </button>
         </form>
       </div>
+
+      {accountType === "candidate" && (
+        <div className="rounded-xl p-6 bg-card border border-destructive/30">
+          <h2 className="text-lg font-semibold text-destructive mb-1 flex items-center gap-2">
+            <Trash2 className="w-4 h-4" /> Danger Zone
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Permanently delete your account and all associated data including your profile, matches, and applications. This action cannot be undone.
+          </p>
+          <Dialog open={deleteDialogOpen} onOpenChange={(open) => { setDeleteDialogOpen(open); if (!open) setDeleteConfirmText(""); }}>
+            <DialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete My Account
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  This will permanently delete your candidate profile, all job matches, applications, and any other data associated with your account.
+                </p>
+                <p className="text-sm font-medium">
+                  Type <span className="font-mono text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">DELETE</span> to confirm:
+                </p>
+                <Input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="font-mono"
+                />
+              </div>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== "DELETE" || deleting}
+                >
+                  {deleting ? "Deleting..." : "Permanently Delete"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 }
