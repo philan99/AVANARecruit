@@ -7,9 +7,12 @@ interface MatchResult {
   educationScore: number;
   locationScore: number;
   verificationScore: number;
+  preferenceScore: number;
   assessment: string;
   matchedSkills: string[];
   missingSkills: string[];
+  preferenceMatches: string[];
+  preferenceMismatches: string[];
 }
 
 function normalizeSkill(skill: string): string {
@@ -90,40 +93,139 @@ function computeExperienceScore(jobLevel: string, candidateYears: number): numbe
   return Math.max(20, 100 - deficit * 15);
 }
 
-function computeEducationScore(requirements: string, education: string): number {
-  const reqLower = requirements.toLowerCase();
-  const eduLower = education.toLowerCase();
+// Ranking of the controlled education enum values used across the app.
+// Higher number = higher attainment.
+const EDUCATION_ENUM_RANK: Record<string, number> = {
+  "gcse": 1,
+  "a-level": 2,
+  "btec": 2,
+  "hnd/hnc": 3,
+  "foundation degree": 4,
+  "bachelor's degree": 5,
+  "master's degree": 6,
+  "phd": 7,
+  "professional qualification": 4,
+  "other": 0,
+};
 
-  const educationLevels = ["phd", "doctorate", "master", "bachelor", "associate", "diploma", "high school"];
-  const educationWeights: Record<string, number> = {
-    "phd": 100, "doctorate": 100, "master": 85, "bachelor": 70,
-    "associate": 55, "diploma": 45, "high school": 30,
-  };
+function rankFromEnum(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const key = value.toLowerCase().trim();
+  if (key in EDUCATION_ENUM_RANK) return EDUCATION_ENUM_RANK[key];
+  return null;
+}
 
-  let requiredLevel = "";
-  for (const level of educationLevels) {
-    if (reqLower.includes(level)) {
-      requiredLevel = level;
-      break;
+function rankFromFreeText(text: string | null | undefined): number | null {
+  if (!text) return null;
+  const t = text.toLowerCase();
+  if (t.includes("phd") || t.includes("doctorate")) return 7;
+  if (t.includes("master")) return 6;
+  if (t.includes("bachelor") || t.includes("degree")) return 5;
+  if (t.includes("foundation")) return 4;
+  if (t.includes("hnd") || t.includes("hnc")) return 3;
+  if (t.includes("a-level") || t.includes("a level") || t.includes("btec")) return 2;
+  if (t.includes("gcse") || t.includes("high school")) return 1;
+  return null;
+}
+
+function computeEducationScore(
+  jobEducationLevel: string | null | undefined,
+  jobRequirements: string,
+  candidateEducation: string,
+): number {
+  // Prefer the controlled enum on both sides; fall back to free-text scan.
+  const required = rankFromEnum(jobEducationLevel) ?? rankFromFreeText(jobRequirements);
+  const candidate = rankFromEnum(candidateEducation) ?? rankFromFreeText(candidateEducation);
+
+  if (required === null) return 75; // Job has no education requirement → neutral pass.
+  if (candidate === null) return 50; // Candidate hasn't stated → mild penalty.
+
+  if (candidate >= required) return 100;
+  const deficit = required - candidate;
+  if (deficit === 1) return 75;
+  if (deficit === 2) return 55;
+  return Math.max(25, 100 - deficit * 18);
+}
+
+interface PreferenceResult {
+  score: number;
+  matches: string[];
+  mismatches: string[];
+}
+
+const WORKPLACE_LABEL: Record<string, string> = {
+  office: "Office",
+  remote: "Remote",
+  hybrid: "Hybrid",
+};
+
+const JOB_TYPE_LABEL: Record<string, string> = {
+  permanent_full_time: "Permanent (Full Time)",
+  contract: "Contract",
+  fixed_term_contract: "Fixed Term Contract",
+  part_time: "Part-time",
+  temporary: "Temporary",
+};
+
+function computePreferenceScore(job: Job, candidate: Candidate): PreferenceResult {
+  const matches: string[] = [];
+  const mismatches: string[] = [];
+
+  const facets: Array<{
+    label: string;
+    jobValue: string | null | undefined;
+    candidatePrefs: string[] | null | undefined;
+    weight: number;
+    display?: Record<string, string>;
+  }> = [
+    {
+      label: "Workplace",
+      jobValue: job.workplace,
+      candidatePrefs: candidate.preferredWorkplaces,
+      weight: 1.2,
+      display: WORKPLACE_LABEL,
+    },
+    {
+      label: "Job type",
+      jobValue: job.jobType,
+      candidatePrefs: candidate.preferredJobTypes,
+      weight: 1,
+      display: JOB_TYPE_LABEL,
+    },
+    {
+      label: "Industry",
+      jobValue: job.industry,
+      candidatePrefs: candidate.preferredIndustries,
+      weight: 0.8,
+    },
+  ];
+
+  let totalWeight = 0;
+  let weightedScore = 0;
+
+  for (const f of facets) {
+    if (!f.jobValue) continue; // Job didn't state this facet → skip.
+    const prefs = Array.isArray(f.candidatePrefs) ? f.candidatePrefs.filter(Boolean) : [];
+    totalWeight += f.weight;
+    const display = (v: string) => f.display?.[v] ?? v;
+    if (prefs.length === 0) {
+      // Candidate has no preference here → neutral, no penalty.
+      weightedScore += f.weight * 85;
+      continue;
+    }
+    const jobNorm = f.jobValue.toLowerCase().trim();
+    const hit = prefs.some(p => p.toLowerCase().trim() === jobNorm);
+    if (hit) {
+      weightedScore += f.weight * 100;
+      matches.push(`${f.label}: ${display(f.jobValue)}`);
+    } else {
+      weightedScore += f.weight * 25;
+      mismatches.push(`${f.label}: ${display(f.jobValue)} (prefers ${prefs.map(display).join(", ")})`);
     }
   }
 
-  let candidateLevel = "";
-  for (const level of educationLevels) {
-    if (eduLower.includes(level)) {
-      candidateLevel = level;
-      break;
-    }
-  }
-
-  if (!requiredLevel) return 75;
-  if (!candidateLevel) return 50;
-
-  const reqWeight = educationWeights[requiredLevel] ?? 50;
-  const candWeight = educationWeights[candidateLevel] ?? 50;
-
-  if (candWeight >= reqWeight) return 100;
-  return Math.max(30, Math.round((candWeight / reqWeight) * 100));
+  if (totalWeight === 0) return { score: 80, matches, mismatches };
+  return { score: weightedScore / totalWeight, matches, mismatches };
 }
 
 function computeLocationScore(jobLocation: string, candidateLocation: string): number {
@@ -188,6 +290,13 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate)
     parts.push(`Limited employment verification on file.`);
   }
 
+  if (result.preferenceMatches.length > 0) {
+    parts.push(`Aligned preferences: ${result.preferenceMatches.join("; ")}.`);
+  }
+  if (result.preferenceMismatches.length > 0) {
+    parts.push(`Preference gaps: ${result.preferenceMismatches.join("; ")}.`);
+  }
+
   return parts.join(" ");
 }
 
@@ -198,16 +307,26 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
   );
 
   const experienceScore = computeExperienceScore(job.experienceLevel, candidate.experienceYears);
-  const educationScore = computeEducationScore(job.requirements, candidate.education);
+  const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
   const locationScore = computeLocationScore(job.location, candidate.location);
   const verificationScore = computeVerificationScore(verifiedCount);
+  const { score: preferenceScore, matches: preferenceMatches, mismatches: preferenceMismatches } =
+    computePreferenceScore(job, candidate);
 
+  // Weights (sum = 1.00):
+  //   Skills        30%   strongest signal
+  //   Experience    20%
+  //   Preferences   15%   workplace + job type + industry alignment
+  //   Verification  15%
+  //   Location      10%
+  //   Education     10%
   const overallScore = Math.round(
-    skillScore * 0.35 +
+    skillScore * 0.30 +
     experienceScore * 0.20 +
-    educationScore * 0.10 +
-    locationScore * 0.15 +
-    verificationScore * 0.20
+    preferenceScore * 0.15 +
+    verificationScore * 0.15 +
+    locationScore * 0.10 +
+    educationScore * 0.10
   );
 
   const result: MatchResult = {
@@ -217,9 +336,12 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
     educationScore: Math.round(educationScore),
     locationScore: Math.round(locationScore),
     verificationScore: Math.round(verificationScore),
+    preferenceScore: Math.round(preferenceScore),
     assessment: "",
     matchedSkills,
     missingSkills,
+    preferenceMatches,
+    preferenceMismatches,
   };
 
   result.assessment = generateAssessment(result, job, candidate);
