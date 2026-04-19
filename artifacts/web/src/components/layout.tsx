@@ -255,6 +255,16 @@ export function Layout({ children }: LayoutProps) {
                   <p className="text-[11px] text-sidebar-foreground/40 truncate">{userEmail}</p>
                 )}
               </div>
+              {settingsItem && (
+                <Link
+                  href={settingsItem.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <settingsItem.icon className="w-4 h-4 mr-3" />
+                  {settingsItem.label}
+                </Link>
+              )}
               {profileItem && (
                 <Link
                   href={profileItem.href}
@@ -273,6 +283,16 @@ export function Layout({ children }: LayoutProps) {
                 >
                   <supportItem.icon className="w-4 h-4 mr-3" />
                   {supportItem.label}
+                </Link>
+              )}
+              {featureRequestItem && (
+                <Link
+                  href={featureRequestItem.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground/70 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <featureRequestItem.icon className="w-4 h-4 mr-3" />
+                  {featureRequestItem.label}
                 </Link>
               )}
               {portalMenuExtras.map((item) => (
