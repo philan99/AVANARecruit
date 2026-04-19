@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, or, sql, count } from "drizzle-orm";
-import { db, candidatesTable, matchesTable, candidateAlertsTable, jobsTable, companyProfiles } from "@workspace/db";
+import { eq, and, ilike, or, sql, count } from "drizzle-orm";
+import { db, candidatesTable, matchesTable, candidateAlertsTable, jobsTable, companyProfiles, companyUsers } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import {
   ListCandidatesQueryParams,
@@ -331,10 +331,14 @@ async function sendCandidateAlerts(candidate: any) {
       keywords: candidateAlertsTable.keywords,
       locations: candidateAlertsTable.locations,
       companyName: companyProfiles.name,
-      companyEmail: companyProfiles.email,
+      companyEmail: companyUsers.email,
     })
     .from(candidateAlertsTable)
     .innerJoin(companyProfiles, eq(candidateAlertsTable.companyProfileId, companyProfiles.id))
+    .leftJoin(
+      companyUsers,
+      and(eq(companyUsers.companyProfileId, companyProfiles.id), eq(companyUsers.role, "owner")),
+    )
     .where(eq(candidateAlertsTable.enabled, true));
 
   if (alertsWithCompanies.length === 0) return;

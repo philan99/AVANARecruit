@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles, candidatesTable, jobsTable, adminsTable, verificationsTable } from "@workspace/db";
-import { eq, count } from "drizzle-orm";
+import { db, companyProfiles, companyUsers, candidatesTable, jobsTable, adminsTable, verificationsTable } from "@workspace/db";
+import { eq, and, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
@@ -83,14 +83,16 @@ router.post("/admin/companies/:id/reset-password", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Reset the owner's password (in stage (a) there is exactly one owner per company).
     const result = await db
-      .update(companyProfiles)
+      .update(companyUsers)
       .set({ password: hashedPassword })
-      .where(eq(companyProfiles.id, companyId))
-      .returning({ id: companyProfiles.id });
+      .where(and(eq(companyUsers.companyProfileId, companyId), eq(companyUsers.role, "owner")))
+      .returning({ id: companyUsers.id });
 
     if (result.length === 0) {
-      return res.status(404).json({ error: "Company not found" });
+      return res.status(404).json({ error: "Company owner not found" });
     }
 
     res.json({ success: true });

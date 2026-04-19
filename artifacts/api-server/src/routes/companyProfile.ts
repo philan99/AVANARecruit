@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles, jobsTable } from "@workspace/db";
+import { db, companyProfiles, companyUsers, jobsTable } from "@workspace/db";
 import { eq, sql, inArray } from "drizzle-orm";
 import { CreateCompanyProfileBody } from "@workspace/api-zod";
 import bcrypt from "bcryptjs";
@@ -81,25 +81,50 @@ router.post("/companies/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const [company] = await db.select().from(companyProfiles).where(eq(companyProfiles.email, email));
-    if (!company) {
+    const lowerEmail = String(email).toLowerCase().trim();
+
+    const [user] = await db
+      .select({
+        id: companyUsers.id,
+        companyProfileId: companyUsers.companyProfileId,
+        email: companyUsers.email,
+        password: companyUsers.password,
+        verified: companyUsers.verified,
+        role: companyUsers.role,
+        name: companyUsers.name,
+        companyName: companyProfiles.name,
+      })
+      .from(companyUsers)
+      .innerJoin(companyProfiles, eq(companyProfiles.id, companyUsers.companyProfileId))
+      .where(eq(companyUsers.email, lowerEmail));
+
+    if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    if (!company.password) {
+    if (!user.password) {
       return res.status(401).json({ error: "No password set for this account. Please contact an admin." });
     }
 
-    const valid = await bcrypt.compare(password, company.password);
+    const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    if (!company.verified) {
-      return res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: company.email });
+    if (!user.verified) {
+      return res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: user.email });
     }
 
-    res.json({ success: true, companyId: company.id, companyName: company.name });
+    await db.update(companyUsers).set({ lastLoginAt: sql`now()` }).where(eq(companyUsers.id, user.id));
+
+    res.json({
+      success: true,
+      companyId: user.companyProfileId,
+      companyName: user.companyName,
+      companyUserId: user.id,
+      companyUserRole: user.role,
+      name: user.name,
+    });
   } catch (err) {
     req.log.error(err, "Company login failed");
     res.status(500).json({ error: "Internal server error" });
@@ -134,13 +159,14 @@ router.post("/company-profile", async (req, res) => {
     const body = parsed.data;
 
     const password = req.body.password;
+    const lowerEmail = body.email ? String(body.email).toLowerCase().trim() : null;
 
-    if (body.email) {
-      const [existingEmail] = await db
-        .select()
-        .from(companyProfiles)
-        .where(eq(companyProfiles.email, body.email));
-      if (existingEmail) {
+    if (lowerEmail) {
+      const [existingUser] = await db
+        .select({ id: companyUsers.id })
+        .from(companyUsers)
+        .where(eq(companyUsers.email, lowerEmail));
+      if (existingUser) {
         return res.status(409).json({ error: "A company with this email already exists" });
       }
     }
@@ -150,13 +176,29 @@ router.post("/company-profile", async (req, res) => {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    const [created] = await db
-      .insert(companyProfiles)
-      .values({
-        ...body,
-        ...(hashedPassword ? { password: hashedPassword } : {}),
-      })
-      .returning();
+    const created = await db.transaction(async (tx) => {
+      const [profile] = await tx
+        .insert(companyProfiles)
+        .values({
+          ...body,
+          ...(lowerEmail ? { email: lowerEmail } : {}),
+          ...(hashedPassword ? { password: hashedPassword } : {}),
+        })
+        .returning();
+
+      if (lowerEmail && hashedPassword) {
+        await tx.insert(companyUsers).values({
+          companyProfileId: profile.id,
+          email: lowerEmail,
+          password: hashedPassword,
+          name: body.name,
+          role: "owner",
+          verified: false,
+        });
+      }
+
+      return profile;
+    });
 
     if (created.email && password) {
       try {

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, companyProfiles, candidatesTable, adminsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, companyProfiles, companyUsers, candidatesTable, adminsTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const router: IRouter = Router();
@@ -51,19 +51,38 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       }
     }
 
-    const [company] = await db
-      .select()
-      .from(companyProfiles)
-      .where(eq(companyProfiles.email, lowerEmail));
+    const [companyUser] = await db
+      .select({
+        id: companyUsers.id,
+        companyProfileId: companyUsers.companyProfileId,
+        email: companyUsers.email,
+        password: companyUsers.password,
+        verified: companyUsers.verified,
+        role: companyUsers.role,
+        name: companyUsers.name,
+        companyName: companyProfiles.name,
+      })
+      .from(companyUsers)
+      .innerJoin(companyProfiles, eq(companyProfiles.id, companyUsers.companyProfileId))
+      .where(eq(companyUsers.email, lowerEmail));
 
-    if (company && company.password) {
-      const valid = await bcrypt.compare(password, company.password);
+    if (companyUser && companyUser.password) {
+      const valid = await bcrypt.compare(password, companyUser.password);
       if (valid) {
-        if (!company.verified) {
-          res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: company.email });
+        if (!companyUser.verified) {
+          res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: companyUser.email });
           return;
         }
-        res.json({ success: true, role: "company", companyId: company.id, companyName: company.name });
+        await db.update(companyUsers).set({ lastLoginAt: sql`now()` }).where(eq(companyUsers.id, companyUser.id));
+        res.json({
+          success: true,
+          role: "company",
+          companyId: companyUser.companyProfileId,
+          companyName: companyUser.companyName,
+          companyUserId: companyUser.id,
+          companyUserRole: companyUser.role,
+          name: companyUser.name,
+        });
         return;
       }
     }

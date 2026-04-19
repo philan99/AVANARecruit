@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, isNull, gt } from "drizzle-orm";
-import { db, passwordResetsTable, candidatesTable, companyProfiles } from "@workspace/db";
+import { db, passwordResetsTable, candidatesTable, companyProfiles, companyUsers } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
@@ -15,15 +15,17 @@ router.post("/forgot-password", async (req, res): Promise<void> => {
     return;
   }
 
+  const lowerEmail = String(email).toLowerCase().trim();
+
   const [candidate] = await db
     .select({ id: candidatesTable.id, email: candidatesTable.email })
     .from(candidatesTable)
-    .where(eq(candidatesTable.email, email));
+    .where(eq(candidatesTable.email, lowerEmail));
 
   const [company] = await db
-    .select({ id: companyProfiles.id, email: companyProfiles.email })
-    .from(companyProfiles)
-    .where(eq(companyProfiles.email, email));
+    .select({ id: companyUsers.id, email: companyUsers.email })
+    .from(companyUsers)
+    .where(eq(companyUsers.email, lowerEmail));
 
   if (!candidate && !company) {
     res.json({ success: true, message: "If an account with that email exists, a reset link has been sent." });
@@ -35,7 +37,7 @@ router.post("/forgot-password", async (req, res): Promise<void> => {
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
   await db.insert(passwordResetsTable).values({
-    email,
+    email: lowerEmail,
     token,
     accountType,
     expiresAt,
@@ -47,7 +49,7 @@ router.post("/forgot-password", async (req, res): Promise<void> => {
     const { client, fromEmail } = await getResendClient();
     await client.emails.send({
       from: fromEmail,
-      to: email,
+      to: lowerEmail,
       subject: "Reset Your AVANA Recruit Password",
       html: brandedEmail(
         "Reset Your Password",
@@ -96,16 +98,17 @@ router.post("/reset-password", async (req, res): Promise<void> => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const lowerResetEmail = String(resetRecord.email).toLowerCase().trim();
   if (resetRecord.accountType === "candidate") {
     await db
       .update(candidatesTable)
       .set({ password: hashedPassword })
-      .where(eq(candidatesTable.email, resetRecord.email));
+      .where(eq(candidatesTable.email, lowerResetEmail));
   } else {
     await db
-      .update(companyProfiles)
+      .update(companyUsers)
       .set({ password: hashedPassword })
-      .where(eq(companyProfiles.email, resetRecord.email));
+      .where(eq(companyUsers.email, lowerResetEmail));
   }
 
   await db

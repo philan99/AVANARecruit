@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql, avg, count, and } from "drizzle-orm";
-import { db, jobsTable, candidatesTable, matchesTable, companyProfiles, verificationsTable } from "@workspace/db";
+import { db, jobsTable, candidatesTable, matchesTable, companyProfiles, companyUsers, verificationsTable } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import {
@@ -384,8 +384,12 @@ router.post("/candidates/:id/contact", async (req, res): Promise<void> => {
   }
 
   const [company] = await db
-    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .select({ name: companyProfiles.name, email: companyUsers.email })
     .from(companyProfiles)
+    .leftJoin(
+      companyUsers,
+      and(eq(companyUsers.companyProfileId, companyProfiles.id), eq(companyUsers.role, "owner")),
+    )
     .where(eq(companyProfiles.id, companyProfileId));
 
   try {
@@ -445,8 +449,12 @@ router.post("/matches/:id/contact", async (req, res): Promise<void> => {
   }
 
   const [company] = await db
-    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .select({ name: companyProfiles.name, email: companyUsers.email })
     .from(companyProfiles)
+    .leftJoin(
+      companyUsers,
+      and(eq(companyUsers.companyProfileId, companyProfiles.id), eq(companyUsers.role, "owner")),
+    )
     .where(eq(companyProfiles.id, companyProfileId));
 
   try {
@@ -502,8 +510,12 @@ router.post("/matches/:id/apply", async (req, res): Promise<void> => {
   }
 
   const [company] = await db
-    .select({ name: companyProfiles.name, email: companyProfiles.email })
+    .select({ name: companyProfiles.name, email: companyUsers.email })
     .from(companyProfiles)
+    .leftJoin(
+      companyUsers,
+      and(eq(companyUsers.companyProfileId, companyProfiles.id), eq(companyUsers.role, "owner")),
+    )
     .where(eq(companyProfiles.id, match.companyProfileId));
 
   if (!company?.email) {

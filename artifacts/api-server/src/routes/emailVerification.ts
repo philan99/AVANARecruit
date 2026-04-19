@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, isNull, gt } from "drizzle-orm";
-import { db, emailVerificationsTable, candidatesTable, companyProfiles } from "@workspace/db";
+import { db, emailVerificationsTable, candidatesTable, companyProfiles, companyUsers } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
@@ -62,15 +62,17 @@ router.post("/verify-email/resend", async (req, res): Promise<void> => {
     return;
   }
 
+  const lowerEmail = String(email).toLowerCase().trim();
+
   const [candidate] = await db
     .select({ id: candidatesTable.id, verified: candidatesTable.verified })
     .from(candidatesTable)
-    .where(eq(candidatesTable.email, email));
+    .where(eq(candidatesTable.email, lowerEmail));
 
   const [company] = await db
-    .select({ id: companyProfiles.id, verified: companyProfiles.verified })
-    .from(companyProfiles)
-    .where(eq(companyProfiles.email, email));
+    .select({ id: companyUsers.id, verified: companyUsers.verified })
+    .from(companyUsers)
+    .where(eq(companyUsers.email, lowerEmail));
 
   if (!candidate && !company) {
     res.json({ success: true, message: "If an account with that email exists, a verification email has been sent." });
@@ -217,15 +219,19 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
       req.log.error(err, "Failed to send candidate welcome email");
     }
   } else {
+    const lowerRecordEmail = String(record.email).toLowerCase().trim();
     const [existing] = await db
       .select({
-        id: companyProfiles.id,
-        name: companyProfiles.name,
-        email: companyProfiles.email,
-        verified: companyProfiles.verified,
+        userId: companyUsers.id,
+        companyProfileId: companyUsers.companyProfileId,
+        userName: companyUsers.name,
+        email: companyUsers.email,
+        verified: companyUsers.verified,
+        companyName: companyProfiles.name,
       })
-      .from(companyProfiles)
-      .where(eq(companyProfiles.email, record.email));
+      .from(companyUsers)
+      .innerJoin(companyProfiles, eq(companyProfiles.id, companyUsers.companyProfileId))
+      .where(eq(companyUsers.email, lowerRecordEmail));
 
     if (!existing) {
       res.status(400).json({ error: "We couldn't find a company account for this email. It may have been removed." });
@@ -237,21 +243,30 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
         success: true,
         message: "Email already verified. You can sign in.",
         role: "company",
-        companyId: existing.id,
+        companyId: existing.companyProfileId,
         email: existing.email,
       });
       return;
     }
 
-    const [company] = await db
-      .update(companyProfiles)
-      .set({ verified: true })
-      .where(eq(companyProfiles.email, record.email))
-      .returning({
-        id: companyProfiles.id,
-        name: companyProfiles.name,
-        email: companyProfiles.email,
-      });
+    await db.transaction(async (tx) => {
+      await tx
+        .update(companyUsers)
+        .set({ verified: true })
+        .where(eq(companyUsers.id, existing.userId));
+
+      // Mirror onto company_profiles for legacy reads (until those are removed in stage c).
+      await tx
+        .update(companyProfiles)
+        .set({ verified: true })
+        .where(eq(companyProfiles.id, existing.companyProfileId));
+    });
+
+    const company = {
+      id: existing.companyProfileId,
+      name: existing.companyName,
+      email: existing.email,
+    };
     verifiedAccount = { id: company.id, role: "company", email: company.email! };
 
     try {
