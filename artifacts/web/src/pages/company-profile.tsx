@@ -87,7 +87,7 @@ export default function CompanyProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { companyProfileId, clearRole, userEmail } = useRole();
+  const { companyProfileId, clearRole, userEmail, companyUserRole } = useRole();
   const [, setLocation] = useLocation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -529,6 +529,7 @@ export default function CompanyProfile() {
         </Card>
       )}
 
+      {companyUserRole === "owner" && (
       <Card className="bg-card border-destructive/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
@@ -579,6 +580,7 @@ export default function CompanyProfile() {
           </Dialog>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
