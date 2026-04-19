@@ -213,24 +213,24 @@ export default function MySettings() {
             </div>
             <div>
               <dt className="text-muted-foreground flex items-center gap-2 mb-1">
-                <Mail className="w-4 h-4" /> Email
-              </dt>
-              <dd className="font-medium text-foreground break-all">{account.email}</dd>
-            </div>
-            {account.phone && (
-              <div>
-                <dt className="text-muted-foreground flex items-center gap-2 mb-1">
-                  <Phone className="w-4 h-4" /> Phone
-                </dt>
-                <dd className="font-medium text-foreground">{account.phone}</dd>
-              </div>
-            )}
-            <div>
-              <dt className="text-muted-foreground flex items-center gap-2 mb-1">
                 <SettingsIcon className="w-4 h-4" /> Account Type
               </dt>
               <dd className="font-medium text-foreground capitalize">{accountType}</dd>
             </div>
+            <div>
+              <dt className="text-muted-foreground flex items-center gap-2 mb-1">
+                <Mail className="w-4 h-4" /> Email
+              </dt>
+              <dd className="font-medium text-foreground break-all">{account.email}</dd>
+            </div>
+            {accountType === "candidate" && (
+              <div>
+                <dt className="text-muted-foreground flex items-center gap-2 mb-1">
+                  <Phone className="w-4 h-4" /> Phone
+                </dt>
+                <dd className="font-medium text-foreground">{account.phone || "Not set"}</dd>
+              </div>
+            )}
           </dl>
         ) : (
           <p className="text-sm text-destructive">Could not load account.</p>
