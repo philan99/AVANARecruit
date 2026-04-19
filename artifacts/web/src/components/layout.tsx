@@ -18,6 +18,7 @@ import {
   KanbanSquare,
   Code2,
   Mail,
+  Lightbulb,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -94,6 +95,11 @@ export function Layout({ children }: LayoutProps) {
       ? { href: "/contact-us", label: "Get Support", icon: Mail }
       : null;
 
+  const featureRequestItem =
+    role === "company" || role === "candidate"
+      ? { href: "/feature-request", label: "Feature Request", icon: Lightbulb }
+      : null;
+
   const portalMenuExtras = role === "admin" ? adminPortalMenuItems : [];
 
   return (
@@ -153,7 +159,7 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </div>
                 </DropdownMenuLabel>
-                {(profileItem || supportItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
+                {(profileItem || supportItem || featureRequestItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
                 {profileItem && (
                   <DropdownMenuItem asChild>
                     <Link href={profileItem.href} className="flex items-center cursor-pointer">
@@ -167,6 +173,14 @@ export function Layout({ children }: LayoutProps) {
                     <Link href={supportItem.href} className="flex items-center cursor-pointer">
                       <supportItem.icon className="w-4 h-4 mr-2" />
                       {supportItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {featureRequestItem && (
+                  <DropdownMenuItem asChild>
+                    <Link href={featureRequestItem.href} className="flex items-center cursor-pointer">
+                      <featureRequestItem.icon className="w-4 h-4 mr-2" />
+                      {featureRequestItem.label}
                     </Link>
                   </DropdownMenuItem>
                 )}

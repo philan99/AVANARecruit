@@ -47,6 +47,7 @@ import HowItWorks from "@/pages/how-it-works";
 import ResetPassword from "@/pages/reset-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import PortalContactUs from "@/pages/portal-contact-us";
+import FeatureRequest from "@/pages/feature-request";
 import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
@@ -75,6 +76,7 @@ function CompanyRoutes() {
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/company-profile" component={CompanyProfile} />
         <Route path="/contact-us" component={PortalContactUs} />
+        <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
       </Switch>
@@ -99,6 +101,7 @@ function CandidateRoutes() {
         <Route path="/browse-companies" component={BrowseCompanies} />
         <Route path="/jobs/:id" component={CandidateJobDetail} />
         <Route path="/contact-us" component={PortalContactUs} />
+        <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
           </Switch>
