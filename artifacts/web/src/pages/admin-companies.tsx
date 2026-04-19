@@ -87,7 +87,7 @@ export default function AdminCompanies() {
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
 
-  const [searchQuery, setSearchQuery] = useState(urlParams.get("search") || "");
+  const [companyQuery, setCompanyQuery] = useState(urlParams.get("company") || "");
   const [industryFilter, setIndustryFilter] = useState(urlParams.get("industry") || "all");
   const [locationFilter, setLocationFilter] = useState(urlParams.get("location") || "all");
   const [sizeFilter, setSizeFilter] = useState(urlParams.get("size") || "all");
@@ -126,8 +126,10 @@ export default function AdminCompanies() {
 
   const filteredRows: Row[] = useMemo(() => {
     const rows: Row[] = [];
+    const q = companyQuery.trim().toLowerCase();
     const sortedCompanies = [...companies].sort((a, b) => a.name.localeCompare(b.name));
     for (const company of sortedCompanies) {
+      if (q && !company.name.toLowerCase().includes(q)) continue;
       if (industryFilter !== "all" && company.industry !== industryFilter) continue;
       if (locationFilter !== "all" && company.location !== locationFilter) continue;
       if (sizeFilter !== "all" && company.size !== sizeFilter) continue;
@@ -137,33 +139,16 @@ export default function AdminCompanies() {
         return true;
       });
 
-      // The base list (before search): if no users, show one synthetic empty row.
+      // If a company has no users (or all are filtered out by role), show one synthetic empty row when no role filter is active.
       const baseUsers: (CompanyTeamUser | null)[] =
         usersForCompany.length > 0 ? usersForCompany : (roleFilter === "all" ? [null] : []);
 
-      // Apply search across both company fields and user fields.
-      const matchedUsers = baseUsers.filter(u => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        const companyMatch =
-          company.name.toLowerCase().includes(q) ||
-          (company.email && company.email.toLowerCase().includes(q)) ||
-          (company.industry && company.industry.toLowerCase().includes(q)) ||
-          (company.location && company.location.toLowerCase().includes(q));
-        const userMatch = u && (
-          (u.email && u.email.toLowerCase().includes(q)) ||
-          (u.name && u.name.toLowerCase().includes(q)) ||
-          u.role.toLowerCase().includes(q)
-        );
-        return companyMatch || userMatch;
-      });
-
-      matchedUsers.forEach((u, idx) => {
+      baseUsers.forEach((u, idx) => {
         rows.push({ company, user: u, isFirstForCompany: idx === 0 });
       });
     }
     return rows;
-  }, [companies, searchQuery, industryFilter, locationFilter, sizeFilter, roleFilter]);
+  }, [companies, companyQuery, industryFilter, locationFilter, sizeFilter, roleFilter]);
 
   const totalCompaniesShown = useMemo(
     () => new Set(filteredRows.map(r => r.company.id)).size,
@@ -171,14 +156,14 @@ export default function AdminCompanies() {
   );
 
   const hasActiveFilters =
-    !!searchQuery ||
+    !!companyQuery ||
     industryFilter !== "all" ||
     locationFilter !== "all" ||
     sizeFilter !== "all" ||
     roleFilter !== "all";
 
   function clearFilters() {
-    setSearchQuery("");
+    setCompanyQuery("");
     setIndustryFilter("all");
     setLocationFilter("all");
     setSizeFilter("all");
@@ -241,14 +226,15 @@ export default function AdminCompanies() {
         <CardContent className="pt-5 pb-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex-1 min-w-[200px]">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Search</Label>
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1 block">Company</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Company name, user email or name, industry, location..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by company name..."
+                  value={companyQuery}
+                  onChange={(e) => setCompanyQuery(e.target.value)}
                   className="pl-8 h-9 text-xs"
+                  data-testid="input-company-search"
                 />
               </div>
             </div>
