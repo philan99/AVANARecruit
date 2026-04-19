@@ -380,7 +380,7 @@ export default function RoleSelect() {
               <br />with the Right Opportunity.
             </h1>
             <p className="text-lg leading-relaxed max-w-xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
-              AVANA Recruit uses artificial intelligence to match candidates and companies based on skills, experience, education and location — making recruitment smarter and faster.
+              AVANA Recruit uses artificial intelligence to match candidates and companies across six weighted dimensions — skills, experience, candidate preferences, verified credentials, location and education — for fairer, more accurate hiring decisions.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
