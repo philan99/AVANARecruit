@@ -329,7 +329,7 @@ export default function AdminDevelopment() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(task => {
             const sc = statusConfig[task.status as Status] || statusConfig.todo;
             const pc = priorityConfig[task.priority as Priority] || priorityConfig.medium;
@@ -351,38 +351,22 @@ export default function AdminDevelopment() {
                     openEditDialog(task);
                   }
                 }}
-                className={`bg-card cursor-pointer transition-all hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${task.status === "done" ? "opacity-60" : ""}`}
+                className={`bg-card cursor-pointer transition-all hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 flex flex-col ${task.status === "done" ? "opacity-60" : ""}`}
                 title="Click to edit task"
               >
-                <CardContent className="py-3 px-4">
-                  <div className="flex items-start gap-3">
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  <div className="flex items-start justify-between gap-2 mb-2">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleStatusToggle(task); }}
-                      className={`mt-0.5 shrink-0 ${sc.color} hover:opacity-70 transition-opacity`}
+                      className={`shrink-0 ${sc.color} hover:opacity-70 transition-opacity`}
                       title="Click to change status"
                     >
                       <StatusIcon className="w-5 h-5" />
                     </button>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`font-medium text-sm ${task.status === "done" ? "line-through text-muted-foreground" : ""}`}>
-                          {task.title}
-                        </span>
-                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sc.badgeClass}`}>
-                          {sc.label}
-                        </Badge>
-                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${pc.badgeClass}`}>
-                          <PriorityIcon className="w-3 h-3 mr-0.5" /> {pc.label}
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                          <CategoryIcon className={`w-3 h-3 mr-0.5 ${cc.color}`} /> {task.category}
-                        </Badge>
-                      </div>
-                      {task.description && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto">
+                      <CategoryIcon className={`w-3 h-3 mr-0.5 ${cc.color}`} /> {task.category}
+                    </Badge>
+                    <div onClick={(e) => e.stopPropagation()} className="shrink-0">
                       {deleteConfirmId === task.id ? (
                         <div className="flex items-center gap-1">
                           <Button variant="destructive" size="sm" className="h-7 text-xs px-2" onClick={() => handleDelete(task.id)}>
@@ -398,6 +382,20 @@ export default function AdminDevelopment() {
                         </Button>
                       )}
                     </div>
+                  </div>
+                  <h3 className={`font-semibold text-sm leading-snug mb-2 ${task.status === "done" ? "line-through text-muted-foreground" : ""}`}>
+                    {task.title}
+                  </h3>
+                  {task.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-3 mb-3 flex-1">{task.description}</p>
+                  )}
+                  <div className="flex items-center gap-1.5 flex-wrap mt-auto pt-2 border-t border-border/50">
+                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sc.badgeClass}`}>
+                      {sc.label}
+                    </Badge>
+                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${pc.badgeClass}`}>
+                      <PriorityIcon className="w-3 h-3 mr-0.5" /> {pc.label}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
