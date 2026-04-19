@@ -314,7 +314,7 @@ export default function CompanyProfile() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
                     Company Details
                   </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -395,7 +395,7 @@ export default function CompanyProfile() {
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
                     Social Media
                   </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -429,10 +429,14 @@ export default function CompanyProfile() {
                   )} />
                 </div>
                 </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[#1a2035] border-b-2 border-[#4CAF50] pb-2">
+                    Company Description
+                  </h3>
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company Description</FormLabel>
-                    <p className="text-xs text-muted-foreground -mt-1">
+                    <p className="text-xs text-muted-foreground">
                       You can choose to include this in your job descriptions when posting a job.
                     </p>
                     <FormControl>
