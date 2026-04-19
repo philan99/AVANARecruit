@@ -529,7 +529,7 @@ export default function CompanyProfile() {
         </Card>
       )}
 
-      {companyUserRole === "owner" && (
+      {companyUserRole === "owner" && isEditing && (
       <Card className="bg-card border-destructive/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
