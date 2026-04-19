@@ -41,7 +41,7 @@ const PRIORITIES: Array<{ value: "nice-to-have" | "important" | "critical"; labe
 
 export default function FeatureRequest() {
   const { toast } = useToast();
-  const { role, userEmail, candidateProfileId } = useRole();
+  const { role, userEmail, candidateProfileId, companyProfileId, companyUserId } = useRole();
   const isCompany = role === "company";
   const requesterType = isCompany ? "company" : "candidate";
   const categories = isCompany ? COMPANY_CATEGORIES : CANDIDATE_CATEGORIES;
@@ -71,18 +71,33 @@ export default function FeatureRequest() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const { data: companyTeam } = useQuery({
+    queryKey: ["company-team-feature-request", companyProfileId, companyUserId],
+    queryFn: async () => {
+      const res = await fetch(`${apiBase}/companies/${companyProfileId}/team`, {
+        headers: { "x-company-user-id": String(companyUserId) },
+      });
+      if (!res.ok) throw new Error("Failed to fetch team");
+      return res.json();
+    },
+    enabled: isCompany && !!companyProfileId && !!companyUserId,
+  });
+
   useEffect(() => {
     if (isCompany && companyProfile) {
       setForm(f => ({
         ...f,
         company: f.company || companyProfile.name || "",
-        name: f.name || companyProfile.contactName || "",
       }));
+    }
+    if (isCompany && companyTeam?.users && companyUserId) {
+      const me = companyTeam.users.find((u: any) => Number(u.id) === Number(companyUserId));
+      if (me?.name) setForm(f => ({ ...f, name: f.name || me.name }));
     }
     if (!isCompany && candidateProfile) {
       setForm(f => ({ ...f, name: f.name || candidateProfile.name || "" }));
     }
-  }, [isCompany, companyProfile, candidateProfile]);
+  }, [isCompany, companyProfile, candidateProfile, companyTeam, companyUserId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -46,7 +46,7 @@ const CANDIDATE_TOPICS: Topic[] = [
 
 export default function PortalContactUs() {
   const { toast } = useToast();
-  const { role, userEmail, candidateProfileId } = useRole();
+  const { role, userEmail, candidateProfileId, companyProfileId, companyUserId } = useRole();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isCompany = role === "company";
   const contactType = isCompany ? "company" : "candidate";
@@ -74,14 +74,30 @@ export default function PortalContactUs() {
     topic: "",
   });
 
+  const { data: companyTeam } = useQuery({
+    queryKey: ["company-team-contact", companyProfileId, companyUserId],
+    queryFn: async () => {
+      const res = await fetch(`${apiBase}/companies/${companyProfileId}/team`, {
+        headers: { "x-company-user-id": String(companyUserId) },
+      });
+      if (!res.ok) throw new Error("Failed to fetch team");
+      return res.json();
+    },
+    enabled: isCompany && !!companyProfileId && !!companyUserId,
+  });
+
   useEffect(() => {
     if (isCompany && companyProfile) {
       setForm(f => ({ ...f, company: f.company || companyProfile.name || "" }));
     }
+    if (isCompany && companyTeam?.users && companyUserId) {
+      const me = companyTeam.users.find((u: any) => Number(u.id) === Number(companyUserId));
+      if (me?.name) setForm(f => ({ ...f, name: f.name || me.name }));
+    }
     if (!isCompany && candidateProfile) {
       setForm(f => ({ ...f, name: f.name || candidateProfile.name || "" }));
     }
-  }, [isCompany, companyProfile, candidateProfile]);
+  }, [isCompany, companyProfile, candidateProfile, companyTeam, companyUserId]);
 
   const selectTopic = (topic: Topic) => {
     setForm(f => ({
