@@ -190,7 +190,8 @@ export default function FeatureRequest() {
               <Input
                 placeholder="Your company name"
                 value={form.company}
-                onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
+                readOnly
+                className="bg-muted cursor-not-allowed"
                 required
               />
             </div>
