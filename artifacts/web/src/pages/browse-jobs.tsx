@@ -7,7 +7,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check, Monitor, Factory, FileText } from "lucide-react";
+import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check, Monitor, Factory, FileText, BookmarkPlus, Bookmark, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+
+type SavedSearchFilters = {
+  search?: string;
+  companyFilters?: string[];
+  levelFilters?: string[];
+  locationFilters?: string[];
+  salaryEnabled?: boolean;
+  salaryRange?: [number, number];
+  skillFilters?: string[];
+  jobTypeFilters?: string[];
+  workplaceFilters?: string[];
+  industryFilters?: string[];
+  educationFilters?: string[];
+};
+
+type SavedSearch = {
+  id: number;
+  name: string;
+  filters: SavedSearchFilters;
+  createdAt: string;
+};
 
 const JOB_TYPE_LABELS: Record<string, string> = {
   permanent_full_time: "Permanent (Full Time)",
@@ -172,6 +210,10 @@ export default function BrowseJobs() {
   const [, navigate] = useLocation();
   const { candidateProfileId } = useRole();
   const [favouriteJobIds, setFavouriteJobIds] = useState<Set<number>>(new Set());
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const { toast } = useToast();
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -189,6 +231,79 @@ export default function BrowseJobs() {
   useEffect(() => {
     fetchFavourites();
   }, [fetchFavourites]);
+
+  const fetchSavedSearches = useCallback(async () => {
+    if (!candidateProfileId) return;
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/saved-searches`);
+      if (res.ok) setSavedSearches(await res.json());
+    } catch {}
+  }, [candidateProfileId, apiBase]);
+
+  useEffect(() => {
+    fetchSavedSearches();
+  }, [fetchSavedSearches]);
+
+  function applySavedSearch(s: SavedSearch) {
+    const f = s.filters || {};
+    setSearch(f.search ?? "");
+    setCompanyFilters(new Set(f.companyFilters ?? []));
+    setLevelFilters(new Set(f.levelFilters ?? []));
+    setLocationFilters(new Set(f.locationFilters ?? []));
+    setSalaryEnabled(!!f.salaryEnabled);
+    setSalaryRange(f.salaryRange ?? [0, 200000]);
+    setSkillFilters(new Set(f.skillFilters ?? []));
+    setJobTypeFilters(new Set(f.jobTypeFilters ?? []));
+    setWorkplaceFilters(new Set(f.workplaceFilters ?? []));
+    setIndustryFilters(new Set(f.industryFilters ?? []));
+    setEducationFilters(new Set(f.educationFilters ?? []));
+    toast({ title: "Search loaded", description: `Applied "${s.name}".` });
+  }
+
+  async function saveCurrentSearch() {
+    if (!candidateProfileId) return;
+    const name = saveName.trim();
+    if (!name) return;
+    const filters: SavedSearchFilters = {
+      search,
+      companyFilters: Array.from(companyFilters),
+      levelFilters: Array.from(levelFilters),
+      locationFilters: Array.from(locationFilters),
+      salaryEnabled,
+      salaryRange,
+      skillFilters: Array.from(skillFilters),
+      jobTypeFilters: Array.from(jobTypeFilters),
+      workplaceFilters: Array.from(workplaceFilters),
+      industryFilters: Array.from(industryFilters),
+      educationFilters: Array.from(educationFilters),
+    };
+    try {
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/saved-searches`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, filters }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      await fetchSavedSearches();
+      setSaveDialogOpen(false);
+      setSaveName("");
+      toast({ title: "Search saved", description: `"${name}" added to your saved searches.` });
+    } catch {
+      toast({ title: "Could not save search", variant: "destructive" });
+    }
+  }
+
+  async function deleteSavedSearch(id: number) {
+    if (!candidateProfileId) return;
+    setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+    try {
+      await fetch(`${apiBase}/candidates/${candidateProfileId}/saved-searches/${id}`, {
+        method: "DELETE",
+      });
+    } catch {
+      fetchSavedSearches();
+    }
+  }
 
   async function toggleFavourite(e: React.MouseEvent, jobId: number) {
     e.preventDefault();
@@ -373,6 +488,61 @@ export default function BrowseJobs() {
             <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground hover:text-foreground">
               <X className="w-3.5 h-3.5 mr-1" /> Clear all
             </Button>
+          )}
+          {candidateProfileId && (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Bookmark className="w-3.5 h-3.5 mr-1.5" />
+                    Saved Searches
+                    {savedSearches.length > 0 && (
+                      <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-muted text-foreground text-[10px] font-bold px-1">
+                        {savedSearches.length}
+                      </span>
+                    )}
+                    <ChevronDown className="w-3.5 h-3.5 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-72">
+                  <DropdownMenuLabel>Your saved searches</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {savedSearches.length === 0 ? (
+                    <div className="px-3 py-4 text-xs text-muted-foreground text-center">
+                      No saved searches yet.
+                    </div>
+                  ) : (
+                    savedSearches.map((s) => (
+                      <DropdownMenuItem
+                        key={s.id}
+                        onSelect={(e) => { e.preventDefault(); applySavedSearch(s); }}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span className="flex-1 truncate">{s.name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); deleteSavedSearch(s.id); }}
+                          className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Delete saved search"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSaveDialogOpen(true)}
+                disabled={activeFilterCount === 0 && !search}
+                title={activeFilterCount === 0 && !search ? "Apply some filters first" : "Save this search"}
+              >
+                <BookmarkPlus className="w-3.5 h-3.5 mr-1.5" />
+                Save
+              </Button>
+            </>
           )}
           <div className="flex-1" />
           <div className="flex items-center border border-border rounded-md bg-card overflow-hidden">
@@ -747,6 +917,31 @@ export default function BrowseJobs() {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save this search</DialogTitle>
+            <DialogDescription>
+              Give this combination of filters a name so you can re-apply it with one click.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</label>
+            <Input
+              autoFocus
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder="e.g. Senior React roles in London"
+              onKeyDown={(e) => { if (e.key === "Enter") saveCurrentSearch(); }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>Cancel</Button>
+            <Button onClick={saveCurrentSearch} disabled={!saveName.trim()}>Save search</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

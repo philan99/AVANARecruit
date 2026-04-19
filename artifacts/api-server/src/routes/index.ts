@@ -22,6 +22,7 @@ import authRouter from "./auth";
 import parseCvRouter from "./parseCv";
 import industriesRouter from "./industries";
 import jobsAiRouter from "./jobsAi";
+import savedSearchesRouter from "./savedSearches";
 
 const router: IRouter = Router();
 
@@ -48,5 +49,6 @@ router.use(devTasksRouter);
 router.use(parseCvRouter);
 router.use(industriesRouter);
 router.use(jobsAiRouter);
+router.use(savedSearchesRouter);
 
 export default router;
