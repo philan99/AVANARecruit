@@ -3,7 +3,7 @@ export function brandedEmail(title: string, body: string, footer?: string): stri
   // email — Gmail strips data: URIs, and SVG isn't supported in most clients.
   // The logo file lives in the web app's public folder so it's served at the
   // root of the deployed site.
-  const logoBase = (process.env.PUBLIC_WEB_URL || "https://avana.replit.app").replace(/\/$/, "");
+  const logoBase = (process.env.PUBLIC_WEB_URL || "https://avanarecruit.ai").replace(/\/$/, "");
   const logoUrl = `${logoBase}/avana-logo.png`;
 
   return `
