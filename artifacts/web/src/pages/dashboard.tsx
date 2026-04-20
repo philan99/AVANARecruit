@@ -3,7 +3,6 @@ import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTop
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck, Bookmark } from "lucide-react";
-import { CandidateAlertsSettings } from "@/components/candidate-alerts-settings";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link, useLocation } from "wouter";
@@ -548,7 +547,6 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <CandidateAlertsSettings />
     </div>
   );
 }

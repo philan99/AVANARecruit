@@ -98,6 +98,8 @@ export function Layout({ children }: LayoutProps) {
   const jobAlertsItem =
     role === "candidate"
       ? { href: "/job-alerts", label: "Job Alerts", icon: Bell }
+      : role === "company"
+      ? { href: "/candidate-alerts", label: "Candidate Alerts", icon: Bell }
       : null;
 
   const profileItem =

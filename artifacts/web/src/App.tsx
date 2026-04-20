@@ -51,6 +51,7 @@ import PortalContactUs from "@/pages/portal-contact-us";
 import FeatureRequest from "@/pages/feature-request";
 import MySettings from "@/pages/my-settings";
 import TeamMembers from "@/pages/team-members";
+import CompanyCandidateAlerts from "@/pages/company-candidate-alerts";
 import AcceptInvite from "@/pages/accept-invite";
 import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
@@ -81,6 +82,7 @@ function CompanyRoutes() {
         <Route path="/company-profile" component={CompanyProfile} />
         <Route path="/my-settings" component={MySettings} />
         <Route path="/team" component={TeamMembers} />
+        <Route path="/candidate-alerts" component={CompanyCandidateAlerts} />
         <Route path="/contact-us" component={PortalContactUs} />
         <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
