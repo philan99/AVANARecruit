@@ -323,115 +323,111 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
 });
 
 async function sendCandidateAlerts(candidate: any) {
-  // 1. Pull every enabled candidate-alert config along with the company name
-  //    and the company OWNER's email (used as a fallback recipient).
-  const alertsWithCompanies = await db
+  // 1. Pull every enabled candidate-alert config — each row is now per-user.
+  //    Join the owning user (filters/recipient) and company (display name).
+  const userAlerts = await db
     .select({
       companyProfileId: candidateAlertsTable.companyProfileId,
+      companyUserId: candidateAlertsTable.companyUserId,
       minScore: candidateAlertsTable.minScore,
       keywords: candidateAlertsTable.keywords,
       locations: candidateAlertsTable.locations,
       companyName: companyProfiles.name,
-      ownerEmail: companyUsers.email,
-      ownerName: companyUsers.name,
+      userEmail: companyUsers.email,
+      userName: companyUsers.name,
+      userRole: companyUsers.role,
     })
     .from(candidateAlertsTable)
     .innerJoin(companyProfiles, eq(candidateAlertsTable.companyProfileId, companyProfiles.id))
-    .leftJoin(
-      companyUsers,
-      and(eq(companyUsers.companyProfileId, companyProfiles.id), eq(companyUsers.role, "owner")),
-    )
+    .innerJoin(companyUsers, eq(candidateAlertsTable.companyUserId, companyUsers.id))
     .where(eq(candidateAlertsTable.enabled, true));
 
-  if (alertsWithCompanies.length === 0) return;
+  if (userAlerts.length === 0) return;
 
-  const companyIds = alertsWithCompanies.map((a) => a.companyProfileId);
+  const configByUserId = new Map<number, (typeof userAlerts)[number]>();
+  for (const a of userAlerts) {
+    if (a.companyUserId != null) configByUserId.set(a.companyUserId, a);
+  }
+
+  const companyIds = Array.from(new Set(userAlerts.map((a) => a.companyProfileId)));
 
   const allJobs = await db
     .select()
     .from(jobsTable)
     .where(and(eq(jobsTable.status, "active"), inArray(jobsTable.companyProfileId, companyIds)));
-
   if (allJobs.length === 0) return;
 
-  // 2. Resolve job-poster contact details (so each recruiter only gets emailed
-  //    about candidates matching THEIR jobs).
-  const posterIds = Array.from(
-    new Set(allJobs.map((j) => j.createdByUserId).filter((id): id is number => typeof id === "number")),
-  );
-  const posters = posterIds.length
-    ? await db
-        .select({
-          id: companyUsers.id,
-          email: companyUsers.email,
-          name: companyUsers.name,
-          companyProfileId: companyUsers.companyProfileId,
-        })
-        .from(companyUsers)
-        .where(inArray(companyUsers.id, posterIds))
-    : [];
-  const posterById = new Map(posters.map((p) => [p.id, p]));
+  // 2. Build a list of every user in those companies so we can decide who is
+  //    "responsible" for each job (poster, with owner fallback for orphans).
+  const allCompanyUsers = await db
+    .select({
+      id: companyUsers.id,
+      companyProfileId: companyUsers.companyProfileId,
+      role: companyUsers.role,
+    })
+    .from(companyUsers)
+    .where(inArray(companyUsers.companyProfileId, companyIds));
 
-  // recipientKey -> { email, name, companyName, jobs: [{title, score}] }
+  const userById = new Map(allCompanyUsers.map((u) => [u.id, u]));
+  const ownerByCompanyId = new Map<number, number>();
+  for (const u of allCompanyUsers) {
+    if (u.role === "owner") ownerByCompanyId.set(u.companyProfileId, u.id);
+  }
+
+  // 3. For each job, find the responsible user (poster if still in this
+  //    company, otherwise the owner).
   type Bucket = {
     email: string;
     name: string | null;
     companyName: string;
     jobs: { title: string; score: number }[];
   };
-  const buckets = new Map<string, Bucket>();
+  const buckets = new Map<number, Bucket>();
 
-  for (const alert of alertsWithCompanies) {
-    const companyJobs = allJobs.filter((j) => j.companyProfileId === alert.companyProfileId);
-    if (companyJobs.length === 0) continue;
-
-    for (const job of companyJobs) {
-      const result = computeMatch(job, candidate);
-      const score = Math.round(result.overallScore);
-
-      if (score < alert.minScore) continue;
-
-      if (alert.keywords && alert.keywords.length > 0) {
-        const candidateText = `${candidate.currentTitle} ${candidate.summary} ${(candidate.skills || []).join(" ")}`.toLowerCase();
-        const hasKeyword = alert.keywords.some((kw: string) => candidateText.includes(kw.toLowerCase()));
-        if (!hasKeyword) continue;
-      }
-
-      if (alert.locations && alert.locations.length > 0) {
-        const candidateLoc = (candidate.location || "").toLowerCase();
-        const matchesLocation = alert.locations.some((loc: string) =>
-          candidateLoc.includes(loc.toLowerCase()),
-        );
-        if (!matchesLocation) continue;
-      }
-
-      // Route to the job poster; fall back to the company owner if the poster
-      // is missing/deleted or no longer attached to this company.
-      let recipientEmail: string | null = null;
-      let recipientName: string | null = null;
-      const poster = job.createdByUserId ? posterById.get(job.createdByUserId) : undefined;
-      if (poster && poster.companyProfileId === alert.companyProfileId && poster.email) {
-        recipientEmail = poster.email;
-        recipientName = poster.name ?? null;
-      } else if (alert.ownerEmail) {
-        recipientEmail = alert.ownerEmail;
-        recipientName = alert.ownerName ?? null;
-      }
-      if (!recipientEmail) continue;
-
-      const key = `${alert.companyProfileId}:${recipientEmail.toLowerCase()}`;
-      let bucket = buckets.get(key);
-      if (!bucket) {
-        bucket = {
-          email: recipientEmail,
-          name: recipientName,
-          companyName: alert.companyName,
-          jobs: [],
-        };
-        buckets.set(key, bucket);
-      }
-      bucket.jobs.push({ title: job.title, score });
+  for (const job of allJobs) {
+    const poster = job.createdByUserId ? userById.get(job.createdByUserId) : undefined;
+    let responsibleUserId: number | undefined;
+    if (poster && poster.companyProfileId === job.companyProfileId) {
+      responsibleUserId = poster.id;
+    } else {
+      responsibleUserId = ownerByCompanyId.get(job.companyProfileId!);
     }
+    if (!responsibleUserId) continue;
+
+    const config = configByUserId.get(responsibleUserId);
+    if (!config) continue; // user has no alert row, or their alerts are off
+
+    const result = computeMatch(job, candidate);
+    const score = Math.round(result.overallScore);
+    if (score < config.minScore) continue;
+
+    if (config.keywords && config.keywords.length > 0) {
+      const candidateText = `${candidate.currentTitle} ${candidate.summary} ${(candidate.skills || []).join(" ")}`.toLowerCase();
+      const hasKeyword = config.keywords.some((kw: string) => candidateText.includes(kw.toLowerCase()));
+      if (!hasKeyword) continue;
+    }
+
+    if (config.locations && config.locations.length > 0) {
+      const candidateLoc = (candidate.location || "").toLowerCase();
+      const matchesLocation = config.locations.some((loc: string) =>
+        candidateLoc.includes(loc.toLowerCase()),
+      );
+      if (!matchesLocation) continue;
+    }
+
+    if (!config.userEmail) continue;
+
+    let bucket = buckets.get(responsibleUserId);
+    if (!bucket) {
+      bucket = {
+        email: config.userEmail,
+        name: config.userName ?? null,
+        companyName: config.companyName,
+        jobs: [],
+      };
+      buckets.set(responsibleUserId, bucket);
+    }
+    bucket.jobs.push({ title: job.title, score });
   }
 
   if (buckets.size === 0) return;

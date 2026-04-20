@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Bell, BellOff, Plus, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
+import { useRole } from "@/contexts/role-context";
 
 export function CandidateAlertsSettings() {
   const { data: profile } = useCompanyProfile();
   const companyProfileId = profile?.id;
+  const { companyUserId } = useRole();
   const { toast } = useToast();
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -26,10 +28,16 @@ export function CandidateAlertsSettings() {
   const [newLocation, setNewLocation] = useState("");
 
   useEffect(() => {
-    if (!companyProfileId) return;
+    if (!companyProfileId || !companyUserId) {
+      setLoading(false);
+      return;
+    }
     async function fetchAlerts() {
       try {
-        const res = await fetch(`${basePath}/company/${companyProfileId}/candidate-alerts`);
+        const res = await fetch(
+          `${basePath}/company/${companyProfileId}/candidate-alerts`,
+          { headers: { "x-company-user-id": String(companyUserId) } },
+        );
         if (res.ok) {
           const data = await res.json();
           setEnabled(data.enabled ?? false);
@@ -44,17 +52,23 @@ export function CandidateAlertsSettings() {
       }
     }
     fetchAlerts();
-  }, [companyProfileId, basePath]);
+  }, [companyProfileId, companyUserId, basePath]);
 
   const handleSave = async () => {
-    if (!companyProfileId) return;
+    if (!companyProfileId || !companyUserId) return;
     setSaving(true);
     try {
-      const res = await fetch(`${basePath}/company/${companyProfileId}/candidate-alerts`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled, minScore, keywords, locations }),
-      });
+      const res = await fetch(
+        `${basePath}/company/${companyProfileId}/candidate-alerts`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "x-company-user-id": String(companyUserId),
+          },
+          body: JSON.stringify({ enabled, minScore, keywords, locations }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to save");
       toast({ title: "Candidate Alerts Updated", description: enabled ? "You'll be notified when matching candidates register." : "Candidate alerts have been turned off." });
     } catch {
