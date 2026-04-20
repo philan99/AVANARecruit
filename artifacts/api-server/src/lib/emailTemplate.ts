@@ -14,8 +14,8 @@ export function brandedEmail(title: string, body: string, footer?: string): stri
             <td align="left" valign="middle" style="vertical-align: middle;">
               <h1 style="color: #4CAF50; margin: 0; font-size: 20px; line-height: 32px;">${title}</h1>
             </td>
-            <td align="right" valign="middle" width="140" style="width: 140px; vertical-align: middle;">
-              <img src="${logoUrl}" alt="AVANA Recruit" width="140" height="32" style="display: block; width: 140px; height: 32px; border: 0; outline: none; text-decoration: none;" />
+            <td align="right" valign="middle" width="210" style="width: 210px; vertical-align: middle;">
+              <img src="${logoUrl}" alt="AVANA Recruit" width="200" height="32" style="display: block; width: 200px; height: 32px; border: 0; outline: none; text-decoration: none;" />
             </td>
           </tr>
         </table>
