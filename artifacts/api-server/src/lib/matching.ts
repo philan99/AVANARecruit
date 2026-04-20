@@ -79,18 +79,105 @@ const experienceLevelMap: Record<string, number> = {
   executive: 12,
 };
 
-function computeExperienceScore(jobLevel: string, candidateYears: number): number {
-  const requiredYears = experienceLevelMap[jobLevel] ?? 3;
-  if (candidateYears >= requiredYears) {
-    const overQualification = candidateYears - requiredYears;
+function scoreYearsAgainstRequirement(years: number, requiredYears: number): number {
+  if (years >= requiredYears) {
+    const overQualification = years - requiredYears;
     if (overQualification <= 3) return 100;
     if (overQualification <= 6) return 85;
     return 70;
   }
-  const deficit = requiredYears - candidateYears;
+  const deficit = requiredYears - years;
   if (deficit <= 1) return 80;
   if (deficit <= 2) return 60;
   return Math.max(20, 100 - deficit * 15);
+}
+
+const EXPERIENCE_STOP_WORDS = new Set([
+  "the", "and", "for", "with", "our", "your", "their", "from", "into", "this",
+  "that", "are", "was", "you", "all", "any", "but", "not", "off", "out",
+  "senior", "junior", "lead", "principal", "head", "staff",
+]);
+
+function tokenizeForExperience(s: string): Set<string> {
+  return new Set(
+    (s ?? "")
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]+/g, " ")
+      .split(/\s+/)
+      .filter((t) => t.length > 2 && !EXPERIENCE_STOP_WORDS.has(t)),
+  );
+}
+
+function entryDurationYears(entry: any): number {
+  const startStr = entry?.startDate;
+  if (!startStr) return 0;
+  const start = new Date(startStr);
+  if (Number.isNaN(start.getTime())) return 0;
+  const end = entry?.current
+    ? new Date()
+    : entry?.endDate
+      ? new Date(entry.endDate)
+      : null;
+  if (!end || Number.isNaN(end.getTime()) || end < start) return 0;
+  const ms = end.getTime() - start.getTime();
+  return ms / (365.25 * 24 * 3600 * 1000);
+}
+
+/**
+ * Sum the years from work-history entries that look relevant to this job.
+ * An entry counts as relevant when its job title shares a meaningful token
+ * with the posted role's title, or when its description mentions any of the
+ * required skills. Returns null if the candidate hasn't entered any work
+ * history (so callers can fall back to total years).
+ */
+function computeRelevantYears(experience: any, job: Job): number | null {
+  if (!Array.isArray(experience) || experience.length === 0) return null;
+  const jobTitleTokens = tokenizeForExperience(job.title ?? "");
+  const jobSkillsLower = (job.skills ?? [])
+    .map((s) => (s ?? "").toLowerCase().trim())
+    .filter((s) => s.length > 1);
+  let total = 0;
+  for (const entry of experience) {
+    const titleTokens = tokenizeForExperience(entry?.jobTitle ?? "");
+    let relevant = false;
+    for (const t of titleTokens) {
+      if (jobTitleTokens.has(t)) {
+        relevant = true;
+        break;
+      }
+    }
+    if (!relevant) {
+      const desc = (entry?.description ?? "").toLowerCase();
+      if (desc) {
+        for (const skill of jobSkillsLower) {
+          if (desc.includes(skill)) {
+            relevant = true;
+            break;
+          }
+        }
+      }
+    }
+    if (relevant) total += entryDurationYears(entry);
+  }
+  return total;
+}
+
+function computeExperienceScore(job: Job, candidate: Candidate): number {
+  const requiredYears = experienceLevelMap[job.experienceLevel] ?? 3;
+  const totalScore = scoreYearsAgainstRequirement(candidate.experienceYears, requiredYears);
+
+  const relevantYears = computeRelevantYears((candidate as any).experience, job);
+  if (relevantYears == null) {
+    // No work-history entries to draw on — fall back to total years only.
+    return totalScore;
+  }
+
+  const relevantScore = scoreYearsAgainstRequirement(relevantYears, requiredYears);
+  // Weight role-relevant years more heavily than raw total tenure: a candidate
+  // with the right kind of experience should outscore one with the same total
+  // years in unrelated roles, but we don't want to zero-out transferable
+  // experience either.
+  return Math.round(relevantScore * 0.65 + totalScore * 0.35);
 }
 
 // Ranking of the controlled education enum values used across the app.
@@ -306,7 +393,7 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
     candidate.skills
   );
 
-  const experienceScore = computeExperienceScore(job.experienceLevel, candidate.experienceYears);
+  const experienceScore = computeExperienceScore(job, candidate);
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
   const locationScore = computeLocationScore(job.location, candidate.location);
   const verificationScore = computeVerificationScore(verifiedCount);
