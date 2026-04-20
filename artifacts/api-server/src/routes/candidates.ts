@@ -439,11 +439,11 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
       await resend.emails.send({
         from: fromEmail,
         to: bucket.email,
-        subject: `New Candidate Alert: ${candidate.name} — matches ${bucket.jobs.length} of your roles`,
+        subject: `Candidate Alert: ${candidate.name} — matches ${bucket.jobs.length} of your roles`,
         html: brandedEmail(
-          "New Candidate Match Alert",
+          "Candidate Match Alert",
           `<p>${greeting}</p>
-          <p>A new candidate has registered who matches one or more of the roles you posted at <strong>${bucket.companyName}</strong>:</p>
+          <p>Either a new candidate has registered or an existing candidate who has improved their match score has now met your candidate match threshold for one or more of the roles you have posted at <strong>${bucket.companyName}</strong>:</p>
           <table style="width:100%; border-collapse:collapse; margin:16px 0;">
             <tr><td style="padding:8px 12px; font-weight:600; color:#666; width:120px;">Name</td><td style="padding:8px 12px;">${candidate.name}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Title</td><td style="padding:8px 12px;">${candidate.currentTitle}</td></tr>
