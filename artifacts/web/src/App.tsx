@@ -11,6 +11,7 @@ import RoleSelect from "@/pages/role-select";
 import ContactUs from "@/pages/contact-us";
 import Dashboard from "@/pages/dashboard";
 import CandidateDashboard from "@/pages/candidate-dashboard";
+import CandidateJobAlerts from "@/pages/candidate-job-alerts";
 import CandidateProfile from "@/pages/candidate-profile";
 import CandidateMatches from "@/pages/candidate-matches";
 import CandidateShortlisted from "@/pages/candidate-shortlisted";
@@ -106,6 +107,7 @@ function CandidateRoutes() {
         <Route path="/browse-companies" component={BrowseCompanies} />
         <Route path="/jobs/:id" component={CandidateJobDetail} />
         <Route path="/my-settings" component={MySettings} />
+        <Route path="/job-alerts" component={CandidateJobAlerts} />
         <Route path="/contact-us" component={PortalContactUs} />
         <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />

@@ -21,6 +21,7 @@ import {
   Lightbulb,
   ChevronDown,
   UsersRound,
+  Bell,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -92,6 +93,11 @@ export function Layout({ children }: LayoutProps) {
   const teamItem =
     role === "company"
       ? { href: "/team", label: "Team Members", icon: UsersRound }
+      : null;
+
+  const jobAlertsItem =
+    role === "candidate"
+      ? { href: "/job-alerts", label: "Job Alerts", icon: Bell }
       : null;
 
   const profileItem =
@@ -170,7 +176,7 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </div>
                 </DropdownMenuLabel>
-                {(settingsItem || profileItem || supportItem || featureRequestItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
+                {(settingsItem || profileItem || jobAlertsItem || supportItem || featureRequestItem || portalMenuExtras.length > 0) && <DropdownMenuSeparator />}
                 {settingsItem && (
                   <DropdownMenuItem asChild>
                     <Link href={settingsItem.href} className="flex items-center cursor-pointer">
@@ -195,7 +201,15 @@ export function Layout({ children }: LayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                {(profileItem || teamItem) && supportItem && <DropdownMenuSeparator />}
+                {jobAlertsItem && (
+                  <DropdownMenuItem asChild>
+                    <Link href={jobAlertsItem.href} className="flex items-center cursor-pointer" data-testid="link-job-alerts">
+                      <jobAlertsItem.icon className="w-4 h-4 mr-2" />
+                      {jobAlertsItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {(profileItem || teamItem || jobAlertsItem) && supportItem && <DropdownMenuSeparator />}
                 {supportItem && (
                   <DropdownMenuItem asChild>
                     <Link href={supportItem.href} className="flex items-center cursor-pointer">
