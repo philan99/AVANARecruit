@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, ilike, or, sql, count } from "drizzle-orm";
+import { eq, and, ilike, or, sql, count, inArray } from "drizzle-orm";
 import { db, candidatesTable, matchesTable, candidateAlertsTable, jobsTable, companyProfiles, companyUsers } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import {
@@ -323,15 +323,17 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
 });
 
 async function sendCandidateAlerts(candidate: any) {
+  // 1. Pull every enabled candidate-alert config along with the company name
+  //    and the company OWNER's email (used as a fallback recipient).
   const alertsWithCompanies = await db
     .select({
-      alertId: candidateAlertsTable.id,
       companyProfileId: candidateAlertsTable.companyProfileId,
       minScore: candidateAlertsTable.minScore,
       keywords: candidateAlertsTable.keywords,
       locations: candidateAlertsTable.locations,
       companyName: companyProfiles.name,
-      companyEmail: companyUsers.email,
+      ownerEmail: companyUsers.email,
+      ownerName: companyUsers.name,
     })
     .from(candidateAlertsTable)
     .innerJoin(companyProfiles, eq(candidateAlertsTable.companyProfileId, companyProfiles.id))
@@ -343,23 +345,45 @@ async function sendCandidateAlerts(candidate: any) {
 
   if (alertsWithCompanies.length === 0) return;
 
+  const companyIds = alertsWithCompanies.map((a) => a.companyProfileId);
+
   const allJobs = await db
     .select()
     .from(jobsTable)
-    .where(eq(jobsTable.status, "active"));
+    .where(and(eq(jobsTable.status, "active"), inArray(jobsTable.companyProfileId, companyIds)));
 
   if (allJobs.length === 0) return;
 
-  const resend = await getResendClient();
-  let sentCount = 0;
+  // 2. Resolve job-poster contact details (so each recruiter only gets emailed
+  //    about candidates matching THEIR jobs).
+  const posterIds = Array.from(
+    new Set(allJobs.map((j) => j.createdByUserId).filter((id): id is number => typeof id === "number")),
+  );
+  const posters = posterIds.length
+    ? await db
+        .select({
+          id: companyUsers.id,
+          email: companyUsers.email,
+          name: companyUsers.name,
+          companyProfileId: companyUsers.companyProfileId,
+        })
+        .from(companyUsers)
+        .where(inArray(companyUsers.id, posterIds))
+    : [];
+  const posterById = new Map(posters.map((p) => [p.id, p]));
+
+  // recipientKey -> { email, name, companyName, jobs: [{title, score}] }
+  type Bucket = {
+    email: string;
+    name: string | null;
+    companyName: string;
+    jobs: { title: string; score: number }[];
+  };
+  const buckets = new Map<string, Bucket>();
 
   for (const alert of alertsWithCompanies) {
-    if (!alert.companyEmail) continue;
-
     const companyJobs = allJobs.filter((j) => j.companyProfileId === alert.companyProfileId);
     if (companyJobs.length === 0) continue;
-
-    const matchingJobs: { title: string; score: number }[] = [];
 
     for (const job of companyJobs) {
       const result = computeMatch(job, candidate);
@@ -375,36 +399,70 @@ async function sendCandidateAlerts(candidate: any) {
 
       if (alert.locations && alert.locations.length > 0) {
         const candidateLoc = (candidate.location || "").toLowerCase();
-        const matchesLocation = alert.locations.some((loc: string) => candidateLoc.includes(loc.toLowerCase()));
+        const matchesLocation = alert.locations.some((loc: string) =>
+          candidateLoc.includes(loc.toLowerCase()),
+        );
         if (!matchesLocation) continue;
       }
 
-      matchingJobs.push({ title: job.title, score });
+      // Route to the job poster; fall back to the company owner if the poster
+      // is missing/deleted or no longer attached to this company.
+      let recipientEmail: string | null = null;
+      let recipientName: string | null = null;
+      const poster = job.createdByUserId ? posterById.get(job.createdByUserId) : undefined;
+      if (poster && poster.companyProfileId === alert.companyProfileId && poster.email) {
+        recipientEmail = poster.email;
+        recipientName = poster.name ?? null;
+      } else if (alert.ownerEmail) {
+        recipientEmail = alert.ownerEmail;
+        recipientName = alert.ownerName ?? null;
+      }
+      if (!recipientEmail) continue;
+
+      const key = `${alert.companyProfileId}:${recipientEmail.toLowerCase()}`;
+      let bucket = buckets.get(key);
+      if (!bucket) {
+        bucket = {
+          email: recipientEmail,
+          name: recipientName,
+          companyName: alert.companyName,
+          jobs: [],
+        };
+        buckets.set(key, bucket);
+      }
+      bucket.jobs.push({ title: job.title, score });
     }
+  }
 
-    if (matchingJobs.length === 0) continue;
+  if (buckets.size === 0) return;
 
-    matchingJobs.sort((a, b) => b.score - a.score);
+  const resend = await getResendClient();
+  let sentCount = 0;
 
-    const jobRows = matchingJobs
+  for (const bucket of buckets.values()) {
+    bucket.jobs.sort((a, b) => b.score - a.score);
+
+    const jobRows = bucket.jobs
       .map(
         (j, i) =>
           `<tr${i % 2 === 1 ? ' style="background:#f9f9f9;"' : ""}>
             <td style="padding:8px 12px;">${j.title}</td>
             <td style="padding:8px 12px; font-weight:700; color:#4CAF50;">${j.score}%</td>
-          </tr>`
+          </tr>`,
       )
       .join("");
+
+    const greeting = bucket.name ? `Hi ${bucket.name},` : `Hi ${bucket.companyName},`;
 
     try {
       await resend.emails.send({
         from: "AVANA Recruit <notifications@avanaservices.com>",
-        to: alert.companyEmail,
-        subject: `New Candidate Alert: ${candidate.name} — matches ${matchingJobs.length} of your roles`,
+        to: bucket.email,
+        subject: `New Candidate Alert: ${candidate.name} — matches ${bucket.jobs.length} of your roles`,
         html: brandedEmail(
           "New Candidate Match Alert",
-          `<p>Hi ${alert.companyName},</p>
-          <p>A new candidate has registered who matches one or more of your open roles:</p>
+          `<p>${greeting}</p>
+          <p>A new candidate has registered who matches one or more of the roles you posted at <strong>${bucket.companyName}</strong>:</p>
           <table style="width:100%; border-collapse:collapse; margin:16px 0;">
             <tr><td style="padding:8px 12px; font-weight:600; color:#666; width:120px;">Name</td><td style="padding:8px 12px;">${candidate.name}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Title</td><td style="padding:8px 12px;">${candidate.currentTitle}</td></tr>
@@ -419,12 +477,12 @@ async function sendCandidateAlerts(candidate: any) {
             ${jobRows}
           </table>
           <p>Log in to your AVANA Recruit account to view the full candidate profile.</p>`,
-          "You received this because you have candidate alerts enabled on AVANA Recruit."
+          "You received this because you have candidate alerts enabled on AVANA Recruit.",
         ),
       });
       sentCount++;
     } catch (err) {
-      console.error(`Failed to send candidate alert to ${alert.companyEmail}:`, err);
+      console.error(`Failed to send candidate alert to ${bucket.email}:`, err);
     }
   }
 
