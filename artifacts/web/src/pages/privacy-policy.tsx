@@ -1,18 +1,13 @@
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { Link } from "wouter";
 import { useEffect } from "react";
+import { MarketingNav } from "@/components/marketing-nav";
 
 export default function PrivacyPolicy() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: "rgba(26, 32, 53, 0.97)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
-          <Link href="/" className="cursor-pointer">
-            <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
-          </Link>
-        </div>
-      </nav>
+      <MarketingNav />
 
       <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-[120px] pb-20">
         <h1 className="text-3xl lg:text-4xl font-bold mb-2" style={{ color: "#1a2035" }}>Privacy Policy</h1>
