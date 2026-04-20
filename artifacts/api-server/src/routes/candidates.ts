@@ -223,6 +223,13 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  // Snapshot the candidate before the update so we can detect a
+  // passive -> active transition (a valid alert trigger).
+  const [prevCandidate] = await db
+    .select({ status: candidatesTable.status })
+    .from(candidatesTable)
+    .where(eq(candidatesTable.id, params.data.id));
+
   const { profileImage, cvFile, cvFileName, experience, educationDetails, qualifications, preferredJobTypes, preferredWorkplaces, preferredIndustries, linkedinUrl, facebookUrl, twitterUrl, portfolioUrl, onboardingState, ...rest } = req.body;
   const parsed = UpdateCandidateBody.safeParse({ ...rest, linkedinUrl, facebookUrl, twitterUrl, portfolioUrl });
   if (!parsed.success) {
@@ -275,6 +282,13 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
 
   const result = { ...candidate, matchCount: 0 };
   res.json(result);
+
+  // Trigger candidate alerts when the candidate flips from passive -> active.
+  if (prevCandidate?.status === "passive" && candidate.status === "active") {
+    sendCandidateAlerts(candidate).catch((err) =>
+      console.error("Candidate alert error (passive→active):", err),
+    );
+  }
 });
 
 router.delete("/candidates/:id", async (req, res): Promise<void> => {
@@ -322,43 +336,32 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
   res.sendStatus(204);
 });
 
-async function sendCandidateAlerts(candidate: any) {
-  // Alerts are now configured PER JOB on the jobs table itself. For each job
-  // that has alerts on, we compute the candidate match and, if it clears that
-  // job's min score, we email the responsible user (poster, owner-fallback
-  // for jobs whose poster is missing or has been removed).
+/**
+ * MatchedJob: a job that has already cleared its candidate-alert threshold
+ * for `candidate` and now needs to be routed to the responsible recruiter.
+ */
+export type MatchedJob = {
+  id: number;
+  title: string;
+  company: string;
+  companyProfileId: number | null;
+  createdByUserId: number | null;
+  score: number;
+};
 
-  const alertJobs = await db
-    .select({
-      id: jobsTable.id,
-      title: jobsTable.title,
-      company: jobsTable.company,
-      companyProfileId: jobsTable.companyProfileId,
-      createdByUserId: jobsTable.createdByUserId,
-      location: jobsTable.location,
-      description: jobsTable.description,
-      requirements: jobsTable.requirements,
-      skills: jobsTable.skills,
-      experienceLevel: jobsTable.experienceLevel,
-      salaryMin: jobsTable.salaryMin,
-      salaryMax: jobsTable.salaryMax,
-      jobType: jobsTable.jobType,
-      industry: jobsTable.industry,
-      educationLevel: jobsTable.educationLevel,
-      workplace: jobsTable.workplace,
-      candidateAlertMinScore: jobsTable.candidateAlertMinScore,
-    })
-    .from(jobsTable)
-    .where(and(eq(jobsTable.status, "open"), eq(jobsTable.candidateAlertEnabled, true)));
-
-  if (alertJobs.length === 0) return;
+/**
+ * Bucket the matched jobs per recipient (poster, owner-fallback) and send
+ * one consolidated email per recipient. Shared between every alert trigger
+ * (new registration, passive→active transition, run-matching threshold cross).
+ */
+export async function dispatchCandidateAlerts(candidate: any, matchedJobs: MatchedJob[]) {
+  if (matchedJobs.length === 0) return;
 
   const companyIds = Array.from(
-    new Set(alertJobs.map((j) => j.companyProfileId).filter((id): id is number => id != null)),
+    new Set(matchedJobs.map((j) => j.companyProfileId).filter((id): id is number => id != null)),
   );
   if (companyIds.length === 0) return;
 
-  // Resolve recipients: every user in the relevant companies, plus owner per company.
   const allCompanyUsers = await db
     .select({
       id: companyUsers.id,
@@ -376,7 +379,6 @@ async function sendCandidateAlerts(candidate: any) {
     if (u.role === "owner") ownerByCompanyId.set(u.companyProfileId!, u);
   }
 
-  // Look up each company's display name once.
   const companyRows = await db
     .select({ id: companyProfiles.id, name: companyProfiles.name })
     .from(companyProfiles)
@@ -391,29 +393,26 @@ async function sendCandidateAlerts(candidate: any) {
   };
   const buckets = new Map<number, Bucket>();
 
-  for (const job of alertJobs) {
+  for (const job of matchedJobs) {
+    if (job.companyProfileId == null) continue;
     const poster = job.createdByUserId ? userById.get(job.createdByUserId) : undefined;
     const recipient =
       poster && poster.companyProfileId === job.companyProfileId
         ? poster
-        : ownerByCompanyId.get(job.companyProfileId!);
+        : ownerByCompanyId.get(job.companyProfileId);
     if (!recipient || !recipient.email) continue;
-
-    const result = computeMatch(job, candidate);
-    const score = Math.round(result.overallScore);
-    if (score < job.candidateAlertMinScore) continue;
 
     let bucket = buckets.get(recipient.id);
     if (!bucket) {
       bucket = {
         email: recipient.email,
         name: recipient.name ?? null,
-        companyName: companyNameById.get(job.companyProfileId!) ?? job.company,
+        companyName: companyNameById.get(job.companyProfileId) ?? job.company,
         jobs: [],
       };
       buckets.set(recipient.id, bucket);
     }
-    bucket.jobs.push({ title: job.title, score });
+    bucket.jobs.push({ title: job.title, score: job.score });
   }
 
   if (buckets.size === 0) return;
@@ -471,6 +470,55 @@ async function sendCandidateAlerts(candidate: any) {
   if (sentCount > 0) {
     console.log(`Sent ${sentCount} candidate alert(s) for "${candidate.name}"`);
   }
+}
+
+/**
+ * Compute matches for `candidate` against every open, alert-enabled job and
+ * dispatch alerts for jobs that clear the per-job threshold. Used for new
+ * candidate registration and passive→active status transitions.
+ */
+async function sendCandidateAlerts(candidate: any) {
+  const alertJobs = await db
+    .select({
+      id: jobsTable.id,
+      title: jobsTable.title,
+      company: jobsTable.company,
+      companyProfileId: jobsTable.companyProfileId,
+      createdByUserId: jobsTable.createdByUserId,
+      location: jobsTable.location,
+      description: jobsTable.description,
+      requirements: jobsTable.requirements,
+      skills: jobsTable.skills,
+      experienceLevel: jobsTable.experienceLevel,
+      salaryMin: jobsTable.salaryMin,
+      salaryMax: jobsTable.salaryMax,
+      jobType: jobsTable.jobType,
+      industry: jobsTable.industry,
+      educationLevel: jobsTable.educationLevel,
+      workplace: jobsTable.workplace,
+      candidateAlertMinScore: jobsTable.candidateAlertMinScore,
+    })
+    .from(jobsTable)
+    .where(and(eq(jobsTable.status, "open"), eq(jobsTable.candidateAlertEnabled, true)));
+
+  if (alertJobs.length === 0) return;
+
+  const matched: MatchedJob[] = [];
+  for (const job of alertJobs) {
+    const result = computeMatch(job, candidate);
+    const score = Math.round(result.overallScore);
+    if (score < job.candidateAlertMinScore) continue;
+    matched.push({
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      companyProfileId: job.companyProfileId,
+      createdByUserId: job.createdByUserId,
+      score,
+    });
+  }
+
+  await dispatchCandidateAlerts(candidate, matched);
 }
 
 export default router;

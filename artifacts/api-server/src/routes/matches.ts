@@ -22,6 +22,7 @@ import {
   GetSkillDemandResponse,
 } from "@workspace/api-zod";
 import { computeMatch } from "../lib/matching";
+import { dispatchCandidateAlerts, type MatchedJob } from "./candidates";
 
 const router: IRouter = Router();
 
@@ -235,9 +236,14 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
   const verifiedCount = verifiedRow?.count || 0;
 
   const matchResults = [];
+  // Track jobs whose new score crossed up through the per-job alert threshold
+  // so we can fire candidate alerts for them after the response is sent.
+  const crossedAlerts: MatchedJob[] = [];
   for (const job of openJobs) {
     const result = computeMatch(job, candidate, verifiedCount);
     const existing = existingMap.get(job.id);
+    const newScore = Math.round(result.overallScore);
+    const previousScore = existing ? Math.round(existing.overallScore) : null;
     if (existing) {
       const [updated] = await db
         .update(matchesTable)
@@ -274,6 +280,24 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
         .returning();
       matchResults.push(match);
     }
+
+    // Alert iff this job has alerts on AND the score has just crossed the
+    // threshold from below (or there was no prior score). Avoids re-spamming
+    // the recruiter every time the candidate re-runs matching.
+    if (
+      job.candidateAlertEnabled &&
+      newScore >= job.candidateAlertMinScore &&
+      (previousScore === null || previousScore < job.candidateAlertMinScore)
+    ) {
+      crossedAlerts.push({
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        companyProfileId: job.companyProfileId,
+        createdByUserId: job.createdByUserId,
+        score: newScore,
+      });
+    }
   }
 
   for (const existing of existingMatches) {
@@ -284,6 +308,12 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
 
   matchResults.sort((a, b) => b.overallScore - a.overallScore);
   res.json(matchResults);
+
+  if (crossedAlerts.length > 0) {
+    dispatchCandidateAlerts(candidate, crossedAlerts).catch((err) =>
+      console.error("Candidate alert error (run-matching crossed):", err),
+    );
+  }
 });
 
 router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
