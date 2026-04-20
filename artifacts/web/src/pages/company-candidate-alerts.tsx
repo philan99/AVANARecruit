@@ -16,8 +16,8 @@ export default function CompanyCandidateAlerts() {
             Candidate Alerts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Get notified by email when new candidates register who match your open roles.
-            Set a minimum match score and optionally narrow alerts by skills, keywords or location.
+            Switch alerts on for the roles you want to track. When a new candidate registers
+            and meets that role's minimum match score, you'll get an email.
           </p>
         </div>
       </div>

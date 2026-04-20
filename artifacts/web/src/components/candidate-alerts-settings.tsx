@@ -1,15 +1,22 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bell, BellOff, Plus, X, Loader2, Check } from "lucide-react";
+import { Bell, BellOff, Loader2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { useRole } from "@/contexts/role-context";
+
+type AlertJob = {
+  id: number;
+  title: string;
+  location: string;
+  status: string;
+  createdByUserId: number | null;
+  candidateAlertEnabled: boolean;
+  candidateAlertMinScore: number;
+};
 
 export function CandidateAlertsSettings() {
   const { data: profile } = useCompanyProfile();
@@ -19,79 +26,97 @@ export function CandidateAlertsSettings() {
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [enabled, setEnabled] = useState(false);
-  const [minScore, setMinScore] = useState(50);
-  const [keywords, setKeywords] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
-  const [newKeyword, setNewKeyword] = useState("");
-  const [newLocation, setNewLocation] = useState("");
+  const [jobs, setJobs] = useState<AlertJob[]>([]);
+  const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
+  const debounceRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (!companyProfileId || !companyUserId) {
       setLoading(false);
       return;
     }
-    async function fetchAlerts() {
+    let cancelled = false;
+    async function fetchJobs() {
       try {
         const res = await fetch(
-          `${basePath}/company/${companyProfileId}/candidate-alerts`,
+          `${basePath}/company/${companyProfileId}/candidate-alert-jobs`,
           { headers: { "x-company-user-id": String(companyUserId) } },
         );
         if (res.ok) {
           const data = await res.json();
-          setEnabled(data.enabled ?? false);
-          setMinScore(data.minScore ?? 50);
-          setKeywords(data.keywords ?? []);
-          setLocations(data.locations ?? []);
+          if (!cancelled) setJobs(data.jobs ?? []);
         }
       } catch (err) {
-        console.error("Failed to fetch candidate alerts", err);
+        console.error("Failed to fetch alert jobs", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    fetchAlerts();
+    fetchJobs();
+    return () => {
+      cancelled = true;
+    };
   }, [companyProfileId, companyUserId, basePath]);
 
-  const handleSave = async () => {
-    if (!companyProfileId || !companyUserId) return;
-    setSaving(true);
+  // Optimistically apply `nextPatch` to local state, send to API, and revert
+  // on failure so the UI never silently disagrees with the server.
+  const persist = async (
+    jobId: number,
+    body: { enabled?: boolean; minScore?: number },
+    rollback: Partial<AlertJob>,
+  ) => {
+    setSavingIds((prev) => new Set(prev).add(jobId));
     try {
-      const res = await fetch(
-        `${basePath}/company/${companyProfileId}/candidate-alerts`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "x-company-user-id": String(companyUserId),
-          },
-          body: JSON.stringify({ enabled, minScore, keywords, locations }),
+      const res = await fetch(`${basePath}/jobs/${jobId}/candidate-alert`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-company-user-id": String(companyUserId),
         },
-      );
+        body: JSON.stringify(body),
+      });
       if (!res.ok) throw new Error("Failed to save");
-      toast({ title: "Candidate Alerts Updated", description: enabled ? "You'll be notified when matching candidates register." : "Candidate alerts have been turned off." });
     } catch {
-      toast({ title: "Error", description: "Failed to save alert settings.", variant: "destructive" });
+      setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...rollback } : j)));
+      toast({
+        title: "Error",
+        description: "Failed to save alert settings — your change has been reverted.",
+        variant: "destructive",
+      });
     } finally {
-      setSaving(false);
+      setSavingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(jobId);
+        return next;
+      });
     }
   };
 
-  const addKeyword = () => {
-    const kw = newKeyword.trim();
-    if (kw && !keywords.includes(kw)) {
-      setKeywords([...keywords, kw]);
-      setNewKeyword("");
-    }
+  const handleToggle = (jobId: number, enabled: boolean) => {
+    const prev = jobs.find((j) => j.id === jobId);
+    if (!prev) return;
+    const previousEnabled = prev.candidateAlertEnabled;
+    setJobs((cur) =>
+      cur.map((j) => (j.id === jobId ? { ...j, candidateAlertEnabled: enabled } : j)),
+    );
+    persist(jobId, { enabled }, { candidateAlertEnabled: previousEnabled });
   };
 
-  const addLocation = () => {
-    const loc = newLocation.trim();
-    if (loc && !locations.includes(loc)) {
-      setLocations([...locations, loc]);
-      setNewLocation("");
-    }
+  const handleScore = (jobId: number, minScore: number) => {
+    const prev = jobs.find((j) => j.id === jobId);
+    if (!prev) return;
+    const previousScore = prev.candidateAlertMinScore;
+    setJobs((cur) =>
+      cur.map((j) => (j.id === jobId ? { ...j, candidateAlertMinScore: minScore } : j)),
+    );
+    // Debounce while the user drags the slider.
+    const existing = debounceRef.current.get(jobId);
+    if (existing) clearTimeout(existing);
+    const timer = setTimeout(() => {
+      debounceRef.current.delete(jobId);
+      persist(jobId, { minScore }, { candidateAlertMinScore: previousScore });
+    }, 400);
+    debounceRef.current.set(jobId, timer);
   };
 
   if (loading) {
@@ -104,123 +129,125 @@ export function CandidateAlertsSettings() {
     );
   }
 
+  if (jobs.length === 0) {
+    return (
+      <Card className="bg-card">
+        <CardContent className="p-8 text-center space-y-2">
+          <BellOff className="w-8 h-8 mx-auto text-muted-foreground" />
+          <p className="text-sm font-medium">No jobs to configure yet</p>
+          <p className="text-xs text-muted-foreground">
+            Once you post a role you'll be able to switch on candidate alerts for it here.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const activeJobs = jobs.filter((j) => j.status !== "closed");
+  const closedJobs = jobs.filter((j) => j.status === "closed");
+
+  return (
+    <div className="space-y-3">
+      {activeJobs.map((job) => (
+        <JobAlertRow
+          key={job.id}
+          job={job}
+          saving={savingIds.has(job.id)}
+          onToggle={(v) => handleToggle(job.id, v)}
+          onScore={(v) => handleScore(job.id, v)}
+        />
+      ))}
+
+      {closedJobs.length > 0 && (
+        <div className="pt-4">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-1">
+            Closed roles
+          </p>
+          <div className="space-y-3 opacity-60">
+            {closedJobs.map((job) => (
+              <JobAlertRow
+                key={job.id}
+                job={job}
+                saving={savingIds.has(job.id)}
+                onToggle={(v) => handleToggle(job.id, v)}
+                onScore={(v) => handleScore(job.id, v)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JobAlertRow({
+  job,
+  saving,
+  onToggle,
+  onScore,
+}: {
+  job: AlertJob;
+  saving: boolean;
+  onToggle: (v: boolean) => void;
+  onScore: (v: number) => void;
+}) {
   return (
     <Card className="bg-card">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            {enabled ? <Bell className="w-5 h-5 text-primary" /> : <BellOff className="w-5 h-5 text-muted-foreground" />}
-            Candidate Alerts
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="candidate-alerts-toggle" className="text-sm text-muted-foreground">
-              {enabled ? "Active" : "Off"}
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              {job.candidateAlertEnabled ? (
+                <Bell className="w-4 h-4 text-primary shrink-0" />
+              ) : (
+                <BellOff className="w-4 h-4 text-muted-foreground shrink-0" />
+              )}
+              <h3 className="font-semibold text-sm truncate" style={{ color: "#1a2035" }}>
+                {job.title}
+              </h3>
+            </div>
+            {job.location && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                <MapPin className="w-3 h-3" />
+                <span className="truncate">{job.location}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {saving && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+            <Label
+              htmlFor={`alert-${job.id}`}
+              className="text-xs text-muted-foreground select-none"
+            >
+              {job.candidateAlertEnabled ? "On" : "Off"}
             </Label>
             <Switch
-              id="candidate-alerts-toggle"
-              checked={enabled}
-              onCheckedChange={setEnabled}
+              id={`alert-${job.id}`}
+              checked={job.candidateAlertEnabled}
+              onCheckedChange={onToggle}
             />
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <p className="text-xs text-muted-foreground">
-          Get notified when new candidates register who match your open roles.
-        </p>
-        {enabled && (
-          <>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Minimum Match Score</Label>
-                <span className="text-sm font-mono font-bold text-primary">{minScore}%</span>
-              </div>
-              <Slider
-                value={[minScore]}
-                onValueChange={([val]) => setMinScore(val)}
-                min={25}
-                max={100}
-                step={5}
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground">
-                Only receive alerts for candidates who match your jobs at or above this score.
-              </p>
-            </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Skills / Keywords (optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newKeyword}
-                  onChange={(e) => setNewKeyword(e.target.value)}
-                  placeholder="e.g. React, Python..."
-                  className="text-sm"
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }}
-                />
-                <Button size="sm" variant="outline" onClick={addKeyword} disabled={!newKeyword.trim()}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {keywords.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {keywords.map((kw) => (
-                    <Badge key={kw} variant="secondary" className="text-xs gap-1 pr-1">
-                      {kw}
-                      <button onClick={() => setKeywords(keywords.filter((k) => k !== kw))} className="hover:text-destructive">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Only alert for candidates with these skills or keywords in their profile.
-                Leave empty to match all candidates.
-              </p>
+        {job.candidateAlertEnabled && (
+          <div className="mt-4 pt-4 border-t space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Minimum Match Score
+              </Label>
+              <span className="text-sm font-mono font-bold text-primary">
+                {Math.round(job.candidateAlertMinScore)}%
+              </span>
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Candidate Locations (optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="e.g. London, Manchester..."
-                  className="text-sm"
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addLocation(); } }}
-                />
-                <Button size="sm" variant="outline" onClick={addLocation} disabled={!newLocation.trim()}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {locations.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {locations.map((loc) => (
-                    <Badge key={loc} variant="secondary" className="text-xs gap-1 pr-1">
-                      {loc}
-                      <button onClick={() => setLocations(locations.filter((l) => l !== loc))} className="hover:text-destructive">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Only alert for candidates based in these locations.
-                Leave empty to match all locations.
-              </p>
-            </div>
-          </>
+            <Slider
+              value={[job.candidateAlertMinScore]}
+              onValueChange={([v]) => onScore(v)}
+              min={25}
+              max={100}
+              step={5}
+            />
+          </div>
         )}
-
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
-          ) : (
-            <><Check className="w-4 h-4 mr-2" /> Save Alert Settings</>
-          )}
-        </Button>
       </CardContent>
     </Card>
   );

@@ -14,7 +14,6 @@ export * from "./bookmarks";
 export * from "./conversations";
 export * from "./messages";
 export * from "./jobAlerts";
-export * from "./candidateAlerts";
 export * from "./devTasks";
 export * from "./industries";
 export * from "./savedSearches";

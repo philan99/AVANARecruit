@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, ilike, or, sql, count, inArray } from "drizzle-orm";
-import { db, candidatesTable, matchesTable, candidateAlertsTable, jobsTable, companyProfiles, companyUsers } from "@workspace/db";
+import { db, candidatesTable, matchesTable, jobsTable, companyProfiles, companyUsers } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import {
   ListCandidatesQueryParams,
@@ -323,45 +323,47 @@ router.delete("/candidates/:id", async (req, res): Promise<void> => {
 });
 
 async function sendCandidateAlerts(candidate: any) {
-  // 1. Pull every enabled candidate-alert config — each row is now per-user.
-  //    Join the owning user (filters/recipient) and company (display name).
-  const userAlerts = await db
+  // Alerts are now configured PER JOB on the jobs table itself. For each job
+  // that has alerts on, we compute the candidate match and, if it clears that
+  // job's min score, we email the responsible user (poster, owner-fallback
+  // for jobs whose poster is missing or has been removed).
+
+  const alertJobs = await db
     .select({
-      companyProfileId: candidateAlertsTable.companyProfileId,
-      companyUserId: candidateAlertsTable.companyUserId,
-      minScore: candidateAlertsTable.minScore,
-      keywords: candidateAlertsTable.keywords,
-      locations: candidateAlertsTable.locations,
-      companyName: companyProfiles.name,
-      userEmail: companyUsers.email,
-      userName: companyUsers.name,
-      userRole: companyUsers.role,
+      id: jobsTable.id,
+      title: jobsTable.title,
+      company: jobsTable.company,
+      companyProfileId: jobsTable.companyProfileId,
+      createdByUserId: jobsTable.createdByUserId,
+      location: jobsTable.location,
+      description: jobsTable.description,
+      requirements: jobsTable.requirements,
+      skills: jobsTable.skills,
+      experienceLevel: jobsTable.experienceLevel,
+      salaryMin: jobsTable.salaryMin,
+      salaryMax: jobsTable.salaryMax,
+      jobType: jobsTable.jobType,
+      industry: jobsTable.industry,
+      educationLevel: jobsTable.educationLevel,
+      workplace: jobsTable.workplace,
+      candidateAlertMinScore: jobsTable.candidateAlertMinScore,
     })
-    .from(candidateAlertsTable)
-    .innerJoin(companyProfiles, eq(candidateAlertsTable.companyProfileId, companyProfiles.id))
-    .innerJoin(companyUsers, eq(candidateAlertsTable.companyUserId, companyUsers.id))
-    .where(eq(candidateAlertsTable.enabled, true));
-
-  if (userAlerts.length === 0) return;
-
-  const configByUserId = new Map<number, (typeof userAlerts)[number]>();
-  for (const a of userAlerts) {
-    if (a.companyUserId != null) configByUserId.set(a.companyUserId, a);
-  }
-
-  const companyIds = Array.from(new Set(userAlerts.map((a) => a.companyProfileId)));
-
-  const allJobs = await db
-    .select()
     .from(jobsTable)
-    .where(and(eq(jobsTable.status, "active"), inArray(jobsTable.companyProfileId, companyIds)));
-  if (allJobs.length === 0) return;
+    .where(and(eq(jobsTable.status, "open"), eq(jobsTable.candidateAlertEnabled, true)));
 
-  // 2. Build a list of every user in those companies so we can decide who is
-  //    "responsible" for each job (poster, with owner fallback for orphans).
+  if (alertJobs.length === 0) return;
+
+  const companyIds = Array.from(
+    new Set(alertJobs.map((j) => j.companyProfileId).filter((id): id is number => id != null)),
+  );
+  if (companyIds.length === 0) return;
+
+  // Resolve recipients: every user in the relevant companies, plus owner per company.
   const allCompanyUsers = await db
     .select({
       id: companyUsers.id,
+      email: companyUsers.email,
+      name: companyUsers.name,
       companyProfileId: companyUsers.companyProfileId,
       role: companyUsers.role,
     })
@@ -369,13 +371,18 @@ async function sendCandidateAlerts(candidate: any) {
     .where(inArray(companyUsers.companyProfileId, companyIds));
 
   const userById = new Map(allCompanyUsers.map((u) => [u.id, u]));
-  const ownerByCompanyId = new Map<number, number>();
+  const ownerByCompanyId = new Map<number, (typeof allCompanyUsers)[number]>();
   for (const u of allCompanyUsers) {
-    if (u.role === "owner") ownerByCompanyId.set(u.companyProfileId, u.id);
+    if (u.role === "owner") ownerByCompanyId.set(u.companyProfileId!, u);
   }
 
-  // 3. For each job, find the responsible user (poster if still in this
-  //    company, otherwise the owner).
+  // Look up each company's display name once.
+  const companyRows = await db
+    .select({ id: companyProfiles.id, name: companyProfiles.name })
+    .from(companyProfiles)
+    .where(inArray(companyProfiles.id, companyIds));
+  const companyNameById = new Map(companyRows.map((c) => [c.id, c.name]));
+
   type Bucket = {
     email: string;
     name: string | null;
@@ -384,48 +391,27 @@ async function sendCandidateAlerts(candidate: any) {
   };
   const buckets = new Map<number, Bucket>();
 
-  for (const job of allJobs) {
+  for (const job of alertJobs) {
     const poster = job.createdByUserId ? userById.get(job.createdByUserId) : undefined;
-    let responsibleUserId: number | undefined;
-    if (poster && poster.companyProfileId === job.companyProfileId) {
-      responsibleUserId = poster.id;
-    } else {
-      responsibleUserId = ownerByCompanyId.get(job.companyProfileId!);
-    }
-    if (!responsibleUserId) continue;
-
-    const config = configByUserId.get(responsibleUserId);
-    if (!config) continue; // user has no alert row, or their alerts are off
+    const recipient =
+      poster && poster.companyProfileId === job.companyProfileId
+        ? poster
+        : ownerByCompanyId.get(job.companyProfileId!);
+    if (!recipient || !recipient.email) continue;
 
     const result = computeMatch(job, candidate);
     const score = Math.round(result.overallScore);
-    if (score < config.minScore) continue;
+    if (score < job.candidateAlertMinScore) continue;
 
-    if (config.keywords && config.keywords.length > 0) {
-      const candidateText = `${candidate.currentTitle} ${candidate.summary} ${(candidate.skills || []).join(" ")}`.toLowerCase();
-      const hasKeyword = config.keywords.some((kw: string) => candidateText.includes(kw.toLowerCase()));
-      if (!hasKeyword) continue;
-    }
-
-    if (config.locations && config.locations.length > 0) {
-      const candidateLoc = (candidate.location || "").toLowerCase();
-      const matchesLocation = config.locations.some((loc: string) =>
-        candidateLoc.includes(loc.toLowerCase()),
-      );
-      if (!matchesLocation) continue;
-    }
-
-    if (!config.userEmail) continue;
-
-    let bucket = buckets.get(responsibleUserId);
+    let bucket = buckets.get(recipient.id);
     if (!bucket) {
       bucket = {
-        email: config.userEmail,
-        name: config.userName ?? null,
-        companyName: config.companyName,
+        email: recipient.email,
+        name: recipient.name ?? null,
+        companyName: companyNameById.get(job.companyProfileId!) ?? job.company,
         jobs: [],
       };
-      buckets.set(responsibleUserId, bucket);
+      buckets.set(recipient.id, bucket);
     }
     bucket.jobs.push({ title: job.title, score });
   }
