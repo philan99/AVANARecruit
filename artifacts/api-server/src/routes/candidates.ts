@@ -417,7 +417,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
 
   if (buckets.size === 0) return;
 
-  const resend = await getResendClient();
+  const { client: resend, fromEmail } = await getResendClient();
   let sentCount = 0;
 
   for (const bucket of buckets.values()) {
@@ -437,7 +437,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
 
     try {
       await resend.emails.send({
-        from: "AVANA Recruit <notifications@avanaservices.com>",
+        from: fromEmail,
         to: bucket.email,
         subject: `New Candidate Alert: ${candidate.name} — matches ${bucket.jobs.length} of your roles`,
         html: brandedEmail(
