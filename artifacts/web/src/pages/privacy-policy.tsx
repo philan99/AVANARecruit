@@ -190,7 +190,7 @@ export default function PrivacyPolicy() {
               <p className="font-semibold" style={{ color: "#1a2035" }}>AVANA Services Limited</p>
               <p>Company Number: 15268633</p>
               <p className="mt-2">
-                Email: <a href="mailto:enquiries@avanaservices.com" style={{ color: "#4CAF50" }}>enquiries@avanaservices.com</a>
+                Email: <a href="mailto:enquiries@avanarecruit.ai" style={{ color: "#4CAF50" }}>enquiries@avanarecruit.ai</a>
               </p>
               <p className="mt-1">
                 Or use our <Link href="/contact-us" style={{ color: "#4CAF50" }}>Contact Us</Link> form.
