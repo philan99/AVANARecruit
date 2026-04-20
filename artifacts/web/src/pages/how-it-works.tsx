@@ -74,8 +74,8 @@ export default function HowItWorks() {
     },
     {
       icon: Sparkles,
-      title: "AI Pre-Fills Your Profile",
-      description: "Our AI reads your CV and automatically fills in your skills, work experience, education, location, qualifications and more — so you only need to review and tweak. Anything it's unsure about is clearly flagged for you to verify.",
+      title: "AI Pre-Fills Your Profile — Your Words or Ours",
+      description: "Our AI reads your CV and automatically fills in your skills, work experience, education, location, qualifications and more. Choose how role descriptions and your profile summary appear: keep your own wording exactly as you wrote it (the default), or let AI summarise each role into a concise 1–3 sentence overview. You can switch and re-read your CV at any time, and anything the AI is unsure about is clearly flagged for you to verify.",
     },
     {
       icon: UserCircle,
