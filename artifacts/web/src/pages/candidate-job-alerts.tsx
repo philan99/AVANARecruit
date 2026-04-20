@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 
 export default function CandidateJobAlerts() {
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 lg:p-10 max-w-4xl mx-auto space-y-6">
       <div className="flex items-start gap-3">
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
