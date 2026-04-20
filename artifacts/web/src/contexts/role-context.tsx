@@ -6,6 +6,8 @@ interface RoleContextType {
   role: UserRole | null;
   setRole: (role: UserRole) => void;
   clearRole: () => void;
+  sessionToken: string | null;
+  setSessionToken: (token: string | null) => void;
   candidateProfileId: number | null;
   setCandidateProfileId: (id: number | null) => void;
   companyProfileId: number | null;
@@ -32,6 +34,8 @@ const COMPANY_USER_ID_KEY = "avanatalent_company_user_id";
 const COMPANY_USER_ROLE_KEY = "avanatalent_company_user_role";
 const EMAIL_KEY = "avanatalent_email";
 const IMPERSONATION_KEY = "avanatalent_impersonation";
+const SESSION_TOKEN_KEY = "avanatalent_session_token";
+const LAST_ACTIVITY_KEY = "avanatalent_last_activity";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<UserRole | null>(() => {
@@ -66,6 +70,19 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem(IMPERSONATION_KEY) !== null;
   });
 
+  const [sessionToken, setSessionTokenState] = useState<string | null>(() => {
+    return localStorage.getItem(SESSION_TOKEN_KEY);
+  });
+
+  const setSessionToken = useCallback((token: string | null) => {
+    if (token) {
+      localStorage.setItem(SESSION_TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(SESSION_TOKEN_KEY);
+    }
+    setSessionTokenState(token);
+  }, []);
+
   const setRole = useCallback((newRole: UserRole) => {
     localStorage.setItem(ROLE_KEY, newRole);
     setRoleState(newRole);
@@ -78,12 +95,15 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(COMPANY_USER_ID_KEY);
     localStorage.removeItem(COMPANY_USER_ROLE_KEY);
     localStorage.removeItem(EMAIL_KEY);
+    localStorage.removeItem(SESSION_TOKEN_KEY);
+    localStorage.removeItem(LAST_ACTIVITY_KEY);
     setRoleState(null);
     setCandidateProfileIdState(null);
     setCompanyProfileIdState(null);
     setCompanyUserIdState(null);
     setCompanyUserRoleState(null);
     setUserEmailState(null);
+    setSessionTokenState(null);
     const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
     window.history.replaceState(null, "", baseUrl);
   }, []);
@@ -242,7 +262,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <RoleContext.Provider value={{ role, setRole, clearRole, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, companyUserId, setCompanyUserId, companyUserRole, setCompanyUserRole, userEmail, setUserEmail, isImpersonating, impersonateCandidate, impersonateCompany, impersonateCompanyUser, exitImpersonation }}>
+    <RoleContext.Provider value={{ role, setRole, clearRole, sessionToken, setSessionToken, candidateProfileId, setCandidateProfileId, companyProfileId, setCompanyProfileId, companyUserId, setCompanyUserId, companyUserRole, setCompanyUserRole, userEmail, setUserEmail, isImpersonating, impersonateCandidate, impersonateCompany, impersonateCompanyUser, exitImpersonation }}>
       {children}
     </RoleContext.Provider>
   );

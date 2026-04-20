@@ -4,6 +4,7 @@ import { db, emailVerificationsTable, candidatesTable, companyProfiles, companyU
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
+import { createSession } from "../lib/sessions";
 
 const router: IRouter = Router();
 
@@ -136,12 +137,14 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     }
 
     if (alreadyUsed || existing.verified) {
+      const sessionToken = await createSession("candidate", existing.id);
       res.json({
         success: true,
         message: "Email already verified. You can sign in.",
         role: "candidate",
         candidateId: existing.id,
         email: existing.email,
+        sessionToken,
       });
       return;
     }
@@ -239,12 +242,15 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     }
 
     if (alreadyUsed || existing.verified) {
+      const sessionToken = await createSession("company", existing.userId);
       res.json({
         success: true,
         message: "Email already verified. You can sign in.",
         role: "company",
         companyId: existing.companyProfileId,
+        companyUserId: existing.userId,
         email: existing.email,
+        sessionToken,
       });
       return;
     }
@@ -339,6 +345,14 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     .set({ usedAt: new Date() })
     .where(eq(emailVerificationsTable.id, record.id));
 
+  let sessionToken: string | undefined;
+  if (verifiedAccount?.role === "candidate") {
+    sessionToken = await createSession("candidate", verifiedAccount.id);
+  } else if (verifiedAccount?.role === "company") {
+    const companyUserId = (verifiedAccount as { companyUserId?: number }).companyUserId;
+    if (companyUserId) sessionToken = await createSession("company", companyUserId);
+  }
+
   res.json({
     success: true,
     message: "Email verified successfully.",
@@ -348,6 +362,7 @@ router.get("/verify-email/:token", async (req, res): Promise<void> => {
     companyUserId: verifiedAccount?.role === "company" ? (verifiedAccount as { companyUserId?: number }).companyUserId : undefined,
     companyUserRole: verifiedAccount?.role === "company" ? (verifiedAccount as { companyUserRole?: string }).companyUserRole : undefined,
     email: verifiedAccount?.email,
+    sessionToken,
   });
 });
 

@@ -66,7 +66,7 @@ export default function RoleSelect() {
   const createCompany = useCreateCompanyProfile();
   const createCandidate = useCreateCandidate();
 
-  const { setCandidateProfileId, setCompanyProfileId, setCompanyUserId, setCompanyUserRole, setUserEmail } = useRole();
+  const { setCandidateProfileId, setCompanyProfileId, setCompanyUserId, setCompanyUserRole, setUserEmail, setSessionToken } = useRole();
   const [, setLocation] = useLocation();
 
   const handleCompanySignUp = async (e: React.FormEvent) => {
@@ -194,6 +194,7 @@ export default function RoleSelect() {
       if (res.ok) {
         const data = await res.json();
         setUserEmail(email);
+        if (data.sessionToken) setSessionToken(data.sessionToken);
 
         if (data.role === "admin") {
           setRole("admin");

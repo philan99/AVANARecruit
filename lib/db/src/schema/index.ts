@@ -17,3 +17,4 @@ export * from "./jobAlerts";
 export * from "./devTasks";
 export * from "./industries";
 export * from "./savedSearches";
+export * from "./userSessions";

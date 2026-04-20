@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
+import { createSession } from "../lib/sessions";
 
 const router: IRouter = Router();
 
@@ -529,6 +530,7 @@ router.post("/team-invites/:token/accept", async (req, res) => {
       .from(companyProfiles)
       .where(eq(companyProfiles.id, invite.companyProfileId));
 
+    const sessionToken = await createSession("company", created.id);
     res.json({
       success: true,
       role: "company",
@@ -538,6 +540,7 @@ router.post("/team-invites/:token/accept", async (req, res) => {
       companyUserRole: created.role,
       email: created.email,
       name: created.name,
+      sessionToken,
     });
   } catch (err) {
     req.log.error(err, "Failed to accept invite");

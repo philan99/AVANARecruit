@@ -18,7 +18,7 @@ interface InviteInfo {
 export default function AcceptInvite() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { setRole, setCompanyProfileId, setCompanyUserId, setCompanyUserRole, setUserEmail, clearRole } = useRole();
+  const { setRole, setCompanyProfileId, setCompanyUserId, setCompanyUserRole, setUserEmail, clearRole, setSessionToken } = useRole();
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const [token, setToken] = useState<string | null>(null);
@@ -89,6 +89,7 @@ export default function AcceptInvite() {
       setCompanyProfileId(data.companyId);
       setCompanyUserId(data.companyUserId);
       setCompanyUserRole(data.companyUserRole);
+      if (data.sessionToken) setSessionToken(data.sessionToken);
       setRole("company");
       toast({ title: `Welcome to ${data.companyName ?? "the team"}!` });
       const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";

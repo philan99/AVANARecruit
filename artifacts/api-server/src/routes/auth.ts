@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, companyProfiles, companyUsers, candidatesTable, adminsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { createSession } from "../lib/sessions";
 
 const router: IRouter = Router();
 
@@ -23,7 +24,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     if (admin && admin.password) {
       const valid = await bcrypt.compare(password, admin.password);
       if (valid) {
-        res.json({ success: true, role: "admin", adminId: admin.id, name: admin.name });
+        const sessionToken = await createSession("admin", admin.id);
+        res.json({ success: true, role: "admin", adminId: admin.id, name: admin.name, sessionToken });
         return;
       }
     }
@@ -46,7 +48,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
           res.status(403).json({ error: "Please verify your email address before logging in.", unverified: true, email: candidate.email });
           return;
         }
-        res.json({ success: true, role: "candidate", candidateId: candidate.id, name: candidate.name });
+        const sessionToken = await createSession("candidate", candidate.id);
+        res.json({ success: true, role: "candidate", candidateId: candidate.id, name: candidate.name, sessionToken });
         return;
       }
     }
@@ -74,6 +77,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
           return;
         }
         await db.update(companyUsers).set({ lastLoginAt: sql`now()` }).where(eq(companyUsers.id, companyUser.id));
+        const sessionToken = await createSession("company", companyUser.id);
         res.json({
           success: true,
           role: "company",
@@ -82,6 +86,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
           companyUserId: companyUser.id,
           companyUserRole: companyUser.role,
           name: companyUser.name,
+          sessionToken,
         });
         return;
       }

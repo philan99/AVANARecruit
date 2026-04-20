@@ -16,7 +16,7 @@ interface VerifyResponse {
 
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
-  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail, setCompanyUserId, setCompanyUserRole } = useRole();
+  const { setRole, setCandidateProfileId, setCompanyProfileId, setUserEmail, setCompanyUserId, setCompanyUserRole, setSessionToken } = useRole();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const [verified, setVerified] = useState<VerifyResponse | null>(null);
@@ -57,6 +57,9 @@ export default function VerifyEmail() {
       return;
     }
     if (verified.email) setUserEmail(verified.email);
+    if ((verified as { sessionToken?: string }).sessionToken) {
+      setSessionToken((verified as { sessionToken?: string }).sessionToken!);
+    }
     const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
     if (verified.role === "candidate" && verified.candidateId) {
       setCandidateProfileId(verified.candidateId);
