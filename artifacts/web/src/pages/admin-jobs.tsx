@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Briefcase, MapPin, Building, Search, X, SlidersHorizontal, ChevronDown, Check, GraduationCap, Monitor, PoundSterling, LayoutGrid, List } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 function MultiSelectDropdown({
   label,
@@ -171,46 +170,6 @@ function formatIndustry(val: string) {
 
 function formatLevel(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
-}
-
-function HorizontalBarCard({
-  title,
-  description,
-  data,
-  labelWidth,
-}: {
-  title: string;
-  description: string;
-  data: { name: string; count: number }[];
-  labelWidth: number;
-}) {
-  const height = Math.max(200, Math.min(320, data.length * 32 + 40));
-  return (
-    <Card className="bg-card">
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent style={{ height }}>
-        {data.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-xs text-muted-foreground">No data</div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={labelWidth} />
-              <RechartsTooltip
-                contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: 12 }}
-                formatter={(v: number) => [v, "Jobs"]}
-              />
-              <Bar dataKey="count" name="Jobs" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} maxBarSize={20} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
-  );
 }
 
 interface Job {
@@ -384,22 +343,21 @@ export default function AdminJobs() {
 
   const hasActiveFilters = searchQuery || activeFilterCount > 0;
 
-  function tallyTop(keyFn: (j: Job) => string | null | undefined, labelFn: (v: string) => string, limit = 10) {
+  function tallyTop(keyFn: (j: Job) => string | null | undefined, limit = 8) {
     const map = new Map<string, number>();
-    for (const j of filtered) {
+    for (const j of jobs) {
       const k = keyFn(j);
       if (!k) continue;
       map.set(k, (map.get(k) || 0) + 1);
     }
     return Array.from(map.entries())
-      .map(([name, count]) => ({ name: labelFn(name), count }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => b[1] - a[1])
       .slice(0, limit);
   }
 
-  const jobsByCompany = useMemo(() => tallyTop(j => j.company, v => v), [filtered]);
-  const jobsByLocation = useMemo(() => tallyTop(j => j.location, v => v), [filtered]);
-  const jobsByType = useMemo(() => tallyTop(j => j.jobType, formatJobType), [filtered]);
+  const companyEntries = useMemo(() => tallyTop(j => j.company, 8), [jobs]);
+  const locationEntries = useMemo(() => tallyTop(j => j.location, 8), [jobs]);
+  const jobTypeEntries = useMemo(() => tallyTop(j => j.jobType, 20), [jobs]);
 
   function clearFilters() {
     setSearchQuery("");
@@ -425,29 +383,6 @@ export default function AdminJobs() {
         </h1>
         <p className="text-muted-foreground mt-1">{jobs.length} jobs on the platform.</p>
       </div>
-
-      {(jobsByCompany.length > 0 || jobsByLocation.length > 0 || jobsByType.length > 0) && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <HorizontalBarCard
-            title="Jobs by Company"
-            description={`Top ${jobsByCompany.length} compan${jobsByCompany.length === 1 ? "y" : "ies"} by job count${hasActiveFilters ? " (filtered)" : ""}`}
-            data={jobsByCompany}
-            labelWidth={110}
-          />
-          <HorizontalBarCard
-            title="Jobs by Location"
-            description={`Top ${jobsByLocation.length} location${jobsByLocation.length === 1 ? "" : "s"}${hasActiveFilters ? " (filtered)" : ""}`}
-            data={jobsByLocation}
-            labelWidth={100}
-          />
-          <HorizontalBarCard
-            title="Jobs by Type"
-            description={`Breakdown by job type${hasActiveFilters ? " (filtered)" : ""}`}
-            data={jobsByType}
-            labelWidth={130}
-          />
-        </div>
-      )}
 
       <div className="space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
@@ -652,6 +587,127 @@ export default function AdminJobs() {
           </Card>
         )}
       </div>
+
+      {(companyEntries.length > 0 || locationEntries.length > 0 || jobTypeEntries.length > 0) && (() => {
+        const JobBar = ({
+          label,
+          value,
+          max,
+          active,
+          color,
+          onClick,
+        }: { label: string; value: number; max: number; active: boolean; color: string; onClick: () => void }) => (
+          <button
+            onClick={onClick}
+            className={`w-full text-left group ${active ? "opacity-100" : "opacity-90 hover:opacity-100"}`}
+          >
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className={`truncate pr-2 ${active ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>
+                {label}
+              </span>
+              <span className={`tabular-nums ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{value}</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full ${color} ${active ? "" : "opacity-70 group-hover:opacity-100"} transition-all`}
+                style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }}
+              />
+            </div>
+          </button>
+        );
+
+        const toggle = <T,>(set: Set<T>, value: T, setter: (s: Set<T>) => void) => {
+          const n = new Set(set);
+          if (n.has(value)) n.delete(value); else n.add(value);
+          setter(n);
+        };
+
+        const companyMax = Math.max(1, ...companyEntries.map(([, v]) => v));
+        const locationMax = Math.max(1, ...locationEntries.map(([, v]) => v));
+        const jobTypeMax = Math.max(1, ...jobTypeEntries.map(([, v]) => v));
+        const totalCompanies = new Set(jobs.map(j => j.company).filter(Boolean)).size;
+        const totalLocations = new Set(jobs.map(j => j.location).filter(Boolean)).size;
+
+        return (
+          <Card className="bg-card">
+            <CardContent className="pt-5 pb-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Jobs by Company</h3>
+                    {totalCompanies > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {companyEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : companyEntries.map(([c, v]) => (
+                      <JobBar
+                        key={c}
+                        label={c}
+                        value={v}
+                        max={companyMax}
+                        active={companyFilters.has(c)}
+                        color="bg-green-500"
+                        onClick={() => toggle(companyFilters, c, setCompanyFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Jobs by Location</h3>
+                    {totalLocations > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {locationEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : locationEntries.map(([l, v]) => (
+                      <JobBar
+                        key={l}
+                        label={l}
+                        value={v}
+                        max={locationMax}
+                        active={locationFilters.has(l)}
+                        color="bg-blue-500"
+                        onClick={() => toggle(locationFilters, l, setLocationFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Jobs by Type</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {jobTypeEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : jobTypeEntries.map(([t, v]) => (
+                      <JobBar
+                        key={t}
+                        label={formatJobType(t)}
+                        value={v}
+                        max={jobTypeMax}
+                        active={jobTypeFilters.has(t)}
+                        color="bg-purple-500"
+                        onClick={() => toggle(jobTypeFilters, t, setJobTypeFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {hasActiveFilters && (
         <div className="flex items-center justify-between">
