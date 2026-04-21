@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Briefcase, MapPin, Building, Search, X, SlidersHorizontal, ChevronDown, Check, GraduationCap, Monitor, PoundSterling, LayoutGrid, List } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 function MultiSelectDropdown({
   label,
@@ -343,6 +344,37 @@ export default function AdminJobs() {
 
   const hasActiveFilters = searchQuery || activeFilterCount > 0;
 
+  const companyStats = useMemo(() => {
+    const map = new Map<string, { company: string; jobs: number; matches: number; open: number; closed: number }>();
+    for (const j of filtered) {
+      const key = j.company || "—";
+      const row = map.get(key) || { company: key, jobs: 0, matches: 0, open: 0, closed: 0 };
+      row.jobs += 1;
+      row.matches += j.matchCount || 0;
+      if (j.status === "open") row.open += 1;
+      else row.closed += 1;
+      map.set(key, row);
+    }
+    return Array.from(map.values());
+  }, [filtered]);
+
+  const topByJobs = useMemo(
+    () => [...companyStats].sort((a, b) => b.jobs - a.jobs).slice(0, 10),
+    [companyStats]
+  );
+  const topByMatches = useMemo(
+    () => [...companyStats].sort((a, b) => b.matches - a.matches).slice(0, 10),
+    [companyStats]
+  );
+  const topByOpenClosed = useMemo(
+    () => [...companyStats].sort((a, b) => (b.open + b.closed) - (a.open + a.closed)).slice(0, 10),
+    [companyStats]
+  );
+
+  function truncLabel(v: string) {
+    return v.length > 14 ? v.slice(0, 13) + "…" : v;
+  }
+
   function clearFilters() {
     setSearchQuery("");
     setStatusFilters(new Set());
@@ -367,6 +399,83 @@ export default function AdminJobs() {
         </h1>
         <p className="text-muted-foreground mt-1">{jobs.length} jobs on the platform.</p>
       </div>
+
+      {companyStats.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="bg-card border-border">
+            <CardContent className="pt-5 pb-5">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" /> Jobs per Company
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Top {Math.min(10, topByJobs.length)} by job count{hasActiveFilters ? " (filtered)" : ""}</p>
+              </div>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={topByJobs} margin={{ top: 4, right: 8, left: -16, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="company" tickFormatter={truncLabel} interval={0} angle={-30} textAnchor="end" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
+                    formatter={(v: number) => [v, "Jobs"]}
+                  />
+                  <Bar dataKey="jobs" fill="#4CAF50" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardContent className="pt-5 pb-5">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Building className="w-4 h-4 text-primary" /> Matches per Company
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Top {Math.min(10, topByMatches.length)} by total matches{hasActiveFilters ? " (filtered)" : ""}</p>
+              </div>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={topByMatches} margin={{ top: 4, right: 8, left: -16, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="company" tickFormatter={truncLabel} interval={0} angle={-30} textAnchor="end" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
+                    formatter={(v: number) => [v, "Matches"]}
+                  />
+                  <Bar dataKey="matches" fill="#1a2035" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardContent className="pt-5 pb-5">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" /> Open vs Closed by Company
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Top {Math.min(10, topByOpenClosed.length)} by total jobs{hasActiveFilters ? " (filtered)" : ""}</p>
+              </div>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={topByOpenClosed} margin={{ top: 4, right: 8, left: -16, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="company" tickFormatter={truncLabel} interval={0} angle={-30} textAnchor="end" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} iconSize={10} />
+                  <Bar dataKey="open" name="Open" stackId="s" fill="#4CAF50" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="closed" name="Closed" stackId="s" fill="#94a3b8" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
