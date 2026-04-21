@@ -145,12 +145,27 @@ function AdminRoutes() {
 
 function AppRouter() {
   const { role } = useRole();
-  const isAcceptInvite = typeof window !== "undefined" && window.location.pathname.endsWith("/accept-invite");
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isAcceptInvite = pathname.endsWith("/accept-invite");
+  const isPublicAuthPath =
+    pathname.endsWith("/verify-email") ||
+    pathname.includes("/verify/") ||
+    pathname.endsWith("/reset-password");
 
   if (isAcceptInvite) {
     return (
       <Switch>
         <Route path="/accept-invite" component={AcceptInvite} />
+      </Switch>
+    );
+  }
+
+  if (isPublicAuthPath) {
+    return (
+      <Switch>
+        <Route path="/verify/:token" component={VerifyPage} />
+        <Route path="/verify-email" component={VerifyEmailPage} />
+        <Route path="/reset-password" component={ResetPassword} />
       </Switch>
     );
   }
