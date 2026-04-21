@@ -35,7 +35,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check, Building, MapPin } from "lucide-react";
+import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check, Building, MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
 
@@ -186,6 +186,23 @@ export default function AdminCompanies() {
       map.set(c.location, (map.get(c.location) || 0) + 1);
     }
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }, [companies]);
+
+  const sizeEntries = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of companies) {
+      if (!c.size) continue;
+      map.set(c.size, (map.get(c.size) || 0) + 1);
+    }
+    const sizeOrder = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5000+"];
+    return Array.from(map.entries()).sort((a, b) => {
+      const ai = sizeOrder.indexOf(a[0]);
+      const bi = sizeOrder.indexOf(b[0]);
+      if (ai !== -1 && bi !== -1) return ai - bi;
+      if (ai !== -1) return -1;
+      if (bi !== -1) return 1;
+      return b[1] - a[1];
+    });
   }, [companies]);
 
   const hasActiveFilters =
@@ -422,7 +439,7 @@ export default function AdminCompanies() {
         </CardContent>
       </Card>
 
-      {(industryEntries.length > 0 || locationEntries.length > 0) && (() => {
+      {(industryEntries.length > 0 || locationEntries.length > 0 || sizeEntries.length > 0) && (() => {
         const CompanyBar = ({
           label,
           value,
@@ -452,13 +469,14 @@ export default function AdminCompanies() {
 
         const industryMax = Math.max(1, ...industryEntries.map(([, v]) => v));
         const locationMax = Math.max(1, ...locationEntries.map(([, v]) => v));
+        const sizeMax = Math.max(1, ...sizeEntries.map(([, v]) => v));
         const totalIndustries = new Set(companies.map(c => c.industry).filter(Boolean)).size;
         const totalLocations = new Set(companies.map(c => c.location).filter(Boolean)).size;
 
         return (
           <Card className="bg-card">
             <CardContent className="pt-5 pb-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Building className="w-4 h-4 text-primary" />
@@ -508,6 +526,28 @@ export default function AdminCompanies() {
                     ))}
                   </div>
                 </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Companies by Size</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {sizeEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : sizeEntries.map(([sz, v]) => (
+                      <CompanyBar
+                        key={sz}
+                        label={sz}
+                        value={v}
+                        max={sizeMax}
+                        active={sizeFilter === sz}
+                        color="bg-purple-500"
+                        onClick={() => setSizeFilter(sizeFilter === sz ? "all" : sz)}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -525,6 +565,7 @@ export default function AdminCompanies() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Team Member</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Role</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Industry</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Size</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Last login</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Actions</th>
@@ -577,6 +618,7 @@ export default function AdminCompanies() {
                         </td>
                         <td className="py-2 px-2 align-top">{u ? roleBadge(u.role) : "—"}</td>
                         <td className="py-2 px-2 text-muted-foreground align-top">{formatIndustry(c.industry) || "—"}</td>
+                        <td className="py-2 px-2 text-muted-foreground align-top">{c.size || "—"}</td>
                         <td className="py-2 px-2 text-muted-foreground align-top">{c.location || "—"}</td>
                         <td className="py-2 px-2 text-muted-foreground align-top">
                           {u?.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "—"}
