@@ -3,11 +3,31 @@ import { Building2, UserCircle, UserPlus, Sparkles, Target, Users, BarChart3 } f
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
+
+const PHONE_CODES = [
+  { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
+  { code: "+33", flag: "🇫🇷" }, { code: "+49", flag: "🇩🇪" }, { code: "+34", flag: "🇪🇸" },
+  { code: "+39", flag: "🇮🇹" }, { code: "+31", flag: "🇳🇱" }, { code: "+32", flag: "🇧🇪" },
+  { code: "+41", flag: "🇨🇭" }, { code: "+46", flag: "🇸🇪" }, { code: "+47", flag: "🇳🇴" },
+  { code: "+45", flag: "🇩🇰" }, { code: "+358", flag: "🇫🇮" }, { code: "+48", flag: "🇵🇱" },
+  { code: "+43", flag: "🇦🇹" }, { code: "+351", flag: "🇵🇹" }, { code: "+61", flag: "🇦🇺" },
+  { code: "+64", flag: "🇳🇿" }, { code: "+91", flag: "🇮🇳" }, { code: "+81", flag: "🇯🇵" },
+  { code: "+82", flag: "🇰🇷" }, { code: "+86", flag: "🇨🇳" }, { code: "+65", flag: "🇸🇬" },
+  { code: "+852", flag: "🇭🇰" }, { code: "+971", flag: "🇦🇪" }, { code: "+966", flag: "🇸🇦" },
+  { code: "+27", flag: "🇿🇦" }, { code: "+55", flag: "🇧🇷" }, { code: "+52", flag: "🇲🇽" },
+];
 
 type SignUpRole = "company" | "candidate";
 
@@ -27,6 +47,8 @@ export default function SignUp() {
   const [candidateForm, setCandidateForm] = useState({
     name: "",
     email: "",
+    phoneDialCode: "+44",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -78,8 +100,9 @@ export default function SignUp() {
 
   const handleCandidateSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword } = candidateForm;
-    if (!name.trim() || !email.trim() || !password) {
+    const { name, email, phoneDialCode, phoneNumber, password, confirmPassword } = candidateForm;
+    const trimmedPhone = phoneNumber.trim();
+    if (!name.trim() || !email.trim() || !trimmedPhone || !password) {
       toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
@@ -97,6 +120,7 @@ export default function SignUp() {
         data: {
           name: name.trim(),
           email: email.trim(),
+          phone: `${phoneDialCode} ${trimmedPhone}`,
           password,
           currentTitle: "",
           summary: "",
@@ -307,6 +331,36 @@ export default function SignUp() {
                     className="bg-card"
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Mobile Number <span className="text-destructive">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={candidateForm.phoneDialCode}
+                      onValueChange={(code) => setCandidateForm(f => ({ ...f, phoneDialCode: code }))}
+                    >
+                      <SelectTrigger className="w-[120px] shrink-0 bg-card">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PHONE_CODES.map(p => (
+                          <SelectItem key={p.code} value={p.code}>{p.flag} {p.code}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="Mobile number"
+                      value={candidateForm.phoneNumber}
+                      onChange={(e) => setCandidateForm(f => ({ ...f, phoneNumber: e.target.value }))}
+                      className="bg-card flex-1"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">

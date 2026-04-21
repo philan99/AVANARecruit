@@ -124,7 +124,11 @@ export default function MySettings() {
     e.preventDefault();
     if (!accountId || accountType !== "candidate") return;
     const trimmedNumber = phoneForm.number.trim();
-    const fullPhone = trimmedNumber ? `${phoneForm.dialCode} ${trimmedNumber}` : "";
+    if (!trimmedNumber) {
+      toast({ title: "Mobile number is required", variant: "destructive" });
+      return;
+    }
+    const fullPhone = `${phoneForm.dialCode} ${trimmedNumber}`;
     setPhoneSubmitting(true);
     try {
       const res = await fetch(`${apiBase}/account/change-phone`, {
@@ -138,8 +142,8 @@ export default function MySettings() {
         return;
       }
       toast({
-        title: trimmedNumber ? "Phone number updated" : "Phone number cleared",
-        description: trimmedNumber ? "Your contact phone number has been changed." : "Your phone number has been removed.",
+        title: "Mobile number updated",
+        description: "Your contact mobile number has been changed.",
       });
       queryClient.invalidateQueries({ queryKey: ["my-account"] });
     } catch {
@@ -366,11 +370,13 @@ export default function MySettings() {
           <Mail className="w-5 h-5" style={{ color: "#4CAF50" }} /> Change Email
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          We'll use this email for login and notifications.
+          Required. We'll use this email for login and notifications.
         </p>
         <form onSubmit={handleEmailSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">New Email</label>
+            <label className="text-sm font-medium text-foreground">
+              New Email <span className="text-destructive">*</span>
+            </label>
             <Input
               type="email"
               value={emailForm.newEmail}
@@ -379,7 +385,9 @@ export default function MySettings() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Current Password</label>
+            <label className="text-sm font-medium text-foreground">
+              Current Password <span className="text-destructive">*</span>
+            </label>
             <Input
               type="password"
               placeholder="Enter your current password to confirm"
@@ -402,14 +410,16 @@ export default function MySettings() {
       {accountType === "candidate" && (
         <div className="rounded-xl p-6 lg:p-8 bg-card border mb-6">
           <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
-            <Phone className="w-5 h-5" style={{ color: "#4CAF50" }} /> Change Phone Number
+            <Phone className="w-5 h-5" style={{ color: "#4CAF50" }} /> Change Mobile Number
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Optional. Leave the number blank to remove your phone number.
+            Required. We use this to contact you about your applications.
           </p>
           <form onSubmit={handlePhoneSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Phone Number</label>
+              <label className="text-sm font-medium text-foreground">
+                Mobile Number <span className="text-destructive">*</span>
+              </label>
               <div className="flex gap-2">
                 <Select
                   value={phoneForm.dialCode}
@@ -427,9 +437,10 @@ export default function MySettings() {
                 <Input
                   value={phoneForm.number}
                   onChange={(e) => setPhoneForm(f => ({ ...f, number: e.target.value }))}
-                  placeholder="Phone number"
+                  placeholder="Mobile number"
                   className="flex-1"
                   inputMode="tel"
+                  required
                 />
               </div>
             </div>
@@ -439,7 +450,7 @@ export default function MySettings() {
               className="px-5 py-2.5 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90"
               style={{ backgroundColor: "#4CAF50", color: "#fff" }}
             >
-              {phoneSubmitting ? "Updating..." : "Update Phone"}
+              {phoneSubmitting ? "Updating..." : "Update Mobile"}
             </button>
           </form>
         </div>
