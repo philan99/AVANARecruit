@@ -391,7 +391,18 @@ export default function SignUp() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={createCandidate.isPending}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    createCandidate.isPending ||
+                    !candidateForm.name.trim() ||
+                    !candidateForm.email.trim() ||
+                    !candidateForm.phoneNumber.trim() ||
+                    !candidateForm.password ||
+                    !candidateForm.confirmPassword
+                  }
+                >
                   <UserPlus className="w-4 h-4 mr-2" />
                   {createCandidate.isPending ? "Creating..." : "Create Candidate Account"}
                 </Button>

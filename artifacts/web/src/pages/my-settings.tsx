@@ -446,7 +446,7 @@ export default function MySettings() {
             </div>
             <button
               type="submit"
-              disabled={phoneSubmitting}
+              disabled={phoneSubmitting || !phoneForm.number.trim()}
               className="px-5 py-2.5 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90"
               style={{ backgroundColor: "#4CAF50", color: "#fff" }}
             >

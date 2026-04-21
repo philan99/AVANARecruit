@@ -167,7 +167,16 @@ router.post("/account/change-phone", async (req, res): Promise<void> => {
       return;
     }
     const trimmed = typeof phone === "string" ? phone.trim() : "";
-    if (trimmed && trimmed.length > 32) {
+    if (!trimmed) {
+      res.status(400).json({ error: "Mobile number is required" });
+      return;
+    }
+    const digitsOnly = trimmed.replace(/[^\d]/g, "");
+    if (digitsOnly.length < 6) {
+      res.status(400).json({ error: "Please enter a valid mobile number" });
+      return;
+    }
+    if (trimmed.length > 32) {
       res.status(400).json({ error: "Phone number is too long" });
       return;
     }
@@ -180,10 +189,10 @@ router.post("/account/change-phone", async (req, res): Promise<void> => {
 
     await db
       .update(candidatesTable)
-      .set({ phone: trimmed || null })
+      .set({ phone: trimmed })
       .where(eq(candidatesTable.id, Number(accountId)));
 
-    res.json({ success: true, phone: trimmed || null });
+    res.json({ success: true, phone: trimmed });
   } catch (err) {
     console.error("Failed to change phone:", err);
     res.status(500).json({ error: "Failed to change phone" });

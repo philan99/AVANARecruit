@@ -137,6 +137,15 @@ router.post("/candidates", async (req, res): Promise<void> => {
     return;
   }
 
+  if (password && typeof password === "string") {
+    const phoneRaw = typeof parsed.data.phone === "string" ? parsed.data.phone.trim() : "";
+    const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
+    if (!phoneRaw || phoneDigits.length < 6) {
+      res.status(400).json({ error: "A valid mobile number is required to create an account." });
+      return;
+    }
+  }
+
   const insertData: any = { ...parsed.data };
   if (password && typeof password === "string") {
     insertData.password = await bcrypt.hash(password, 10);
