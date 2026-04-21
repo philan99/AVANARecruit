@@ -35,7 +35,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check } from "lucide-react";
+import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check, Building, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
 
@@ -169,6 +169,24 @@ export default function AdminCompanies() {
     () => new Set(filteredRows.map(r => r.company.id)).size,
     [filteredRows],
   );
+
+  const industryEntries = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of companies) {
+      if (!c.industry) continue;
+      map.set(c.industry, (map.get(c.industry) || 0) + 1);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }, [companies]);
+
+  const locationEntries = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of companies) {
+      if (!c.location) continue;
+      map.set(c.location, (map.get(c.location) || 0) + 1);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }, [companies]);
 
   const hasActiveFilters =
     !!companyQuery ||
@@ -403,6 +421,98 @@ export default function AdminCompanies() {
           )}
         </CardContent>
       </Card>
+
+      {(industryEntries.length > 0 || locationEntries.length > 0) && (() => {
+        const CompanyBar = ({
+          label,
+          value,
+          max,
+          active,
+          color,
+          onClick,
+        }: { label: string; value: number; max: number; active: boolean; color: string; onClick: () => void }) => (
+          <button
+            onClick={onClick}
+            className={`w-full text-left group ${active ? "opacity-100" : "opacity-90 hover:opacity-100"}`}
+          >
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className={`truncate pr-2 ${active ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>
+                {label}
+              </span>
+              <span className={`tabular-nums ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{value}</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full ${color} ${active ? "" : "opacity-70 group-hover:opacity-100"} transition-all`}
+                style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }}
+              />
+            </div>
+          </button>
+        );
+
+        const industryMax = Math.max(1, ...industryEntries.map(([, v]) => v));
+        const locationMax = Math.max(1, ...locationEntries.map(([, v]) => v));
+        const totalIndustries = new Set(companies.map(c => c.industry).filter(Boolean)).size;
+        const totalLocations = new Set(companies.map(c => c.location).filter(Boolean)).size;
+
+        return (
+          <Card className="bg-card">
+            <CardContent className="pt-5 pb-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Companies by Industry</h3>
+                    {totalIndustries > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {industryEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : industryEntries.map(([ind, v]) => (
+                      <CompanyBar
+                        key={ind}
+                        label={formatIndustry(ind)}
+                        value={v}
+                        max={industryMax}
+                        active={industryFilter === ind}
+                        color="bg-green-500"
+                        onClick={() => setIndustryFilter(industryFilter === ind ? "all" : ind)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Companies by Location</h3>
+                    {totalLocations > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {locationEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : locationEntries.map(([loc, v]) => (
+                      <CompanyBar
+                        key={loc}
+                        label={loc}
+                        value={v}
+                        max={locationMax}
+                        active={locationFilter === loc}
+                        color="bg-blue-500"
+                        onClick={() => setLocationFilter(locationFilter === loc ? "all" : loc)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <Card className="bg-card">
         <CardContent className="pt-6">
