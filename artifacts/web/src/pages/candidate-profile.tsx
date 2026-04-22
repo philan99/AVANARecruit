@@ -179,73 +179,30 @@ export default function CandidateProfile() {
     setCvParsing(true);
     try {
       const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
-      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/parse-cv`, {
-        method: "POST",
+      const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
+      const nextState = {
+        currentStep: 2,
+        completedSteps: [1],
+        skippedSteps: [],
+        completedAt: null,
+      };
+      const patchRes = await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summaryMode: "verbatim" }),
+        body: JSON.stringify({ onboardingState: nextState }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        toast({ title: "CV reader failed", description: (data as any)?.error || "Could not read your CV.", variant: "destructive" });
+      if (!patchRes.ok) {
+        toast({ title: "Couldn't start the wizard", description: "Please try again.", variant: "destructive" });
         return;
       }
-      const parsed = await res.json();
-      const c: any = candidate || {};
-      const isEmpty = (v: any) => v === undefined || v === null || (typeof v === "string" && v.trim() === "") || (Array.isArray(v) && v.length === 0);
-      const patch: any = {};
-      let count = 0;
-      const maybeSet = (key: string, val: any) => {
-        if (val === undefined || val === null) return;
-        if (typeof val === "string" && !val.trim()) return;
-        if (Array.isArray(val) && val.length === 0) return;
-        if (!isEmpty(c[key])) return;
-        patch[key] = val;
-        count++;
-      };
-      maybeSet("location", parsed.location);
-      maybeSet("currentTitle", parsed.currentTitle);
-      if (isEmpty(c.experienceYears) || c.experienceYears === 0) {
-        if (typeof parsed.experienceYears === "number" && parsed.experienceYears > 0) {
-          patch.experienceYears = parsed.experienceYears;
-          count++;
-        }
-      }
-      maybeSet("summary", parsed.summary);
-      maybeSet("skills", parsed.skills);
-      maybeSet("education", parsed.education);
-      maybeSet("educationDetails", parsed.educationDetails);
-      maybeSet("qualifications", parsed.qualifications);
-      maybeSet("experience", parsed.experience);
-      maybeSet("preferredJobTypes", parsed.preferredJobTypes);
-      maybeSet("preferredWorkplaces", parsed.preferredWorkplaces);
-      maybeSet("preferredIndustries", parsed.preferredIndustries);
-      maybeSet("linkedinUrl", parsed.linkedinUrl);
-      maybeSet("facebookUrl", parsed.facebookUrl);
-      maybeSet("twitterUrl", parsed.twitterUrl);
-      maybeSet("portfolioUrl", parsed.portfolioUrl);
-
-      if (count === 0) {
-        toast({ title: "Nothing new to add", description: "Your profile already covers what's in the CV." });
-      } else {
-        const patchRes = await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patch),
-        });
-        if (!patchRes.ok) {
-          toast({ title: "Couldn't save updates", description: "We read your CV but failed to update your profile.", variant: "destructive" });
-          return;
-        }
-        queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
-        queryClient.invalidateQueries({ queryKey: getListCandidatesQueryKey() });
-        toast({ title: "Profile updated", description: `We pre-filled ${count} field${count === 1 ? "" : "s"} from your CV — please review.` });
-      }
+      queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+      setCvParsePromptOpen(false);
+      window.location.assign(`${baseUrl}/onboarding`);
     } catch (err) {
-      console.error("CV reader failed", err);
-      toast({ title: "CV reader failed", description: "Please try again or fill in the details manually.", variant: "destructive" });
+      console.error("CV wizard launch failed", err);
+      toast({ title: "Couldn't start the wizard", description: "Please try again.", variant: "destructive" });
     } finally {
       setCvParsing(false);
-      setCvParsePromptOpen(false);
     }
   }
 
@@ -969,17 +926,18 @@ export default function CandidateProfile() {
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" /> Read this CV automatically?
+                  <FileText className="w-5 h-5 text-primary" /> Have AI process your CV?
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <p>
-                  We can scan your newly uploaded CV with AI and pre-fill the empty
-                  parts of your profile (job title, experience, skills, education,
-                  qualifications, work history, summary, social links, etc.).
+                  We'll take you through the same guided steps you saw at sign-up.
+                  Our AI will read your newly uploaded CV and pre-fill each step
+                  (basics, skills, education, experience, preferences, social links)
+                  so you can review, edit and confirm everything as you go.
                 </p>
                 <p className="text-xs">
-                  Existing values won't be overwritten — only blank fields are filled. You can edit anything afterwards.
+                  Nothing is saved until you confirm each step, and you can skip any step you don't want to change.
                 </p>
               </div>
               <DialogFooter className="gap-2 sm:gap-2">
@@ -988,9 +946,9 @@ export default function CandidateProfile() {
                 </Button>
                 <Button onClick={runCvReader} disabled={cvParsing}>
                   {cvParsing ? (
-                    <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" /> Reading…</>
+                    <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" /> Starting…</>
                   ) : (
-                    <>Yes, read my CV</>
+                    <>Yes, walk me through it</>
                   )}
                 </Button>
               </DialogFooter>
