@@ -307,15 +307,22 @@ export default function Onboarding() {
     if (!candidateProfileId) return false;
     let ok = true;
     switch (step) {
-      case 3:
+      case 3: {
+        const phoneNumberPart = phone.replace(/^\+\d+\s*/, "").trim();
+        const phoneDigits = phoneNumberPart.replace(/[^\d]/g, "");
+        if (!phoneNumberPart || phoneDigits.length < 6) {
+          toast({ title: "Mobile number is required", description: "Please enter a valid mobile number to continue.", variant: "destructive" });
+          return false;
+        }
         ok = await patchCandidate({
-          phone: phone || null,
+          phone: phone,
           location: location || "Not specified",
           currentTitle: currentTitle || "Not specified",
           experienceYears: experienceYears ? parseInt(experienceYears, 10) || 0 : 0,
           summary: summary || "",
         });
         break;
+      }
       case 4:
         ok = await patchCandidate({ skills });
         break;
@@ -689,7 +696,10 @@ export default function Onboarding() {
                   <Input type="number" min="0" max="60" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 5" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Phone (optional)<FieldBadge field="phone" /></label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                    Mobile Number <span className="text-red-500">*</span>
+                    <FieldBadge field="phone" />
+                  </label>
                   <div className="flex gap-2">
                     <Select
                       value={phone.match(/^\+\d+/)?.[0] || "+44"}
@@ -711,8 +721,11 @@ export default function Onboarding() {
                         const code = phone.match(/^\+\d+/)?.[0] || "+44";
                         setPhone(`${code} ${e.target.value}`);
                       }}
-                      placeholder="Phone number"
+                      placeholder="Mobile number"
                       className="flex-1"
+                      type="tel"
+                      inputMode="tel"
+                      required
                     />
                   </div>
                 </div>
