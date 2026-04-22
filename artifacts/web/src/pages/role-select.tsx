@@ -12,7 +12,21 @@ import { Building2, UserCircle, LogIn, ArrowRight, Lightbulb, TrendingUp, Heart,
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { MarketingNav } from "@/components/marketing-nav";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRole, type UserRole } from "@/contexts/role-context";
+
+const PHONE_CODES = [
+  { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
+  { code: "+33", flag: "🇫🇷" }, { code: "+49", flag: "🇩🇪" }, { code: "+34", flag: "🇪🇸" },
+  { code: "+39", flag: "🇮🇹" }, { code: "+31", flag: "🇳🇱" }, { code: "+32", flag: "🇧🇪" },
+  { code: "+41", flag: "🇨🇭" }, { code: "+46", flag: "🇸🇪" }, { code: "+47", flag: "🇳🇴" },
+  { code: "+45", flag: "🇩🇰" }, { code: "+358", flag: "🇫🇮" }, { code: "+48", flag: "🇵🇱" },
+  { code: "+43", flag: "🇦🇹" }, { code: "+351", flag: "🇵🇹" }, { code: "+61", flag: "🇦🇺" },
+  { code: "+64", flag: "🇳🇿" }, { code: "+91", flag: "🇮🇳" }, { code: "+81", flag: "🇯🇵" },
+  { code: "+82", flag: "🇰🇷" }, { code: "+86", flag: "🇨🇳" }, { code: "+65", flag: "🇸🇬" },
+  { code: "+852", flag: "🇭🇰" }, { code: "+971", flag: "🇦🇪" }, { code: "+966", flag: "🇸🇦" },
+  { code: "+27", flag: "🇿🇦" }, { code: "+55", flag: "🇧🇷" }, { code: "+52", flag: "🇲🇽" },
+];
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
@@ -53,7 +67,7 @@ export default function RoleSelect() {
   const [loginErrorMsg, setLoginErrorMsg] = useState<string | null>(null);
   const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
   const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
-  const [candidateForm, setCandidateForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [candidateForm, setCandidateForm] = useState({ name: "", email: "", phoneDialCode: "+44", phoneNumber: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [showCompanyPassword, setShowCompanyPassword] = useState(false);
   const [showCompanyConfirm, setShowCompanyConfirm] = useState(false);
@@ -106,9 +120,14 @@ export default function RoleSelect() {
 
   const handleCandidateSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email: cEmail, password: cPass, confirmPassword } = candidateForm;
-    if (!name.trim() || !cEmail.trim() || !cPass) {
+    const { name, email: cEmail, phoneDialCode, phoneNumber, password: cPass, confirmPassword } = candidateForm;
+    const trimmedPhone = phoneNumber.trim();
+    if (!name.trim() || !cEmail.trim() || !trimmedPhone || !cPass) {
       toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (trimmedPhone.replace(/[^\d]/g, "").length < 6) {
+      toast({ title: "Please enter a valid mobile number", variant: "destructive" });
       return;
     }
     if (cPass !== confirmPassword) {
@@ -124,6 +143,7 @@ export default function RoleSelect() {
         data: {
           name: name.trim(),
           email: cEmail.trim(),
+          phone: `${phoneDialCode} ${trimmedPhone}`,
           password: cPass,
           currentTitle: "Not specified",
           summary: "",
@@ -1025,6 +1045,34 @@ export default function RoleSelect() {
                     <Input type="email" placeholder="jane@example.com" value={candidateForm.email} onChange={(e) => setCandidateForm(f => ({ ...f, email: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
                   </div>
                   <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Mobile Number <span style={{ color: "#ef4444" }}>*</span></label>
+                    <div className="flex gap-2">
+                      <Select
+                        value={candidateForm.phoneDialCode}
+                        onValueChange={(code) => setCandidateForm(f => ({ ...f, phoneDialCode: code }))}
+                      >
+                        <SelectTrigger className="w-[120px] shrink-0" style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PHONE_CODES.map(p => (
+                            <SelectItem key={p.code} value={p.code}>{p.flag} {p.code}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="Mobile number"
+                        value={candidateForm.phoneNumber}
+                        onChange={(e) => setCandidateForm(f => ({ ...f, phoneNumber: e.target.value }))}
+                        style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+                        className="flex-1"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Password <span style={{ color: "#ef4444" }}>*</span></label>
                     <div className="relative">
                       <Input type={showCandidatePassword ? "text" : "password"} placeholder="Minimum 8 characters" value={candidateForm.password} onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }} required />
@@ -1042,7 +1090,7 @@ export default function RoleSelect() {
                       </button>
                     </div>
                   </div>
-                  <button type="submit" disabled={createCandidate.isPending} className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
+                  <button type="submit" disabled={createCandidate.isPending || !candidateForm.name.trim() || !candidateForm.email.trim() || !candidateForm.phoneNumber.trim() || !candidateForm.password || !candidateForm.confirmPassword} className="w-full py-3 rounded-md text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
                     <UserPlus className="w-4 h-4 mr-2 inline" />
                     {createCandidate.isPending ? "Creating..." : "Create Candidate Account"}
                   </button>
