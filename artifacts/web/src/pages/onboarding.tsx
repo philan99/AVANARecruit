@@ -246,6 +246,20 @@ export default function Onboarding() {
     }
   }
 
+  const autoParseTriggered = useRef(false);
+  useEffect(() => {
+    if (autoParseTriggered.current) return;
+    if (!candidate || !candidateProfileId) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("parseCv") !== "1") return;
+    if (!(candidate as any)?.cvFile) return;
+    autoParseTriggered.current = true;
+    parseCv(candidateProfileId);
+    // Strip the query param so a refresh doesn't re-trigger
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState(null, "", cleanUrl);
+  }, [candidate, candidateProfileId]);
+
   const cvFileNameRef = useRef("");
   const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
     basePath: storageBase,

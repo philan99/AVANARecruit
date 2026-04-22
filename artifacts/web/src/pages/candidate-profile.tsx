@@ -197,7 +197,7 @@ export default function CandidateProfile() {
       }
       queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
       setCvParsePromptOpen(false);
-      window.location.assign(`${baseUrl}/onboarding`);
+      window.location.assign(`${baseUrl}/onboarding?parseCv=1`);
     } catch (err) {
       console.error("CV wizard launch failed", err);
       toast({ title: "Couldn't start the wizard", description: "Please try again.", variant: "destructive" });
