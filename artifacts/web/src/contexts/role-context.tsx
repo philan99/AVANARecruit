@@ -85,6 +85,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   const setRole = useCallback((newRole: UserRole) => {
     localStorage.setItem(ROLE_KEY, newRole);
+    localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
     setRoleState(newRole);
   }, []);
 
