@@ -67,7 +67,7 @@ const buildSystemPrompt = (industryOptions: string[], summaryMode: "verbatim" | 
 
 Rules:
 - Use British English where applicable.
-- Phone: include international dialling code if present (e.g. "+44 7700 900123"). If no code present, leave as written.
+- Do NOT extract a phone number — the candidate has already provided it at sign-up. Always return "" for the phone field.
 - Location: prefer "City, Country" format (e.g. "London, UK").
 - experienceYears: estimate total years of professional work experience as a positive integer.
 - education: ONE of these EXACT values that best describes their highest qualification: ${EDUCATION_OPTIONS.join(", ")}.
@@ -82,7 +82,7 @@ Rules:
 - preferredJobTypes / preferredWorkplaces / preferredIndustries: ONLY include if the CV explicitly states preferences (most CVs won't). Use only these enum values: jobTypes=[${JOB_TYPE_OPTIONS.join(",")}], workplaces=[${WORKPLACE_OPTIONS.join(",")}], industries=[${industryOptions.join(",")}]. Empty arrays if not stated.
 - Social URLs: linkedinUrl, twitterUrl, facebookUrl, portfolioUrl. Empty string if not present.
 - summary: ${summaryMode === "verbatim" ? "use the CV's own profile/summary VERBATIM if present (preserve wording). If no profile section exists, return an empty string — do NOT generate one." : "1-3 sentence professional summary (use the CV's own profile/summary if present, otherwise generate one)."}
-- lowConfidenceFields: array of field names where you had to guess or the CV was ambiguous. Examples: "phone", "location", "experienceYears", "education", "preferredJobTypes". Be honest — flag anything not directly stated.
+- lowConfidenceFields: array of field names where you had to guess or the CV was ambiguous. Examples: "location", "experienceYears", "education", "preferredJobTypes". Be honest — flag anything not directly stated. Never include "phone".
 
 Schema:
 {
@@ -187,7 +187,7 @@ router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
     const result = {
       name: safeStr(parsed.name),
       email: safeStr(parsed.email),
-      phone: safeStr(parsed.phone),
+      phone: "",
       location: safeStr(parsed.location),
       currentTitle: safeStr(parsed.currentTitle),
       experienceYears: safeNum(parsed.experienceYears),
