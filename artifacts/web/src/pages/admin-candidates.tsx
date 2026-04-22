@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 
 function MultiSelectDropdown({
@@ -230,6 +230,7 @@ function profileCompletion(c: Candidate): number {
 export default function AdminCandidates() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nameSort, setNameSort] = useState<"asc" | "desc">("asc");
   const [resetTarget, setResetTarget] = useState<Candidate | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -345,7 +346,7 @@ export default function AdminCandidates() {
   const uniqueStatuses = ["active", "passive", "not_looking"];
 
   const filtered = useMemo(() => {
-    return candidates.filter(c => {
+    const list = candidates.filter(c => {
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matches = c.name.toLowerCase().includes(q) ||
@@ -363,7 +364,12 @@ export default function AdminCandidates() {
       if (educationFilters.size > 0 && !educationFilters.has(c.education)) return false;
       return true;
     });
-  }, [candidates, searchQuery, statusFilters, locationFilters, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters]);
+    const sorted = [...list].sort((a, b) => {
+      const cmp = (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" });
+      return nameSort === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [candidates, searchQuery, statusFilters, locationFilters, skillFilters, jobTypeFilters, workplaceFilters, industryFilters, educationFilters, nameSort]);
 
   const activeFilterCount = useMemo(() => {
     return statusFilters.size + locationFilters.size + skillFilters.size + jobTypeFilters.size + workplaceFilters.size + industryFilters.size + educationFilters.size;
@@ -883,13 +889,22 @@ export default function AdminCandidates() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Candidate</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">
+                      <button
+                        type="button"
+                        onClick={() => setNameSort(s => s === "asc" ? "desc" : "asc")}
+                        className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                        title={`Sort by name (${nameSort === "asc" ? "A→Z, click for Z→A" : "Z→A, click for A→Z"})`}
+                      >
+                        Candidate
+                        {nameSort === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                      </button>
+                    </th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Title</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Location</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Exp</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Type</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pref. Workplace</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Email</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Phone</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Profile %</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Verified</th>
@@ -915,44 +930,15 @@ export default function AdminCandidates() {
                       <td className="py-2 px-2 text-muted-foreground">{candidate.currentTitle}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.location}</td>
                       <td className="py-2 px-2 text-muted-foreground">{candidate.experienceYears}y</td>
-                      <td className="py-2 px-2">
-                        <div className="flex flex-wrap gap-1">
-                          {(candidate.preferredJobTypes || []).slice(0, 1).map(t => (
-                            <Badge key={t} variant="outline" className="text-[8px] px-1 py-0">
-                              {formatJobType(t)}
-                            </Badge>
-                          ))}
-                          {(candidate.preferredJobTypes || []).length > 1 && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0">
-                              +{(candidate.preferredJobTypes || []).length - 1}
-                            </Badge>
-                          )}
-                          {(candidate.preferredJobTypes || []).length === 0 && <span className="text-muted-foreground">—</span>}
-                        </div>
+                      <td className="py-2 px-2 text-muted-foreground">
+                        {candidate.email ? (
+                          <a href={`mailto:${candidate.email}`} onClick={(e) => e.stopPropagation()} className="hover:underline truncate inline-block max-w-[180px] align-bottom">{candidate.email}</a>
+                        ) : <span>—</span>}
                       </td>
-                      <td className="py-2 px-2">
-                        <div className="flex flex-wrap gap-1">
-                          {(candidate.preferredWorkplaces || []).map(w => (
-                            <Badge key={w} variant="outline" className="text-[8px] px-1 py-0">
-                              {formatWorkplace(w)}
-                            </Badge>
-                          ))}
-                          {(candidate.preferredWorkplaces || []).length === 0 && <span className="text-muted-foreground">—</span>}
-                        </div>
-                      </td>
-                      <td className="py-2 px-2">
-                        <div className="flex flex-wrap gap-1">
-                          {candidate.skills.slice(0, 2).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-[8px] px-1 py-0">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {candidate.skills.length > 2 && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0">
-                              +{candidate.skills.length - 2}
-                            </Badge>
-                          )}
-                        </div>
+                      <td className="py-2 px-2 text-muted-foreground">
+                        {candidate.phone ? (
+                          <a href={`tel:${candidate.phone.replace(/\s+/g, "")}`} onClick={(e) => e.stopPropagation()} className="hover:underline whitespace-nowrap">{candidate.phone}</a>
+                        ) : <span>—</span>}
                       </td>
                       <td className="py-2 px-2">
                         <Badge className={`text-[8px] uppercase border-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
