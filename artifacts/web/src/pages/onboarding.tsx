@@ -246,19 +246,19 @@ export default function Onboarding() {
     }
   }
 
-  const autoParseTriggered = useRef(false);
+  const [fromCvFlow, setFromCvFlow] = useState(false);
+  const cvFlowChecked = useRef(false);
   useEffect(() => {
-    if (autoParseTriggered.current) return;
-    if (!candidate || !candidateProfileId) return;
+    if (cvFlowChecked.current) return;
+    cvFlowChecked.current = true;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("parseCv") !== "1") return;
-    if (!(candidate as any)?.cvFile) return;
-    autoParseTriggered.current = true;
-    parseCv(candidateProfileId);
-    // Strip the query param so a refresh doesn't re-trigger
-    const cleanUrl = window.location.pathname + window.location.hash;
-    window.history.replaceState(null, "", cleanUrl);
-  }, [candidate, candidateProfileId]);
+    if (params.get("parseCv") === "1") {
+      setFromCvFlow(true);
+      // Strip the query param so a refresh doesn't keep showing the prompt
+      const cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState(null, "", cleanUrl);
+    }
+  }, []);
 
   const cvFileNameRef = useRef("");
   const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
@@ -668,14 +668,30 @@ export default function Onboarding() {
               )}
 
               {candidate?.cvFile && !parsingCv && (
-                <button
-                  type="button"
-                  onClick={() => candidateProfileId && parseCv(candidateProfileId)}
-                  className="text-xs font-semibold inline-flex items-center gap-1 hover:underline mt-2"
-                  style={{ color: "#4CAF50" }}
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> {prefillCount > 0 ? "Re-read my CV" : "Read my CV with AI to pre-fill the next steps"}
-                </button>
+                fromCvFlow && prefillCount === 0 && !cvParseError ? (
+                  <div className="mt-3 p-3 rounded-lg border" style={{ backgroundColor: "rgba(76,175,80,0.08)", borderColor: "rgba(76,175,80,0.3)" }}>
+                    <p className="text-sm mb-2" style={{ color: "#1a2035" }}>
+                      Choose how you'd like your role descriptions handled above, then read your CV to pre-fill the next steps.
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() => candidateProfileId && parseCv(candidateProfileId)}
+                      className="font-semibold"
+                      style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+                    >
+                      <Sparkles className="w-4 h-4 mr-1" /> Read my CV with AI
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => candidateProfileId && parseCv(candidateProfileId)}
+                    className="text-xs font-semibold inline-flex items-center gap-1 hover:underline mt-2"
+                    style={{ color: "#4CAF50" }}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" /> {prefillCount > 0 ? "Re-read my CV" : "Read my CV with AI to pre-fill the next steps"}
+                  </button>
+                )
               )}
             </div>
           )}
