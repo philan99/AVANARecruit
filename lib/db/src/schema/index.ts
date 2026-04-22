@@ -15,6 +15,7 @@ export * from "./conversations";
 export * from "./messages";
 export * from "./jobAlerts";
 export * from "./devTasks";
+export * from "./devOptions";
 export * from "./industries";
 export * from "./savedSearches";
 export * from "./userSessions";

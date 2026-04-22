@@ -19,18 +19,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, CheckCircle2, Circle, Clock, AlertTriangle, ArrowUp, ArrowDown, ArrowRight, Home, Building2, UserCircle, Code2, Megaphone } from "lucide-react";
+import { Plus, Trash2, Edit, CheckCircle2, Circle, Clock, AlertTriangle, ArrowUp, ArrowDown, ArrowRight, Home, Building2, UserCircle, Code2, Megaphone, Settings, Tag } from "lucide-react";
 
 const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
-const CATEGORIES = ["Homepage", "Company", "Candidate", "Marketing", "Other"] as const;
-type Category = typeof CATEGORIES[number];
-
-const STATUSES = ["todo", "in-progress", "done"] as const;
-type Status = typeof STATUSES[number];
-
 const PRIORITIES = ["low", "medium", "high"] as const;
 type Priority = typeof PRIORITIES[number];
+
+interface DevOption {
+  id: number;
+  type: string;
+  value: string;
+  label: string;
+  sortOrder: number;
+}
 
 interface DevTask {
   id: number;
@@ -43,11 +45,25 @@ interface DevTask {
   updatedAt: string;
 }
 
-const statusConfig: Record<Status, { label: string; icon: typeof Circle; color: string; badgeClass: string }> = {
+type StatusStyle = { label: string; icon: typeof Circle; color: string; badgeClass: string };
+const BUILTIN_STATUS_STYLE: Record<string, StatusStyle> = {
   "todo": { label: "To Do", icon: Circle, color: "text-muted-foreground", badgeClass: "bg-muted text-muted-foreground" },
   "in-progress": { label: "In Progress", icon: Clock, color: "text-blue-500", badgeClass: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
   "done": { label: "Done", icon: CheckCircle2, color: "text-green-500", badgeClass: "bg-green-500/10 text-green-500 border-green-500/20" },
 };
+const CUSTOM_STATUS_PALETTE: StatusStyle[] = [
+  { label: "", icon: Tag, color: "text-purple-500", badgeClass: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
+  { label: "", icon: Tag, color: "text-pink-500", badgeClass: "bg-pink-500/10 text-pink-500 border-pink-500/20" },
+  { label: "", icon: Tag, color: "text-amber-500", badgeClass: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
+  { label: "", icon: Tag, color: "text-cyan-500", badgeClass: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" },
+  { label: "", icon: Tag, color: "text-rose-500", badgeClass: "bg-rose-500/10 text-rose-500 border-rose-500/20" },
+];
+function statusStyleFor(value: string, label: string, index: number): StatusStyle {
+  const builtin = BUILTIN_STATUS_STYLE[value];
+  if (builtin) return builtin;
+  const palette = CUSTOM_STATUS_PALETTE[index % CUSTOM_STATUS_PALETTE.length];
+  return { ...palette, label };
+}
 
 const priorityConfig: Record<Priority, { label: string; icon: typeof ArrowUp; color: string; badgeClass: string }> = {
   "high": { label: "High", icon: ArrowUp, color: "text-red-500", badgeClass: "bg-red-500/10 text-red-500 border-red-500/20" },
@@ -55,13 +71,24 @@ const priorityConfig: Record<Priority, { label: string; icon: typeof ArrowUp; co
   "low": { label: "Low", icon: ArrowDown, color: "text-muted-foreground", badgeClass: "bg-muted text-muted-foreground" },
 };
 
-const categoryConfig: Record<Category, { icon: typeof Home; color: string }> = {
+type CategoryStyle = { icon: typeof Home; color: string };
+const BUILTIN_CATEGORY_STYLE: Record<string, CategoryStyle> = {
   "Homepage": { icon: Home, color: "text-purple-500" },
   "Company": { icon: Building2, color: "text-blue-500" },
   "Candidate": { icon: UserCircle, color: "text-green-500" },
   "Marketing": { icon: Megaphone, color: "text-pink-500" },
   "Other": { icon: Code2, color: "text-orange-500" },
 };
+const CUSTOM_CATEGORY_PALETTE: CategoryStyle[] = [
+  { icon: Tag, color: "text-cyan-500" },
+  { icon: Tag, color: "text-rose-500" },
+  { icon: Tag, color: "text-amber-500" },
+  { icon: Tag, color: "text-emerald-500" },
+  { icon: Tag, color: "text-indigo-500" },
+];
+function categoryStyleFor(value: string, index: number): CategoryStyle {
+  return BUILTIN_CATEGORY_STYLE[value] || CUSTOM_CATEGORY_PALETTE[index % CUSTOM_CATEGORY_PALETTE.length];
+}
 
 export default function AdminDevelopment() {
   const { toast } = useToast();
@@ -75,6 +102,12 @@ export default function AdminDevelopment() {
   const [form, setForm] = useState({ title: "", description: "", category: "Other" as string, priority: "medium" as string, status: "todo" as string });
   const [saving, setSaving] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<DevOption[]>([]);
+  const [statuses, setStatuses] = useState<DevOption[]>([]);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [manageType, setManageType] = useState<"category" | "status">("category");
+  const [newOptionLabel, setNewOptionLabel] = useState("");
+  const [optionSaving, setOptionSaving] = useState(false);
 
   async function fetchTasks() {
     try {
@@ -89,7 +122,65 @@ export default function AdminDevelopment() {
     }
   }
 
-  useEffect(() => { fetchTasks(); }, []);
+  async function fetchOptions() {
+    try {
+      const [cRes, sRes] = await Promise.all([
+        fetch(`${apiBase}/dev-options?type=category`),
+        fetch(`${apiBase}/dev-options?type=status`),
+      ]);
+      if (cRes.ok) setCategories(await cRes.json());
+      if (sRes.ok) setStatuses(await sRes.json());
+    } catch {}
+  }
+
+  useEffect(() => { fetchTasks(); fetchOptions(); }, []);
+
+  const categoryStyleByValue: Record<string, CategoryStyle> = {};
+  categories.forEach((c, i) => { categoryStyleByValue[c.value] = categoryStyleFor(c.value, i); });
+  const statusStyleByValue: Record<string, StatusStyle> = {};
+  statuses.forEach((s, i) => { statusStyleByValue[s.value] = statusStyleFor(s.value, s.label, i); });
+
+  function getCategoryStyle(value: string): CategoryStyle {
+    return categoryStyleByValue[value] || BUILTIN_CATEGORY_STYLE.Other;
+  }
+  function getStatusStyle(value: string): StatusStyle {
+    return statusStyleByValue[value] || BUILTIN_STATUS_STYLE.todo;
+  }
+
+  async function addOption() {
+    const label = newOptionLabel.trim();
+    if (!label) return;
+    setOptionSaving(true);
+    try {
+      const res = await fetch(`${apiBase}/dev-options`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: manageType, label }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed");
+      }
+      setNewOptionLabel("");
+      await fetchOptions();
+      toast({ title: `${manageType === "category" ? "Category" : "Status"} added`, description: label });
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Failed to add", variant: "destructive" });
+    } finally {
+      setOptionSaving(false);
+    }
+  }
+
+  async function removeOption(opt: DevOption) {
+    try {
+      const res = await fetch(`${apiBase}/dev-options/${opt.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      await fetchOptions();
+      toast({ title: "Removed", description: opt.label });
+    } catch {
+      toast({ title: "Error", description: "Failed to remove option", variant: "destructive" });
+    }
+  }
 
   function openCreateDialog() {
     setEditingTask(null);
@@ -140,8 +231,10 @@ export default function AdminDevelopment() {
   }
 
   async function handleStatusToggle(task: DevTask) {
-    const next: Record<string, string> = { "todo": "in-progress", "in-progress": "done", "done": "todo" };
-    const newStatus = next[task.status] || "todo";
+    const order = statuses.map(s => s.value);
+    let newStatus = order[0] || "todo";
+    const idx = order.indexOf(task.status);
+    if (idx >= 0) newStatus = order[(idx + 1) % order.length];
     try {
       await fetch(`${apiBase}/dev-tasks/${task.id}`, {
         method: "PATCH",
@@ -167,10 +260,10 @@ export default function AdminDevelopment() {
     done: tasks.filter(t => t.status === "done").length,
   };
 
-  const categoryCounts = CATEGORIES.map(cat => ({
-    key: cat as string,
-    label: cat,
-    total: tasks.filter(t => t.category === cat).length,
+  const categoryCounts = categories.map(cat => ({
+    key: cat.value,
+    label: cat.label,
+    total: tasks.filter(t => t.category === cat.value).length,
   }));
   const priorityCounts = PRIORITIES.map(p => ({
     key: p as string,
@@ -178,11 +271,10 @@ export default function AdminDevelopment() {
     total: tasks.filter(t => t.priority === p).length,
     color: priorityConfig[p].color,
   }));
-  const statusCounts = STATUSES.map(s => ({
-    key: s as string,
-    label: statusConfig[s].label,
-    total: tasks.filter(t => t.status === s).length,
-    color: statusConfig[s].color,
+  const statusCounts = statuses.map(s => ({
+    key: s.value,
+    label: getStatusStyle(s.value).label || s.label,
+    total: tasks.filter(t => t.status === s.value).length,
   }));
 
   const maxCategory = Math.max(1, ...categoryCounts.map(c => c.total));
@@ -272,9 +364,14 @@ export default function AdminDevelopment() {
           <h1 className="text-2xl font-bold">Development Tasks</h1>
           <p className="text-sm text-muted-foreground mt-1">Track and manage all development work across the platform</p>
         </div>
-        <Button onClick={openCreateDialog}>
-          <Plus className="w-4 h-4 mr-1.5" /> Add Task
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => { setManageType("category"); setNewOptionLabel(""); setManageOpen(true); }}>
+            <Settings className="w-4 h-4 mr-1.5" /> Manage
+          </Button>
+          <Button onClick={openCreateDialog}>
+            <Plus className="w-4 h-4 mr-1.5" /> Add Task
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -307,9 +404,9 @@ export default function AdminDevelopment() {
       {(filterCategory !== "all" || filterStatus !== "all" || filterPriority !== "all") && (
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span>Active filters:</span>
-          {filterCategory !== "all" && <Badge variant="outline">Category: {filterCategory}</Badge>}
+          {filterCategory !== "all" && <Badge variant="outline">Category: {categories.find(c => c.value === filterCategory)?.label || filterCategory}</Badge>}
           {filterPriority !== "all" && <Badge variant="outline">Priority: {priorityConfig[filterPriority as Priority]?.label || filterPriority}</Badge>}
-          {filterStatus !== "all" && <Badge variant="outline">Status: {statusConfig[filterStatus as Status]?.label || filterStatus}</Badge>}
+          {filterStatus !== "all" && <Badge variant="outline">Status: {getStatusStyle(filterStatus).label || statuses.find(s => s.value === filterStatus)?.label || filterStatus}</Badge>}
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setFilterCategory("all"); setFilterStatus("all"); setFilterPriority("all"); }}>
             Clear all
           </Button>
@@ -331,12 +428,14 @@ export default function AdminDevelopment() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(task => {
-            const sc = statusConfig[task.status as Status] || statusConfig.todo;
+            const sc = getStatusStyle(task.status);
             const pc = priorityConfig[task.priority as Priority] || priorityConfig.medium;
-            const cc = categoryConfig[task.category as Category] || categoryConfig.Other;
+            const cc = getCategoryStyle(task.category);
             const StatusIcon = sc.icon;
             const PriorityIcon = pc.icon;
             const CategoryIcon = cc.icon;
+            const categoryLabel = categories.find(c => c.value === task.category)?.label || task.category;
+            const statusLabel = sc.label || statuses.find(s => s.value === task.status)?.label || task.status;
 
             return (
               <Card
@@ -364,7 +463,7 @@ export default function AdminDevelopment() {
                       <StatusIcon className="w-5 h-5" />
                     </button>
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto">
-                      <CategoryIcon className={`w-3 h-3 mr-0.5 ${cc.color}`} /> {task.category}
+                      <CategoryIcon className={`w-3 h-3 mr-0.5 ${cc.color}`} /> {categoryLabel}
                     </Badge>
                     <div onClick={(e) => e.stopPropagation()} className="shrink-0">
                       {deleteConfirmId === task.id ? (
@@ -391,7 +490,7 @@ export default function AdminDevelopment() {
                   )}
                   <div className="flex items-center gap-1.5 flex-wrap mt-auto pt-2 border-t border-border/50">
                     <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sc.badgeClass}`}>
-                      {sc.label}
+                      {statusLabel}
                     </Badge>
                     <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${pc.badgeClass}`}>
                       <PriorityIcon className="w-3 h-3 mr-0.5" /> {pc.label}
@@ -424,7 +523,7 @@ export default function AdminDevelopment() {
                 <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -442,7 +541,7 @@ export default function AdminDevelopment() {
                 <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {STATUSES.map(s => <SelectItem key={s} value={s}>{statusConfig[s].label}</SelectItem>)}
+                    {statuses.map(s => <SelectItem key={s.value} value={s.value}>{getStatusStyle(s.value).label || s.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -451,6 +550,91 @@ export default function AdminDevelopment() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : editingTask ? "Update Task" : "Create Task"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={manageOpen} onOpenChange={setManageOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Categories &amp; Statuses</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Button
+                variant={manageType === "category" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setManageType("category")}
+              >
+                Categories
+              </Button>
+              <Button
+                variant={manageType === "status" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setManageType("status")}
+              >
+                Statuses
+              </Button>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Add new {manageType === "category" ? "category" : "status"}
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  value={newOptionLabel}
+                  onChange={e => setNewOptionLabel(e.target.value)}
+                  placeholder={manageType === "category" ? "e.g. Mobile App" : "e.g. Blocked"}
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addOption(); } }}
+                />
+                <Button onClick={addOption} disabled={optionSaving || !newOptionLabel.trim()}>
+                  <Plus className="w-4 h-4 mr-1" /> Add
+                </Button>
+              </div>
+            </div>
+
+            <div className="border rounded-md divide-y max-h-72 overflow-y-auto">
+              {(manageType === "category" ? categories : statuses).length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">No {manageType === "category" ? "categories" : "statuses"} yet.</div>
+              ) : (
+                (manageType === "category" ? categories : statuses).map(opt => {
+                  const usedCount = tasks.filter(t => (manageType === "category" ? t.category : t.status) === opt.value).length;
+                  return (
+                    <div key={opt.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">{opt.label}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono truncate">
+                          {opt.value} &middot; {usedCount} task{usedCount === 1 ? "" : "s"}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive/70 hover:text-destructive shrink-0"
+                        onClick={() => {
+                          if (usedCount > 0) {
+                            toast({
+                              title: "Cannot remove",
+                              description: `${usedCount} task${usedCount === 1 ? " uses" : "s use"} this. Reassign first.`,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          removeOption(opt);
+                        }}
+                        title={usedCount > 0 ? "Reassign tasks first" : "Remove"}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setManageOpen(false)}>Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
