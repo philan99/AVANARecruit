@@ -150,6 +150,8 @@ export default function CandidateProfile() {
   }
 
   const cvFileNameRef = useRef("");
+  const [cvParsePromptOpen, setCvParsePromptOpen] = useState(false);
+  const [cvParsing, setCvParsing] = useState(false);
 
   const { uploadFile: uploadCv, isUploading: isCvUploading } = useUpload({
     basePath,
@@ -165,11 +167,87 @@ export default function CandidateProfile() {
       queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
       toast({ title: "CV uploaded", description: "Your CV has been saved." });
       cvFileNameRef.current = "";
+      setCvParsePromptOpen(true);
     },
     onError: () => {
       toast({ title: "Upload failed", description: "Could not upload CV.", variant: "destructive" });
     },
   });
+
+  async function runCvReader() {
+    if (!candidateProfileId) return;
+    setCvParsing(true);
+    try {
+      const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+      const res = await fetch(`${apiBase}/candidates/${candidateProfileId}/parse-cv`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summaryMode: "verbatim" }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast({ title: "CV reader failed", description: (data as any)?.error || "Could not read your CV.", variant: "destructive" });
+        return;
+      }
+      const parsed = await res.json();
+      const c: any = candidate || {};
+      const isEmpty = (v: any) => v === undefined || v === null || (typeof v === "string" && v.trim() === "") || (Array.isArray(v) && v.length === 0);
+      const patch: any = {};
+      let count = 0;
+      const maybeSet = (key: string, val: any) => {
+        if (val === undefined || val === null) return;
+        if (typeof val === "string" && !val.trim()) return;
+        if (Array.isArray(val) && val.length === 0) return;
+        if (!isEmpty(c[key])) return;
+        patch[key] = val;
+        count++;
+      };
+      maybeSet("location", parsed.location);
+      maybeSet("currentTitle", parsed.currentTitle);
+      if (isEmpty(c.experienceYears) || c.experienceYears === 0) {
+        if (typeof parsed.experienceYears === "number" && parsed.experienceYears > 0) {
+          patch.experienceYears = parsed.experienceYears;
+          count++;
+        }
+      }
+      maybeSet("summary", parsed.summary);
+      maybeSet("skills", parsed.skills);
+      maybeSet("education", parsed.education);
+      maybeSet("educationDetails", parsed.educationDetails);
+      maybeSet("qualifications", parsed.qualifications);
+      maybeSet("experience", parsed.experience);
+      maybeSet("preferredJobTypes", parsed.preferredJobTypes);
+      maybeSet("preferredWorkplaces", parsed.preferredWorkplaces);
+      maybeSet("preferredIndustries", parsed.preferredIndustries);
+      maybeSet("linkedinUrl", parsed.linkedinUrl);
+      maybeSet("facebookUrl", parsed.facebookUrl);
+      maybeSet("twitterUrl", parsed.twitterUrl);
+      maybeSet("portfolioUrl", parsed.portfolioUrl);
+
+      if (count === 0) {
+        toast({ title: "Nothing new to add", description: "Your profile already covers what's in the CV." });
+      } else {
+        const patchRes = await fetch(`${apiBase}/candidates/${candidateProfileId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        if (!patchRes.ok) {
+          toast({ title: "Couldn't save updates", description: "We read your CV but failed to update your profile.", variant: "destructive" });
+          return;
+        }
+        queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
+        queryClient.invalidateQueries({ queryKey: getListCandidatesQueryKey() });
+        toast({ title: "Profile updated", description: `We pre-filled ${count} field${count === 1 ? "" : "s"} from your CV — please review.` });
+      }
+    } catch (err) {
+      console.error("CV reader failed", err);
+      toast({ title: "CV reader failed", description: "Please try again or fill in the details manually.", variant: "destructive" });
+    } finally {
+      setCvParsing(false);
+      setCvParsePromptOpen(false);
+    }
+  }
 
   async function handleCvChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -885,6 +963,39 @@ export default function CandidateProfile() {
               )}
             </CardContent>
           </Card>
+
+          {/* CV reader prompt */}
+          <Dialog open={cvParsePromptOpen} onOpenChange={(open) => { if (!cvParsing) setCvParsePromptOpen(open); }}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" /> Read this CV automatically?
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  We can scan your newly uploaded CV with AI and pre-fill the empty
+                  parts of your profile (job title, experience, skills, education,
+                  qualifications, work history, summary, social links, etc.).
+                </p>
+                <p className="text-xs">
+                  Existing values won't be overwritten — only blank fields are filled. You can edit anything afterwards.
+                </p>
+              </div>
+              <DialogFooter className="gap-2 sm:gap-2">
+                <Button variant="outline" onClick={() => setCvParsePromptOpen(false)} disabled={cvParsing}>
+                  No thanks
+                </Button>
+                <Button onClick={runCvReader} disabled={cvParsing}>
+                  {cvParsing ? (
+                    <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" /> Reading…</>
+                  ) : (
+                    <>Yes, read my CV</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* CV / Resume */}
           <Card className="bg-card">
