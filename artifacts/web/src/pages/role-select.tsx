@@ -379,8 +379,8 @@ export default function RoleSelect() {
               AI-Powered Recruitment Platform
             </p>
             <h1 className="text-4xl lg:text-[56px] font-bold leading-[1.08] mb-6" style={{ color: "#ffffff" }}>
-              Connecting the Right Talent
-              <br />with the Right Opportunity.
+              Connecting the <span style={{ color: "#4CAF50" }}>Right Talent</span>
+              <br />with the <span style={{ color: "#4CAF50" }}>Right Opportunity</span>.
             </h1>
             <p className="text-lg leading-relaxed max-w-xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.55)" }}>
               AVANA Recruit uses artificial intelligence to match candidates and companies across six weighted dimensions — skills, experience, candidate preferences, verified credentials, location and education — for fairer, more accurate hiring decisions.
