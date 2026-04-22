@@ -14,8 +14,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
+import * as XLSX from "xlsx";
 
 function MultiSelectDropdown({
   label,
@@ -377,6 +378,41 @@ export default function AdminCandidates() {
 
   const hasActiveFilters = searchQuery || activeFilterCount > 0;
 
+  function exportToExcel() {
+    if (filtered.length === 0) return;
+    const rows = filtered.map(c => ({
+      Name: c.name || "",
+      Email: c.email || "",
+      Phone: c.phone || "",
+      "Current Title": c.currentTitle || "",
+      Location: c.location || "",
+      "Experience (years)": c.experienceYears ?? 0,
+      Education: c.education || "",
+      Status: c.status === "not_looking" ? "Not Looking" : (c.status || ""),
+      "Profile %": profileCompletion(c),
+      Verified: (c.verifiedCount ?? 0) > 0 ? "Yes" : "No",
+      Skills: (c.skills || []).join(", "),
+      Qualifications: (c.qualifications || []).join(", "),
+      "Preferred Job Types": (c.preferredJobTypes || []).map(formatJobType).join(", "),
+      "Preferred Workplaces": (c.preferredWorkplaces || []).map(formatWorkplace).join(", "),
+      "Preferred Industries": (c.preferredIndustries || []).join(", "),
+      Summary: c.summary || "",
+      Created: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : "",
+      Updated: c.updatedAt ? new Date(c.updatedAt).toISOString().slice(0, 10) : "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const colWidths = Object.keys(rows[0]).map(key => {
+      const maxLen = Math.max(key.length, ...rows.map(r => String((r as any)[key] ?? "").length));
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+    });
+    (ws as any)["!cols"] = colWidths;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Candidates");
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `avana-candidates-${stamp}.xlsx`);
+    toast({ title: `Exported ${rows.length} candidate${rows.length === 1 ? "" : "s"}` });
+  }
+
   function clearFilters() {
     setSearchQuery("");
     setStatusFilters(new Set());
@@ -465,6 +501,15 @@ export default function AdminCandidates() {
             </Button>
           )}
           <div className="flex-1" />
+          <Button
+            variant="outline"
+            onClick={exportToExcel}
+            disabled={filtered.length === 0}
+            title={hasActiveFilters ? "Export filtered candidates" : "Export all candidates"}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export Excel
+          </Button>
           <div className="flex items-center border border-border rounded-md bg-card overflow-hidden">
             <button
               className={`p-2 transition-colors ${viewMode === "cards" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
