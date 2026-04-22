@@ -11,6 +11,7 @@ interface Verification {
   roleTitle: string;
   company: string;
   verifierName: string;
+  verifierEmail: string;
   status: string;
   verifierResponse: string | null;
   verifiedAt: string | null;
@@ -112,7 +113,7 @@ export default function CompanyCandidateVerifications({ params }: { params: { id
                       </div>
                       <div>
                         <span className="text-muted-foreground">Verifier:</span>{" "}
-                        <span className="font-medium">{v.verifierName}</span>
+                        <span className="font-medium font-mono">{v.verifierEmail || v.verifierName}</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Requested:</span>{" "}

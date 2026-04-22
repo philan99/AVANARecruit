@@ -7,6 +7,17 @@ import { brandedEmail } from "../lib/emailTemplate";
 
 const router = Router();
 
+function maskEmail(email: string | null | undefined): string {
+  if (!email) return "";
+  const at = email.indexOf("@");
+  if (at <= 0) return email;
+  const local = email.slice(0, at);
+  const domain = email.slice(at);
+  if (local.length <= 2) return local + domain;
+  const masked = local[0] + "*".repeat(local.length - 2) + local[local.length - 1];
+  return masked + domain;
+}
+
 router.post("/verifications", async (req, res): Promise<void> => {
   try {
     const { candidateId, roleTitle, company, verifierName, verifierEmail, message } = req.body;
@@ -202,6 +213,7 @@ router.get("/candidates/:id/verifications", async (req, res): Promise<void> => {
         roleTitle: verificationsTable.roleTitle,
         company: verificationsTable.company,
         verifierName: verificationsTable.verifierName,
+        verifierEmail: verificationsTable.verifierEmail,
         message: verificationsTable.message,
         status: verificationsTable.status,
         verifierResponse: verificationsTable.verifierResponse,
@@ -212,7 +224,12 @@ router.get("/candidates/:id/verifications", async (req, res): Promise<void> => {
       .where(eq(verificationsTable.candidateId, candidateId))
       .orderBy(verificationsTable.createdAt);
 
-    res.json(verifications);
+    const masked = verifications.map(v => ({
+      ...v,
+      verifierEmail: maskEmail(v.verifierEmail),
+    }));
+
+    res.json(masked);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch verifications" });
   }
