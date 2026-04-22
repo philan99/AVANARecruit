@@ -187,25 +187,31 @@ export default function Onboarding() {
 
   function applyCvParse(parsed: any) {
     const prefilled = new Set<string>();
-    const isEmpty = (v: any) => v === undefined || v === null || (typeof v === "string" && v.trim() === "");
     const mark = (field: string) => prefilled.add(field);
+    const hasStr = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0;
+    const hasArr = (v: unknown): v is unknown[] => Array.isArray(v) && v.length > 0;
 
-    if (isEmpty(location) && parsed.location) { setLocationField(parsed.location); mark("location"); }
-    if (isEmpty(currentTitle) && parsed.currentTitle) { setCurrentTitle(parsed.currentTitle); mark("currentTitle"); }
-    if (isEmpty(experienceYears) && parsed.experienceYears) { setExperienceYears(String(parsed.experienceYears)); mark("experienceYears"); }
-    if (isEmpty(summary) && parsed.summary) { setSummary(parsed.summary); mark("summary"); }
-    if (skills.length === 0 && Array.isArray(parsed.skills) && parsed.skills.length > 0) { setSkills(parsed.skills); mark("skills"); }
-    if (isEmpty(education) && parsed.education) { setEducation(parsed.education); mark("education"); }
-    if (isEmpty(educationDetails) && parsed.educationDetails) { setEducationDetails(parsed.educationDetails); mark("educationDetails"); }
-    if (qualifications.length === 0 && Array.isArray(parsed.qualifications) && parsed.qualifications.length > 0) { setQualifications(parsed.qualifications); mark("qualifications"); }
-    if (experienceList.length === 0 && Array.isArray(parsed.experience) && parsed.experience.length > 0) { setExperienceList(parsed.experience); mark("experience"); }
-    if (preferredJobTypes.length === 0 && Array.isArray(parsed.preferredJobTypes) && parsed.preferredJobTypes.length > 0) { setPreferredJobTypes(parsed.preferredJobTypes); mark("preferredJobTypes"); }
-    if (preferredWorkplaces.length === 0 && Array.isArray(parsed.preferredWorkplaces) && parsed.preferredWorkplaces.length > 0) { setPreferredWorkplaces(parsed.preferredWorkplaces); mark("preferredWorkplaces"); }
-    if (preferredIndustries.length === 0 && Array.isArray(parsed.preferredIndustries) && parsed.preferredIndustries.length > 0) { setPreferredIndustries(parsed.preferredIndustries); mark("preferredIndustries"); }
-    if (isEmpty(linkedinUrl) && parsed.linkedinUrl) { setLinkedinUrl(parsed.linkedinUrl); mark("linkedinUrl"); }
-    if (isEmpty(facebookUrl) && parsed.facebookUrl) { setFacebookUrl(parsed.facebookUrl); mark("facebookUrl"); }
-    if (isEmpty(twitterUrl) && parsed.twitterUrl) { setTwitterUrl(parsed.twitterUrl); mark("twitterUrl"); }
-    if (isEmpty(portfolioUrl) && parsed.portfolioUrl) { setPortfolioUrl(parsed.portfolioUrl); mark("portfolioUrl"); }
+    // The user has explicitly asked us to (re-)read this CV — overwrite the
+    // form fields with the freshly parsed values so they reflect the uploaded
+    // CV, not whatever was previously filled in.
+    if (hasStr(parsed.location)) { setLocationField(parsed.location); mark("location"); }
+    if (hasStr(parsed.currentTitle)) { setCurrentTitle(parsed.currentTitle); mark("currentTitle"); }
+    if (typeof parsed.experienceYears === "number" && parsed.experienceYears > 0) {
+      setExperienceYears(String(parsed.experienceYears)); mark("experienceYears");
+    }
+    if (hasStr(parsed.summary)) { setSummary(parsed.summary); mark("summary"); }
+    if (hasArr(parsed.skills)) { setSkills(parsed.skills as string[]); mark("skills"); }
+    if (hasStr(parsed.education)) { setEducation(parsed.education); mark("education"); }
+    if (hasStr(parsed.educationDetails)) { setEducationDetails(parsed.educationDetails); mark("educationDetails"); }
+    if (hasArr(parsed.qualifications)) { setQualifications(parsed.qualifications as string[]); mark("qualifications"); }
+    if (hasArr(parsed.experience)) { setExperienceList(parsed.experience as ExperienceEntry[]); mark("experience"); }
+    if (hasArr(parsed.preferredJobTypes)) { setPreferredJobTypes(parsed.preferredJobTypes as string[]); mark("preferredJobTypes"); }
+    if (hasArr(parsed.preferredWorkplaces)) { setPreferredWorkplaces(parsed.preferredWorkplaces as string[]); mark("preferredWorkplaces"); }
+    if (hasArr(parsed.preferredIndustries)) { setPreferredIndustries(parsed.preferredIndustries as string[]); mark("preferredIndustries"); }
+    if (hasStr(parsed.linkedinUrl)) { setLinkedinUrl(parsed.linkedinUrl); mark("linkedinUrl"); }
+    if (hasStr(parsed.facebookUrl)) { setFacebookUrl(parsed.facebookUrl); mark("facebookUrl"); }
+    if (hasStr(parsed.twitterUrl)) { setTwitterUrl(parsed.twitterUrl); mark("twitterUrl"); }
+    if (hasStr(parsed.portfolioUrl)) { setPortfolioUrl(parsed.portfolioUrl); mark("portfolioUrl"); }
 
     setPrefilledFields(prefilled);
     setLowConfidenceFields(new Set((parsed.lowConfidenceFields || []) as string[]));
