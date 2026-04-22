@@ -923,7 +923,6 @@ export default function AdminCandidates() {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-xs text-foreground truncate">{candidate.name}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{candidate.email}</p>
                           </div>
                         </div>
                       </td>
