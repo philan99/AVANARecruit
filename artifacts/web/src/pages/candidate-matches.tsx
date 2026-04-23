@@ -184,14 +184,15 @@ export default function CandidateMatches() {
           </div>
 
           {viewMode === "list" ? (
-            <Card className="bg-card border-border overflow-hidden">
-              <div className="divide-y divide-border">
-                {sortedMatches.map(match => (
-                  <Link key={match.id} href={`/jobs/${match.jobId}`}>
-                    <div className="flex items-center gap-4 p-4 hover:bg-secondary/40 cursor-pointer transition-colors">
-                      <Badge className={`${scoreColor(match.overallScore)} text-sm font-bold border-0 shrink-0 w-14 justify-center`}>
+            <div className="flex flex-col gap-3">
+              {sortedMatches.map(match => (
+                <Card key={match.id} className="bg-card border-border hover:border-primary/50 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4 flex-wrap lg:flex-nowrap">
+                      <Badge className={`${scoreColor(match.overallScore)} text-base font-bold border-0 shrink-0 w-16 h-10 justify-center`}>
                         {Math.round(match.overallScore)}%
                       </Badge>
+
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold text-foreground truncate">{match.jobTitle}</h3>
@@ -207,14 +208,15 @@ export default function CandidateMatches() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mt-0.5">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mt-1">
                           <span className="flex items-center gap-1"><Building className="w-3 h-3" />{match.jobCompany}</span>
                           {match.jobLocation && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{match.jobLocation}</span>}
                           {match.jobType && <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{match.jobType}</span>}
                           {match.jobWorkplace && <span className="flex items-center gap-1"><Monitor className="w-3 h-3" />{match.jobWorkplace}</span>}
                         </div>
                       </div>
-                      <div className="hidden lg:grid grid-cols-6 gap-1.5 text-[10px] shrink-0">
+
+                      <div className="grid grid-cols-6 gap-1.5 text-[11px] shrink-0">
                         {[
                           { label: "Exp", v: match.experienceScore },
                           { label: "Skl", v: match.skillScore },
@@ -223,18 +225,30 @@ export default function CandidateMatches() {
                           { label: "Loc", v: match.locationScore },
                           { label: "Edu", v: match.educationScore },
                         ].map(c => (
-                          <div key={c.label} className="bg-secondary/40 rounded px-2 py-1 text-center w-12">
+                          <div key={c.label} className="bg-secondary/40 rounded px-2 py-1 text-center w-14">
                             <div className="text-muted-foreground text-[9px] uppercase">{c.label}</div>
                             <div className="font-semibold text-foreground">{Math.round(c.v)}</div>
                           </div>
                         ))}
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+
+                      <Link href={`/jobs/${match.jobId}`}>
+                        <Button variant="outline" size="sm" className="text-xs shrink-0">
+                          View Job <ArrowRight className="w-3 h-3 ml-1" />
+                        </Button>
+                      </Link>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            </Card>
+
+                    {match.assessment && (
+                      <p className="text-xs text-muted-foreground flex gap-1.5 mt-3">
+                        <Sparkles className="w-3 h-3 mt-0.5 shrink-0 text-primary" />
+                        <span className="line-clamp-2">{match.assessment}</span>
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sortedMatches.map(match => (
