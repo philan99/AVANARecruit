@@ -54,7 +54,6 @@ export function JobFormSection() {
                 Optional
               </span>
             </div>
-            <span className="text-[11px] font-medium text-[#9ca3af] mt-2">Step 6 of 7</span>
           </div>
           <p className="text-[13px] leading-relaxed text-[#6b7280]">
             Beyond skills and experience — describe the kind of person who'd thrive in this role.
@@ -158,21 +157,12 @@ export function JobFormSection() {
           </div>
         </div>
 
-        {/* Footer actions */}
-        <div className="px-7 py-4 border-t border-[#f1f2f4] flex items-center justify-between bg-[#fafbfc]">
-          <button className="text-[13px] font-medium text-[#6b7280] hover:text-[#1a2035]">← Back</button>
-          <div className="flex items-center gap-2">
-            <button className="text-[13px] font-medium text-[#6b7280] hover:text-[#1a2035] px-3 py-2">
-              Skip for now
-            </button>
-            <button
-              className="text-[13px] font-semibold text-white px-4 py-2 rounded-lg shadow-sm hover:opacity-95"
-              style={{ background: "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" }}
-            >
-              Continue →
-            </button>
-          </div>
-        </div>
+      </div>
+
+      {/* Sibling section preview — shows this is one of several sections on a single page */}
+      <div className="max-w-[640px] mx-auto mt-3 px-1 flex items-center justify-between text-[11px] text-[#9ca3af]">
+        <span>↑ Compensation &amp; benefits</span>
+        <span>Screening questions ↓</span>
       </div>
     </div>
   );
