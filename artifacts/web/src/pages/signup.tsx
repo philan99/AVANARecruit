@@ -15,7 +15,7 @@ import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { validatePassword } from "@/lib/password-policy";
+import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordStrength } from "@/components/password-strength";
 
 const PHONE_CODES = [
@@ -280,6 +280,9 @@ export default function SignUp() {
                   <label className="text-sm font-medium text-foreground">
                     Password <span className="text-destructive">*</span>
                   </label>
+                  <p className="text-[11px] text-muted-foreground">
+                    Must be at least {PASSWORD_MIN_LENGTH} characters and include an uppercase letter, a lowercase letter, a number, and a special character.
+                  </p>
                   <Input
                     type="password"
                     placeholder="Create a strong password"
@@ -375,6 +378,9 @@ export default function SignUp() {
                   <label className="text-sm font-medium text-foreground">
                     Password <span className="text-destructive">*</span>
                   </label>
+                  <p className="text-[11px] text-muted-foreground">
+                    Must be at least {PASSWORD_MIN_LENGTH} characters and include an uppercase letter, a lowercase letter, a number, and a special character.
+                  </p>
                   <Input
                     type="password"
                     placeholder="Create a strong password"
