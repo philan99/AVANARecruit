@@ -25,7 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Pencil, Trash2, Info, Check, Plus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,7 +54,25 @@ const editFormSchema = z.object({
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"]),
+  idealCandidateTraits: z.array(z.string()).min(1, "Pick at least one trait").max(5, "Pick up to 5 traits"),
+  idealCandidateNote: z.string().min(20, "Add a sentence or two (20+ characters)").max(300, "Keep it under 300 characters"),
+  idealCandidateUseInScore: z.boolean(),
 });
+
+const SUGGESTED_TRAITS = [
+  "Self-starter",
+  "Detail-oriented",
+  "Collaborative",
+  "Strong communicator",
+  "Analytical",
+  "Creative",
+  "Adaptable",
+  "Customer-focused",
+  "Pragmatic",
+  "Ownership mindset",
+  "Curious",
+  "Calm under pressure",
+];
 
 export default function EditJob({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
@@ -91,6 +111,9 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
       salaryMin: job.salaryMin ?? undefined,
       salaryMax: job.salaryMax ?? undefined,
       status: (job.status as z.infer<typeof editFormSchema>["status"]) ?? "open",
+      idealCandidateTraits: Array.isArray(job.idealCandidateTraits) ? job.idealCandidateTraits : [],
+      idealCandidateNote: job.idealCandidateNote ?? "",
+      idealCandidateUseInScore: job.idealCandidateUseInScore ?? true,
     },
   });
 
@@ -433,6 +456,108 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                   </FormItem>
                 )}
               />
+
+              <div className="space-y-4 pt-2 border-t border-border">
+                <div>
+                  <h3 className="text-base font-semibold text-foreground flex items-center gap-2 mt-4">
+                    Ideal candidate
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Beyond skills and experience — describe the kind of person who'd thrive in this role. Soft signal in matching, not a hard filter.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2 text-[11px] text-muted-foreground rounded-md bg-muted/40 border border-border px-3 py-2">
+                  <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                  <p className="leading-relaxed">
+                    This section is filled in by you — AVANA won't draft or pre-fill it from a brief or uploaded job spec. It's how candidates hear your team's voice.
+                  </p>
+                </div>
+
+                <FormField control={form.control} name="idealCandidateTraits" render={({ field }) => {
+                  const value = field.value || [];
+                  const toggle = (t: string) => {
+                    if (value.includes(t)) {
+                      field.onChange(value.filter((x) => x !== t));
+                    } else if (value.length < 5) {
+                      field.onChange([...value, t]);
+                    }
+                  };
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Working style <span className="text-red-500">*</span>{" "}
+                        <span className="text-muted-foreground font-normal text-xs">
+                          · pick 1–5 ({value.length}/5)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex flex-wrap gap-2">
+                          {SUGGESTED_TRAITS.map((trait) => {
+                            const isSelected = value.includes(trait);
+                            const atMax = value.length >= 5 && !isSelected;
+                            return (
+                              <button
+                                key={trait}
+                                type="button"
+                                onClick={() => toggle(trait)}
+                                disabled={atMax}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : atMax
+                                      ? "bg-muted text-muted-foreground border-border opacity-50 cursor-not-allowed"
+                                      : "bg-background text-foreground border-border hover:border-primary hover:text-primary"
+                                }`}
+                              >
+                                {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                                {trait}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }} />
+
+                <FormField control={form.control} name="idealCandidateNote" render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>
+                        Why this role suits them <span className="text-red-500">*</span>{" "}
+                        <span className="text-muted-foreground font-normal text-xs">· 1–2 sentences</span>
+                      </FormLabel>
+                      <span className={`text-[11px] font-mono ${(field.value?.length || 0) > 280 ? "text-destructive" : "text-muted-foreground"}`}>
+                        {field.value?.length || 0}/300
+                      </span>
+                    </div>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        rows={3}
+                        maxLength={300}
+                        placeholder="e.g. You'll own the analytics roadmap end-to-end with a small, senior team — perfect for someone who likes shaping direction, not just executing tickets."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="idealCandidateUseInScore" render={({ field }) => (
+                  <FormItem className="flex items-start justify-between rounded-md border border-border p-3 gap-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-sm">Use as a scoring signal</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        When on, candidates whose profile aligns with these traits get a small Fit boost. Skills and experience always weigh more.
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
                 {deleteButton}
