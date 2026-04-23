@@ -387,6 +387,183 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate)
   return parts.join(" ");
 }
 
+export const MATCH_WEIGHTS = {
+  skills: 0.30,
+  experience: 0.20,
+  preferences: 0.15,
+  verification: 0.15,
+  location: 0.10,
+  education: 0.10,
+} as const;
+
+export const EXPERIENCE_LEVEL_MAP = experienceLevelMap;
+
+export interface MatchExplanation {
+  overallScore: number;
+  weights: typeof MATCH_WEIGHTS;
+  elements: {
+    skills: {
+      score: number;
+      jobSkills: string[];
+      candidateSkills: string[];
+      matched: string[];
+      missing: string[];
+    };
+    experience: {
+      score: number;
+      jobExperienceLevel: string;
+      requiredYears: number;
+      candidateTotalYears: number;
+      candidateRelevantYears: number | null;
+      totalYearsScore: number;
+      relevantYearsScore: number | null;
+    };
+    education: {
+      score: number;
+      jobEducationLevel: string | null;
+      jobRequirementsExcerpt: string;
+      candidateEducation: string;
+      requiredRank: number | null;
+      candidateRank: number | null;
+    };
+    location: {
+      score: number;
+      jobLocation: string;
+      candidateLocation: string;
+    };
+    verification: {
+      score: number;
+      verifiedCount: number;
+    };
+    preferences: {
+      score: number;
+      facets: Array<{
+        label: string;
+        jobValue: string | null;
+        candidatePreferences: string[];
+        weight: number;
+        outcome: "skipped" | "neutral" | "match" | "mismatch";
+        contributionScore: number;
+      }>;
+      matches: string[];
+      mismatches: string[];
+    };
+  };
+  assessment: string;
+}
+
+export function explainMatch(job: Job, candidate: Candidate, verifiedCount: number = 0): MatchExplanation {
+  const skill = computeSkillScore(job.skills, candidate.skills);
+
+  const requiredYears = experienceLevelMap[job.experienceLevel] ?? 3;
+  const totalYearsScore = scoreYearsAgainstRequirement(candidate.experienceYears, requiredYears);
+  const relevantYears = computeRelevantYears((candidate as any).experience, job);
+  const relevantYearsScore = relevantYears != null ? scoreYearsAgainstRequirement(relevantYears, requiredYears) : null;
+  const experienceScore = computeExperienceScore(job, candidate);
+
+  const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
+  const locationScore = computeLocationScore(job.location, candidate.location);
+  const verificationScore = computeVerificationScore(verifiedCount);
+  const pref = computePreferenceScore(job, candidate);
+
+  const overallScore = Math.round(
+    skill.score * MATCH_WEIGHTS.skills +
+    experienceScore * MATCH_WEIGHTS.experience +
+    pref.score * MATCH_WEIGHTS.preferences +
+    verificationScore * MATCH_WEIGHTS.verification +
+    locationScore * MATCH_WEIGHTS.location +
+    educationScore * MATCH_WEIGHTS.education,
+  );
+
+  const facetDefs: Array<{ label: string; jobValue: string | null; prefs: string[]; weight: number; display?: Record<string, string> }> = [
+    { label: "Workplace", jobValue: job.workplace ?? null, prefs: candidate.preferredWorkplaces ?? [], weight: 1.2, display: WORKPLACE_LABEL },
+    { label: "Job type", jobValue: job.jobType ?? null, prefs: candidate.preferredJobTypes ?? [], weight: 1, display: JOB_TYPE_LABEL },
+    { label: "Industry", jobValue: job.industry ?? null, prefs: candidate.preferredIndustries ?? [], weight: 0.8 },
+  ];
+
+  const facets = facetDefs.map(f => {
+    if (!f.jobValue) {
+      return { label: f.label, jobValue: null, candidatePreferences: f.prefs, weight: f.weight, outcome: "skipped" as const, contributionScore: 0 };
+    }
+    if (f.prefs.length === 0) {
+      return { label: f.label, jobValue: f.jobValue, candidatePreferences: [], weight: f.weight, outcome: "neutral" as const, contributionScore: 85 };
+    }
+    const jobNorm = f.jobValue.toLowerCase().trim();
+    const hit = f.prefs.some(p => p.toLowerCase().trim() === jobNorm);
+    return {
+      label: f.label,
+      jobValue: f.jobValue,
+      candidatePreferences: f.prefs,
+      weight: f.weight,
+      outcome: hit ? ("match" as const) : ("mismatch" as const),
+      contributionScore: hit ? 100 : 25,
+    };
+  });
+
+  const partial: MatchResult = {
+    overallScore,
+    skillScore: Math.round(skill.score),
+    experienceScore: Math.round(experienceScore),
+    educationScore: Math.round(educationScore),
+    locationScore: Math.round(locationScore),
+    verificationScore: Math.round(verificationScore),
+    preferenceScore: Math.round(pref.score),
+    assessment: "",
+    matchedSkills: skill.matched,
+    missingSkills: skill.missing,
+    preferenceMatches: pref.matches,
+    preferenceMismatches: pref.mismatches,
+  };
+  const assessment = generateAssessment(partial, job, candidate);
+
+  return {
+    overallScore,
+    weights: MATCH_WEIGHTS,
+    elements: {
+      skills: {
+        score: Math.round(skill.score),
+        jobSkills: job.skills ?? [],
+        candidateSkills: candidate.skills ?? [],
+        matched: skill.matched,
+        missing: skill.missing,
+      },
+      experience: {
+        score: Math.round(experienceScore),
+        jobExperienceLevel: job.experienceLevel,
+        requiredYears,
+        candidateTotalYears: candidate.experienceYears,
+        candidateRelevantYears: relevantYears == null ? null : Math.round(relevantYears * 10) / 10,
+        totalYearsScore: Math.round(totalYearsScore),
+        relevantYearsScore: relevantYearsScore == null ? null : Math.round(relevantYearsScore),
+      },
+      education: {
+        score: Math.round(educationScore),
+        jobEducationLevel: job.educationLevel ?? null,
+        jobRequirementsExcerpt: (job.requirements ?? "").slice(0, 240),
+        candidateEducation: candidate.education ?? "",
+        requiredRank: rankFromEnum(job.educationLevel) ?? rankFromFreeText(job.requirements),
+        candidateRank: rankFromEnum(candidate.education) ?? rankFromFreeText(candidate.education),
+      },
+      location: {
+        score: Math.round(locationScore),
+        jobLocation: job.location ?? "",
+        candidateLocation: candidate.location ?? "",
+      },
+      verification: {
+        score: Math.round(verificationScore),
+        verifiedCount,
+      },
+      preferences: {
+        score: Math.round(pref.score),
+        facets,
+        matches: pref.matches,
+        mismatches: pref.mismatches,
+      },
+    },
+    assessment,
+  };
+}
+
 export function computeMatch(job: Job, candidate: Candidate, verifiedCount: number = 0): MatchResult {
   const { score: skillScore, matched: matchedSkills, missing: missingSkills } = computeSkillScore(
     job.skills,

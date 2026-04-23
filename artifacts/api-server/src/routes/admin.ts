@@ -4,6 +4,7 @@ import { eq, and, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
+import { explainMatch } from "../lib/matching";
 
 const router: IRouter = Router();
 
@@ -367,6 +368,53 @@ router.delete("/admin/admins/:id", async (req, res) => {
 });
 
 const DEMO_CANDIDATE_EMAIL = "demo-candidate@avana.test";
+
+router.get("/admin/match-diagnostic", async (req, res) => {
+  const candidateId = parseInt(String(req.query.candidateId ?? ""), 10);
+  const jobId = parseInt(String(req.query.jobId ?? ""), 10);
+  if (!Number.isFinite(candidateId) || !Number.isFinite(jobId)) {
+    res.status(400).json({ error: "candidateId and jobId are required" });
+    return;
+  }
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
+  if (!candidate) { res.status(404).json({ error: "Candidate not found" }); return; }
+  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+  if (!job) { res.status(404).json({ error: "Job not found" }); return; }
+
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
+  const explanation = explainMatch(job, candidate, verifiedCount);
+
+  res.json({
+    candidate: {
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      currentTitle: candidate.currentTitle,
+      experienceYears: candidate.experienceYears,
+      education: candidate.education,
+      location: candidate.location,
+      isDemo: candidate.isDemo,
+    },
+    job: {
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      jobType: job.jobType,
+      workplace: job.workplace,
+      industry: job.industry,
+      experienceLevel: job.experienceLevel,
+      educationLevel: job.educationLevel,
+    },
+    explanation,
+  });
+});
 
 router.post("/admin/demo-candidate/reset", async (req, res) => {
   try {

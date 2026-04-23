@@ -33,6 +33,7 @@ import CompanyProfile from "@/pages/company-profile";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCompanies from "@/pages/admin-companies";
 import AdminCandidates from "@/pages/admin-candidates";
+import AdminMatchDiagnostic from "@/pages/admin-match-diagnostic";
 import DemoMatches from "@/pages/demo-matches";
 import AdminJobs from "@/pages/admin-jobs";
 import AdminCompanyDetail from "@/pages/admin-company-detail";
@@ -137,6 +138,7 @@ function AdminRoutes() {
         <Route path="/jobs/:id/matches" component={AdminJobMatches} />
         <Route path="/jobs/:id" component={AdminJobDetail} />
         <Route path="/jobs" component={AdminJobs} />
+        <Route path="/match-diagnostic" component={AdminMatchDiagnostic} />
         <Route path="/settings" component={AdminSettings} />
         <Route path="/development" component={AdminDevelopment} />
         <Route path="/verify/:token" component={VerifyPage} />
