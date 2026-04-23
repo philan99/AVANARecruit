@@ -321,33 +321,53 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#ffffff" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
-              Platform Features
-            </p>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
-              Everything You Need
+      <section className="relative py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: "#ffffff" }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 right-0 w-[520px] h-[520px] rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+          <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #1a2035 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)", border: "1px solid rgba(76, 175, 80, 0.2)" }}>
+              <Sparkles className="w-3.5 h-3.5" style={{ color: "#4CAF50" }} />
+              <span className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "#4CAF50" }}>Platform Features</span>
+            </div>
+            <h2 className="text-3xl lg:text-[44px] font-bold leading-[1.1] mb-5" style={{ color: "#1a2035" }}>
+              Everything You <span style={{ color: "#4CAF50" }}>Need</span>
             </h2>
-            <p className="text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
+            <p className="text-base lg:text-lg leading-relaxed" style={{ color: "#6b7280" }}>
               Built-in tools that make recruitment smarter, faster, and more transparent for everyone involved.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-xl p-7 transition-all hover:-translate-y-1"
-                style={{ backgroundColor: "#f8f9fb", border: "1px solid #e5e7eb" }}
-              >
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-                  <feature.icon className="w-5 h-5" style={{ color: "#4CAF50" }} />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((feature, index) => {
+              const isFeatured = index === 0;
+              return (
+                <div
+                  key={feature.title}
+                  className="relative rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,32,53,0.18)] group overflow-hidden"
+                  style={
+                    isFeatured
+                      ? { background: "linear-gradient(135deg, #1a2035 0%, #232a45 100%)", border: "1px solid rgba(76, 175, 80, 0.25)" }
+                      : { backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }
+                  }
+                >
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[3px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: "linear-gradient(90deg, #4CAF50 0%, #6dcf72 100%)" }}
+                  />
+                  <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, rgba(76,175,80,0.15) 0%, transparent 70%)" }} />
+
+                  <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-5 shadow-sm" style={{ background: "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" }}>
+                    <feature.icon className="w-5 h-5" style={{ color: "#ffffff" }} />
+                  </div>
+                  <h3 className="relative text-lg font-bold mb-2.5 leading-snug" style={{ color: isFeatured ? "#ffffff" : "#1a2035" }}>{feature.title}</h3>
+                  <p className="relative text-sm leading-relaxed" style={{ color: isFeatured ? "rgba(255,255,255,0.7)" : "#6b7280" }}>{feature.description}</p>
                 </div>
-                <h3 className="text-base font-bold mb-2" style={{ color: "#1a2035" }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{feature.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
