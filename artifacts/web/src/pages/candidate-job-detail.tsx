@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2, Sparkles } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2, Sparkles, Quote } from "lucide-react";
 import { useGetJob, getGetJobQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -336,6 +336,55 @@ ${name}`
               </div>
             </CardContent>
           </Card>
+
+          {(job.idealCandidateTraits?.length || job.idealCandidateNote) && (
+            <Card className="bg-card overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <span className="text-[10px] font-semibold tracking-[0.18em] uppercase text-primary">
+                    What {job.company} is looking for
+                  </span>
+                </div>
+                <CardTitle className="text-lg leading-snug">
+                  The kind of person who'd thrive in this role
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {job.idealCandidateTraits && job.idealCandidateTraits.length > 0 && (
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-muted-foreground mb-2">
+                      Working style
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {job.idealCandidateTraits.map((trait) => (
+                        <span
+                          key={trait}
+                          className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border"
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {job.idealCandidateNote && (
+                  <div className="rounded-lg p-4 relative bg-muted/40 border border-border">
+                    <Quote className="absolute top-3 left-3 w-4 h-4 text-primary opacity-40" />
+                    <p className="text-sm leading-relaxed text-foreground/80 pl-6 italic">
+                      "{job.idealCandidateNote}"
+                    </p>
+                    <div className="text-[10px] text-muted-foreground mt-2 pl-6">
+                      — from the hiring team at {job.company}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div>
