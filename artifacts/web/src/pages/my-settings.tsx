@@ -21,7 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { validatePassword } from "@/lib/password-policy";
+import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordStrength } from "@/components/password-strength";
 
 const PHONE_CODES = [
@@ -479,6 +479,9 @@ export default function MySettings() {
               autoComplete="current-password"
             />
           </div>
+          <p className="text-xs text-muted-foreground rounded-md bg-muted/50 px-3 py-2" data-testid="text-password-rules">
+            Your password must include: at least {PASSWORD_MIN_LENGTH} characters, one lowercase letter, one uppercase letter, one number, and one special character.
+          </p>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">New Password</label>
