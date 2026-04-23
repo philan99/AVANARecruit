@@ -2,14 +2,29 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidateMatches, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, MapPin, Briefcase, ArrowRight, Sparkles, X } from "lucide-react";
+import { Target, Building, ArrowRight, Sparkles } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 type ScoreFilter = "all" | "high" | "mid" | "low";
+
+function scoreColor(score: number) {
+  if (score >= 75) return "bg-green-500 text-white";
+  if (score >= 50) return "bg-amber-500 text-white";
+  return "bg-gray-400 text-white";
+}
+
+function ScoreChip({ label, v }: { label: string; v: number | undefined }) {
+  return (
+    <div className="flex items-center justify-between bg-secondary/40 rounded px-2 py-1">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{Math.round(v ?? 0)}</span>
+    </div>
+  );
+}
 
 export default function CandidateMatches() {
   const { candidateProfileId } = useRole();
@@ -60,19 +75,6 @@ export default function CandidateMatches() {
     }
   }, [candidateProfileId, isLoading, matches, isRunning]);
 
-  if (!candidateProfileId) {
-    return (
-      <div className="p-8 max-w-7xl mx-auto text-center py-16">
-        <Target className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-foreground mb-2">No Profile Selected</h2>
-        <p className="text-muted-foreground mb-6">Set up your profile first to see job matches.</p>
-        <Link href="/profile">
-          <Button>Go to My Profile</Button>
-        </Link>
-      </div>
-    );
-  }
-
   const allSorted = useMemo(() => [...(matches || [])].sort((a, b) => b.overallScore - a.overallScore), [matches]);
 
   const sortedMatches = useMemo(() => {
@@ -86,8 +88,21 @@ export default function CandidateMatches() {
     });
   }, [allSorted, scoreFilter, appliedOnly]);
 
+  if (!candidateProfileId) {
+    return (
+      <div className="p-8 max-w-7xl mx-auto text-center py-16">
+        <Target className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-foreground mb-2">No Profile Selected</h2>
+        <p className="text-muted-foreground mb-6">Set up your profile first to see job matches.</p>
+        <Link href="/profile">
+          <Button>Go to My Profile</Button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 max-w-[1200px] mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
@@ -95,7 +110,7 @@ export default function CandidateMatches() {
           </h1>
           <p className="text-muted-foreground mt-1">Jobs that match your skills and experience, ranked by AI scoring.</p>
         </div>
-        <Button onClick={handleRunMatching} disabled={isRunning} className="shrink-0">
+        <Button onClick={() => handleRunMatching()} disabled={isRunning} className="shrink-0">
           <Sparkles className="w-4 h-4 mr-2" />
           {isRunning ? "Running..." : "Run AI Matching"}
         </Button>
@@ -120,6 +135,11 @@ export default function CandidateMatches() {
         <>
           <div className="flex items-center gap-3 flex-wrap">
             <Badge variant="secondary" className="font-mono text-sm px-3 py-1">{allSorted.length} Total Matches</Badge>
+            {scoreFilter !== "all" && (
+              <span className="text-sm text-muted-foreground">
+                Showing <span className="font-medium text-foreground">{sortedMatches.length}</span> of {allSorted.length}
+              </span>
+            )}
             <div className="flex items-center gap-1 ml-auto">
               {([
                 { key: "high" as ScoreFilter, label: "> 75%" },
@@ -140,87 +160,73 @@ export default function CandidateMatches() {
             </div>
           </div>
 
-          {scoreFilter !== "all" && (
-            <p className="text-sm text-muted-foreground">
-              Showing <span className="font-medium text-foreground">{sortedMatches.length}</span> of {allSorted.length} matches
-            </p>
-          )}
-
-        <div className="space-y-4">
-          {sortedMatches.map((match) => (
-            <Card key={match.id} className="bg-card hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-                        {Math.round(match.overallScore)}%
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-bold text-foreground">{match.jobTitle}</h3>
-                          {match.status !== "pending" && (
-                          <Badge
-                            variant={match.status === "shortlisted" ? "default" : match.status === "hired" ? "default" : match.status === "rejected" ? "destructive" : "secondary"}
-                            className="text-[10px] uppercase"
-                          >
-                            {match.status}
-                          </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-                          <span className="flex items-center"><Building className="w-3.5 h-3.5 mr-1" />{match.jobCompany}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{match.assessment}</p>
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {match.matchedSkills.slice(0, 5).map((skill) => (
-                            <Badge key={skill} variant="outline" className="text-[10px] py-0 h-5 bg-background">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {match.missingSkills.length > 0 && (
-                            <Badge variant="outline" className="text-[10px] py-0 h-5 bg-destructive/5 text-destructive border-destructive/20">
-                              {match.missingSkills.length} skills to develop
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sortedMatches.map(match => (
+              <Card key={match.id} className="bg-card border-border hover:border-primary/50 transition-colors">
+                <CardContent className="p-5 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">{match.jobTitle}</h3>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        <Building className="w-3 h-3" /> {match.jobCompany}
+                      </p>
                     </div>
+                    <Badge className={`${scoreColor(match.overallScore)} text-sm font-bold border-0 shrink-0`}>
+                      {Math.round(match.overallScore)}%
+                    </Badge>
                   </div>
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="bg-secondary/50 rounded px-2 py-1">
-                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.skillScore)}%</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">Skills</div>
-                      </div>
-                      <div className="bg-secondary/50 rounded px-2 py-1">
-                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.experienceScore)}%</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">Exp</div>
-                      </div>
-                      <div className="bg-secondary/50 rounded px-2 py-1">
-                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.educationScore)}%</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">Edu</div>
-                      </div>
-                      <div className="bg-secondary/50 rounded px-2 py-1">
-                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.locationScore)}%</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">Loc</div>
-                      </div>
-                      <div className="bg-secondary/50 rounded px-2 py-1 col-span-2">
-                        <div className="text-xs font-mono font-bold text-foreground">{Math.round(match.verificationScore ?? 0)}%</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">Verified</div>
-                      </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {match.status !== "pending" && (
+                      <Badge
+                        variant={match.status === "rejected" ? "destructive" : "secondary"}
+                        className="text-[10px] uppercase"
+                      >
+                        {match.status}
+                      </Badge>
+                    )}
+                    {match.applied && (
+                      <Badge className="text-[10px] uppercase border-0 bg-primary text-primary-foreground">Applied</Badge>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-[11px]">
+                    <ScoreChip label="Skills" v={match.skillScore} />
+                    <ScoreChip label="Experience" v={match.experienceScore} />
+                    <ScoreChip label="Education" v={match.educationScore} />
+                    <ScoreChip label="Location" v={match.locationScore} />
+                    <ScoreChip label="Verification" v={match.verificationScore ?? 0} />
+                  </div>
+
+                  {match.assessment && (
+                    <p className="text-xs text-muted-foreground flex gap-1.5">
+                      <Sparkles className="w-3 h-3 mt-0.5 shrink-0 text-primary" />
+                      <span className="line-clamp-3">{match.assessment}</span>
+                    </p>
+                  )}
+
+                  {(match.matchedSkills.length > 0 || match.missingSkills.length > 0) && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {match.matchedSkills.slice(0, 6).map(s => (
+                        <Badge key={`m-${s}`} variant="outline" className="text-[10px] border-green-500/40 text-green-600">{s}</Badge>
+                      ))}
+                      {match.missingSkills.slice(0, 4).map(s => (
+                        <Badge key={`x-${s}`} variant="outline" className="text-[10px] border-destructive/40 text-destructive">{s}</Badge>
+                      ))}
                     </div>
+                  )}
+
+                  <div className="pt-1">
                     <Link href={`/jobs/${match.jobId}`}>
-                      <Button variant="outline" size="sm" className="text-xs">
+                      <Button variant="outline" size="sm" className="text-xs w-full">
                         View Job <ArrowRight className="w-3 h-3 ml-1" />
                       </Button>
                     </Link>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </>
       )}
     </div>
