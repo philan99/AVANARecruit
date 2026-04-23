@@ -377,6 +377,10 @@ ${name}`
                       <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.verificationScore ?? 0)}%</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Verified</div>
                     </div>
+                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.preferenceScore ?? 0)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Preferences</div>
+                    </div>
                   </div>
                   {myMatch.assessment && (
                     <div className="mt-4 p-3 bg-muted/30 rounded-lg">

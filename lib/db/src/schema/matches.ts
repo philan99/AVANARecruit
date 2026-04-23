@@ -14,6 +14,7 @@ export const matchesTable = pgTable("matches", {
   educationScore: real("education_score").notNull(),
   locationScore: real("location_score").notNull(),
   verificationScore: real("verification_score").notNull().default(0),
+  preferenceScore: real("preference_score").notNull().default(0),
   assessment: text("assessment").notNull(),
   matchedSkills: text("matched_skills").array().notNull(),
   missingSkills: text("missing_skills").array().notNull(),

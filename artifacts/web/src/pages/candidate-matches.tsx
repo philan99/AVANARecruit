@@ -196,6 +196,7 @@ export default function CandidateMatches() {
                     <ScoreChip label="Education" v={match.educationScore} />
                     <ScoreChip label="Location" v={match.locationScore} />
                     <ScoreChip label="Verification" v={match.verificationScore ?? 0} />
+                    <ScoreChip label="Preferences" v={match.preferenceScore ?? 0} />
                   </div>
 
                   {match.assessment && (

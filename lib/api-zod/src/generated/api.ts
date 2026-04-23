@@ -359,6 +359,7 @@ export const GetCandidateMatchesResponseItem = zod.object({
   educationScore: zod.number(),
   locationScore: zod.number(),
   verificationScore: zod.number().optional(),
+  preferenceScore: zod.number().optional(),
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
