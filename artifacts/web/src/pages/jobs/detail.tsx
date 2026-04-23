@@ -225,6 +225,35 @@ export default function JobDetail({ params }: { params: { id: string } }) {
               </div>
             </CardContent>
           </Card>
+
+          {(job.idealCandidateTraits?.length || job.idealCandidateNote) && (
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center justify-between">
+                  Ideal candidate
+                  {job.idealCandidateUseInScore === false && (
+                    <span className="text-[10px] font-normal text-muted-foreground uppercase tracking-wide">Display only</span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {job.idealCandidateTraits && job.idealCandidateTraits.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {job.idealCandidateTraits.map((trait) => (
+                      <Badge key={trait} variant="outline" className="px-2 py-0.5 text-xs border-primary/30 text-primary">
+                        {trait}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {job.idealCandidateNote && (
+                  <p className="text-sm text-muted-foreground leading-relaxed italic">
+                    "{job.idealCandidateNote}"
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div>
