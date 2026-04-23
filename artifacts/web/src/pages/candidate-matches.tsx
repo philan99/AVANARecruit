@@ -40,7 +40,7 @@ export default function CandidateMatches() {
   const searchString = useSearch();
   const appliedOnly = new URLSearchParams(searchString).get("applied") === "true";
   const [isRunning, setIsRunning] = useState(false);
-  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {

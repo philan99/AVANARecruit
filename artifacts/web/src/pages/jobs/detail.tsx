@@ -67,7 +67,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
     query: { enabled: !!jobId, queryKey: getGetJobMatchesQueryKey(jobId) },
   });
 
-  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
 
   const filteredMatches = useMemo(() => {
     if (!matches) return [];
