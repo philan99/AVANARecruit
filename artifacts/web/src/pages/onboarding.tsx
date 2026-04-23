@@ -49,10 +49,10 @@ const STEP_TITLES = [
   "Upload your CV",
   "The basics",
   "Your skills",
-  "Education",
   "Experience",
-  "What you're looking for",
+  "Education",
   "Social media",
+  "What you're looking for",
   "All set",
 ];
 
@@ -338,25 +338,25 @@ export default function Onboarding() {
         ok = await patchCandidate({ skills });
         break;
       case 5:
+        ok = await patchCandidate({ experience: experienceList } as any);
+        break;
+      case 6:
         ok = await patchCandidate({
           education: education || "Not specified",
           educationDetails: educationDetails || null,
           qualifications,
         });
         break;
-      case 6:
-        ok = await patchCandidate({ experience: experienceList } as any);
-        break;
       case 7:
-        ok = await patchCandidate({ preferredJobTypes, preferredWorkplaces, preferredIndustries });
-        break;
-      case 8:
         ok = await patchCandidate({
           linkedinUrl: normalizeUrl(linkedinUrl),
           facebookUrl: normalizeUrl(facebookUrl),
           twitterUrl: normalizeUrl(twitterUrl),
           portfolioUrl: normalizeUrl(portfolioUrl),
         });
+        break;
+      case 8:
+        ok = await patchCandidate({ preferredJobTypes, preferredWorkplaces, preferredIndustries });
         break;
     }
     if (!ok) toast({ title: "Couldn't save", description: "Please try again.", variant: "destructive" });
@@ -794,7 +794,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Education</h1>
               <p className="text-sm text-slate-600 mb-5">Your highest qualification helps with role-specific matching.</p>
@@ -874,7 +874,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 6 && (
+          {step === 5 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Work experience<FieldBadge field="experience" /></h1>
               <p className="text-sm text-slate-600 mb-5">Add your previous roles. The more you share, the better we can match you. This step is optional — you can always add more later.</p>
@@ -1000,7 +1000,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 7 && (
+          {step === 8 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>What you're looking for</h1>
               <p className="text-sm text-slate-600 mb-5">We'll prioritise jobs that match your preferences.</p>
@@ -1049,7 +1049,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          {step === 8 && (
+          {step === 7 && (
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#1a2035" }}>Social media</h1>
               <p className="text-sm text-slate-600 mb-5">Adding links helps companies learn more about you. All optional.</p>
