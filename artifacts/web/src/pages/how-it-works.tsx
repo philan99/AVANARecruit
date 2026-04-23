@@ -300,10 +300,10 @@ export default function HowItWorks() {
 
                   <div className="relative flex items-center gap-3 mb-5">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: isFeatured ? "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" : "linear-gradient(135deg, #1a2035 0%, #2c3454 100%)" }}>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" }}>
                         <step.icon className="w-5 h-5" style={{ color: "#ffffff" }} />
                       </div>
-                      <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm" style={{ backgroundColor: isFeatured ? "#4CAF50" : "#1a2035", color: "#ffffff", border: "2px solid #ffffff" }}>
+                      <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm" style={{ backgroundColor: "#4CAF50", color: "#ffffff", border: "2px solid #ffffff" }}>
                         {index + 1}
                       </div>
                     </div>
