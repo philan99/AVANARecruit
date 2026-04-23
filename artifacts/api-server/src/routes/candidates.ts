@@ -21,7 +21,7 @@ const router: IRouter = Router();
 router.get("/candidates", async (req, res): Promise<void> => {
   const params = ListCandidatesQueryParams.safeParse(req.query);
 
-  const conditions = [];
+  const conditions = [eq(candidatesTable.isDemo, false)];
   if (params.success && params.data.status) {
     conditions.push(eq(candidatesTable.status, params.data.status));
   }
@@ -487,6 +487,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
  * candidate registration and passive→active status transitions.
  */
 async function sendCandidateAlerts(candidate: any) {
+  if (candidate?.isDemo || candidate?.is_demo) return;
   const alertJobs = await db
     .select({
       id: jobsTable.id,

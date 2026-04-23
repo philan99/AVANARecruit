@@ -42,7 +42,7 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
   const activeCandidates = await db
     .select()
     .from(candidatesTable)
-    .where(eq(candidatesTable.status, "active"));
+    .where(and(eq(candidatesTable.status, "active"), eq(candidatesTable.isDemo, false)));
 
   const existingMatches = await db.select().from(matchesTable).where(eq(matchesTable.jobId, job.id));
   const existingMap = new Map(existingMatches.map(m => [m.candidateId, m]));
@@ -217,6 +217,13 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
   const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, params.data.id));
   if (!candidate) {
     res.status(404).json({ error: "Candidate not found" });
+    return;
+  }
+
+  // Demo candidates are used for QA only — never persist matches against
+  // real jobs or surface them to companies.
+  if (candidate.isDemo) {
+    res.json({ jobsMatched: 0, matches: [], demo: true });
     return;
   }
 
@@ -646,9 +653,11 @@ router.get("/dashboard/recent-matches", async (req, res): Promise<void> => {
     .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
     .$dynamic();
 
-  if (companyProfileId) {
-    query = query.where(eq(jobsTable.companyProfileId, companyProfileId));
-  }
+  query = query.where(
+    companyProfileId
+      ? and(eq(jobsTable.companyProfileId, companyProfileId), eq(candidatesTable.isDemo, false))
+      : eq(candidatesTable.isDemo, false)
+  );
 
   const matches = await query
     .orderBy(desc(matchesTable.createdAt))
@@ -675,9 +684,11 @@ router.get("/dashboard/top-candidates", async (req, res): Promise<void> => {
     .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
     .$dynamic();
 
-  if (companyProfileId) {
-    query = query.where(eq(jobsTable.companyProfileId, companyProfileId));
-  }
+  query = query.where(
+    companyProfileId
+      ? and(eq(jobsTable.companyProfileId, companyProfileId), eq(candidatesTable.isDemo, false))
+      : eq(candidatesTable.isDemo, false)
+  );
 
   const topCandidates = await query
     .groupBy(candidatesTable.id, candidatesTable.name, candidatesTable.currentTitle)
@@ -754,8 +765,8 @@ router.get("/dashboard/applicants", async (req, res): Promise<void> => {
     .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
     .where(
       companyProfileId
-        ? and(eq(matchesTable.applied, true), eq(jobsTable.companyProfileId, companyProfileId))
-        : eq(matchesTable.applied, true)
+        ? and(eq(matchesTable.applied, true), eq(jobsTable.companyProfileId, companyProfileId), eq(candidatesTable.isDemo, false))
+        : and(eq(matchesTable.applied, true), eq(candidatesTable.isDemo, false))
     )
     .orderBy(desc(matchesTable.createdAt))
     .limit(limit);
@@ -772,7 +783,10 @@ router.get("/dashboard/skill-demand", async (req, res): Promise<void> => {
     jobQuery = jobQuery.where(eq(jobsTable.companyProfileId, companyProfileId));
   }
   const jobs = await jobQuery;
-  const candidates = await db.select({ skills: candidatesTable.skills }).from(candidatesTable);
+  const candidates = await db
+    .select({ skills: candidatesTable.skills })
+    .from(candidatesTable)
+    .where(eq(candidatesTable.isDemo, false));
 
   const skillJobCount: Record<string, number> = {};
   const skillCandidateCount: Record<string, number> = {};

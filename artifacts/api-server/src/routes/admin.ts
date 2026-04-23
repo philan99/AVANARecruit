@@ -366,4 +366,63 @@ router.delete("/admin/admins/:id", async (req, res) => {
   }
 });
 
+const DEMO_CANDIDATE_EMAIL = "demo-candidate@avana.test";
+
+router.post("/admin/demo-candidate/reset", async (req, res) => {
+  try {
+    const initialOnboarding = { currentStep: 1, completedSteps: [], skippedSteps: [], completedAt: null };
+    const blankCandidateFields = {
+      name: "Demo Candidate",
+      phone: null,
+      currentTitle: "",
+      summary: "",
+      skills: [] as string[],
+      qualifications: [] as string[],
+      experienceYears: 0,
+      education: "",
+      educationDetails: null,
+      location: "",
+      profileImage: null,
+      cvFile: null,
+      cvFileName: null,
+      experience: [] as any[],
+      preferredJobTypes: [] as string[],
+      preferredWorkplaces: [] as string[],
+      preferredIndustries: [] as string[],
+      linkedinUrl: null,
+      facebookUrl: null,
+      twitterUrl: null,
+      portfolioUrl: null,
+      verified: true,
+      isDemo: true,
+      status: "active" as const,
+      onboardingState: initialOnboarding,
+    };
+
+    const [existing] = await db
+      .select()
+      .from(candidatesTable)
+      .where(eq(candidatesTable.email, DEMO_CANDIDATE_EMAIL));
+
+    let row;
+    if (existing) {
+      [row] = await db
+        .update(candidatesTable)
+        .set(blankCandidateFields)
+        .where(eq(candidatesTable.id, existing.id))
+        .returning();
+    } else {
+      [row] = await db
+        .insert(candidatesTable)
+        .values({ ...blankCandidateFields, email: DEMO_CANDIDATE_EMAIL })
+        .returning();
+    }
+
+    res.json({ id: row.id, email: row.email, name: row.name, isDemo: row.isDemo });
+  } catch (err) {
+    req.log.error(err, "Failed to reset demo candidate");
+    res.status(500).json({ error: "Failed to reset demo candidate" });
+  }
+});
+
 export default router;

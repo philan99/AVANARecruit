@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download, FlaskConical, RotateCcw } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 import * as XLSX from "xlsx";
 
@@ -462,13 +462,40 @@ export default function AdminCandidates() {
     return <div className="p-8 text-center text-muted-foreground font-mono">Loading candidates...</div>;
   }
 
+  async function startDemoCandidate() {
+    try {
+      const res = await fetch(`${basePath}/admin/demo-candidate/reset`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const demo = await res.json();
+      toast({ title: "Demo candidate ready", description: "Wizard reset to step 1." });
+      impersonateCandidate(demo.id, demo.email);
+      navigate("/onboarding");
+    } catch {
+      toast({ title: "Error", description: "Failed to reset the demo candidate.", variant: "destructive" });
+    }
+  }
+
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-          <Users className="mr-3 text-primary" /> Candidates
-        </h1>
-        <p className="text-muted-foreground mt-1">{candidates.length} candidate profiles on the platform.</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+            <Users className="mr-3 text-primary" /> Candidates
+          </h1>
+          <p className="text-muted-foreground mt-1">{candidates.length} candidate profiles on the platform.</p>
+        </div>
+        <Card className="bg-card border-amber-500/30 shrink-0">
+          <CardContent className="p-3 flex items-center gap-3">
+            <FlaskConical className="w-5 h-5 text-amber-500 shrink-0" />
+            <div className="text-xs">
+              <div className="font-semibold text-foreground">Demo candidate</div>
+              <div className="text-muted-foreground">Test the CV wizard end-to-end without affecting live data.</div>
+            </div>
+            <Button size="sm" onClick={startDemoCandidate} className="ml-1 shrink-0">
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Reset &amp; Test
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-3">
