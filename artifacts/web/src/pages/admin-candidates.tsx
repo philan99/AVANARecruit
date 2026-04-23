@@ -869,6 +869,9 @@ export default function AdminCandidates() {
                       <Badge className={`text-[8px] uppercase border-0 shrink-0 ${candidate.status === 'active' ? 'bg-green-500 text-white' : candidate.status === 'passive' ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'}`}>
                         {candidate.status === "not_looking" ? "Not Looking" : candidate.status}
                       </Badge>
+                      {candidate.isDemo && (
+                        <Badge className="text-[8px] uppercase border-0 shrink-0 bg-amber-500 text-white">Demo</Badge>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
                   </div>
@@ -994,7 +997,12 @@ export default function AdminCandidates() {
                             {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-xs text-foreground truncate">{candidate.name}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-xs text-foreground truncate">{candidate.name}</p>
+                              {candidate.isDemo && (
+                                <Badge className="text-[8px] uppercase border-0 shrink-0 bg-amber-500 text-white px-1 py-0">Demo</Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
