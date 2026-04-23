@@ -202,8 +202,8 @@ export default function CandidateMatches() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-[11px]">
-                    <ScoreChip label="Skills" v={match.skillScore} />
                     <ScoreChip label="Experience" v={match.experienceScore} />
+                    <ScoreChip label="Skills" v={match.skillScore} />
                     <ScoreChip label="Preferences" v={match.preferenceScore ?? 0} />
                     <ScoreChip label="Verification" v={match.verificationScore ?? 0} />
                     <ScoreChip label="Location" v={match.locationScore} />

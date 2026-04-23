@@ -358,12 +358,12 @@ ${name}`
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.skillScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Skills</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
                       <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.experienceScore)}%</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Experience</div>
+                    </div>
+                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.skillScore)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Skills</div>
                     </div>
                     <div className="bg-secondary/50 rounded-lg p-3 text-center">
                       <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.preferenceScore ?? 0)}%</div>

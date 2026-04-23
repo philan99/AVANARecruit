@@ -178,6 +178,19 @@ export default function AdminMatchDiagnostic() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
               <ElementHeader
+                icon={Briefcase} title="Experience" score={e.experience.score} weight={data.explanation.weights.experience}
+                rule="Required years are inferred from the job's experience level (junior 1, mid 3, senior 5, lead 8, executive 12). Total years and role-relevant years (from work history matching the job title or required skills) are each scored, then blended 20% total + 80% relevant. Over-qualification penalty only applies for junior roles."
+              />
+              <CardContent className="text-xs space-y-1">
+                <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs)`} />
+                <KV k="Total years" v={`${e.experience.candidateTotalYears} yrs → ${e.experience.totalYearsScore}%`} />
+                <KV k="Role-relevant years" v={e.experience.candidateRelevantYears == null ? "n/a (no work history)" : `${e.experience.candidateRelevantYears} yrs → ${e.experience.relevantYearsScore}%`} />
+                <KV k="Final" v={`${e.experience.score}%`} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <ElementHeader
                 icon={Target} title="Skills" score={e.skills.score} weight={data.explanation.weights.skills}
                 rule="Each required job skill is matched against the candidate's skills using exact match, substring overlap, or 80%+ Levenshtein similarity. Score = matched / required × 100."
               />
@@ -200,19 +213,6 @@ export default function AdminMatchDiagnostic() {
                   <p className="font-medium mb-1 text-destructive">Missing ({e.skills.missing.length})</p>
                   <div className="flex flex-wrap gap-1">{e.skills.missing.map(s => <Badge key={s} className="bg-destructive/10 text-destructive border-destructive/30" variant="outline">{s}</Badge>)}</div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <ElementHeader
-                icon={Briefcase} title="Experience" score={e.experience.score} weight={data.explanation.weights.experience}
-                rule="Required years are inferred from the job's experience level (junior 1, mid 3, senior 5, lead 8, executive 12). Total years and role-relevant years (from work history matching the job title or required skills) are each scored, then blended 20% total + 80% relevant. Over-qualification penalty only applies for junior roles."
-              />
-              <CardContent className="text-xs space-y-1">
-                <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs)`} />
-                <KV k="Total years" v={`${e.experience.candidateTotalYears} yrs → ${e.experience.totalYearsScore}%`} />
-                <KV k="Role-relevant years" v={e.experience.candidateRelevantYears == null ? "n/a (no work history)" : `${e.experience.candidateRelevantYears} yrs → ${e.experience.relevantYearsScore}%`} />
-                <KV k="Final" v={`${e.experience.score}%`} />
               </CardContent>
             </Card>
 

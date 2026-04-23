@@ -135,8 +135,8 @@ export default function DemoMatches() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-[11px]">
-                  <ScoreChip label="Skills" v={p.skillScore} />
                   <ScoreChip label="Experience" v={p.experienceScore} />
+                  <ScoreChip label="Skills" v={p.skillScore} />
                   <ScoreChip label="Preferences" v={p.preferenceScore} />
                   <ScoreChip label="Verification" v={p.verificationScore} />
                   <ScoreChip label="Location" v={p.locationScore} />
