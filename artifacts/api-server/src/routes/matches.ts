@@ -246,6 +246,7 @@ router.get("/candidates/:id/preview-matches", async (req, res): Promise<void> =>
       educationScore: result.educationScore,
       locationScore: result.locationScore,
       verificationScore: result.verificationScore,
+      preferenceScore: result.preferenceScore,
       assessment: result.assessment,
       matchedSkills: result.matchedSkills,
       missingSkills: result.missingSkills,

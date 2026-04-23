@@ -18,6 +18,7 @@ type Preview = {
   educationScore: number;
   locationScore: number;
   verificationScore: number;
+  preferenceScore: number;
   assessment: string;
   matchedSkills: string[];
   missingSkills: string[];
@@ -133,6 +134,7 @@ export default function DemoMatches() {
                   <ScoreChip label="Education" v={p.educationScore} />
                   <ScoreChip label="Location" v={p.locationScore} />
                   <ScoreChip label="Verification" v={p.verificationScore} />
+                  <ScoreChip label="Preferences" v={p.preferenceScore} />
                 </div>
 
                 {p.assessment && (
