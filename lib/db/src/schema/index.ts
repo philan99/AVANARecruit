@@ -9,6 +9,7 @@ export * from "./admins";
 export * from "./contactSubmissions";
 export * from "./verifications";
 export * from "./passwordResets";
+export * from "./passwordHistory";
 export * from "./emailVerifications";
 export * from "./bookmarks";
 export * from "./conversations";

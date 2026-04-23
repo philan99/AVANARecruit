@@ -250,6 +250,7 @@ export default function MySettings() {
         body: JSON.stringify({
           accountType,
           accountId,
+          companyUserId: accountType === "company" ? companyUserId : undefined,
           currentPassword: pwForm.currentPassword,
           newPassword: pwForm.newPassword,
         }),

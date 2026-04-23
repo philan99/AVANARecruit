@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { explainMatch } from "../lib/matching";
+import { isPasswordReused, recordPasswordHistory, PASSWORD_REUSE_ERROR } from "../lib/password-history";
 
 const router: IRouter = Router();
 
@@ -88,16 +89,27 @@ router.post("/admin/company-users/:userId/reset-password", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db
-      .update(companyUsers)
-      .set({ password: hashedPassword })
-      .where(eq(companyUsers.id, userId))
-      .returning({ id: companyUsers.id });
-
-    if (result.length === 0) {
+    const [existing] = await db
+      .select({ id: companyUsers.id, password: companyUsers.password })
+      .from(companyUsers)
+      .where(eq(companyUsers.id, userId));
+    if (!existing) {
       return res.status(404).json({ error: "Team member not found" });
     }
+    if (await isPasswordReused("company_user", userId, password, [existing.password])) {
+      return res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db
+      .update(companyUsers)
+      .set({ password: hashedPassword })
+      .where(eq(companyUsers.id, userId));
+
+    if (existing.password) {
+      await recordPasswordHistory("company_user", userId, existing.password);
+    }
+
     res.json({ success: true });
   } catch (err) {
     req.log.error(err, "Failed to reset team member password");
@@ -164,17 +176,25 @@ router.post("/admin/companies/:id/reset-password", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const [owner] = await db
+      .select({ id: companyUsers.id, password: companyUsers.password })
+      .from(companyUsers)
+      .where(and(eq(companyUsers.companyProfileId, companyId), eq(companyUsers.role, "owner")));
+    if (!owner) {
+      return res.status(404).json({ error: "Company owner not found" });
+    }
+    if (await isPasswordReused("company_user", owner.id, password, [owner.password])) {
+      return res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+    }
 
-    // Reset the owner's password (in stage (a) there is exactly one owner per company).
-    const result = await db
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db
       .update(companyUsers)
       .set({ password: hashedPassword })
-      .where(and(eq(companyUsers.companyProfileId, companyId), eq(companyUsers.role, "owner")))
-      .returning({ id: companyUsers.id });
+      .where(eq(companyUsers.id, owner.id));
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: "Company owner not found" });
+    if (owner.password) {
+      await recordPasswordHistory("company_user", owner.id, owner.password);
     }
 
     res.json({ success: true });
@@ -193,15 +213,25 @@ router.post("/admin/candidates/:id/reset-password", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
+    const [existing] = await db
+      .select({ id: candidatesTable.id, password: candidatesTable.password })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.id, candidateId));
+    if (!existing) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+    if (await isPasswordReused("candidate", candidateId, password, [existing.password])) {
+      return res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db
+    await db
       .update(candidatesTable)
       .set({ password: hashedPassword })
-      .where(eq(candidatesTable.id, candidateId))
-      .returning({ id: candidatesTable.id });
+      .where(eq(candidatesTable.id, candidateId));
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: "Candidate not found" });
+    if (existing.password) {
+      await recordPasswordHistory("candidate", candidateId, existing.password);
     }
 
     res.json({ success: true });
@@ -326,14 +356,24 @@ router.post("/admin/admins/:id/reset-password", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db.update(adminsTable)
-      .set({ password: hashedPassword, updatedAt: new Date() })
-      .where(eq(adminsTable.id, adminId))
-      .returning({ id: adminsTable.id });
-
-    if (result.length === 0) {
+    const [existing] = await db
+      .select({ id: adminsTable.id, password: adminsTable.password })
+      .from(adminsTable)
+      .where(eq(adminsTable.id, adminId));
+    if (!existing) {
       return res.status(404).json({ error: "Admin not found" });
+    }
+    if (await isPasswordReused("admin", adminId, password, [existing.password])) {
+      return res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db.update(adminsTable)
+      .set({ password: hashedPassword, updatedAt: new Date() })
+      .where(eq(adminsTable.id, adminId));
+
+    if (existing.password) {
+      await recordPasswordHistory("admin", adminId, existing.password);
     }
 
     res.json({ success: true });

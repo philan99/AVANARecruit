@@ -6,6 +6,7 @@ import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { validatePassword } from "../lib/password-policy";
+import { isPasswordReused, recordPasswordHistory, PASSWORD_REUSE_ERROR } from "../lib/password-history";
 
 const router: IRouter = Router();
 
@@ -98,9 +99,37 @@ router.post("/reset-password", async (req, res): Promise<void> => {
     return;
   }
 
+  const lowerResetEmail = String(resetRecord.email).toLowerCase().trim();
+
+  let targetId: number | null = null;
+  let currentHash: string | null = null;
+  if (resetRecord.accountType === "candidate") {
+    const [row] = await db
+      .select({ id: candidatesTable.id, password: candidatesTable.password })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.email, lowerResetEmail));
+    targetId = row?.id ?? null;
+    currentHash = row?.password ?? null;
+  } else {
+    const [row] = await db
+      .select({ id: companyUsers.id, password: companyUsers.password })
+      .from(companyUsers)
+      .where(eq(companyUsers.email, lowerResetEmail));
+    targetId = row?.id ?? null;
+    currentHash = row?.password ?? null;
+  }
+
+  const historyType = resetRecord.accountType === "candidate" ? "candidate" : "company_user";
+  if (
+    targetId &&
+    (await isPasswordReused(historyType, targetId, password, [currentHash]))
+  ) {
+    res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+    return;
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const lowerResetEmail = String(resetRecord.email).toLowerCase().trim();
   if (resetRecord.accountType === "candidate") {
     await db
       .update(candidatesTable)
@@ -111,6 +140,10 @@ router.post("/reset-password", async (req, res): Promise<void> => {
       .update(companyUsers)
       .set({ password: hashedPassword })
       .where(eq(companyUsers.email, lowerResetEmail));
+  }
+
+  if (targetId && currentHash) {
+    await recordPasswordHistory(historyType, targetId, currentHash);
   }
 
   await db

@@ -3,6 +3,7 @@ import { db, candidatesTable, companyProfiles, companyUsers, adminsTable } from 
 import { eq, and, ne } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { validatePassword } from "../lib/password-policy";
+import { isPasswordReused, recordPasswordHistory, PASSWORD_REUSE_ERROR } from "../lib/password-history";
 
 const router: IRouter = Router();
 
@@ -259,7 +260,7 @@ router.post("/account/change-name", async (req, res): Promise<void> => {
 
 router.post("/account/change-password", async (req, res): Promise<void> => {
   try {
-    const { accountType, accountId, currentPassword, newPassword } = req.body || {};
+    const { accountType, accountId, companyUserId, currentPassword, newPassword } = req.body || {};
     if (!["candidate", "company"].includes(accountType) || !Number.isFinite(Number(accountId))) {
       res.status(400).json({ error: "Invalid account" });
       return;
@@ -274,7 +275,11 @@ router.post("/account/change-password", async (req, res): Promise<void> => {
       return;
     }
 
-    const acct = await loadAccount(accountType, Number(accountId));
+    const resolvedCompanyUserId =
+      companyUserId != null && companyUserId !== "" && Number.isFinite(Number(companyUserId))
+        ? Number(companyUserId)
+        : undefined;
+    const acct = await loadAccount(accountType, Number(accountId), resolvedCompanyUserId);
     if (!acct || !acct.password) {
       res.status(404).json({ error: "Account not found" });
       return;
@@ -290,6 +295,19 @@ router.post("/account/change-password", async (req, res): Promise<void> => {
       return;
     }
 
+    const historyType = accountType === "candidate" ? "candidate" : "company_user";
+    const historyId =
+      accountType === "candidate"
+        ? Number(accountId)
+        : ((acct as { userId?: number }).userId ?? 0);
+    if (
+      historyId &&
+      (await isPasswordReused(historyType, historyId, newPassword, [acct.password]))
+    ) {
+      res.status(400).json({ error: PASSWORD_REUSE_ERROR });
+      return;
+    }
+
     const hashed = await bcrypt.hash(newPassword, 10);
     if (accountType === "candidate") {
       await db.update(candidatesTable).set({ password: hashed }).where(eq(candidatesTable.id, Number(accountId)));
@@ -298,6 +316,9 @@ router.post("/account/change-password", async (req, res): Promise<void> => {
       if (userId) {
         await db.update(companyUsers).set({ password: hashed }).where(eq(companyUsers.id, userId));
       }
+    }
+    if (historyId && acct.password) {
+      await recordPasswordHistory(historyType, historyId, acct.password);
     }
 
     res.json({ success: true });
