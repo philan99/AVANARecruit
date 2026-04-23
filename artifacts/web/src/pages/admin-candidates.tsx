@@ -16,6 +16,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download, FlaskConical, RotateCcw } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetCandidateQueryKey, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
 import * as XLSX from "xlsx";
 
 function MultiSelectDropdown({
@@ -239,6 +241,7 @@ export default function AdminCandidates() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { impersonateCandidate } = useRole();
+  const queryClient = useQueryClient();
 
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -467,6 +470,8 @@ export default function AdminCandidates() {
       const res = await fetch(`${basePath}/admin/demo-candidate/reset`, { method: "POST" });
       if (!res.ok) throw new Error();
       const demo = await res.json();
+      await queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(demo.id) });
+      await queryClient.invalidateQueries({ queryKey: getGetCandidateMatchesQueryKey(demo.id) });
       toast({ title: "Demo candidate ready", description: "Wizard reset to step 1." });
       impersonateCandidate(demo.id, demo.email);
       navigate("/onboarding");
