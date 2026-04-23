@@ -81,6 +81,10 @@ const experienceLevelMap: Record<string, number> = {
 
 function scoreYearsAgainstRequirement(years: number, requiredYears: number): number {
   if (years >= requiredYears) {
+    // Only penalise over-qualification for junior roles. For mid+ roles,
+    // having more experience than required is always treated as a full match.
+    const isJunior = requiredYears <= 1;
+    if (!isJunior) return 100;
     const overQualification = years - requiredYears;
     if (overQualification <= 3) return 100;
     if (overQualification <= 6) return 85;
