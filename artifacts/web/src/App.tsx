@@ -103,6 +103,7 @@ function CandidateRoutes() {
             <Route path="/" component={CandidateDashboard} />
         <Route path="/profile" component={CandidateProfile} />
         <Route path="/my-matches" component={CandidateMatches} />
+        <Route path="/demo-matches/:id" component={DemoMatches} />
         <Route path="/shortlisted" component={CandidateShortlisted} />
         <Route path="/verifications" component={CandidateVerifications} />
         <Route path="/browse-jobs" component={BrowseJobs} />
