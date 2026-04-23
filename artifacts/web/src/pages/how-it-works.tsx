@@ -69,8 +69,8 @@ export default function HowItWorks() {
     },
     {
       icon: Sparkles,
-      title: "AI Pre-Fills Your Profile — Your Words or Ours",
-      description: "Our AI reads your CV and automatically fills in your skills, work experience, education, location, qualifications and more. Choose how role descriptions and your profile summary appear: keep your own wording exactly as you wrote it (the default), or let AI summarise each role into a concise 1–3 sentence overview. You can switch and re-read your CV at any time, and anything the AI is unsure about is clearly flagged for you to verify.",
+      title: "AI Pre-Fills Your Profile",
+      description: "Our AI reads your CV and fills in your skills, experience, education and more. Keep your own wording or let AI summarise it — anything uncertain is flagged for you to verify.",
     },
     {
       icon: UserCircle,
@@ -244,40 +244,79 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-              <UserCircle className="w-5 h-5" style={{ color: "#4CAF50" }} />
+      <section className="relative py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -left-32 w-[520px] h-[520px] rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, #1a2035 0%, transparent 70%)" }} />
+          <div className="absolute -bottom-40 -right-24 w-[420px] h-[420px] rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5" style={{ backgroundColor: "rgba(26, 32, 53, 0.08)", border: "1px solid rgba(26, 32, 53, 0.15)" }}>
+                <UserCircle className="w-3.5 h-3.5" style={{ color: "#1a2035" }} />
+                <span className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "#1a2035" }}>For Candidates</span>
+              </div>
+              <h2 className="text-3xl lg:text-[44px] font-bold leading-[1.1] mb-5" style={{ color: "#1a2035" }}>
+                Find Your <span style={{ color: "#4CAF50" }}>Perfect Role</span>
+              </h2>
+              <p className="text-base lg:text-lg leading-relaxed" style={{ color: "#6b7280" }}>
+                Build your profile, let AI find your best matches, and apply to roles where you're most likely to succeed.
+              </p>
             </div>
-            <div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>For Candidates</p>
-              <h2 className="text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: "#1a2035" }}>Find Your Perfect Role</h2>
+
+            <div className="grid grid-cols-3 gap-3 lg:gap-5 lg:max-w-md w-full">
+              {[
+                { value: "5 min", label: "Guided setup" },
+                { value: "+30%", label: "Score from verifying" },
+                { value: "1-click", label: "Apply to roles" },
+              ].map((stat) => (
+                <div key={stat.label} className="rounded-xl p-4 text-center" style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+                  <div className="text-xl lg:text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>{stat.value}</div>
+                  <div className="text-[11px] leading-tight font-medium" style={{ color: "#6b7280" }}>{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
-          <p className="text-base max-w-2xl mb-12" style={{ color: "#6b7280" }}>
-            Build your profile, let AI find your best matches, and apply to roles where you're most likely to succeed.
-          </p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {candidateSteps.map((step, index) => (
-              <div
-                key={step.title}
-                className="relative rounded-xl p-7 transition-all hover:-translate-y-1 group"
-                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "#1a2035", color: "#fff" }}>
-                    {index + 1}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {candidateSteps.map((step, index) => {
+              const isFeatured = index === 0;
+              return (
+                <div
+                  key={step.title}
+                  className={`relative rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,32,53,0.18)] group overflow-hidden ${isFeatured ? "md:col-span-2 lg:col-span-1" : ""}`}
+                  style={
+                    isFeatured
+                      ? { background: "linear-gradient(135deg, #1a2035 0%, #232a45 100%)", border: "1px solid rgba(76, 175, 80, 0.25)" }
+                      : { backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }
+                  }
+                >
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[3px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: "linear-gradient(90deg, #1a2035 0%, #4CAF50 100%)" }}
+                  />
+                  <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, rgba(26,32,53,0.12) 0%, transparent 70%)" }} />
+
+                  <div className="relative flex items-center gap-3 mb-5">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: isFeatured ? "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" : "linear-gradient(135deg, #1a2035 0%, #2c3454 100%)" }}>
+                        <step.icon className="w-5 h-5" style={{ color: "#ffffff" }} />
+                      </div>
+                      <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm" style={{ backgroundColor: isFeatured ? "#4CAF50" : "#1a2035", color: "#ffffff", border: "2px solid #ffffff" }}>
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: isFeatured ? "rgba(76, 175, 80, 0.9)" : "#9ca3af" }}>
+                      Step {String(index + 1).padStart(2, "0")}
+                    </div>
                   </div>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(26, 32, 53, 0.08)" }}>
-                    <step.icon className="w-4 h-4" style={{ color: "#1a2035" }} />
-                  </div>
+
+                  <h3 className="relative text-lg font-bold mb-2.5 leading-snug" style={{ color: isFeatured ? "#ffffff" : "#1a2035" }}>{step.title}</h3>
+                  <p className="relative text-sm leading-relaxed" style={{ color: isFeatured ? "rgba(255,255,255,0.7)" : "#6b7280" }}>{step.description}</p>
                 </div>
-                <h3 className="text-base font-bold mb-2" style={{ color: "#1a2035" }}>{step.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{step.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
