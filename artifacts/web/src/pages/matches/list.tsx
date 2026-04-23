@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Network, Check, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, ArrowLeft, ArrowRight, Send, Loader2, Plus } from "lucide-react";
+import { Network, Check, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, ArrowLeft, ArrowRight, Send, Loader2, Plus, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
@@ -266,7 +266,27 @@ ${companyName}`
           <div className="flex items-center gap-3 flex-wrap">
             <Badge variant="secondary" className="font-mono text-sm px-3 py-1">{totalMatches} Total Matches</Badge>
             <Badge variant="outline" className="font-mono text-sm px-3 py-1">{allMatches.length} Jobs with Matches</Badge>
-            <div className="flex items-center gap-1 ml-auto">
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setCollapsedJobs(new Set())}
+                disabled={collapsedJobs.size === 0}
+              >
+                <ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand all
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setCollapsedJobs(new Set(allMatches.map(g => g.jobId)))}
+                disabled={collapsedJobs.size === allMatches.length}
+              >
+                <ChevronsDownUp className="w-3.5 h-3.5 mr-1" /> Collapse all
+              </Button>
+            </div>
+            <div className="flex items-center gap-1">
               {([
                 { key: "high" as ScoreFilter, label: "> 75%" },
                 { key: "mid" as ScoreFilter, label: "50-75%" },
