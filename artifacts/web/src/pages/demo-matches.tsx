@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useRoute, Link } from "wouter";
+import { useRoute, useLocation } from "wouter";
+import { useRole } from "@/contexts/role-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,13 @@ function scoreColor(score: number) {
 
 export default function DemoMatches() {
   const [, params] = useRoute<{ id: string }>("/demo-matches/:id");
+  const [, navigate] = useLocation();
+  const { exitImpersonation, isImpersonating } = useRole();
+
+  function handleBack() {
+    if (isImpersonating) exitImpersonation();
+    navigate("/candidates");
+  }
   const candidateId = params?.id ? Number(params.id) : null;
   const [data, setData] = useState<PreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,11 +85,9 @@ export default function DemoMatches() {
             Nothing is saved, no companies are notified, and these matches do not appear anywhere else.
           </p>
         </div>
-        <Link href="/candidates">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to admin candidates
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm" onClick={handleBack}>
+          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to admin candidates
+        </Button>
       </div>
 
       <Card className="border-amber-500/40 bg-amber-500/5">
