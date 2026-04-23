@@ -136,6 +136,9 @@ export const UpdateJobBody = zod.object({
   educationLevel: zod.string().nullish(),
   workplace: zod.string().nullish(),
   status: zod.enum(["open", "closed", "draft"]).optional(),
+  idealCandidateTraits: zod.array(zod.string()).optional(),
+  idealCandidateNote: zod.string().optional(),
+  idealCandidateUseInScore: zod.boolean().optional(),
 });
 
 export const UpdateJobResponse = zod.object({

@@ -29,4 +29,7 @@ export interface UpdateJobBody {
   /** @nullable */
   workplace?: string | null;
   status?: UpdateJobBodyStatus;
+  idealCandidateTraits?: string[];
+  idealCandidateNote?: string;
+  idealCandidateUseInScore?: boolean;
 }

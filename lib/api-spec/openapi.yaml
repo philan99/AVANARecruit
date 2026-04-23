@@ -668,6 +668,14 @@ components:
         status:
           type: string
           enum: [open, closed, draft]
+        idealCandidateTraits:
+          type: array
+          items:
+            type: string
+        idealCandidateNote:
+          type: string
+        idealCandidateUseInScore:
+          type: boolean
 
     Candidate:
       type: object
