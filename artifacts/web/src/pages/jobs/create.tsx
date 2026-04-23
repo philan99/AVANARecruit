@@ -49,8 +49,14 @@ const formSchema = z.object({
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"], { required_error: "Status is required" }),
-  idealCandidateTraits: z.array(z.string()).max(5, "Pick up to 5 traits").default([]),
-  idealCandidateNote: z.string().max(300, "Keep it under 300 characters").default(""),
+  idealCandidateTraits: z
+    .array(z.string())
+    .min(1, "Pick at least one trait")
+    .max(5, "Pick up to 5 traits"),
+  idealCandidateNote: z
+    .string()
+    .min(20, "Add a sentence or two (at least 20 characters)")
+    .max(300, "Keep it under 300 characters"),
   idealCandidateUseInScore: z.boolean().default(true),
 });
 
@@ -817,9 +823,9 @@ export default function CreateJob() {
                     <FormItem>
                       <div className="flex items-center justify-between">
                         <FormLabel>
-                          Working style{" "}
+                          Working style <span className="text-red-500">*</span>{" "}
                           <span className="text-muted-foreground font-normal text-xs">
-                            · pick up to 5 ({value.length}/5)
+                            · pick 1–5 ({value.length}/5)
                           </span>
                         </FormLabel>
                       </div>
@@ -858,8 +864,8 @@ export default function CreateJob() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>
-                        Why this role suits them{" "}
-                        <span className="text-muted-foreground font-normal text-xs">· optional, 1–2 sentences</span>
+                        Why this role suits them <span className="text-red-500">*</span>{" "}
+                        <span className="text-muted-foreground font-normal text-xs">· 1–2 sentences</span>
                       </FormLabel>
                       <span className={`text-[11px] font-mono ${(field.value?.length || 0) > 280 ? "text-destructive" : "text-muted-foreground"}`}>
                         {field.value?.length || 0}/300
