@@ -54,6 +54,9 @@ export interface Job {
   /** @nullable */
   workplace?: string | null;
   status: JobStatus;
+  idealCandidateTraits: string[];
+  idealCandidateNote: string;
+  idealCandidateUseInScore: boolean;
   matchCount: number;
   createdAt: string;
   updatedAt: string;
@@ -104,6 +107,9 @@ export interface CreateJobBody {
   /** @nullable */
   workplace?: string | null;
   status?: CreateJobBodyStatus;
+  idealCandidateTraits?: string[];
+  idealCandidateNote?: string;
+  idealCandidateUseInScore?: boolean;
 }
 
 export type UpdateJobBodyExperienceLevel =

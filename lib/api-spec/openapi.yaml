@@ -546,6 +546,14 @@ components:
         status:
           type: string
           enum: [open, closed, draft]
+        idealCandidateTraits:
+          type: array
+          items:
+            type: string
+        idealCandidateNote:
+          type: string
+        idealCandidateUseInScore:
+          type: boolean
         matchCount:
           type: integer
         createdAt:
@@ -564,6 +572,9 @@ components:
         - skills
         - experienceLevel
         - status
+        - idealCandidateTraits
+        - idealCandidateNote
+        - idealCandidateUseInScore
         - matchCount
         - createdAt
         - updatedAt
@@ -607,6 +618,14 @@ components:
         status:
           type: string
           enum: [open, closed, draft]
+        idealCandidateTraits:
+          type: array
+          items:
+            type: string
+        idealCandidateNote:
+          type: string
+        idealCandidateUseInScore:
+          type: boolean
       required:
         - title
         - company

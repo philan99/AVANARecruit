@@ -33,4 +33,7 @@ export interface CreateJobBody {
   /** @nullable */
   workplace?: string | null;
   status?: CreateJobBodyStatus;
+  idealCandidateTraits?: string[];
+  idealCandidateNote?: string;
+  idealCandidateUseInScore?: boolean;
 }

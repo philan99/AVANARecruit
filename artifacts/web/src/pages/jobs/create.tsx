@@ -32,7 +32,8 @@ import {
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus, Upload, FileText, PencilLine } from "lucide-react";
+import { ArrowLeft, Briefcase, Sparkles, Loader2, X, Plus, Upload, FileText, PencilLine, Info, Check } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -48,7 +49,25 @@ const formSchema = z.object({
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"], { required_error: "Status is required" }),
+  idealCandidateTraits: z.array(z.string()).max(5, "Pick up to 5 traits").default([]),
+  idealCandidateNote: z.string().max(300, "Keep it under 300 characters").default(""),
+  idealCandidateUseInScore: z.boolean().default(true),
 });
+
+const SUGGESTED_TRAITS = [
+  "Self-starter",
+  "Detail-oriented",
+  "Collaborative",
+  "Customer-facing",
+  "Calm under pressure",
+  "Strategic thinker",
+  "Builder / 0-to-1",
+  "Process-driven",
+  "Curious learner",
+  "Analytical",
+  "Creative problem-solver",
+  "Mentor / coach",
+];
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -156,6 +175,9 @@ export default function CreateJob() {
       experienceLevel: undefined,
       workplace: undefined,
       status: "draft",
+      idealCandidateTraits: [],
+      idealCandidateNote: "",
+      idealCandidateUseInScore: true,
     },
   });
 
@@ -769,6 +791,113 @@ export default function CreateJob() {
                           </span>
                         )}
                       </label>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              {/* SECTION 5: IDEAL CANDIDATE */}
+              <div className="space-y-4">
+                <SectionHeader
+                  step={5}
+                  title="Ideal candidate"
+                  description="Beyond skills and experience — describe the kind of person who'd thrive in this role. Soft signal in matching, not a hard filter."
+                />
+                <FormField control={form.control} name="idealCandidateTraits" render={({ field }) => {
+                  const value = field.value || [];
+                  const toggle = (t: string) => {
+                    if (value.includes(t)) {
+                      field.onChange(value.filter((x) => x !== t));
+                    } else if (value.length < 5) {
+                      field.onChange([...value, t]);
+                    }
+                  };
+                  return (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>
+                          Working style{" "}
+                          <span className="text-muted-foreground font-normal text-xs">
+                            · pick up to 5 ({value.length}/5)
+                          </span>
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <div className="flex flex-wrap gap-2">
+                          {SUGGESTED_TRAITS.map((trait) => {
+                            const isSelected = value.includes(trait);
+                            const disabled = !isSelected && value.length >= 5;
+                            return (
+                              <button
+                                key={trait}
+                                type="button"
+                                onClick={() => toggle(trait)}
+                                disabled={disabled}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : disabled
+                                    ? "bg-muted text-muted-foreground/50 cursor-not-allowed"
+                                    : "bg-background text-foreground border border-input hover:border-primary hover:text-primary"
+                                }`}
+                              >
+                                {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3 opacity-60" />}
+                                {trait}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }} />
+
+                <FormField control={form.control} name="idealCandidateNote" render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>
+                        Why this role suits them{" "}
+                        <span className="text-muted-foreground font-normal text-xs">· optional, 1–2 sentences</span>
+                      </FormLabel>
+                      <span className={`text-[11px] font-mono ${(field.value?.length || 0) > 280 ? "text-destructive" : "text-muted-foreground"}`}>
+                        {field.value?.length || 0}/300
+                      </span>
+                    </div>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value.slice(0, 300))}
+                        rows={3}
+                        placeholder="e.g. Someone energised by ambiguity who enjoys building from a blank page…"
+                      />
+                    </FormControl>
+                    <div className="flex items-start gap-1.5 mt-1">
+                      <Info className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-[11px] leading-relaxed text-muted-foreground">
+                        We'll flag wording that could introduce bias (age, gender, background) and suggest neutral alternatives before you publish.
+                      </p>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="idealCandidateUseInScore" render={({ field }) => (
+                  <FormItem>
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground mb-0.5">
+                          Use as a scoring signal
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Adds a 10% "Fit" dimension to the overall match score. Turn off to keep this section as candidate-facing context only.
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
                     </div>
                     <FormMessage />
                   </FormItem>

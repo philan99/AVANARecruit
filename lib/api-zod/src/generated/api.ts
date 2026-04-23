@@ -43,6 +43,9 @@ export const ListJobsResponseItem = zod.object({
   educationLevel: zod.string().nullish(),
   workplace: zod.string().nullish(),
   status: zod.enum(["open", "closed", "draft"]),
+  idealCandidateTraits: zod.array(zod.string()),
+  idealCandidateNote: zod.string(),
+  idealCandidateUseInScore: zod.boolean(),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -71,6 +74,9 @@ export const CreateJobBody = zod.object({
   educationLevel: zod.string().nullish(),
   workplace: zod.string().nullish(),
   status: zod.enum(["open", "closed", "draft"]).optional(),
+  idealCandidateTraits: zod.array(zod.string()).optional(),
+  idealCandidateNote: zod.string().optional(),
+  idealCandidateUseInScore: zod.boolean().optional(),
 });
 
 /**
@@ -98,6 +104,9 @@ export const GetJobResponse = zod.object({
   educationLevel: zod.string().nullish(),
   workplace: zod.string().nullish(),
   status: zod.enum(["open", "closed", "draft"]),
+  idealCandidateTraits: zod.array(zod.string()),
+  idealCandidateNote: zod.string(),
+  idealCandidateUseInScore: zod.boolean(),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -147,6 +156,9 @@ export const UpdateJobResponse = zod.object({
   educationLevel: zod.string().nullish(),
   workplace: zod.string().nullish(),
   status: zod.enum(["open", "closed", "draft"]),
+  idealCandidateTraits: zod.array(zod.string()),
+  idealCandidateNote: zod.string(),
+  idealCandidateUseInScore: zod.boolean(),
   matchCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -359,7 +371,6 @@ export const GetCandidateMatchesResponseItem = zod.object({
   educationScore: zod.number(),
   locationScore: zod.number(),
   verificationScore: zod.number().optional(),
-  preferenceScore: zod.number().optional(),
   assessment: zod.string(),
   matchedSkills: zod.array(zod.string()),
   missingSkills: zod.array(zod.string()),
@@ -376,9 +387,6 @@ export const GetCandidateMatchesResponseItem = zod.object({
   applied: zod.boolean().optional(),
   jobTitle: zod.string(),
   jobCompany: zod.string(),
-  jobLocation: zod.string().nullable().optional(),
-  jobType: zod.string().nullable().optional(),
-  jobWorkplace: zod.string().nullable().optional(),
 });
 export const GetCandidateMatchesResponse = zod.array(
   GetCandidateMatchesResponseItem,

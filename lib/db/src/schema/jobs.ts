@@ -1,4 +1,5 @@
 import { pgTable, text, serial, timestamp, integer, boolean, real } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -22,6 +23,9 @@ export const jobsTable = pgTable("jobs", {
   status: text("status").notNull().default("open"),
   candidateAlertEnabled: boolean("candidate_alert_enabled").notNull().default(false),
   candidateAlertMinScore: real("candidate_alert_min_score").notNull().default(70),
+  idealCandidateTraits: text("ideal_candidate_traits").array().notNull().default(sql`ARRAY[]::text[]`),
+  idealCandidateNote: text("ideal_candidate_note").notNull().default(""),
+  idealCandidateUseInScore: boolean("ideal_candidate_use_in_score").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -34,6 +34,9 @@ export interface Job {
   /** @nullable */
   workplace?: string | null;
   status: JobStatus;
+  idealCandidateTraits: string[];
+  idealCandidateNote: string;
+  idealCandidateUseInScore: boolean;
   matchCount: number;
   createdAt: Date;
   updatedAt: Date;
