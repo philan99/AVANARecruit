@@ -57,7 +57,7 @@ export default function MatchesList() {
   const [allMatches, setAllMatches] = useState<JobGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
-  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
   const [verificationMap, setVerificationMap] = useState<Record<number, VerificationSummary>>({});
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [contactMatch, setContactMatch] = useState<{ id: number; candidateName: string; jobTitle: string } | null>(null);
