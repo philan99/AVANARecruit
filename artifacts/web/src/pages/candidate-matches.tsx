@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, ArrowRight, Sparkles } from "lucide-react";
+import { Target, Building, ArrowRight, Sparkles, MapPin, Briefcase, Monitor } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -170,6 +170,17 @@ export default function CandidateMatches() {
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
                         <Building className="w-3 h-3" /> {match.jobCompany}
                       </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground mt-1.5">
+                        {match.jobLocation && (
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{match.jobLocation}</span>
+                        )}
+                        {match.jobType && (
+                          <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{match.jobType}</span>
+                        )}
+                        {match.jobWorkplace && (
+                          <span className="flex items-center gap-1"><Monitor className="w-3 h-3" />{match.jobWorkplace}</span>
+                        )}
+                      </div>
                     </div>
                     <Badge className={`${scoreColor(match.overallScore)} text-sm font-bold border-0 shrink-0`}>
                       {Math.round(match.overallScore)}%

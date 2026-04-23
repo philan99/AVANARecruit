@@ -376,6 +376,9 @@ export const GetCandidateMatchesResponseItem = zod.object({
   applied: zod.boolean().optional(),
   jobTitle: zod.string(),
   jobCompany: zod.string(),
+  jobLocation: zod.string().nullable().optional(),
+  jobType: zod.string().nullable().optional(),
+  jobWorkplace: zod.string().nullable().optional(),
 });
 export const GetCandidateMatchesResponse = zod.array(
   GetCandidateMatchesResponseItem,

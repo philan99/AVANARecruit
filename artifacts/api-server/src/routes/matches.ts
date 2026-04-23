@@ -412,6 +412,10 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
       createdAt: matchesTable.createdAt,
       jobTitle: jobsTable.title,
       jobCompany: jobsTable.company,
+      jobLocation: jobsTable.location,
+      jobType: jobsTable.jobType,
+      jobWorkplace: jobsTable.workplace,
+      preferenceScore: matchesTable.preferenceScore,
     })
     .from(matchesTable)
     .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
