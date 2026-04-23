@@ -21,6 +21,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { validatePassword } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 
 const PHONE_CODES = [
   { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
@@ -229,9 +231,12 @@ export default function MySettings() {
       toast({ title: "Please fill in all password fields", variant: "destructive" });
       return;
     }
-    if (pwForm.newPassword.length < 8) {
-      toast({ title: "New password must be at least 8 characters", variant: "destructive" });
-      return;
+    {
+      const { ok, failed } = validatePassword(pwForm.newPassword);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
     }
     if (pwForm.newPassword !== pwForm.confirmPassword) {
       toast({ title: "New passwords do not match", variant: "destructive" });
@@ -496,6 +501,9 @@ export default function MySettings() {
                 minLength={8}
                 autoComplete="new-password"
               />
+            </div>
+            <div className="sm:col-span-2">
+              <PasswordStrength password={pwForm.newPassword} />
             </div>
           </div>
           <button

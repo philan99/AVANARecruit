@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { validatePassword } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 
 export default function ResetPassword() {
   const { toast } = useToast();
@@ -25,9 +27,12 @@ export default function ResetPassword() {
       toast({ title: "Invalid reset link", variant: "destructive" });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
-      return;
+    {
+      const { ok, failed } = validatePassword(password);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
     }
     if (password !== confirmPassword) {
       toast({ title: "Passwords do not match", variant: "destructive" });
@@ -106,7 +111,7 @@ export default function ResetPassword() {
                   <Input
                     id="new-password"
                     type={showNewPassword ? "text" : "password"}
-                    placeholder="At least 6 characters"
+                    placeholder="Create a strong password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", paddingRight: "2.5rem" }}
@@ -115,6 +120,7 @@ export default function ResetPassword() {
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <PasswordStrength password={password} />
               </div>
 
               <div className="space-y-2">

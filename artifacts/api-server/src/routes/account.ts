@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, candidatesTable, companyProfiles, companyUsers, adminsTable } from "@workspace/db";
 import { eq, and, ne } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { validatePassword } from "../lib/password-policy";
 
 const router: IRouter = Router();
 
@@ -267,8 +268,9 @@ router.post("/account/change-password", async (req, res): Promise<void> => {
       res.status(400).json({ error: "Current and new password are required" });
       return;
     }
-    if (String(newPassword).length < 8) {
-      res.status(400).json({ error: "New password must be at least 8 characters" });
+    const pwCheck = validatePassword(newPassword);
+    if (!pwCheck.ok) {
+      res.status(400).json({ error: pwCheck.error });
       return;
     }
 

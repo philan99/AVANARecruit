@@ -5,6 +5,7 @@ import { CreateCompanyProfileBody } from "@workspace/api-zod";
 import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
+import { validatePassword } from "../lib/password-policy";
 
 const router: IRouter = Router();
 
@@ -159,6 +160,12 @@ router.post("/company-profile", async (req, res) => {
     const body = parsed.data;
 
     const password = req.body.password;
+    if (password) {
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.ok) {
+        return res.status(400).json({ error: pwCheck.error });
+      }
+    }
     const lowerEmail = body.email ? String(body.email).toLowerCase().trim() : null;
 
     if (lowerEmail) {

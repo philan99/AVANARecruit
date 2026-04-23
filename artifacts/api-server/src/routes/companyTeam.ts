@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { createSession } from "../lib/sessions";
+import { validatePassword } from "../lib/password-policy";
 
 const router: IRouter = Router();
 
@@ -454,8 +455,9 @@ router.post("/team-invites/:token/accept", async (req, res) => {
     const password = typeof req.body?.password === "string" ? req.body.password : "";
 
     if (!name) return res.status(400).json({ error: "Name is required" });
-    if (!password || password.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    const pwCheck = validatePassword(password);
+    if (!pwCheck.ok) {
+      return res.status(400).json({ error: pwCheck.error });
     }
 
     const [invite] = await db

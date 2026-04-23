@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
 import { Loader2, Lock, User } from "lucide-react";
+import { validatePassword } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 
 interface InviteInfo {
   email: string;
@@ -64,9 +66,12 @@ export default function AcceptInvite() {
       toast({ title: "Please enter your name", variant: "destructive" });
       return;
     }
-    if (password.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
-      return;
+    {
+      const { ok, failed } = validatePassword(password);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
     }
     if (password !== confirmPassword) {
       toast({ title: "Passwords do not match", variant: "destructive" });
@@ -165,11 +170,12 @@ export default function AcceptInvite() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder="Create a strong password"
                 required
                 minLength={8}
                 data-testid="input-invite-password"
               />
+              <PasswordStrength password={password} />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Confirm password</label>

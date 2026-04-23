@@ -15,6 +15,8 @@ import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
+import { validatePassword } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 
 const PHONE_CODES = [
   { code: "+44", flag: "🇬🇧" }, { code: "+1", flag: "🇺🇸" }, { code: "+353", flag: "🇮🇪" },
@@ -62,15 +64,17 @@ export default function SignUp() {
       toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
+    {
+      const { ok, failed } = validatePassword(companyForm.password);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
+    }
     if (companyForm.password !== companyForm.confirmPassword) {
       toast({ title: "Passwords do not match", variant: "destructive" });
       return;
     }
-    if (companyForm.password.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
-      return;
-    }
-
     const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
     try {
       const res = await fetch(`${basePath}/company-profile`, {
@@ -106,12 +110,15 @@ export default function SignUp() {
       toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
+    {
+      const { ok, failed } = validatePassword(password);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
+    }
     if (password !== confirmPassword) {
       toast({ title: "Passwords do not match", variant: "destructive" });
-      return;
-    }
-    if (password.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
       return;
     }
 
@@ -275,12 +282,13 @@ export default function SignUp() {
                   </label>
                   <Input
                     type="password"
-                    placeholder="Minimum 8 characters"
+                    placeholder="Create a strong password"
                     value={companyForm.password}
                     onChange={(e) => setCompanyForm(f => ({ ...f, password: e.target.value }))}
                     className="bg-card"
                     required
                   />
+                  <PasswordStrength password={companyForm.password} />
                 </div>
 
                 <div className="space-y-2">
@@ -369,12 +377,13 @@ export default function SignUp() {
                   </label>
                   <Input
                     type="password"
-                    placeholder="Minimum 8 characters"
+                    placeholder="Create a strong password"
                     value={candidateForm.password}
                     onChange={(e) => setCandidateForm(f => ({ ...f, password: e.target.value }))}
                     className="bg-card"
                     required
                   />
+                  <PasswordStrength password={candidateForm.password} />
                 </div>
 
                 <div className="space-y-2">

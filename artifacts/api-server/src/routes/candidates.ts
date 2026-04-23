@@ -15,6 +15,7 @@ import {
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { computeMatch } from "../lib/matching";
+import { validatePassword } from "../lib/password-policy";
 
 const router: IRouter = Router();
 
@@ -142,6 +143,11 @@ router.post("/candidates", async (req, res): Promise<void> => {
     const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
     if (!phoneRaw || phoneDigits.length < 6) {
       res.status(400).json({ error: "A valid mobile number is required to create an account." });
+      return;
+    }
+    const pwCheck = validatePassword(password);
+    if (!pwCheck.ok) {
+      res.status(400).json({ error: pwCheck.error });
       return;
     }
   }

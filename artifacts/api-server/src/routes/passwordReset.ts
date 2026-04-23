@@ -5,6 +5,7 @@ import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import { validatePassword } from "../lib/password-policy";
 
 const router: IRouter = Router();
 
@@ -75,8 +76,9 @@ router.post("/reset-password", async (req, res): Promise<void> => {
     return;
   }
 
-  if (password.length < 6) {
-    res.status(400).json({ error: "Password must be at least 6 characters" });
+  const pwCheck = validatePassword(password);
+  if (!pwCheck.ok) {
+    res.status(400).json({ error: pwCheck.error });
     return;
   }
 
