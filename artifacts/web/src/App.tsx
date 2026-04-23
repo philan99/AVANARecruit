@@ -33,6 +33,7 @@ import CompanyProfile from "@/pages/company-profile";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCompanies from "@/pages/admin-companies";
 import AdminCandidates from "@/pages/admin-candidates";
+import DemoMatches from "@/pages/demo-matches";
 import AdminJobs from "@/pages/admin-jobs";
 import AdminCompanyDetail from "@/pages/admin-company-detail";
 import AdminJobDetail from "@/pages/admin-job-detail";
@@ -128,6 +129,7 @@ function AdminRoutes() {
         <Route path="/" component={AdminDashboard} />
         <Route path="/companies/:id" component={AdminCompanyDetail} />
         <Route path="/companies" component={AdminCompanies} />
+        <Route path="/demo-matches/:id" component={DemoMatches} />
         <Route path="/candidates/:id/matches" component={AdminCandidateMatches} />
         <Route path="/candidates/:id" component={AdminCandidateDetail} />
         <Route path="/candidates" component={AdminCandidates} />

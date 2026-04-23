@@ -209,6 +209,7 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       twitterUrl: candidatesTable.twitterUrl,
       portfolioUrl: candidatesTable.portfolioUrl,
       onboardingState: candidatesTable.onboardingState,
+      isDemo: candidatesTable.isDemo,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
       updatedAt: candidatesTable.updatedAt,

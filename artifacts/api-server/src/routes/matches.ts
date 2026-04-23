@@ -207,6 +207,55 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
   res.json(match);
 });
 
+// Preview matches without persisting. Used for the demo candidate so admins
+// can see what jobs the wizard's profile would match against, without
+// affecting live data, alerts, or company dashboards.
+router.get("/candidates/:id/preview-matches", async (req, res): Promise<void> => {
+  const params = GetCandidateMatchesParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, params.data.id));
+  if (!candidate) {
+    res.status(404).json({ error: "Candidate not found" });
+    return;
+  }
+
+  const openJobs = await db.select().from(jobsTable).where(eq(jobsTable.status, "open"));
+
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidate.id), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
+  const previews = openJobs.map(job => {
+    const result = computeMatch(job, candidate, verifiedCount);
+    return {
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company,
+      location: job.location,
+      jobType: job.jobType,
+      workplace: job.workplace,
+      overallScore: result.overallScore,
+      skillScore: result.skillScore,
+      experienceScore: result.experienceScore,
+      educationScore: result.educationScore,
+      locationScore: result.locationScore,
+      verificationScore: result.verificationScore,
+      assessment: result.assessment,
+      matchedSkills: result.matchedSkills,
+      missingSkills: result.missingSkills,
+    };
+  });
+
+  previews.sort((a, b) => b.overallScore - a.overallScore);
+  res.json({ candidateId: candidate.id, isDemo: candidate.isDemo, jobsConsidered: openJobs.length, previews });
+});
+
 router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
   const params = GetCandidateMatchesParams.safeParse(req.params);
   if (!params.success) {

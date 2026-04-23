@@ -421,6 +421,12 @@ export default function Onboarding() {
       const persisted = await persistOnboarding(TOTAL_STEPS, { completed: true, finishNow: true });
       if (!persisted) return;
 
+      if ((candidate as any)?.isDemo) {
+        toast({ title: "Demo profile saved", description: "Showing preview matches without saving them." });
+        setLocation(`/demo-matches/${candidateProfileId}`);
+        return;
+      }
+
       let matchingOk = false;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
