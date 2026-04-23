@@ -17,11 +17,18 @@ function scoreColor(score: number) {
   return "bg-gray-400 text-white";
 }
 
+function scoreChipClasses(v: number) {
+  if (v >= 75) return "bg-green-500/10 border-green-500/40 text-green-700 dark:text-green-400";
+  if (v >= 50) return "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400";
+  return "bg-gray-400/10 border-gray-400/40 text-gray-600 dark:text-gray-400";
+}
+
 function ScoreChip({ label, v }: { label: string; v: number | undefined }) {
+  const score = Math.round(v ?? 0);
   return (
-    <div className="flex items-center justify-between bg-secondary/40 rounded px-2 py-1">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold text-foreground">{Math.round(v ?? 0)}</span>
+    <div className={`flex items-center justify-between rounded px-2 py-1 border ${scoreChipClasses(score)}`}>
+      <span className="opacity-80">{label}</span>
+      <span className="font-semibold">{score}</span>
     </div>
   );
 }
@@ -224,12 +231,15 @@ export default function CandidateMatches() {
                           { label: "Ver", v: match.verificationScore ?? 0 },
                           { label: "Loc", v: match.locationScore },
                           { label: "Edu", v: match.educationScore },
-                        ].map(c => (
-                          <div key={c.label} className="bg-secondary/40 rounded px-2 py-1 text-center w-14">
-                            <div className="text-muted-foreground text-[9px] uppercase">{c.label}</div>
-                            <div className="font-semibold text-foreground">{Math.round(c.v)}</div>
-                          </div>
-                        ))}
+                        ].map(c => {
+                          const v = Math.round(c.v);
+                          return (
+                            <div key={c.label} className={`rounded px-2 py-1 text-center w-14 border ${scoreChipClasses(v)}`}>
+                              <div className="text-[9px] uppercase opacity-80">{c.label}</div>
+                              <div className="font-semibold">{v}</div>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       <Link href={`/jobs/${match.jobId}`}>

@@ -357,30 +357,26 @@ ${name}`
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.experienceScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Experience</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.skillScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Skills</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.preferenceScore ?? 0)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Preferences</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.verificationScore ?? 0)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Verified</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.locationScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Location</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.educationScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Education</div>
-                    </div>
+                    {[
+                      { label: "Experience", v: myMatch.experienceScore },
+                      { label: "Skills", v: myMatch.skillScore },
+                      { label: "Preferences", v: myMatch.preferenceScore ?? 0 },
+                      { label: "Verified", v: myMatch.verificationScore ?? 0 },
+                      { label: "Location", v: myMatch.locationScore },
+                      { label: "Education", v: myMatch.educationScore },
+                    ].map(t => {
+                      const v = Math.round(t.v);
+                      const cls =
+                        v >= 75 ? "bg-green-500/10 border-green-500/40 text-green-700 dark:text-green-400" :
+                        v >= 50 ? "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400" :
+                        "bg-gray-400/10 border-gray-400/40 text-gray-600 dark:text-gray-400";
+                      return (
+                        <div key={t.label} className={`rounded-lg p-3 text-center border ${cls}`}>
+                          <div className="text-sm font-mono font-bold">{v}%</div>
+                          <div className="text-[10px] uppercase tracking-wider mt-0.5 opacity-80">{t.label}</div>
+                        </div>
+                      );
+                    })}
                   </div>
                   {myMatch.assessment && (
                     <div className="mt-4 p-3 bg-muted/30 rounded-lg">

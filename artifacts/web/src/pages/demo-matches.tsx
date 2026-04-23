@@ -170,10 +170,16 @@ export default function DemoMatches() {
 }
 
 function ScoreChip({ label, v }: { label: string; v: number }) {
+  const score = Math.round(v ?? 0);
+  const cls =
+    score >= 75 ? "bg-green-500/10 border-green-500/40 text-green-700 dark:text-green-400" :
+    score >= 50 ? "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400" :
+    "bg-gray-400/10 border-gray-400/40 text-gray-600 dark:text-gray-400";
   return (
-    <div className="flex items-center justify-between bg-secondary/40 rounded px-2 py-1">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold text-foreground">{Math.round(v)}</span>
+    <div className={`flex items-center justify-between rounded px-2 py-1 border ${cls}`}>
+      <span className="opacity-80">{label}</span>
+      <span className="font-semibold">{score}</span>
     </div>
   );
 }
+
