@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, ArrowRight, Sparkles, MapPin, Briefcase, Monitor } from "lucide-react";
+import { Target, Building, ArrowRight, Sparkles, MapPin, Briefcase, Monitor, LayoutGrid, List } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,6 +34,7 @@ export default function CandidateMatches() {
   const appliedOnly = new URLSearchParams(searchString).get("applied") === "true";
   const [isRunning, setIsRunning] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [viewMode, setViewMode] = useState<"card" | "list">("card");
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
@@ -158,8 +159,83 @@ export default function CandidateMatches() {
                 </Button>
               ))}
             </div>
+            <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+              <Button
+                variant={viewMode === "card" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-2"
+                onClick={() => setViewMode("card")}
+                aria-label="Card view"
+                title="Card view"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-2"
+                onClick={() => setViewMode("list")}
+                aria-label="List view"
+                title="List view"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
+          {viewMode === "list" ? (
+            <Card className="bg-card border-border overflow-hidden">
+              <div className="divide-y divide-border">
+                {sortedMatches.map(match => (
+                  <Link key={match.id} href={`/jobs/${match.jobId}`}>
+                    <div className="flex items-center gap-4 p-4 hover:bg-secondary/40 cursor-pointer transition-colors">
+                      <Badge className={`${scoreColor(match.overallScore)} text-sm font-bold border-0 shrink-0 w-14 justify-center`}>
+                        {Math.round(match.overallScore)}%
+                      </Badge>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-foreground truncate">{match.jobTitle}</h3>
+                          {match.applied && (
+                            <Badge className="text-[10px] uppercase border-0 bg-primary text-primary-foreground">Applied</Badge>
+                          )}
+                          {match.status !== "pending" && (
+                            <Badge
+                              variant={match.status === "rejected" ? "destructive" : "secondary"}
+                              className="text-[10px] uppercase"
+                            >
+                              {match.status}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mt-0.5">
+                          <span className="flex items-center gap-1"><Building className="w-3 h-3" />{match.jobCompany}</span>
+                          {match.jobLocation && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{match.jobLocation}</span>}
+                          {match.jobType && <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{match.jobType}</span>}
+                          {match.jobWorkplace && <span className="flex items-center gap-1"><Monitor className="w-3 h-3" />{match.jobWorkplace}</span>}
+                        </div>
+                      </div>
+                      <div className="hidden lg:grid grid-cols-6 gap-1.5 text-[10px] shrink-0">
+                        {[
+                          { label: "Exp", v: match.experienceScore },
+                          { label: "Skl", v: match.skillScore },
+                          { label: "Prf", v: match.preferenceScore ?? 0 },
+                          { label: "Ver", v: match.verificationScore ?? 0 },
+                          { label: "Loc", v: match.locationScore },
+                          { label: "Edu", v: match.educationScore },
+                        ].map(c => (
+                          <div key={c.label} className="bg-secondary/40 rounded px-2 py-1 text-center w-12">
+                            <div className="text-muted-foreground text-[9px] uppercase">{c.label}</div>
+                            <div className="font-semibold text-foreground">{Math.round(c.v)}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sortedMatches.map(match => (
               <Card key={match.id} className="bg-card border-border hover:border-primary/50 transition-colors">
@@ -239,6 +315,7 @@ export default function CandidateMatches() {
               </Card>
             ))}
           </div>
+          )}
         </>
       )}
     </div>
