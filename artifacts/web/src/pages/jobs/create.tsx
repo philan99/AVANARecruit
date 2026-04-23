@@ -225,6 +225,10 @@ export default function CreateJob() {
         skills: Array.isArray(data.skills) && data.skills.length ? data.skills : current.skills,
         description: data.description || current.description,
         status: current.status || "draft",
+        // Ideal candidate is intentionally human-only — never overwritten by AI/upload.
+        idealCandidateTraits: current.idealCandidateTraits,
+        idealCandidateNote: current.idealCandidateNote,
+        idealCandidateUseInScore: current.idealCandidateUseInScore,
       });
       toast({ title: "Draft ready", description: "Review the fields and tweak anything you'd like before posting." });
     } catch (err) {
@@ -250,6 +254,10 @@ export default function CreateJob() {
       skills: Array.isArray(data.skills) && data.skills.length ? (data.skills as string[]) : current.skills,
       description: (data.description as string) || current.description,
       status: current.status || "draft",
+      // Ideal candidate is intentionally human-only — never overwritten by AI/upload.
+      idealCandidateTraits: current.idealCandidateTraits,
+      idealCandidateNote: current.idealCandidateNote,
+      idealCandidateUseInScore: current.idealCandidateUseInScore,
     });
   }
 
@@ -810,6 +818,12 @@ export default function CreateJob() {
                   title="Ideal candidate"
                   description="Beyond skills and experience — describe the kind of person who'd thrive in this role. Soft signal in matching, not a hard filter."
                 />
+                <div className="flex items-start gap-2 text-[11px] text-muted-foreground rounded-md bg-muted/40 border border-border px-3 py-2">
+                  <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                  <p className="leading-relaxed">
+                    This section is filled in by you — AVANA won't draft or pre-fill it from a brief or uploaded job spec. It's how candidates hear your team's voice.
+                  </p>
+                </div>
                 <FormField control={form.control} name="idealCandidateTraits" render={({ field }) => {
                   const value = field.value || [];
                   const toggle = (t: string) => {
