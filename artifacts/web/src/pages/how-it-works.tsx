@@ -50,11 +50,6 @@ export default function HowItWorks() {
       description: "See ranked candidates with detailed breakdowns — overall match percentage, individual category scores, matched and missing skills, and a written AI assessment for each candidate.",
     },
     {
-      icon: ShieldCheck,
-      title: "Verified Candidates",
-      description: "Candidates can get their work history, qualifications, and certifications verified directly through the platform. Verified candidates receive higher match scores, giving you greater confidence in your hiring decisions.",
-    },
-    {
       icon: KanbanSquare,
       title: "Manage Your Pipeline",
       description: "Track candidates through your hiring process with a visual pipeline: Pending, Shortlisted, Screened, Interviewed, Offered, and Hired. Drag and drop to update stages.",
