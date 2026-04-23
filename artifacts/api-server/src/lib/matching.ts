@@ -177,7 +177,7 @@ function computeExperienceScore(job: Job, candidate: Candidate): number {
   // with the right kind of experience should outscore one with the same total
   // years in unrelated roles, but we don't want to zero-out transferable
   // experience either.
-  return Math.round(relevantScore * 0.65 + totalScore * 0.35);
+  return Math.round(relevantScore * 0.80 + totalScore * 0.20);
 }
 
 // Ranking of the controlled education enum values used across the app.
