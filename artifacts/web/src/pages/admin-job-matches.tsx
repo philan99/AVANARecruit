@@ -221,7 +221,7 @@ export default function AdminJobMatches() {
                       </TableCell>
                     </TableRow>
                   )}
-                  </>
+                  </Fragment>
                   );
                 })}
               </TableBody>
