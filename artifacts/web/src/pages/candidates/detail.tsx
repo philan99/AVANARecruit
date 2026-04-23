@@ -10,6 +10,7 @@ import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { publicLocation } from "@/lib/display-location";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -263,7 +264,7 @@ ${companyName}`
                 <p className="text-sm text-muted-foreground mt-1">{candidate.currentTitle}</p>
               )}
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{candidate.location}</span>
+                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{publicLocation(candidate)}</span>
                 {!isCompany && <span className="flex items-center gap-1"><Mail className="w-4 h-4" />{candidate.email}</span>}
                 {!isCompany && candidate.phone && (
                   <span className="flex items-center gap-1"><Phone className="w-4 h-4" />{candidate.phone}</span>
@@ -498,7 +499,7 @@ ${companyName}`
             <CardContent>
               {!isCompany && <DetailRow icon={Mail} label="Email" value={candidate.email} />}
               {!isCompany && <DetailRow icon={Phone} label="Phone" value={candidate.phone || "Not provided"} />}
-              <DetailRow icon={MapPin} label="Location" value={candidate.location || "Not specified"} />
+              <DetailRow icon={MapPin} label="Location" value={publicLocation(candidate) || "Not specified"} />
             </CardContent>
           </Card>
 

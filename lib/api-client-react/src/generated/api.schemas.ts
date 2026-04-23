@@ -37,6 +37,16 @@ export interface Job {
   /** @nullable */
   createdByUserId?: number | null;
   location: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   description: string;
   requirements: string;
   skills: string[];
@@ -90,6 +100,16 @@ export interface CreateJobBody {
   /** @nullable */
   createdByUserId?: number | null;
   location: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   description: string;
   requirements?: string;
   skills: string[];
@@ -136,6 +156,16 @@ export interface UpdateJobBody {
   title?: string;
   company?: string;
   location?: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   description?: string;
   requirements?: string;
   skills?: string[];
@@ -179,6 +209,16 @@ export interface Candidate {
   experienceYears: number;
   education: string;
   location: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   status: CandidateStatus;
   matchCount: number;
   createdAt: string;
@@ -205,6 +245,16 @@ export interface CreateCandidateBody {
   experienceYears: number;
   education: string;
   location: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   status?: CreateCandidateBodyStatus;
 }
 
@@ -228,6 +278,16 @@ export interface UpdateCandidateBody {
   experienceYears?: number;
   education?: string;
   location?: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   status?: UpdateCandidateBodyStatus;
   /** @nullable */
   linkedinUrl?: string | null;
@@ -406,6 +466,16 @@ export interface CompanyProfile {
   /** @nullable */
   location?: string | null;
   /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+  /** @nullable */
   description?: string | null;
   /** @nullable */
   logoUrl?: string | null;
@@ -433,6 +503,16 @@ export interface CompanyProfileBody {
   instagramUrl?: string | null;
   /** @nullable */
   location?: string | null;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   /** @nullable */
   description?: string | null;
   /** @nullable */

@@ -16,6 +16,7 @@ import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { computeMatch } from "../lib/matching";
 import { validatePassword } from "../lib/password-policy";
+import { geocodeUkPostcode, buildLocationDisplay } from "../lib/geocode";
 
 const router: IRouter = Router();
 
@@ -57,6 +58,11 @@ router.get("/candidates", async (req, res): Promise<void> => {
       education: candidatesTable.education,
       educationDetails: candidatesTable.educationDetails,
       location: candidatesTable.location,
+      postcode: candidatesTable.postcode,
+      town: candidatesTable.town,
+      country: candidatesTable.country,
+      lat: candidatesTable.lat,
+      lng: candidatesTable.lng,
       profileImage: candidatesTable.profileImage,
       cvFile: candidatesTable.cvFile,
       cvFileName: candidatesTable.cvFileName,
@@ -157,6 +163,23 @@ router.post("/candidates", async (req, res): Promise<void> => {
     insertData.password = await bcrypt.hash(password, 10);
   }
 
+  const country = insertData.country || "United Kingdom";
+  if (insertData.postcode && country === "United Kingdom") {
+    const geo = await geocodeUkPostcode(insertData.postcode);
+    if (!geo.ok) {
+      res.status(400).json({ error: geo.error });
+      return;
+    }
+    insertData.postcode = geo.postcode;
+    insertData.town = geo.town;
+    insertData.country = geo.country;
+    insertData.lat = geo.lat;
+    insertData.lng = geo.lng;
+    if (!insertData.location || insertData.location.trim() === "") {
+      insertData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+    }
+  }
+
   const [candidate] = await db.insert(candidatesTable).values(insertData).returning();
 
   if (candidate.email && password) {
@@ -202,6 +225,11 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       education: candidatesTable.education,
       educationDetails: candidatesTable.educationDetails,
       location: candidatesTable.location,
+      postcode: candidatesTable.postcode,
+      town: candidatesTable.town,
+      country: candidatesTable.country,
+      lat: candidatesTable.lat,
+      lng: candidatesTable.lng,
       profileImage: candidatesTable.profileImage,
       cvFile: candidatesTable.cvFile,
       cvFileName: candidatesTable.cvFileName,
@@ -283,6 +311,30 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
   }
   if (onboardingState !== undefined) {
     updateData.onboardingState = onboardingState;
+  }
+
+  if (updateData.postcode !== undefined && updateData.postcode !== null && updateData.postcode !== "") {
+    const country = updateData.country || "United Kingdom";
+    if (country === "United Kingdom") {
+      const geo = await geocodeUkPostcode(updateData.postcode);
+      if (!geo.ok) {
+        res.status(400).json({ error: geo.error });
+        return;
+      }
+      updateData.postcode = geo.postcode;
+      updateData.town = geo.town;
+      updateData.country = geo.country;
+      updateData.lat = geo.lat;
+      updateData.lng = geo.lng;
+      if (!updateData.location || updateData.location.trim() === "") {
+        updateData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+      }
+    }
+  } else if (updateData.postcode === null || updateData.postcode === "") {
+    updateData.postcode = null;
+    updateData.town = null;
+    updateData.lat = null;
+    updateData.lng = null;
   }
 
   const [candidate] = await db

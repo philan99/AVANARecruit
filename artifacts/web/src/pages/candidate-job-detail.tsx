@@ -8,6 +8,7 @@ import { useRole } from "@/contexts/role-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { publicLocation } from "@/lib/display-location";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -269,7 +270,7 @@ ${name}`
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Location</span>
-                  <span className="font-medium">{job.location}</span>
+                  <span className="font-medium">{publicLocation(job)}</span>
                 </div>
                 {job.jobType && (
                   <div className="flex justify-between">

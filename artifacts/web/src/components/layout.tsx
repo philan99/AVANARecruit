@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
+import { PostcodeMissingBanner } from "@/components/postcode-missing-banner";
 import { ShieldAlert } from "lucide-react";
 import {
   AlertDialog,
@@ -375,6 +376,7 @@ export function Layout({ children }: LayoutProps) {
       )}
 
       <main className="flex-1 overflow-auto">
+        <PostcodeMissingBanner />
         {children}
       </main>
 

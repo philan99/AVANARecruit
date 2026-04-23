@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { CityCombobox } from "@/components/city-combobox";
+import { PostcodeInput } from "@/components/postcode-input";
 import { Link, useLocation } from "wouter";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
@@ -47,6 +48,8 @@ interface EditFormState {
   education: string;
   educationDetails: string;
   location: string;
+  postcode: string;
+  country: string;
   linkedinUrl: string;
   facebookUrl: string;
   twitterUrl: string;
@@ -240,6 +243,7 @@ export default function CandidateProfile() {
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
     summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, education: "", educationDetails: "", location: "",
+    postcode: "", country: "United Kingdom",
     linkedinUrl: "", facebookUrl: "", twitterUrl: "", portfolioUrl: "",
   });
 
@@ -260,6 +264,8 @@ export default function CandidateProfile() {
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
+        postcode: ((candidate as any).postcode as string) || "",
+        country: ((candidate as any).country as string) || "United Kingdom",
         linkedinUrl: (candidate as any).linkedinUrl || "",
         facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
@@ -362,6 +368,8 @@ export default function CandidateProfile() {
         education: stripPlaceholder(candidate.education),
         educationDetails: (candidate as any).educationDetails || "",
         location: stripPlaceholder(candidate.location),
+        postcode: ((candidate as any).postcode as string) || "",
+        country: ((candidate as any).country as string) || "United Kingdom",
         linkedinUrl: (candidate as any).linkedinUrl || "",
         facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
@@ -426,6 +434,8 @@ export default function CandidateProfile() {
       education: editForm.education,
       educationDetails: editForm.educationDetails || null,
       location: editForm.location,
+      postcode: editForm.postcode || null,
+      country: editForm.country || "United Kingdom",
       experience: experienceList,
       linkedinUrl: normalizeUrl(editForm.linkedinUrl),
       facebookUrl: normalizeUrl(editForm.facebookUrl),
@@ -668,11 +678,16 @@ export default function CandidateProfile() {
                   <label className="text-xs font-medium text-muted-foreground">Years of Experience</label>
                   <Input type="number" min="0" value={editForm.experienceYears} onChange={e => updateField("experienceYears", parseInt(e.target.value) || 0)} />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">Location</label>
-                  <CityCombobox
-                    value={editForm.location}
-                    onChange={(v) => updateField("location", v)}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-medium text-muted-foreground">Postcode</label>
+                  <PostcodeInput
+                    value={{ postcode: editForm.postcode, country: editForm.country }}
+                    onChange={(v) => { updateField("postcode", v.postcode); updateField("country", v.country); }}
+                    onResolved={(info) => {
+                      if (!editForm.location) {
+                        updateField("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                      }
+                    }}
                   />
                 </div>
               </CardContent>

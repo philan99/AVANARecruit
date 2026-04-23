@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, real } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const companyProfiles = pgTable("company_profiles", {
@@ -11,6 +11,11 @@ export const companyProfiles = pgTable("company_profiles", {
   facebookUrl: text("facebook_url"),
   instagramUrl: text("instagram_url"),
   location: text("location"),
+  postcode: text("postcode"),
+  town: text("town"),
+  country: text("country").default("United Kingdom"),
+  lat: real("lat"),
+  lng: real("lng"),
   description: text("description"),
   logoUrl: text("logo_url"),
   size: text("size"),

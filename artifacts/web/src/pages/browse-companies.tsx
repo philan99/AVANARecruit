@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "wouter";
 import { formatIndustry } from "@/lib/industries";
+import { publicLocation } from "@/lib/display-location";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -172,7 +173,7 @@ export default function BrowseCompanies() {
   }, [companies]);
 
   const uniqueLocations = useMemo(() => {
-    return Array.from(new Set(companies.map(c => c.location).filter(Boolean) as string[])).sort();
+    return Array.from(new Set(companies.map(c => publicLocation(c)).filter(Boolean) as string[])).sort();
   }, [companies]);
 
   const uniqueSizes = useMemo(() => {
@@ -196,12 +197,15 @@ export default function BrowseCompanies() {
         const q = search.toLowerCase();
         const matches = c.name.toLowerCase().includes(q) ||
           (c.industry && c.industry.toLowerCase().includes(q)) ||
-          (c.location && c.location.toLowerCase().includes(q)) ||
+          ((publicLocation(c) ?? "").toLowerCase().includes(q)) ||
           (c.description && c.description.toLowerCase().includes(q));
         if (!matches) return false;
       }
       if (industryFilters.size > 0 && (!c.industry || !industryFilters.has(c.industry))) return false;
-      if (locationFilters.size > 0 && (!c.location || !locationFilters.has(c.location))) return false;
+      if (locationFilters.size > 0) {
+        const loc = publicLocation(c);
+        if (!loc || !locationFilters.has(loc)) return false;
+      }
       if (sizeFilters.size > 0 && (!c.size || !sizeFilters.has(c.size))) return false;
       return true;
     });
@@ -377,10 +381,10 @@ export default function BrowseCompanies() {
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{company.description}</p>
                   )}
                   <div className="space-y-2 mt-auto">
-                    {company.location && (
+                    {publicLocation(company) && (
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="w-3.5 h-3.5 mr-2 shrink-0" />
-                        <span className="truncate">{company.location}</span>
+                        <span className="truncate">{publicLocation(company)}</span>
                       </div>
                     )}
                     {company.size && (
@@ -431,7 +435,7 @@ export default function BrowseCompanies() {
                       </Link>
                     </td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{formatIndustry(company.industry) || "—"}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{company.location || "—"}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">{publicLocation(company) || "—"}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{company.size || "—"}</td>
                   </tr>
                 ))}

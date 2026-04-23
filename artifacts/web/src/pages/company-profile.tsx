@@ -9,6 +9,7 @@ import {
 import { useUpload } from "@workspace/object-storage-web";
 import { useRole } from "@/contexts/role-context";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
+import { PostcodeInput } from "@/components/postcode-input";
 import { useIndustries } from "@/hooks/use-industries";
 import { safeExternalUrl } from "@/lib/safeUrl";
 
@@ -67,6 +68,8 @@ const formSchema = z.object({
   facebookUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
   location: z.string().optional(),
+  postcode: z.string().optional(),
+  country: z.string().optional(),
   description: z.string().optional(),
   size: z.string().optional(),
   founded: z.string().optional(),
@@ -186,6 +189,8 @@ export default function CompanyProfile() {
       facebookUrl: "",
       instagramUrl: "",
       location: "",
+      postcode: "",
+      country: "United Kingdom",
       description: "",
       size: "",
       founded: "",
@@ -205,6 +210,8 @@ export default function CompanyProfile() {
         facebookUrl: profile.facebookUrl || "",
         instagramUrl: profile.instagramUrl || "",
         location: profile.location || "",
+        postcode: ((profile as any).postcode as string) || "",
+        country: ((profile as any).country as string) || "United Kingdom",
         description: profile.description || "",
         size: profile.size || "",
         founded: profile.founded || "",
@@ -343,19 +350,21 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="location" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
+                  <FormField control={form.control} name="postcode" render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Postcode</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Start typing a city..."
-                          list="company-city-suggestions"
-                          {...field}
+                        <PostcodeInput
+                          value={{ postcode: field.value ?? "", country: form.watch("country") || "United Kingdom" }}
+                          onChange={(v) => { field.onChange(v.postcode); form.setValue("country", v.country); }}
+                          onResolved={(info) => {
+                            const cur = form.getValues("location");
+                            if (!cur || cur.trim() === "") {
+                              form.setValue("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                            }
+                          }}
                         />
                       </FormControl>
-                      <datalist id="company-city-suggestions">
-                        {CITY_SUGGESTIONS.map(c => <option key={c} value={c} />)}
-                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )} />

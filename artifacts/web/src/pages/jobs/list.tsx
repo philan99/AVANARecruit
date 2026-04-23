@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { publicLocation } from "@/lib/display-location";
 import {
   Briefcase, Search, Plus, MapPin, Building, Target,
   SlidersHorizontal, X, ChevronDown, Check, GraduationCap,
@@ -648,7 +649,7 @@ export default function JobsList() {
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="w-3.5 h-3.5 mr-2 shrink-0" />
-                      <span className="truncate">{job.location}</span>
+                      <span className="truncate">{publicLocation(job)}</span>
                     </div>
                     {((job as any).salaryMin || (job as any).salaryMax) && (
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -740,7 +741,7 @@ export default function JobsList() {
                         </div>
                       </td>
                       <td className="py-2 px-2 text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</span>
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{publicLocation(job)}</span>
                       </td>
                       <td className="py-2 px-2">
                         <Badge variant="outline" className="text-[8px] uppercase px-1 py-0">{job.experienceLevel}</Badge>

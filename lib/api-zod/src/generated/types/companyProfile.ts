@@ -24,6 +24,16 @@ export interface CompanyProfile {
   /** @nullable */
   location?: string | null;
   /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+  /** @nullable */
   description?: string | null;
   /** @nullable */
   logoUrl?: string | null;

@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CityCombobox } from "@/components/city-combobox";
+import { PostcodeInput } from "@/components/postcode-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,7 +39,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  location: z.string().min(1, "Location is required"),
+  location: z.string().optional().default(""),
+  postcode: z.string().min(1, "Postcode is required"),
+  country: z.string().default("United Kingdom"),
   description: z.string().min(1, "Description is required"),
   skills: z.array(z.string().min(1)).min(1, "At least one skill is required"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"], { required_error: "Experience level is required" }),
@@ -176,6 +179,8 @@ export default function CreateJob() {
     defaultValues: {
       title: "",
       location: "",
+      postcode: "",
+      country: "United Kingdom",
       description: "",
       skills: [],
       experienceLevel: undefined,
@@ -621,11 +626,20 @@ export default function CreateJob() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="location" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
+                  <FormField control={form.control} name="postcode" render={({ field }) => (
+                    <FormItem className="md:col-span-2 lg:col-span-3">
+                      <FormLabel>Postcode <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <CityCombobox value={field.value ?? ""} onChange={field.onChange} />
+                        <PostcodeInput
+                          value={{ postcode: field.value ?? "", country: form.watch("country") || "United Kingdom" }}
+                          onChange={(v) => { field.onChange(v.postcode); form.setValue("country", v.country); }}
+                          onResolved={(info) => {
+                            const cur = form.getValues("location");
+                            if (!cur || cur.trim() === "") {
+                              form.setValue("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                            }
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

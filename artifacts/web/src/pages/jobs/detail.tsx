@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { publicLocation } from "@/lib/display-location";
 
 type ScoreFilter = "all" | "high" | "mid" | "low";
 
@@ -171,7 +172,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Location</span>
-                  <span className="font-medium">{job.location}</span>
+                  <span className="font-medium">{publicLocation(job)}</span>
                 </div>
                 {job.jobType && (
                   <div className="flex justify-between">

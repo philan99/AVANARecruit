@@ -520,6 +520,16 @@ components:
           type: ["integer", "null"]
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         description:
           type: string
         requirements:
@@ -592,6 +602,16 @@ components:
           type: ["integer", "null"]
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         description:
           type: string
         requirements:
@@ -642,6 +662,16 @@ components:
           type: string
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         description:
           type: string
         requirements:
@@ -702,6 +732,16 @@ components:
           type: string
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]
@@ -751,6 +791,16 @@ components:
           type: string
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]
@@ -787,6 +837,16 @@ components:
           type: string
         location:
           type: string
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]
@@ -1100,6 +1160,16 @@ components:
           type: ["string", "null"]
         location:
           type: ["string", "null"]
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         description:
           type: ["string", "null"]
         logoUrl:
@@ -1139,6 +1209,16 @@ components:
           type: ["string", "null"]
         location:
           type: ["string", "null"]
+        postcode:
+          type: ["string", "null"]
+        town:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
         description:
           type: ["string", "null"]
         logoUrl:

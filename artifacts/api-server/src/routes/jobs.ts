@@ -2,7 +2,17 @@ import { Router, type IRouter } from "express";
 import { eq, ilike, or, sql, count } from "drizzle-orm";
 import { db, jobsTable, matchesTable, candidatesTable, jobAlertsTable } from "@workspace/db";
 import { computeMatch } from "../lib/matching";
+import { geocodeUkPostcode, buildLocationDisplay } from "../lib/geocode";
 import { getResendClient } from "../lib/resend";
+
+function maybeClearGeo(d: Record<string, any>) {
+  if (d.postcode === null || d.postcode === "") {
+    d.postcode = null;
+    d.town = null;
+    d.lat = null;
+    d.lng = null;
+  }
+}
 import { brandedEmail } from "../lib/emailTemplate";
 import {
   ListJobsQueryParams,
@@ -55,6 +65,11 @@ router.get("/jobs", async (req, res): Promise<void> => {
       companyProfileId: jobsTable.companyProfileId,
       createdByUserId: jobsTable.createdByUserId,
       location: jobsTable.location,
+      postcode: jobsTable.postcode,
+      town: jobsTable.town,
+      country: jobsTable.country,
+      lat: jobsTable.lat,
+      lng: jobsTable.lng,
       description: jobsTable.description,
       requirements: jobsTable.requirements,
       skills: jobsTable.skills,
@@ -95,7 +110,25 @@ router.post("/jobs", async (req, res): Promise<void> => {
     return;
   }
 
-  const [job] = await db.insert(jobsTable).values(parsed.data).returning();
+  const insertData: any = { ...parsed.data };
+  const country = insertData.country || "United Kingdom";
+  if (insertData.postcode && country === "United Kingdom") {
+    const geo = await geocodeUkPostcode(insertData.postcode);
+    if (!geo.ok) {
+      res.status(400).json({ error: geo.error });
+      return;
+    }
+    insertData.postcode = geo.postcode;
+    insertData.town = geo.town;
+    insertData.country = geo.country;
+    insertData.lat = geo.lat;
+    insertData.lng = geo.lng;
+    if (!insertData.location || insertData.location.trim() === "") {
+      insertData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+    }
+  }
+
+  const [job] = await db.insert(jobsTable).values(insertData).returning();
 
   const result = { ...job, matchCount: 0 };
   res.status(201).json(GetJobResponse.parse(result));
@@ -124,6 +157,11 @@ router.get("/jobs/:id", async (req, res): Promise<void> => {
       companyProfileId: jobsTable.companyProfileId,
       createdByUserId: jobsTable.createdByUserId,
       location: jobsTable.location,
+      postcode: jobsTable.postcode,
+      town: jobsTable.town,
+      country: jobsTable.country,
+      lat: jobsTable.lat,
+      lng: jobsTable.lng,
       description: jobsTable.description,
       requirements: jobsTable.requirements,
       skills: jobsTable.skills,
@@ -167,9 +205,31 @@ router.patch("/jobs/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  const updateData: any = { ...parsed.data };
+  if (updateData.postcode !== undefined && updateData.postcode !== null && updateData.postcode !== "") {
+    const country = updateData.country || "United Kingdom";
+    if (country === "United Kingdom") {
+      const geo = await geocodeUkPostcode(updateData.postcode);
+      if (!geo.ok) {
+        res.status(400).json({ error: geo.error });
+        return;
+      }
+      updateData.postcode = geo.postcode;
+      updateData.town = geo.town;
+      updateData.country = geo.country;
+      updateData.lat = geo.lat;
+      updateData.lng = geo.lng;
+      if (!updateData.location || updateData.location.trim() === "") {
+        updateData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+      }
+    }
+  } else if (updateData.postcode === null || updateData.postcode === "") {
+    maybeClearGeo(updateData);
+  }
+
   const [job] = await db
     .update(jobsTable)
-    .set(parsed.data)
+    .set(updateData)
     .where(eq(jobsTable.id, params.data.id))
     .returning();
 

@@ -3,6 +3,7 @@ import { Link, useSearch, useLocation } from "wouter";
 import { useListJobs, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 import { useIndustries } from "@/hooks/use-industries";
+import { publicLocation } from "@/lib/display-location";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -348,7 +349,7 @@ export default function BrowseJobs() {
 
   const uniqueLocations = useMemo(() => {
     if (!allOpenJobs) return [];
-    const locations = new Set(allOpenJobs.map(j => j.location).filter(Boolean));
+    const locations = new Set(allOpenJobs.map(j => publicLocation(j)).filter(Boolean));
     return Array.from(locations).sort();
   }, [allOpenJobs]);
 
@@ -412,7 +413,7 @@ export default function BrowseJobs() {
       result = result?.filter((job) => levelFilters.has(job.experienceLevel));
     }
     if (locationFilters.size > 0) {
-      result = result?.filter((job) => locationFilters.has(job.location));
+      result = result?.filter((job) => locationFilters.has(publicLocation(job) ?? ""));
     }
     if (salaryEnabled) {
       result = result?.filter((job) => {
@@ -802,7 +803,7 @@ export default function BrowseJobs() {
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="w-3.5 h-3.5 mr-2" />
-                      <span className="truncate">{job.location}</span>
+                      <span className="truncate">{publicLocation(job)}</span>
                     </div>
                     {(job.salaryMin || job.salaryMax) && (
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -869,7 +870,7 @@ export default function BrowseJobs() {
                     <td className="py-3 px-3">
                       <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                         <MapPin className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{job.location}</span>
+                        <span className="truncate">{publicLocation(job)}</span>
                       </span>
                     </td>
                     <td className="py-3 px-3">

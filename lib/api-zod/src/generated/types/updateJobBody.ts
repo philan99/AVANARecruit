@@ -12,6 +12,16 @@ export interface UpdateJobBody {
   title?: string;
   company?: string;
   location?: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   description?: string;
   requirements?: string;
   skills?: string[];

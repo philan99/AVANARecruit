@@ -19,6 +19,16 @@ export interface Candidate {
   experienceYears: number;
   education: string;
   location: string;
+  /** @nullable */
+  postcode?: string | null;
+  /** @nullable */
+  town?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
   status: CandidateStatus;
   matchCount: number;
   createdAt: Date;

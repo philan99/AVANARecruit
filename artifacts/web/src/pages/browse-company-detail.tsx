@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { formatIndustry } from "@/lib/industries";
+import { publicLocation } from "@/lib/display-location";
 import { safeExternalUrl } from "@/lib/safeUrl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,9 +113,9 @@ export default function BrowseCompanyDetail() {
                 {formatIndustry(company.industry)}
               </Badge>
             )}
-            {company.location && (
+            {publicLocation(company) && (
               <span className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-3.5 h-3.5 mr-1" /> {company.location}
+                <MapPin className="w-3.5 h-3.5 mr-1" /> {publicLocation(company)}
               </span>
             )}
             {company.size && (

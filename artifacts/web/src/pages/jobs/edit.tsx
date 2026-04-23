@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CityCombobox } from "@/components/city-combobox";
+import { PostcodeInput } from "@/components/postcode-input";
 import {
   Form,
   FormControl,
@@ -43,7 +44,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const editFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  location: z.string().min(1, "Location is required"),
+  location: z.string().optional().default(""),
+  postcode: z.string().min(1, "Postcode is required"),
+  country: z.string().default("United Kingdom"),
   description: z.string().min(1, "Description is required"),
   skills: z.string().min(1, "Skills are required (comma separated)"),
   experienceLevel: z.enum(["junior", "mid", "senior", "lead", "executive"]),
@@ -101,6 +104,8 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
     defaultValues: {
       title: job.title ?? "",
       location: job.location ?? "",
+      postcode: ((job as any).postcode as string) ?? "",
+      country: ((job as any).country as string) ?? "United Kingdom",
       description: job.description ?? "",
       skills: Array.isArray(job.skills) ? job.skills.join(", ") : "",
       experienceLevel: (job.experienceLevel as z.infer<typeof editFormSchema>["experienceLevel"]) ?? "mid",
@@ -273,12 +278,21 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                 />
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="postcode"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
+                    <FormItem className="md:col-span-2 lg:col-span-3">
+                      <FormLabel>Postcode <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <CityCombobox value={field.value ?? ""} onChange={field.onChange} />
+                        <PostcodeInput
+                          value={{ postcode: field.value ?? "", country: form.watch("country") || "United Kingdom" }}
+                          onChange={(v) => { field.onChange(v.postcode); form.setValue("country", v.country); }}
+                          onResolved={(info) => {
+                            const cur = form.getValues("location");
+                            if (!cur || cur.trim() === "") {
+                              form.setValue("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                            }
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

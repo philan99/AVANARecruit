@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb, boolean, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -16,6 +16,11 @@ export const candidatesTable = pgTable("candidates", {
   education: text("education").notNull(),
   educationDetails: text("education_details"),
   location: text("location").notNull(),
+  postcode: text("postcode"),
+  town: text("town"),
+  country: text("country").default("United Kingdom"),
+  lat: real("lat"),
+  lng: real("lng"),
   profileImage: text("profile_image"),
   cvFile: text("cv_file"),
   cvFileName: text("cv_file_name"),

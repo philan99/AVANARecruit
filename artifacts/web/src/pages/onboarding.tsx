@@ -18,6 +18,7 @@ import {
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
 import { CityCombobox } from "@/components/city-combobox";
+import { PostcodeInput } from "@/components/postcode-input";
 import { useIndustries } from "@/hooks/use-industries";
 
 type ExperienceEntry = {
@@ -132,6 +133,8 @@ export default function Onboarding() {
   // Form state — pre-filled from candidate
   const [phone, setPhone] = useState("");
   const [location, setLocationField] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [postcodeCountry, setPostcodeCountry] = useState("United Kingdom");
   const [currentTitle, setCurrentTitle] = useState("");
   const [experienceYears, setExperienceYears] = useState<string>("");
   const [summary, setSummary] = useState("");
@@ -166,6 +169,8 @@ export default function Onboarding() {
       const stripPlaceholder = (v?: string | null) => (v && v !== "Not specified" ? v : "");
       setPhone(candidate.phone || "");
       setLocationField(stripPlaceholder(candidate.location));
+      setPostcode(((candidate as any).postcode as string) || "");
+      setPostcodeCountry(((candidate as any).country as string) || "United Kingdom");
       setCurrentTitle(stripPlaceholder(candidate.currentTitle));
       setExperienceYears(candidate.experienceYears ? String(candidate.experienceYears) : "");
       setSummary(candidate.summary && candidate.summary !== "No summary provided" ? candidate.summary : "");
@@ -329,10 +334,12 @@ export default function Onboarding() {
       case 3:
         ok = await patchCandidate({
           location: location || "Not specified",
+          postcode: postcode || null,
+          country: postcodeCountry || "United Kingdom",
           currentTitle: currentTitle || "Not specified",
           experienceYears: experienceYears ? parseInt(experienceYears, 10) || 0 : 0,
           summary: summary || "",
-        });
+        } as any);
         break;
       case 4:
         ok = await patchCandidate({ skills });
@@ -717,11 +724,12 @@ export default function Onboarding() {
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Current job title<FieldBadge field="currentTitle" /></label>
                   <Input value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" />
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Location<FieldBadge field="location" /></label>
-                  <CityCombobox
-                    value={location}
-                    onChange={setLocationField}
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Postcode<FieldBadge field="location" /></label>
+                  <PostcodeInput
+                    value={{ postcode, country: postcodeCountry }}
+                    onChange={(v) => { setPostcode(v.postcode); setPostcodeCountry(v.country); }}
+                    onResolved={(info) => { if (!location) setLocationField(info.town + (info.region && info.region !== info.town ? `, ${info.region}` : "")); }}
                   />
                 </div>
                 <div>

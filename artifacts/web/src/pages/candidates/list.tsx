@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { publicLocation } from "@/lib/display-location";
 import {
   Users, Search, MapPin, Mail, X, LayoutGrid, List,
   SlidersHorizontal, ChevronDown, Check, Briefcase,
@@ -643,7 +644,7 @@ export default function CandidatesList() {
                     )}
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{candidate.location}</span>
+                      <span className="truncate">{publicLocation(candidate)}</span>
                     </div>
                     {candidate.education && (
                       <div className="flex items-center gap-1.5">
@@ -707,7 +708,7 @@ export default function CandidatesList() {
                       </td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.currentTitle}</td>
                       <td className="py-2 px-2 text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{candidate.location}</span>
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{publicLocation(candidate)}</span>
                       </td>
                       <td className="py-2 px-2 text-muted-foreground font-mono">{candidate.experienceYears} yrs</td>
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">{candidate.education || "—"}</td>
