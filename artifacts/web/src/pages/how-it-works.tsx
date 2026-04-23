@@ -372,16 +372,22 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#1a2035" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
-              The AI Behind the Match
-            </p>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#ffffff" }}>
-              How We Score Every Match
+      <section className="relative py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: "#1a2035" }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.12)", border: "1px solid rgba(76, 175, 80, 0.25)" }}>
+              <Sparkles className="w-3.5 h-3.5" style={{ color: "#4CAF50" }} />
+              <span className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "#4CAF50" }}>The AI Behind the Match</span>
+            </div>
+            <h2 className="text-3xl lg:text-[44px] font-bold leading-[1.1] mb-5" style={{ color: "#ffffff" }}>
+              How We Score Every <span style={{ color: "#4CAF50" }}>Match</span>
             </h2>
-            <p className="text-base max-w-2xl mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p className="text-base lg:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
               Every candidate-job match is scored across six weighted dimensions, producing an overall percentage and a detailed assessment.
             </p>
           </div>
@@ -394,7 +400,15 @@ export default function HowItWorks() {
               { label: "Location", weight: "10%", desc: "Remote, exact city match, or regional proximity" },
               { label: "Education", weight: "10%", desc: "Candidate's qualification level versus the role's requirement" },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl p-5 text-center" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div
+                key={item.label}
+                className="relative rounded-xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(76,175,80,0.4)] overflow-hidden group"
+                style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <div
+                  className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "linear-gradient(90deg, transparent 0%, #4CAF50 50%, transparent 100%)" }}
+                />
                 <div className="text-2xl font-bold font-mono mb-1" style={{ color: "#4CAF50" }}>{item.weight}</div>
                 <div className="text-sm font-semibold mb-2" style={{ color: "#ffffff" }}>{item.label}</div>
                 <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{item.desc}</p>
