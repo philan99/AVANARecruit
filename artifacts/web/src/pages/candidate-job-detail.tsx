@@ -366,20 +366,20 @@ ${name}`
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Experience</div>
                     </div>
                     <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.educationScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Education</div>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.locationScore)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Location</div>
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.preferenceScore ?? 0)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Preferences</div>
                     </div>
                     <div className="bg-secondary/50 rounded-lg p-3 text-center">
                       <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.verificationScore ?? 0)}%</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Verified</div>
                     </div>
                     <div className="bg-secondary/50 rounded-lg p-3 text-center">
-                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.preferenceScore ?? 0)}%</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Preferences</div>
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.locationScore)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Location</div>
+                    </div>
+                    <div className="bg-secondary/50 rounded-lg p-3 text-center">
+                      <div className="text-sm font-mono font-bold text-foreground">{Math.round(myMatch.educationScore)}%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Education</div>
                     </div>
                   </div>
                   {myMatch.assessment && (

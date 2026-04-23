@@ -206,50 +206,13 @@ export default function AdminMatchDiagnostic() {
             <Card>
               <ElementHeader
                 icon={Briefcase} title="Experience" score={e.experience.score} weight={data.explanation.weights.experience}
-                rule="Required years are inferred from the job's experience level (junior 1, mid 3, senior 5, lead 8, executive 12). Total years and role-relevant years (from work history matching the job title or required skills) are each scored, then blended 35% total + 65% relevant."
+                rule="Required years are inferred from the job's experience level (junior 1, mid 3, senior 5, lead 8, executive 12). Total years and role-relevant years (from work history matching the job title or required skills) are each scored, then blended 20% total + 80% relevant. Over-qualification penalty only applies for junior roles."
               />
               <CardContent className="text-xs space-y-1">
                 <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs)`} />
                 <KV k="Total years" v={`${e.experience.candidateTotalYears} yrs → ${e.experience.totalYearsScore}%`} />
                 <KV k="Role-relevant years" v={e.experience.candidateRelevantYears == null ? "n/a (no work history)" : `${e.experience.candidateRelevantYears} yrs → ${e.experience.relevantYearsScore}%`} />
                 <KV k="Final" v={`${e.experience.score}%`} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <ElementHeader
-                icon={GraduationCap} title="Education" score={e.education.score} weight={data.explanation.weights.education}
-                rule="Education levels are ranked (GCSE 1 → PhD 7). The job's education level (or requirements text) sets the required rank; if the candidate's rank ≥ required → 100. Each rank short = 75 / 55 / lower."
-              />
-              <CardContent className="text-xs space-y-1">
-                <KV k="Job education level" v={e.education.jobEducationLevel || "—"} />
-                <KV k="Required rank" v={e.education.requiredRank == null ? "no requirement" : e.education.requiredRank} />
-                <KV k="Candidate education" v={e.education.candidateEducation || "—"} />
-                <KV k="Candidate rank" v={e.education.candidateRank == null ? "not stated" : e.education.candidateRank} />
-                <KV k="Final" v={`${e.education.score}%`} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <ElementHeader
-                icon={MapPin} title="Location" score={e.location.score} weight={data.explanation.weights.location}
-                rule="100 if equal · 95 if either side is remote · 90 if one contains the other · 75 if a meaningful token overlaps · 40 otherwise."
-              />
-              <CardContent className="text-xs space-y-1">
-                <KV k="Job location" v={e.location.jobLocation || "—"} />
-                <KV k="Candidate location" v={e.location.candidateLocation || "—"} />
-                <KV k="Final" v={`${e.location.score}%`} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <ElementHeader
-                icon={ShieldCheck} title="Verification" score={e.verification.score} weight={data.explanation.weights.verification}
-                rule="Based on count of verified employment records: 0→0, 1→50, 2→65, 3→80, 4→90, 5+→100."
-              />
-              <CardContent className="text-xs space-y-1">
-                <KV k="Verified employments" v={e.verification.verifiedCount} />
-                <KV k="Final" v={`${e.verification.score}%`} />
               </CardContent>
             </Card>
 
@@ -273,6 +236,43 @@ export default function AdminMatchDiagnostic() {
                     <KV k="Candidate prefers" v={f.candidatePreferences.length ? f.candidatePreferences.join(", ") : "no preference"} />
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <ElementHeader
+                icon={ShieldCheck} title="Verification" score={e.verification.score} weight={data.explanation.weights.verification}
+                rule="Based on count of verified employment records: 0→0, 1→50, 2→65, 3→80, 4→90, 5+→100."
+              />
+              <CardContent className="text-xs space-y-1">
+                <KV k="Verified employments" v={e.verification.verifiedCount} />
+                <KV k="Final" v={`${e.verification.score}%`} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <ElementHeader
+                icon={MapPin} title="Location" score={e.location.score} weight={data.explanation.weights.location}
+                rule="100 if equal · 95 if either side is remote · 90 if one contains the other · 75 if a meaningful token overlaps · 40 otherwise."
+              />
+              <CardContent className="text-xs space-y-1">
+                <KV k="Job location" v={e.location.jobLocation || "—"} />
+                <KV k="Candidate location" v={e.location.candidateLocation || "—"} />
+                <KV k="Final" v={`${e.location.score}%`} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <ElementHeader
+                icon={GraduationCap} title="Education" score={e.education.score} weight={data.explanation.weights.education}
+                rule="Education levels are ranked (GCSE 1 → PhD 7). The job's education level (or requirements text) sets the required rank; if the candidate's rank ≥ required → 100. Each rank short = 75 / 55 / lower."
+              />
+              <CardContent className="text-xs space-y-1">
+                <KV k="Job education level" v={e.education.jobEducationLevel || "—"} />
+                <KV k="Required rank" v={e.education.requiredRank == null ? "no requirement" : e.education.requiredRank} />
+                <KV k="Candidate education" v={e.education.candidateEducation || "—"} />
+                <KV k="Candidate rank" v={e.education.candidateRank == null ? "not stated" : e.education.candidateRank} />
+                <KV k="Final" v={`${e.education.score}%`} />
               </CardContent>
             </Card>
           </div>

@@ -204,10 +204,10 @@ export default function CandidateMatches() {
                   <div className="grid grid-cols-3 gap-2 text-[11px]">
                     <ScoreChip label="Skills" v={match.skillScore} />
                     <ScoreChip label="Experience" v={match.experienceScore} />
-                    <ScoreChip label="Education" v={match.educationScore} />
-                    <ScoreChip label="Location" v={match.locationScore} />
-                    <ScoreChip label="Verification" v={match.verificationScore ?? 0} />
                     <ScoreChip label="Preferences" v={match.preferenceScore ?? 0} />
+                    <ScoreChip label="Verification" v={match.verificationScore ?? 0} />
+                    <ScoreChip label="Location" v={match.locationScore} />
+                    <ScoreChip label="Education" v={match.educationScore} />
                   </div>
 
                   {match.assessment && (
