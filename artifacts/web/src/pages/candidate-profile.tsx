@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,7 @@ interface EditFormState {
   preferredWorkplaces: string[];
   preferredIndustries: string[];
   experienceYears: number;
+  maxRadiusMiles: number;
   education: string;
   educationDetails: string;
   location: string;
@@ -242,7 +244,7 @@ export default function CandidateProfile() {
 
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
-    summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, education: "", educationDetails: "", location: "",
+    summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, maxRadiusMiles: 25, education: "", educationDetails: "", location: "",
     postcode: "", country: "United Kingdom",
     linkedinUrl: "", facebookUrl: "", twitterUrl: "", portfolioUrl: "",
   });
@@ -261,6 +263,7 @@ export default function CandidateProfile() {
         preferredWorkplaces: (candidate as any).preferredWorkplaces || [],
         preferredIndustries: (candidate as any).preferredIndustries || [],
         experienceYears: candidate.experienceYears,
+        maxRadiusMiles: ((candidate as any).maxRadiusMiles as number) ?? 25,
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
@@ -365,6 +368,7 @@ export default function CandidateProfile() {
         preferredWorkplaces: (candidate as any).preferredWorkplaces || [],
         preferredIndustries: (candidate as any).preferredIndustries || [],
         experienceYears: candidate.experienceYears,
+        maxRadiusMiles: ((candidate as any).maxRadiusMiles as number) ?? 25,
         education: stripPlaceholder(candidate.education),
         educationDetails: (candidate as any).educationDetails || "",
         location: stripPlaceholder(candidate.location),
@@ -431,6 +435,7 @@ export default function CandidateProfile() {
       preferredWorkplaces: editForm.preferredWorkplaces,
       preferredIndustries: editForm.preferredIndustries,
       experienceYears: editForm.experienceYears,
+      maxRadiusMiles: editForm.maxRadiusMiles,
       education: editForm.education,
       educationDetails: editForm.educationDetails || null,
       location: editForm.location,
@@ -689,6 +694,20 @@ export default function CandidateProfile() {
                       }
                     }}
                   />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-muted-foreground">Maximum commute radius</label>
+                    <span className="text-xs font-mono font-bold text-primary">{editForm.maxRadiusMiles} mi</span>
+                  </div>
+                  <Slider
+                    value={[editForm.maxRadiusMiles]}
+                    onValueChange={([v]) => updateField("maxRadiusMiles", v)}
+                    min={5} max={100} step={5}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Jobs closer to your postcode score higher. Remote jobs always score full marks.
+                  </p>
                 </div>
               </CardContent>
             </Card>

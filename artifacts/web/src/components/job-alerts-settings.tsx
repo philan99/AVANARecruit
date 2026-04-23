@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Bell, BellOff, Plus, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
+import { PostcodeInput } from "@/components/postcode-input";
 
 export function JobAlertsSettings() {
   const { candidateProfileId } = useRole();
@@ -20,9 +21,11 @@ export function JobAlertsSettings() {
   const [enabled, setEnabled] = useState(false);
   const [minScore, setMinScore] = useState(50);
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const [newLocation, setNewLocation] = useState("");
+  const [centerPostcode, setCenterPostcode] = useState<string>("");
+  const [centerCountry, setCenterCountry] = useState<string>("United Kingdom");
+  const [centerTown, setCenterTown] = useState<string | null>(null);
+  const [radiusMiles, setRadiusMiles] = useState<number>(25);
 
   useEffect(() => {
     if (!candidateProfileId) return;
@@ -34,7 +37,9 @@ export function JobAlertsSettings() {
           setEnabled(data.enabled ?? false);
           setMinScore(data.minScore ?? 50);
           setKeywords(data.keywords ?? []);
-          setLocations(data.locations ?? []);
+          setCenterPostcode(data.centerPostcode ?? "");
+          setCenterTown(data.centerTown ?? null);
+          setRadiusMiles(data.radiusMiles ?? 25);
         }
       } catch (err) {
         console.error("Failed to fetch alerts", err);
@@ -52,7 +57,13 @@ export function JobAlertsSettings() {
       const res = await fetch(`${basePath}/candidates/${candidateProfileId}/job-alerts`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled, minScore, keywords, locations }),
+        body: JSON.stringify({
+          enabled,
+          minScore,
+          keywords,
+          centerPostcode: centerPostcode.trim() === "" ? null : centerPostcode,
+          radiusMiles,
+        }),
       });
       if (!res.ok) throw new Error("Failed to save");
       toast({ title: "Job Alerts Updated", description: enabled ? "You'll be notified when matching jobs are posted." : "Job alerts have been turned off." });
@@ -68,14 +79,6 @@ export function JobAlertsSettings() {
     if (kw && !keywords.includes(kw)) {
       setKeywords([...keywords, kw]);
       setNewKeyword("");
-    }
-  };
-
-  const addLocation = () => {
-    const loc = newLocation.trim();
-    if (loc && !locations.includes(loc)) {
-      setLocations([...locations, loc]);
-      setNewLocation("");
     }
   };
 
@@ -162,35 +165,31 @@ export function JobAlertsSettings() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Preferred Locations (optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="e.g. London, Manchester..."
-                  className="text-sm"
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addLocation(); } }}
-                />
-                <Button size="sm" variant="outline" onClick={addLocation} disabled={!newLocation.trim()}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {locations.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {locations.map((loc) => (
-                    <Badge key={loc} variant="secondary" className="text-xs gap-1 pr-1">
-                      {loc}
-                      <button onClick={() => setLocations(locations.filter((l) => l !== loc))} className="hover:text-destructive">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Search area (optional)</Label>
+              <PostcodeInput
+                value={{ postcode: centerPostcode ?? "", country: centerCountry ?? "United Kingdom" }}
+                onChange={(v) => { setCenterPostcode(v.postcode); setCenterCountry(v.country); }}
+                onResolved={(r) => setCenterTown(r?.town ?? null)}
+              />
+              {centerTown && (
+                <p className="text-xs text-muted-foreground">Resolved: {centerTown}</p>
               )}
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Radius</Label>
+                <span className="text-sm font-mono font-bold text-primary">{radiusMiles} mi</span>
+              </div>
+              <Slider
+                value={[radiusMiles]}
+                onValueChange={([val]) => setRadiusMiles(val)}
+                min={5}
+                max={100}
+                step={5}
+                className="w-full"
+              />
               <p className="text-xs text-muted-foreground">
-                Only alert for jobs in these locations (remote jobs always included).
-                Leave empty to match all locations.
+                Only alert for jobs within this distance of the postcode (remote jobs always included).
+                Leave the postcode blank to use your profile location.
               </p>
             </div>
           </>

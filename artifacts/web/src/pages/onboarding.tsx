@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import {
   ArrowRight, ArrowLeft, CheckCircle2, Briefcase, Target, ShieldCheck,
   Upload, FileText, X, Plus, Sparkles, AlertCircle, GraduationCap,
@@ -137,6 +138,7 @@ export default function Onboarding() {
   const [postcodeCountry, setPostcodeCountry] = useState("United Kingdom");
   const [currentTitle, setCurrentTitle] = useState("");
   const [experienceYears, setExperienceYears] = useState<string>("");
+  const [maxRadiusMiles, setMaxRadiusMiles] = useState<number>(25);
   const [summary, setSummary] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [skillDraft, setSkillDraft] = useState("");
@@ -173,6 +175,8 @@ export default function Onboarding() {
       setPostcodeCountry(((candidate as any).country as string) || "United Kingdom");
       setCurrentTitle(stripPlaceholder(candidate.currentTitle));
       setExperienceYears(candidate.experienceYears ? String(candidate.experienceYears) : "");
+      const r = (candidate as any).maxRadiusMiles;
+      if (typeof r === "number") setMaxRadiusMiles(r);
       setSummary(candidate.summary && candidate.summary !== "No summary provided" ? candidate.summary : "");
       setSkills(candidate.skills || []);
       setEducation(stripPlaceholder(candidate.education));
@@ -338,6 +342,7 @@ export default function Onboarding() {
           country: postcodeCountry || "United Kingdom",
           currentTitle: currentTitle || "Not specified",
           experienceYears: experienceYears ? parseInt(experienceYears, 10) || 0 : 0,
+          maxRadiusMiles,
           summary: summary || "",
         } as any);
         break;
@@ -735,6 +740,14 @@ export default function Onboarding() {
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
                   <Input type="number" min="0" max="60" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 5" />
+                </div>
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-600">Maximum commute radius</label>
+                    <span className="text-xs font-mono font-bold" style={{ color: "#4CAF50" }}>{maxRadiusMiles} mi</span>
+                  </div>
+                  <Slider value={[maxRadiusMiles]} onValueChange={([v]) => setMaxRadiusMiles(v)} min={5} max={100} step={5} />
+                  <p className="text-xs text-slate-500 mt-1">Jobs closer to your postcode score higher. Remote jobs always score full marks.</p>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">

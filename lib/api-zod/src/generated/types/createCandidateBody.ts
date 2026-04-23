@@ -28,5 +28,7 @@ export interface CreateCandidateBody {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status?: CreateCandidateBodyStatus;
 }

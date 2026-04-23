@@ -28,6 +28,8 @@ export interface UpdateCandidateBody {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status?: UpdateCandidateBodyStatus;
   /** @nullable */
   linkedinUrl?: string | null;

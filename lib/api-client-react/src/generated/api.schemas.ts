@@ -219,6 +219,8 @@ export interface Candidate {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status: CandidateStatus;
   matchCount: number;
   createdAt: string;
@@ -255,6 +257,8 @@ export interface CreateCandidateBody {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status?: CreateCandidateBodyStatus;
 }
 
@@ -288,6 +292,8 @@ export interface UpdateCandidateBody {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status?: UpdateCandidateBodyStatus;
   /** @nullable */
   linkedinUrl?: string | null;

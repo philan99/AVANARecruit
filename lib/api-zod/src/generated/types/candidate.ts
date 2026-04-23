@@ -29,6 +29,8 @@ export interface Candidate {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  /** @nullable */
+  maxRadiusMiles?: number | null;
   status: CandidateStatus;
   matchCount: number;
   createdAt: Date;

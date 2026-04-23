@@ -742,6 +742,8 @@ components:
           type: ["number", "null"]
         lng:
           type: ["number", "null"]
+        maxRadiusMiles:
+          type: ["integer", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]
@@ -801,6 +803,8 @@ components:
           type: ["number", "null"]
         lng:
           type: ["number", "null"]
+        maxRadiusMiles:
+          type: ["integer", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]
@@ -847,6 +851,8 @@ components:
           type: ["number", "null"]
         lng:
           type: ["number", "null"]
+        maxRadiusMiles:
+          type: ["integer", "null"]
         status:
           type: string
           enum: [active, passive, not_looking]

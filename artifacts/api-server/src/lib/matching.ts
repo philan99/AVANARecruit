@@ -319,20 +319,70 @@ function computePreferenceScore(job: Job, candidate: Candidate): PreferenceResul
   return { score: weightedScore / totalWeight, matches, mismatches };
 }
 
-function computeLocationScore(jobLocation: string, candidateLocation: string): number {
-  const jobLoc = jobLocation.toLowerCase().trim();
-  const candLoc = candidateLocation.toLowerCase().trim();
+function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3958.7613;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
 
+function computeLocationScoreLegacy(jobLocation: string, candidateLocation: string): number {
+  const jobLoc = (jobLocation ?? "").toLowerCase().trim();
+  const candLoc = (candidateLocation ?? "").toLowerCase().trim();
+  if (!jobLoc || !candLoc) return 60;
   if (jobLoc === candLoc) return 100;
   if (jobLoc.includes("remote") || candLoc.includes("remote")) return 95;
   if (jobLoc.includes(candLoc) || candLoc.includes(jobLoc)) return 90;
-
   const jobParts = jobLoc.split(/[,\s]+/);
   const candParts = candLoc.split(/[,\s]+/);
   const hasCommon = jobParts.some(p => candParts.includes(p) && p.length > 2);
   if (hasCommon) return 75;
-
   return 40;
+}
+
+export interface LocationScoreDetail {
+  score: number;
+  distanceMiles: number | null;
+  radiusMiles: number;
+  source: "remote" | "distance" | "legacy-text";
+}
+
+export function computeLocationScoreDetailed(job: Job, candidate: Candidate): LocationScoreDetail {
+  const radius = (candidate as any).maxRadiusMiles ?? 25;
+  const workplace = (job.workplace ?? "").toLowerCase();
+  if (workplace === "remote") {
+    return { score: 100, distanceMiles: null, radiusMiles: radius, source: "remote" };
+  }
+
+  const jLat = (job as any).lat;
+  const jLng = (job as any).lng;
+  const cLat = (candidate as any).lat;
+  const cLng = (candidate as any).lng;
+  if (
+    typeof jLat === "number" && typeof jLng === "number" &&
+    typeof cLat === "number" && typeof cLng === "number"
+  ) {
+    const d = haversineMiles(cLat, cLng, jLat, jLng);
+    // Soft curve: 100 at 0mi, ~50 at radius, 0 at 2*radius. Floor at 0.
+    const raw = 100 - 50 * (d / Math.max(1, radius));
+    const score = Math.max(0, Math.min(100, raw));
+    return { score, distanceMiles: d, radiusMiles: radius, source: "distance" };
+  }
+
+  return {
+    score: computeLocationScoreLegacy(job.location, candidate.location),
+    distanceMiles: null,
+    radiusMiles: radius,
+    source: "legacy-text",
+  };
+}
+
+function computeLocationScore(job: Job, candidate: Candidate): number {
+  return computeLocationScoreDetailed(job, candidate).score;
 }
 
 function computeVerificationScore(verifiedCount: number): number {
@@ -434,6 +484,9 @@ export interface MatchExplanation {
       score: number;
       jobLocation: string;
       candidateLocation: string;
+      distanceMiles: number | null;
+      radiusMiles: number;
+      source: "remote" | "distance" | "legacy-text";
     };
     verification: {
       score: number;
@@ -466,7 +519,8 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
   const experienceScore = computeExperienceScore(job, candidate);
 
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
-  const locationScore = computeLocationScore(job.location, candidate.location);
+  const locationDetail = computeLocationScoreDetailed(job, candidate);
+  const locationScore = locationDetail.score;
   const verificationScore = computeVerificationScore(verifiedCount);
   const pref = computePreferenceScore(job, candidate);
 
@@ -552,6 +606,9 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
         score: Math.round(locationScore),
         jobLocation: job.location ?? "",
         candidateLocation: candidate.location ?? "",
+        distanceMiles: locationDetail.distanceMiles == null ? null : Math.round(locationDetail.distanceMiles * 10) / 10,
+        radiusMiles: locationDetail.radiusMiles,
+        source: locationDetail.source,
       },
       verification: {
         score: Math.round(verificationScore),
@@ -576,7 +633,7 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
 
   const experienceScore = computeExperienceScore(job, candidate);
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
-  const locationScore = computeLocationScore(job.location, candidate.location);
+  const locationScore = computeLocationScore(job, candidate);
   const verificationScore = computeVerificationScore(verifiedCount);
   const { score: preferenceScore, matches: preferenceMatches, mismatches: preferenceMismatches } =
     computePreferenceScore(job, candidate);

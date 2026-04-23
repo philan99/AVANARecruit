@@ -28,6 +28,7 @@ export const candidatesTable = pgTable("candidates", {
   preferredJobTypes: text("preferred_job_types").array().default([]),
   preferredWorkplaces: text("preferred_workplaces").array().default([]),
   preferredIndustries: text("preferred_industries").array().default([]),
+  maxRadiusMiles: integer("max_radius_miles").default(25),
   linkedinUrl: text("linkedin_url"),
   facebookUrl: text("facebook_url"),
   twitterUrl: text("twitter_url"),
