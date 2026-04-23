@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useParams, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Target, Users } from "lucide-react";
+import { ArrowLeft, Target, Users, ChevronRight, ChevronDown, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 
 interface MatchResult {
   id: number;
@@ -35,6 +35,19 @@ export default function AdminJobMatches() {
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [job, setJob] = useState<JobInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+
+  const toggleRow = (matchId: number) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(matchId)) next.delete(matchId);
+      else next.add(matchId);
+      return next;
+    });
+  };
+  const expandAll = () => setExpanded(new Set(matches.map(m => m.id)));
+  const collapseAll = () => setExpanded(new Set());
+  const allExpanded = matches.length > 0 && expanded.size === matches.length;
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -90,9 +103,21 @@ export default function AdminJobMatches() {
       </div>
 
       <Card className="bg-card">
-        <CardHeader className="border-b border-border pb-4 flex flex-row items-center justify-between">
+        <CardHeader className="border-b border-border pb-4 flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-lg">Match Results</CardTitle>
-          <Badge variant="secondary" className="font-mono">{matches.length} Matches</Badge>
+          <div className="flex items-center gap-2">
+            {matches.length > 0 && (
+              <>
+                <Button variant="outline" size="sm" className="text-xs h-8" onClick={expandAll} disabled={allExpanded}>
+                  <ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand all
+                </Button>
+                <Button variant="outline" size="sm" className="text-xs h-8" onClick={collapseAll} disabled={expanded.size === 0}>
+                  <ChevronsDownUp className="w-3.5 h-3.5 mr-1" /> Collapse all
+                </Button>
+              </>
+            )}
+            <Badge variant="secondary" className="font-mono">{matches.length} Matches</Badge>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {matches.length === 0 ? (
@@ -104,6 +129,7 @@ export default function AdminJobMatches() {
             <Table>
               <TableHeader className="bg-secondary/50">
                 <TableRow>
+                  <TableHead className="w-[40px]"></TableHead>
                   <TableHead className="w-[250px]">Candidate</TableHead>
                   <TableHead className="text-center font-mono">Overall</TableHead>
                   <TableHead className="text-center font-mono hidden md:table-cell">Skills</TableHead>
@@ -111,18 +137,30 @@ export default function AdminJobMatches() {
                   <TableHead className="text-center font-mono hidden lg:table-cell">Education</TableHead>
                   <TableHead className="text-center font-mono hidden lg:table-cell">Location</TableHead>
                   <TableHead className="text-center font-mono hidden lg:table-cell">Verified</TableHead>
-                  <TableHead className="hidden xl:table-cell">Matched Skills</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="hidden xl:table-cell">Assessment</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {matches
                   .sort((a, b) => b.overallScore - a.overallScore)
-                  .map((match) => (
-                  <TableRow key={match.id}>
+                  .map((match) => {
+                    const isOpen = expanded.has(match.id);
+                    return (
+                  <Fragment key={match.id}>
+                  <TableRow className="cursor-pointer" onClick={() => toggleRow(match.id)}>
+                    <TableCell className="w-[40px]">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={(e) => { e.stopPropagation(); toggleRow(match.id); }}
+                        aria-label={isOpen ? "Collapse row" : "Expand row"}
+                      >
+                        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </Button>
+                    </TableCell>
                     <TableCell>
-                      <Link href={`/candidates/${match.candidateId}`} className="block hover:text-primary transition-colors">
+                      <Link href={`/candidates/${match.candidateId}`} onClick={(e) => e.stopPropagation()} className="block hover:text-primary transition-colors">
                         <div className="font-medium text-foreground">{match.candidateName}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{match.candidateTitle}</div>
                       </Link>
@@ -147,20 +185,6 @@ export default function AdminJobMatches() {
                     <TableCell className="text-center hidden lg:table-cell">
                       <span className="font-mono text-sm">{Math.round(match.verificationScore ?? 0)}%</span>
                     </TableCell>
-                    <TableCell className="hidden xl:table-cell">
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
-                        {match.matchedSkills.slice(0, 3).map(skill => (
-                          <Badge key={skill} variant="outline" className="text-[10px] py-0 h-4 bg-background">
-                            {skill}
-                          </Badge>
-                        ))}
-                        {match.matchedSkills.length > 3 && (
-                          <Badge variant="outline" className="text-[10px] py-0 h-4 bg-background">
-                            +{match.matchedSkills.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={match.status === 'shortlisted' ? 'default' : match.status === 'rejected' ? 'destructive' : 'secondary'}
@@ -169,13 +193,37 @@ export default function AdminJobMatches() {
                         {match.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-cell">
-                      <p className="text-xs text-muted-foreground leading-relaxed max-w-[300px]">
-                        {match.assessment}
-                      </p>
-                    </TableCell>
                   </TableRow>
-                ))}
+                  {isOpen && (
+                    <TableRow key={`${match.id}-detail`} className="bg-secondary/20 hover:bg-secondary/20">
+                      <TableCell></TableCell>
+                      <TableCell colSpan={8} className="py-4">
+                        <div className="space-y-3">
+                          {match.matchedSkills.length > 0 && (
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Matched Skills</p>
+                              <div className="flex flex-wrap gap-1">
+                                {match.matchedSkills.map(skill => (
+                                  <Badge key={skill} variant="outline" className="text-[10px] py-0 h-5 bg-background border-green-500/40 text-green-700 dark:text-green-400">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {match.assessment && (
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">AI Assessment</p>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{match.assessment}</p>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
