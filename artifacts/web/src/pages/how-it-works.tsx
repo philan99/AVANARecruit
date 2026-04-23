@@ -172,40 +172,79 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#ffffff" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-              <Building2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
+      <section className="relative py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: "#ffffff" }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }} />
+          <div className="absolute -bottom-40 -left-24 w-[420px] h-[420px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #1a2035 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)", border: "1px solid rgba(76, 175, 80, 0.2)" }}>
+                <Building2 className="w-3.5 h-3.5" style={{ color: "#4CAF50" }} />
+                <span className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "#4CAF50" }}>For Companies</span>
+              </div>
+              <h2 className="text-3xl lg:text-[44px] font-bold leading-[1.1] mb-5" style={{ color: "#1a2035" }}>
+                Hire with <span style={{ color: "#4CAF50" }}>Confidence</span>
+              </h2>
+              <p className="text-base lg:text-lg leading-relaxed" style={{ color: "#6b7280" }}>
+                From posting your first job to signing your next hire — everything you need to find the right talent, powered by AI.
+              </p>
             </div>
-            <div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#4CAF50" }}>For Companies</p>
-              <h2 className="text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: "#1a2035" }}>Hire with Confidence</h2>
+
+            <div className="grid grid-cols-3 gap-3 lg:gap-5 lg:max-w-md w-full">
+              {[
+                { value: "6", label: "Scoring dimensions" },
+                { value: "3", label: "Ways to post jobs" },
+                { value: "1-click", label: "Verified hires" },
+              ].map((stat) => (
+                <div key={stat.label} className="rounded-xl p-4 text-center" style={{ backgroundColor: "#f8f9fb", border: "1px solid #e5e7eb" }}>
+                  <div className="text-xl lg:text-2xl font-bold mb-1" style={{ color: "#1a2035" }}>{stat.value}</div>
+                  <div className="text-[11px] leading-tight font-medium" style={{ color: "#6b7280" }}>{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
-          <p className="text-base max-w-2xl mb-12" style={{ color: "#6b7280" }}>
-            From posting your first job to making a hire — everything you need to find the right talent, powered by AI.
-          </p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {companySteps.map((step, index) => (
-              <div
-                key={step.title}
-                className="relative rounded-xl p-7 transition-all hover:-translate-y-1 group"
-                style={{ backgroundColor: "#f8f9fb", border: "1px solid #e5e7eb" }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "#4CAF50", color: "#fff" }}>
-                    {index + 1}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {companySteps.map((step, index) => {
+              const isFeatured = index === 0;
+              return (
+                <div
+                  key={step.title}
+                  className={`relative rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,32,53,0.18)] group overflow-hidden ${isFeatured ? "md:col-span-2 lg:col-span-1" : ""}`}
+                  style={
+                    isFeatured
+                      ? { background: "linear-gradient(135deg, #1a2035 0%, #232a45 100%)", border: "1px solid rgba(76, 175, 80, 0.25)" }
+                      : { backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }
+                  }
+                >
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[3px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: "linear-gradient(90deg, #4CAF50 0%, #6dcf72 100%)" }}
+                  />
+                  <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, rgba(76,175,80,0.15) 0%, transparent 70%)" }} />
+
+                  <div className="relative flex items-center gap-3 mb-5">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: "linear-gradient(135deg, #4CAF50 0%, #43a047 100%)" }}>
+                        <step.icon className="w-5 h-5" style={{ color: "#ffffff" }} />
+                      </div>
+                      <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm" style={{ backgroundColor: isFeatured ? "#4CAF50" : "#1a2035", color: "#ffffff", border: "2px solid #ffffff" }}>
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: isFeatured ? "rgba(76, 175, 80, 0.9)" : "#9ca3af" }}>
+                      Step {String(index + 1).padStart(2, "0")}
+                    </div>
                   </div>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-                    <step.icon className="w-4 h-4" style={{ color: "#4CAF50" }} />
-                  </div>
+
+                  <h3 className="relative text-lg font-bold mb-2.5 leading-snug" style={{ color: isFeatured ? "#ffffff" : "#1a2035" }}>{step.title}</h3>
+                  <p className="relative text-sm leading-relaxed" style={{ color: isFeatured ? "rgba(255,255,255,0.7)" : "#6b7280" }}>{step.description}</p>
                 </div>
-                <h3 className="text-base font-bold mb-2" style={{ color: "#1a2035" }}>{step.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{step.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
