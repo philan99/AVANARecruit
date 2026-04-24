@@ -7,6 +7,16 @@ import { brandedEmail } from "../lib/emailTemplate";
 
 const router = Router();
 
+function escapeHtml(s: string | null | undefined): string {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function maskEmail(email: string | null | undefined): string {
   if (!email) return "";
   const at = email.indexOf("@");
@@ -189,6 +199,55 @@ router.post("/verifications/token/:token/respond", async (req, res): Promise<voi
       })
       .where(eq(verificationsTable.token, token))
       .returning();
+
+    // Notify the candidate that their verification request has been answered.
+    // Failures here must not break the verifier's response submission, so we
+    // swallow errors after logging.
+    try {
+      const [candidate] = await db
+        .select({ name: candidatesTable.name, email: candidatesTable.email })
+        .from(candidatesTable)
+        .where(eq(candidatesTable.id, verification.candidateId));
+
+      if (candidate?.email) {
+        const { client, fromEmail } = await getResendClient();
+        const isVerified = status === "verified";
+        const headlineColor = isVerified ? "#4CAF50" : "#dc2626";
+        const headlineLabel = isVerified ? "Verified" : "Declined";
+        const responseText = (response || "").trim();
+        const greetingName = escapeHtml(candidate.name?.split(" ")[0] || candidate.name || "there");
+
+        await client.emails.send({
+          from: fromEmail,
+          to: candidate.email,
+          subject: `AVANA Recruit – Your verification request was ${isVerified ? "verified" : "declined"}`,
+          html: brandedEmail(
+            isVerified ? "Verification Confirmed" : "Verification Declined",
+            `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Hi ${greetingName},</p>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6;">
+               <strong>${escapeHtml(verification.verifierName)}</strong> has responded to your employment verification request for your role as
+               <strong>${escapeHtml(verification.roleTitle)}</strong> at <strong>${escapeHtml(verification.company)}</strong>.
+             </p>
+             <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin: 16px 0;">
+               <p style="font-size: 13px; color: #6b7280; margin: 0 0 6px 0; font-weight: 600;">Response</p>
+               <p style="font-size: 16px; font-weight: 700; margin: 0 0 12px 0; color: ${headlineColor};">${headlineLabel}</p>
+               ${responseText ? `
+                 <p style="font-size: 13px; color: #6b7280; margin: 12px 0 6px 0; font-weight: 600;">Message from ${escapeHtml(verification.verifierName)}</p>
+                 <p style="font-size: 14px; color: #374151; margin: 0; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(responseText)}</p>
+               ` : `
+                 <p style="font-size: 13px; color: #9ca3af; margin: 0; font-style: italic;">No additional message was provided.</p>
+               `}
+             </div>
+             <p style="font-size: 14px; color: #374151; line-height: 1.6;">
+               You can view all of your verification responses in your AVANA Recruit profile at any time.
+             </p>`,
+            "This is an automated notification from AVANA Recruit. You are receiving it because you sent a verification request from your candidate profile."
+          ),
+        });
+      }
+    } catch (notifyErr) {
+      console.error("Failed to send candidate verification response email", notifyErr);
+    }
 
     res.json(updated);
   } catch (err) {
