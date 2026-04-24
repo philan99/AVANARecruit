@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, desc, sql, avg, count, and } from "drizzle-orm";
+import { eq, desc, sql, avg, count, and, inArray } from "drizzle-orm";
 import { db, jobsTable, candidatesTable, matchesTable, companyProfiles, companyUsers, verificationsTable } from "@workspace/db";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
@@ -251,7 +251,7 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
     return;
   }
 
-  const matches = await db
+  const rows = await db
     .select({
       id: matchesTable.id,
       jobId: matchesTable.jobId,
@@ -262,6 +262,7 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
       educationScore: matchesTable.educationScore,
       locationScore: matchesTable.locationScore,
       verificationScore: matchesTable.verificationScore,
+      preferenceScore: matchesTable.preferenceScore,
       assessment: matchesTable.assessment,
       matchedSkills: matchesTable.matchedSkills,
       missingSkills: matchesTable.missingSkills,
@@ -274,11 +275,63 @@ router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
     })
     .from(matchesTable)
     .innerJoin(candidatesTable, eq(matchesTable.candidateId, candidatesTable.id))
-    .where(eq(matchesTable.jobId, params.data.id))
-    .orderBy(desc(matchesTable.overallScore));
+    .where(eq(matchesTable.jobId, params.data.id));
 
-  res.json(matches);
+  // Recompute scores fresh against the current matching algorithm so the list
+  // always agrees with the diagnostic / candidate-detail views, even after
+  // the engine has been tweaked since the matches were last persisted.
+  const refreshed = rows.length > 0 ? await refreshScoresForJob(params.data.id, rows) : rows;
+  refreshed.sort((a, b) => b.overallScore - a.overallScore);
+
+  res.json(refreshed);
 });
+
+async function refreshScoresForJob<T extends {
+  candidateId: number;
+  overallScore: number;
+  skillScore: number;
+  experienceScore: number;
+  educationScore: number;
+  locationScore: number;
+  verificationScore: number;
+  preferenceScore: number;
+  assessment: string;
+  matchedSkills: string[];
+  missingSkills: string[];
+}>(jobId: number, rows: T[]): Promise<T[]> {
+  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+  if (!job) return rows;
+
+  const candidateIds = Array.from(new Set(rows.map(r => r.candidateId)));
+  const fullCandidates = await db.select().from(candidatesTable).where(inArray(candidatesTable.id, candidateIds));
+  const candidateMap = new Map(fullCandidates.map(c => [c.id, c]));
+
+  const verifiedCounts = await db
+    .select({ candidateId: verificationsTable.candidateId, count: count() })
+    .from(verificationsTable)
+    .where(and(inArray(verificationsTable.candidateId, candidateIds), eq(verificationsTable.status, "verified")))
+    .groupBy(verificationsTable.candidateId);
+  const verifiedMap = new Map(verifiedCounts.map(v => [v.candidateId, v.count]));
+
+  return rows.map(r => {
+    const candidate = candidateMap.get(r.candidateId);
+    if (!candidate) return r;
+    const result = computeMatch(job, candidate, verifiedMap.get(r.candidateId) ?? 0);
+    return {
+      ...r,
+      overallScore: result.overallScore,
+      skillScore: result.skillScore,
+      experienceScore: result.experienceScore,
+      educationScore: result.educationScore,
+      locationScore: result.locationScore,
+      verificationScore: result.verificationScore,
+      preferenceScore: result.preferenceScore,
+      assessment: result.assessment,
+      matchedSkills: result.matchedSkills,
+      missingSkills: result.missingSkills,
+    };
+  });
+}
 
 router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promise<void> => {
   const candidateId = parseInt(req.params.candidateId, 10);
@@ -528,7 +581,7 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
     conditions.push(eq(jobsTable.companyProfileId, companyId));
   }
 
-  const matches = await db
+  const rows = await db
     .select({
       id: matchesTable.id,
       jobId: matchesTable.jobId,
@@ -554,11 +607,62 @@ router.get("/candidates/:id/matches", async (req, res): Promise<void> => {
     })
     .from(matchesTable)
     .innerJoin(jobsTable, eq(matchesTable.jobId, jobsTable.id))
-    .where(and(...conditions))
-    .orderBy(desc(matchesTable.overallScore));
+    .where(and(...conditions));
 
-  res.json(GetCandidateMatchesResponse.parse(matches));
+  // Recompute scores fresh against the current matching algorithm so the list
+  // always agrees with the diagnostic / job-detail views, even after the
+  // engine has been tweaked since the matches were last persisted.
+  const refreshed = rows.length > 0 ? await refreshScoresForCandidate(params.data.id, rows) : rows;
+  refreshed.sort((a, b) => b.overallScore - a.overallScore);
+
+  res.json(GetCandidateMatchesResponse.parse(refreshed));
 });
+
+async function refreshScoresForCandidate<T extends {
+  jobId: number;
+  overallScore: number;
+  skillScore: number;
+  experienceScore: number;
+  educationScore: number;
+  locationScore: number;
+  verificationScore: number;
+  preferenceScore: number;
+  assessment: string;
+  matchedSkills: string[];
+  missingSkills: string[];
+}>(candidateId: number, rows: T[]): Promise<T[]> {
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
+  if (!candidate) return rows;
+
+  const jobIds = Array.from(new Set(rows.map(r => r.jobId)));
+  const fullJobs = await db.select().from(jobsTable).where(inArray(jobsTable.id, jobIds));
+  const jobMap = new Map(fullJobs.map(j => [j.id, j]));
+
+  const verifiedRow = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow[0]?.count ?? 0;
+
+  return rows.map(r => {
+    const job = jobMap.get(r.jobId);
+    if (!job) return r;
+    const result = computeMatch(job, candidate, verifiedCount);
+    return {
+      ...r,
+      overallScore: result.overallScore,
+      skillScore: result.skillScore,
+      experienceScore: result.experienceScore,
+      educationScore: result.educationScore,
+      locationScore: result.locationScore,
+      verificationScore: result.verificationScore,
+      preferenceScore: result.preferenceScore,
+      assessment: result.assessment,
+      matchedSkills: result.matchedSkills,
+      missingSkills: result.missingSkills,
+    };
+  });
+}
 
 router.patch("/matches/:id", async (req, res): Promise<void> => {
   const params = UpdateMatchStatusParams.safeParse(req.params);
