@@ -57,8 +57,12 @@ const editFormSchema = z.object({
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   status: z.enum(["open", "closed", "draft"]),
-  idealCandidateTraits: z.array(z.string()).min(1, "Pick at least one trait").max(5, "Pick up to 5 traits"),
-  idealCandidateNote: z.string().min(20, "Add a sentence or two (20+ characters)").max(300, "Keep it under 300 characters"),
+  // Legacy jobs created before the Ideal Candidate feature have empty defaults
+  // for these fields. We keep the upper bounds but don't enforce a minimum on
+  // edit, so older jobs can still be saved without being forced to fill in
+  // this section. The create form keeps the stricter minimum requirements.
+  idealCandidateTraits: z.array(z.string()).max(5, "Pick up to 5 traits"),
+  idealCandidateNote: z.string().max(300, "Keep it under 300 characters"),
   idealCandidateUseInScore: z.boolean(),
 });
 
@@ -142,6 +146,25 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
     );
   }
 
+  function onInvalid(errors: Record<string, { message?: string } | undefined>) {
+    const firstFieldName = Object.keys(errors)[0];
+    const firstMessage =
+      (firstFieldName && errors[firstFieldName]?.message) ||
+      "Please review the highlighted fields and try again.";
+    toast({
+      title: "Couldn't save changes",
+      description: firstMessage,
+      variant: "destructive",
+    });
+    if (firstFieldName) {
+      const el = document.querySelector<HTMLElement>(`[name="${firstFieldName}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus({ preventScroll: true });
+      }
+    }
+  }
+
   function handleDelete() {
     deleteJob.mutate(
       { id: jobId },
@@ -165,7 +188,7 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
       </Button>
       <Button
         type="button"
-        onClick={form.handleSubmit(onSubmit)}
+        onClick={form.handleSubmit(onSubmit, onInvalid)}
         disabled={updateJob.isPending}
       >
         {updateJob.isPending ? "Saving..." : "Save Changes"}
@@ -217,7 +240,7 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
       <Card className="bg-card">
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
