@@ -459,7 +459,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
     email: string;
     name: string | null;
     companyName: string;
-    jobs: { title: string; score: number }[];
+    jobs: { id: number; title: string; score: number }[];
   };
   const buckets = new Map<number, Bucket>();
 
@@ -482,12 +482,13 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
       };
       buckets.set(recipient.id, bucket);
     }
-    bucket.jobs.push({ title: job.title, score: job.score });
+    bucket.jobs.push({ id: job.id, title: job.title, score: job.score });
   }
 
   if (buckets.size === 0) return;
 
   const { client: resend, fromEmail } = await getResendClient();
+  const platformUrl = (process.env.PUBLIC_WEB_URL || "https://avanarecruit.ai").replace(/\/$/, "");
   let sentCount = 0;
 
   for (const bucket of buckets.values()) {
@@ -497,7 +498,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
       .map(
         (j, i) =>
           `<tr${i % 2 === 1 ? ' style="background:#f9f9f9;"' : ""}>
-            <td style="padding:8px 12px;">${j.title}</td>
+            <td style="padding:8px 12px;"><a href="${platformUrl}/jobs/${j.id}" style="color:#1a2035; font-weight:600; text-decoration:underline;">${j.title}</a></td>
             <td style="padding:8px 12px; font-weight:700; color:#4CAF50;">${j.score}%</td>
           </tr>`,
       )
@@ -519,7 +520,7 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Title</td><td style="padding:8px 12px;">${candidate.currentTitle}</td></tr>
             <tr><td style="padding:8px 12px; font-weight:600; color:#666;">Location</td><td style="padding:8px 12px;">${candidate.location}</td></tr>
           </table>
-          <p style="font-weight:600; margin-top:20px;">Matching Roles:</p>
+          <p style="font-weight:600; margin-top:20px;">Matching Roles (click a role title to open it):</p>
           <table style="width:100%; border-collapse:collapse; margin:8px 0;">
             <tr style="background:#f0f0f0;">
               <th style="padding:8px 12px; text-align:left; font-size:13px;">Job Title</th>
@@ -527,7 +528,12 @@ export async function dispatchCandidateAlerts(candidate: any, matchedJobs: Match
             </tr>
             ${jobRows}
           </table>
-          <p>Log in to your AVANA Recruit account to view the full candidate profile.</p>`,
+          <p style="text-align:center; margin:28px 0 8px;">
+            <a href="${platformUrl}" style="display:inline-block; background:#4CAF50; color:#ffffff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:600;">Open AVANA Recruit</a>
+          </p>
+          <p style="font-size:12px; color:#64748b; text-align:center; margin:4px 0 0;">
+            Or paste this link into your browser: <a href="${platformUrl}" style="color:#1a2035;">${platformUrl}</a>
+          </p>`,
           "You received this because you have candidate alerts enabled on AVANA Recruit.",
         ),
       });
