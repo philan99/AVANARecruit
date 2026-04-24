@@ -164,7 +164,8 @@ router.post("/candidates", async (req, res): Promise<void> => {
     insertData.password = await bcrypt.hash(password, 10);
   }
 
-  const country = insertData.country || "United Kingdom";
+  const userCountry = insertData.country;
+  const country = userCountry || "United Kingdom";
   if (insertData.postcode && country === "United Kingdom") {
     const geo = await geocodeUkPostcode(insertData.postcode);
     if (!geo.ok) {
@@ -173,7 +174,11 @@ router.post("/candidates", async (req, res): Promise<void> => {
     }
     insertData.postcode = geo.postcode;
     insertData.town = geo.town;
-    insertData.country = geo.country;
+    // Preserve the user-supplied country (e.g. "United Kingdom"). Only fall
+    // back to the geocoder's country (which postcodes.io reports as
+    // "England" / "Scotland" / "Wales" / "Northern Ireland") if the caller
+    // didn't supply one.
+    insertData.country = userCountry ?? geo.country;
     insertData.lat = geo.lat;
     insertData.lng = geo.lng;
     if (!insertData.location || insertData.location.trim() === "") {
@@ -316,7 +321,8 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
   }
 
   if (updateData.postcode !== undefined && updateData.postcode !== null && updateData.postcode !== "") {
-    const country = updateData.country || "United Kingdom";
+    const userCountry = updateData.country;
+    const country = userCountry || "United Kingdom";
     if (country === "United Kingdom") {
       const geo = await geocodeUkPostcode(updateData.postcode);
       if (!geo.ok) {
@@ -325,7 +331,11 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
       }
       updateData.postcode = geo.postcode;
       updateData.town = geo.town;
-      updateData.country = geo.country;
+      // Preserve the user-supplied country (e.g. "United Kingdom"). Only fall
+      // back to the geocoder's country (which postcodes.io reports as
+      // "England" / "Scotland" / "Wales" / "Northern Ireland") if the caller
+      // didn't supply one.
+      updateData.country = userCountry ?? geo.country;
       updateData.lat = geo.lat;
       updateData.lng = geo.lng;
       if (!updateData.location || updateData.location.trim() === "") {
