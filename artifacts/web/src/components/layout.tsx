@@ -22,6 +22,7 @@ import {
   ChevronDown,
   UsersRound,
   Bell,
+  Microscope,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -80,6 +81,7 @@ export function Layout({ children }: LayoutProps) {
 
   const adminPortalMenuItems = [
     { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/match-diagnostic", label: "Match Diagnostic", icon: Microscope },
     { href: "/development", label: "Development", icon: Code2 },
   ];
 

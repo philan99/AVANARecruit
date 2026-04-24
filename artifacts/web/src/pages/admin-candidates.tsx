@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download, FlaskConical, RotateCcw, Microscope } from "lucide-react";
+import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download, FlaskConical, RotateCcw } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetCandidateQueryKey, getGetCandidateMatchesQueryKey } from "@workspace/api-client-react";
@@ -489,9 +489,6 @@ export default function AdminCandidates() {
           </h1>
           <p className="text-muted-foreground mt-1">{candidates.length} candidate profiles on the platform.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate("/match-diagnostic")} className="shrink-0">
-          <Microscope className="w-3.5 h-3.5 mr-1.5" /> Match diagnostic
-        </Button>
         <Card className="bg-card border-amber-500/30 shrink-0">
           <CardContent className="p-3 flex items-center gap-3">
             <FlaskConical className="w-5 h-5 text-amber-500 shrink-0" />
