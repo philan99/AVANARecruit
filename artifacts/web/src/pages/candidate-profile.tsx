@@ -283,7 +283,7 @@ export default function CandidateProfile() {
 
   const [verifications, setVerifications] = useState<{ id: number; candidateName: string; roleTitle: string; company: string; verifierName: string; verifierEmail: string; status: string; verifierResponse: string | null; verifiedAt: string | null; createdAt: string }[]>([]);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [verifyForm, setVerifyForm] = useState({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "" });
+  const [verifyForm, setVerifyForm] = useState({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "", startDate: "", endDate: "", current: false });
   const [sendingVerification, setSendingVerification] = useState(false);
   const [, setLocation] = useLocation();
 
@@ -314,13 +314,16 @@ export default function CandidateProfile() {
           verifierName: verifyForm.verifierName.trim(),
           verifierEmail: verifyForm.verifierEmail.trim(),
           message: verifyForm.message.trim() || null,
+          startDate: verifyForm.startDate || null,
+          endDate: verifyForm.current ? null : (verifyForm.endDate || null),
+          current: verifyForm.current,
         }),
       });
       if (res.ok) {
         const v = await res.json();
         setVerifications(prev => [...prev, v]);
         setVerifyDialogOpen(false);
-        setVerifyForm({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "" });
+        setVerifyForm({ roleTitle: "", company: "", verifierName: "", verifierEmail: "", message: "", startDate: "", endDate: "", current: false });
         toast({ title: "Verification Sent", description: `Verification request sent to ${verifyForm.verifierName}.` });
       } else {
         const err = await res.json();
@@ -1085,13 +1088,13 @@ export default function CandidateProfile() {
                             }
                             onValueChange={(value) => {
                               if (value === "__custom") {
-                                setVerifyForm(p => ({ ...p, roleTitle: "", company: "" }));
+                                setVerifyForm(p => ({ ...p, roleTitle: "", company: "", startDate: "", endDate: "", current: false }));
                                 return;
                               }
                               const idx = parseInt(value, 10);
                               const ex = experienceList[idx];
                               if (ex) {
-                                setVerifyForm(p => ({ ...p, roleTitle: ex.jobTitle, company: ex.company }));
+                                setVerifyForm(p => ({ ...p, roleTitle: ex.jobTitle, company: ex.company, startDate: ex.startDate || "", endDate: ex.endDate || "", current: !!ex.current }));
                               }
                             }}
                           >

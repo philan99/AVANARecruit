@@ -18,9 +18,33 @@ function maskEmail(email: string | null | undefined): string {
   return masked + domain;
 }
 
+function formatMonthYear(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim();
+  if (!v) return null;
+  // Strictly accept "YYYY-MM" or "YYYY-MM-DD"; otherwise drop silently.
+  const m = v.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
+  if (!m) return null;
+  const year = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  if (!year || year < 1900 || year > 2100) return null;
+  if (!month || month < 1 || month > 12) return null;
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return `${monthNames[month - 1]} ${year}`;
+}
+
+function buildDateRange(startDate: unknown, endDate: unknown, current: unknown): string | null {
+  const isCurrent = current === true;
+  const start = formatMonthYear(startDate);
+  const end = isCurrent ? "Present" : formatMonthYear(endDate);
+  if (!start && !end) return null;
+  if (start && end) return `${start} – ${end}`;
+  return start || end;
+}
+
 router.post("/verifications", async (req, res): Promise<void> => {
   try {
-    const { candidateId, roleTitle, company, verifierName, verifierEmail, message } = req.body;
+    const { candidateId, roleTitle, company, verifierName, verifierEmail, message, startDate, endDate, current } = req.body;
 
     if (!candidateId || !roleTitle || !company || !verifierName || !verifierEmail) {
       res.status(400).json({ error: "All required fields must be provided" });
@@ -58,6 +82,8 @@ router.post("/verifications", async (req, res): Promise<void> => {
       || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://example.com");
     const verifyUrl = `${origin}/verify/${token}`;
 
+    const dateRange = buildDateRange(startDate, endDate, current);
+
     try {
       const { client, fromEmail } = await getResendClient();
 
@@ -69,8 +95,17 @@ router.post("/verifications", async (req, res): Promise<void> => {
           "Employment Verification Request",
           `<p style="font-size: 14px; color: #374151; line-height: 1.6;">Dear ${verifierName},</p>
            <p style="font-size: 14px; color: #374151; line-height: 1.6;">
-             <strong>${candidateName}</strong> has listed you as a reference for their role as <strong>${roleTitle}</strong> at <strong>${company}</strong>.
+             <strong>${candidateName}</strong> has listed you as a reference for their role as <strong>${roleTitle}</strong> at <strong>${company}</strong>${dateRange ? ` (<strong>${dateRange}</strong>)` : ""}.
            </p>
+           ${dateRange ? `
+           <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+             <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0; font-weight: 600;">Role details</p>
+             <p style="font-size: 14px; color: #374151; margin: 0; line-height: 1.5;">
+               <strong>${roleTitle}</strong> at <strong>${company}</strong><br />
+               <span style="color: #6b7280;">Dates:</span> ${dateRange}
+             </p>
+           </div>
+           ` : ""}
            ${message ? `
            <div style="background: #ffffff; border-left: 3px solid #4CAF50; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
              <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0; font-weight: 600;">Message from ${candidateName}:</p>
