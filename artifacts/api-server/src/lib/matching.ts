@@ -176,6 +176,13 @@ function computeExperienceScore(job: Job, candidate: Candidate): number {
     return totalScore;
   }
 
+  if (relevantYears === 0) {
+    // Candidate has work history but none of it appears relevant to this role.
+    // Apply a strong cap so unrelated tenure cannot carry the experience score;
+    // allow only a small transferable-tenure credit (max 25/100).
+    return Math.min(25, Math.round(totalScore * 0.25));
+  }
+
   const relevantScore = scoreYearsAgainstRequirement(relevantYears, requiredYears);
   // Weight role-relevant years more heavily than raw total tenure: a candidate
   // with the right kind of experience should outscore one with the same total
@@ -394,7 +401,7 @@ function computeVerificationScore(verifiedCount: number): number {
   return 0;
 }
 
-function generateAssessment(result: MatchResult, job: Job, candidate: Candidate): string {
+function generateAssessment(result: MatchResult, job: Job, candidate: Candidate, opts: { hasNoRelevantExperience?: boolean } = {}): string {
   const parts: string[] = [];
 
   if (result.overallScore >= 85) {
@@ -415,7 +422,9 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate)
     parts.push(`Skills to develop: ${result.missingSkills.slice(0, 3).join(", ")}.`);
   }
 
-  if (result.experienceScore >= 80) {
+  if (opts.hasNoRelevantExperience) {
+    parts.push(`Work history shows no role-relevant experience for this position, which significantly limits the experience score.`);
+  } else if (result.experienceScore >= 80) {
     parts.push(`Experience level aligns well with requirements.`);
   } else if (result.experienceScore >= 60) {
     parts.push(`Experience level is close to requirements.`);
@@ -572,7 +581,9 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
     preferenceMatches: pref.matches,
     preferenceMismatches: pref.mismatches,
   };
-  const assessment = generateAssessment(partial, job, candidate);
+  const assessment = generateAssessment(partial, job, candidate, {
+    hasNoRelevantExperience: relevantYears === 0,
+  });
 
   return {
     overallScore,
@@ -632,6 +643,7 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
   );
 
   const experienceScore = computeExperienceScore(job, candidate);
+  const relevantYearsForAssessment = computeRelevantYears((candidate as any).experience, job);
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
   const locationScore = computeLocationScore(job, candidate);
   const verificationScore = computeVerificationScore(verifiedCount);
@@ -669,6 +681,8 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
     preferenceMismatches,
   };
 
-  result.assessment = generateAssessment(result, job, candidate);
+  result.assessment = generateAssessment(result, job, candidate, {
+    hasNoRelevantExperience: relevantYearsForAssessment === 0,
+  });
   return result;
 }

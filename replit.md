@@ -30,7 +30,7 @@ AI-powered recruitment platform that matches job descriptions with candidate pro
 ### AI Matching Engine
 Located at `artifacts/api-server/src/lib/matching.ts`. Computes match scores based on:
 - **Skill matching** (35% weight): Fuzzy matching using Levenshtein similarity
-- **Experience matching** (20% weight): Compares candidate years vs job level requirements
+- **Experience matching** (20% weight): Compares total years AND role-relevant years (work-history entries whose title overlaps the job title or whose description mentions a required skill) against the job level. If the candidate has work history but **none of it is role-relevant (relevantYears = 0)**, the experience score is hard-capped at 25/100 (set to `min(25, totalYearsScore × 0.20)`) so unrelated tenure cannot carry this element. The assessment text also explicitly calls this out.
 - **Education matching** (10% weight): Parses education levels from requirements text
 - **Location matching** (15% weight): Distance-based using haversine over UK postcode lat/lng. Score = clamp(100 − 50×d/radius, 0, 100). Remote workplace = 100. Falls back to text match if either side lacks coords. Per-candidate `maxRadiusMiles` (default 25) configurable in onboarding/profile. Job alerts have their own center postcode + radius (hard filter for alert dispatch).
 - **Verification matching** (20% weight): Based on number of verified credentials (0=0%, 1=50%, 2=65%, 3=80%, 4=90%, 5+=100%)
