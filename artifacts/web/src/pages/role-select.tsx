@@ -512,16 +512,21 @@ export default function RoleSelect() {
                       <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Sample candidate analysis</div>
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {[
-                      { label: "Skills Match", value: 92 },
-                      { label: "Experience Fit", value: 85 },
-                      { label: "Education Score", value: 78 },
-                      { label: "Location Match", value: 95 },
+                      { label: "Skills", weight: "30%", value: 92 },
+                      { label: "Experience", weight: "20%", value: 85 },
+                      { label: "Preferences", weight: "15%", value: 88 },
+                      { label: "Verification", weight: "15%", value: 75 },
+                      { label: "Location", weight: "10%", value: 95 },
+                      { label: "Education", weight: "10%", value: 78 },
                     ].map((item) => (
                       <div key={item.label}>
                         <div className="flex justify-between text-xs mb-1.5">
-                          <span style={{ color: "rgba(255,255,255,0.6)" }}>{item.label}</span>
+                          <span style={{ color: "rgba(255,255,255,0.6)" }}>
+                            {item.label}
+                            <span className="ml-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>({item.weight})</span>
+                          </span>
                           <span className="font-mono font-semibold" style={{ color: "#ffffff" }}>{item.value}%</span>
                         </div>
                         <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
@@ -536,7 +541,7 @@ export default function RoleSelect() {
                   <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                     <div className="flex items-center justify-between">
                       <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Overall Score</span>
-                      <span className="text-3xl font-bold font-mono" style={{ color: "#4CAF50" }}>87%</span>
+                      <span className="text-3xl font-bold font-mono" style={{ color: "#4CAF50" }}>86%</span>
                     </div>
                   </div>
                 </div>
