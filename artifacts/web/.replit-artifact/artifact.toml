@@ -17,14 +17,18 @@ localPort = 22333
 [services.development]
 run = "pnpm --filter @workspace/web run dev"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/web", "run", "build" ]
-publicDir = "artifacts/web/dist/public"
-serve = "static"
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/web", "run", "build"]
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["node", "artifacts/web/server.mjs"]
+
+[services.production.run.env]
+PORT = "22333"
+NODE_ENV = "production"
 
 [services.env]
 PORT = "22333"
