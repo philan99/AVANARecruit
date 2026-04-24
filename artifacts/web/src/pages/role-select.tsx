@@ -514,8 +514,8 @@ export default function RoleSelect() {
                   </div>
                   <div className="space-y-3.5">
                     {[
-                      { label: "Experience", weight: "20%", value: 85 },
-                      { label: "Skills", weight: "30%", value: 92 },
+                      { label: "Experience", weight: "25%", value: 85 },
+                      { label: "Skills", weight: "25%", value: 92 },
                       { label: "Preferences", weight: "15%", value: 88 },
                       { label: "Verification", weight: "15%", value: 75 },
                       { label: "Location", weight: "10%", value: 95 },
