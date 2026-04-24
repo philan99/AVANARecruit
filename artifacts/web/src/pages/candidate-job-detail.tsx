@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2, Sparkles, Quote } from "lucide-react";
+import { Briefcase, Building, Calendar, MapPin, ArrowLeft, Send, Heart, Loader2, Globe, CheckCircle2, Sparkles, Quote, Microscope } from "lucide-react";
 import { useGetJob, getGetJobQueryKey } from "@workspace/api-client-react";
 import { useRole } from "@/contexts/role-context";
 
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { MatchDiagnosticDialog } from "@/components/match-diagnostic-dialog";
 
 export default function CandidateJobDetail({ params }: { params: { id: string } }) {
   const jobId = parseInt(params.id);
@@ -29,6 +30,7 @@ export default function CandidateJobDetail({ params }: { params: { id: string } 
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
   const [candidateName, setCandidateName] = useState("");
+  const [diagnosticOpen, setDiagnosticOpen] = useState(false);
 
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
 
@@ -469,6 +471,14 @@ ${name}`
                     <Sparkles className="w-4 h-4 mr-2" />
                     Improve my Match Score
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-2 text-xs"
+                    onClick={() => setDiagnosticOpen(true)}
+                  >
+                    <Microscope className="w-4 h-4 mr-2" />
+                    Run match diagnostic
+                  </Button>
                 </>
               ) : (
                 <div className="text-sm text-muted-foreground text-center py-4">Unable to generate match score</div>
@@ -477,6 +487,15 @@ ${name}`
           </Card>
         </div>
       </div>
+
+      {myMatch && candidateProfileId && job && (
+        <MatchDiagnosticDialog
+          open={diagnosticOpen}
+          onOpenChange={setDiagnosticOpen}
+          fetchUrl={`${apiBase}/matches/candidate-diagnostic?candidateId=${candidateProfileId}&jobId=${jobId}`}
+          subtitle={`${job.title} · ${job.company}`}
+        />
+      )}
 
       <Dialog open={confirmApplyOpen} onOpenChange={setConfirmApplyOpen}>
         <DialogContent className="sm:max-w-[450px]">

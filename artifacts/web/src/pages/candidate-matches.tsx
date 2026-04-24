@@ -5,9 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Building, ArrowRight, Sparkles, MapPin, Briefcase, Monitor, LayoutGrid, List } from "lucide-react";
+import { Target, Building, ArrowRight, Sparkles, MapPin, Briefcase, Monitor, LayoutGrid, List, Microscope } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { MatchDiagnosticDialog } from "@/components/match-diagnostic-dialog";
 
 type ScoreFilter = "all" | "high" | "mid" | "low";
 
@@ -42,6 +43,12 @@ export default function CandidateMatches() {
   const [isRunning, setIsRunning] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
+  const [diagnosticTarget, setDiagnosticTarget] = useState<{ jobId: number; jobTitle: string; jobCompany: string } | null>(null);
+  const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
+  const diagnosticFetchUrl =
+    diagnosticTarget && candidateProfileId
+      ? `${apiBase}/matches/candidate-diagnostic?candidateId=${candidateProfileId}&jobId=${diagnosticTarget.jobId}`
+      : null;
 
   const { data: matches, isLoading } = useGetCandidateMatches(candidateProfileId!, {
     query: { enabled: !!candidateProfileId, queryKey: getGetCandidateMatchesQueryKey(candidateProfileId!) },
@@ -242,11 +249,21 @@ export default function CandidateMatches() {
                         })}
                       </div>
 
-                      <Link href={`/jobs/${match.jobId}`}>
-                        <Button variant="outline" size="sm" className="text-xs shrink-0">
-                          View Job <ArrowRight className="w-3 h-3 ml-1" />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => setDiagnosticTarget({ jobId: match.jobId, jobTitle: match.jobTitle, jobCompany: match.jobCompany })}
+                        >
+                          <Microscope className="w-3 h-3 mr-1" /> Run match diagnostic
                         </Button>
-                      </Link>
+                        <Link href={`/jobs/${match.jobId}`}>
+                          <Button variant="outline" size="sm" className="text-xs">
+                            View Job <ArrowRight className="w-3 h-3 ml-1" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
 
                     {match.assessment && (
@@ -328,7 +345,15 @@ export default function CandidateMatches() {
                     </div>
                   )}
 
-                  <div className="pt-1">
+                  <div className="pt-1 grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setDiagnosticTarget({ jobId: match.jobId, jobTitle: match.jobTitle, jobCompany: match.jobCompany })}
+                    >
+                      <Microscope className="w-3 h-3 mr-1" /> Run match diagnostic
+                    </Button>
                     <Link href={`/jobs/${match.jobId}`}>
                       <Button variant="outline" size="sm" className="text-xs w-full">
                         View Job <ArrowRight className="w-3 h-3 ml-1" />
@@ -342,6 +367,13 @@ export default function CandidateMatches() {
           )}
         </>
       )}
+
+      <MatchDiagnosticDialog
+        open={!!diagnosticTarget}
+        onOpenChange={(o) => { if (!o) setDiagnosticTarget(null); }}
+        fetchUrl={diagnosticFetchUrl}
+        subtitle={diagnosticTarget ? `${diagnosticTarget.jobTitle} · ${diagnosticTarget.jobCompany}` : undefined}
+      />
     </div>
   );
 }

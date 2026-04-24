@@ -109,6 +109,78 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
   res.json(RunJobMatchingResponse.parse(matchResults));
 });
 
+function importanceFor(weight: number): "high" | "medium" | "low" {
+  if (weight >= 0.20) return "high";
+  if (weight >= 0.13) return "medium";
+  return "low";
+}
+
+async function buildSoftenedDiagnostic(jobId: number, candidateId: number) {
+  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+  if (!job) return { error: "Job not found", status: 404 as const };
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
+  if (!candidate) return { error: "Candidate not found", status: 404 as const };
+
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
+  const explanation = explainMatch(job, candidate, verifiedCount);
+  const { weights, elements } = explanation;
+  const safeExplanation = {
+    overallScore: explanation.overallScore,
+    assessment: explanation.assessment,
+    elements: {
+      skills: { ...elements.skills, importance: importanceFor(weights.skills) },
+      experience: { ...elements.experience, importance: importanceFor(weights.experience) },
+      education: { ...elements.education, importance: importanceFor(weights.education) },
+      location: { ...elements.location, importance: importanceFor(weights.location) },
+      verification: { ...elements.verification, importance: importanceFor(weights.verification) },
+      preferences: {
+        score: elements.preferences.score,
+        importance: importanceFor(weights.preferences),
+        matches: elements.preferences.matches,
+        mismatches: elements.preferences.mismatches,
+        facets: elements.preferences.facets.map(f => ({
+          label: f.label,
+          jobValue: f.jobValue,
+          candidatePreferences: f.candidatePreferences,
+          outcome: f.outcome,
+        })),
+      },
+    },
+  };
+
+  return {
+    payload: {
+      candidate: {
+        id: candidate.id,
+        name: candidate.name,
+        currentTitle: candidate.currentTitle,
+        experienceYears: candidate.experienceYears,
+        education: candidate.education,
+        location: candidate.location,
+      },
+      job: {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        jobType: job.jobType,
+        workplace: job.workplace,
+        industry: job.industry,
+        experienceLevel: job.experienceLevel,
+        educationLevel: job.educationLevel,
+      },
+      explanation: safeExplanation,
+    },
+    job,
+  };
+}
+
 router.get("/matches/diagnostic", async (req, res): Promise<void> => {
   const candidateId = parseInt(String(req.query.candidateId ?? ""), 10);
   const jobId = parseInt(String(req.query.jobId ?? ""), 10);
@@ -138,74 +210,38 @@ router.get("/matches/diagnostic", async (req, res): Promise<void> => {
     return;
   }
 
-  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
-  if (!candidate) {
-    res.status(404).json({ error: "Candidate not found" });
+  const result = await buildSoftenedDiagnostic(jobId, candidateId);
+  if ("error" in result) {
+    res.status(result.status).json({ error: result.error });
+    return;
+  }
+  res.json(result.payload);
+});
+
+router.get("/matches/candidate-diagnostic", async (req, res): Promise<void> => {
+  const candidateId = parseInt(String(req.query.candidateId ?? ""), 10);
+  const jobId = parseInt(String(req.query.jobId ?? ""), 10);
+
+  if (!Number.isFinite(candidateId) || !Number.isFinite(jobId)) {
+    res.status(400).json({ error: "candidateId and jobId are required" });
     return;
   }
 
-  const [verifiedRow] = await db
-    .select({ count: count() })
-    .from(verificationsTable)
-    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
-  const verifiedCount = verifiedRow?.count || 0;
+  const [matchRow] = await db
+    .select({ id: matchesTable.id })
+    .from(matchesTable)
+    .where(and(eq(matchesTable.jobId, jobId), eq(matchesTable.candidateId, candidateId)));
+  if (!matchRow) {
+    res.status(404).json({ error: "No match exists for this candidate and job" });
+    return;
+  }
 
-  const explanation = explainMatch(job, candidate, verifiedCount);
-
-  const importanceFor = (weight: number): "high" | "medium" | "low" => {
-    if (weight >= 0.20) return "high";
-    if (weight >= 0.13) return "medium";
-    return "low";
-  };
-
-  // Strip weights and contribution maths so the wire payload matches the softened UI.
-  const { weights, elements } = explanation;
-  const safeExplanation = {
-    overallScore: explanation.overallScore,
-    assessment: explanation.assessment,
-    elements: {
-      skills: { ...elements.skills, importance: importanceFor(weights.skills) },
-      experience: { ...elements.experience, importance: importanceFor(weights.experience) },
-      education: { ...elements.education, importance: importanceFor(weights.education) },
-      location: { ...elements.location, importance: importanceFor(weights.location) },
-      verification: { ...elements.verification, importance: importanceFor(weights.verification) },
-      preferences: {
-        score: elements.preferences.score,
-        importance: importanceFor(weights.preferences),
-        matches: elements.preferences.matches,
-        mismatches: elements.preferences.mismatches,
-        facets: elements.preferences.facets.map(f => ({
-          label: f.label,
-          jobValue: f.jobValue,
-          candidatePreferences: f.candidatePreferences,
-          outcome: f.outcome,
-        })),
-      },
-    },
-  };
-
-  res.json({
-    candidate: {
-      id: candidate.id,
-      name: candidate.name,
-      currentTitle: candidate.currentTitle,
-      experienceYears: candidate.experienceYears,
-      education: candidate.education,
-      location: candidate.location,
-    },
-    job: {
-      id: job.id,
-      title: job.title,
-      company: job.company,
-      location: job.location,
-      jobType: job.jobType,
-      workplace: job.workplace,
-      industry: job.industry,
-      experienceLevel: job.experienceLevel,
-      educationLevel: job.educationLevel,
-    },
-    explanation: safeExplanation,
-  });
+  const result = await buildSoftenedDiagnostic(jobId, candidateId);
+  if ("error" in result) {
+    res.status(result.status).json({ error: result.error });
+    return;
+  }
+  res.json(result.payload);
 });
 
 router.get("/jobs/:id/matches", async (req, res): Promise<void> => {
