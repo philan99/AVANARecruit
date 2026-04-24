@@ -74,6 +74,7 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/` — Admin dashboard with platform KPIs (total companies, candidates, active candidates) and recent entries
 - `/companies` — Full table of all company profiles
 - `/candidates` — Full table of all candidate profiles
+- `/matches` — All AI-generated job→candidate matches across every company; mirrors the company-portal `/matches` page (filters, expand/collapse, score breakdown) but read-only and shows the company on each job header. Linked from the "Total Matches" card on the admin dashboard.
 
 ## Key Commands
 

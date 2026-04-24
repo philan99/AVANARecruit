@@ -309,7 +309,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/jobs")}>
+          <Card className="bg-card cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/matches")}>
             <CardContent className="pt-4 pb-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Matches</p>
               <p className="text-2xl font-bold mt-1 text-primary">{insights.totalMatches}</p>
