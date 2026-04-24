@@ -292,6 +292,8 @@ async function sendJobAlerts(job: any) {
   if (alertsWithCandidates.length === 0) return;
 
   const resend = await getResendClient();
+  const platformUrl = (process.env.PUBLIC_WEB_URL || "https://avanarecruit.ai").replace(/\/$/, "");
+  const jobUrl = `${platformUrl}/jobs/${job.id}`;
   let sentCount = 0;
 
   for (const alert of alertsWithCandidates) {
@@ -340,12 +342,20 @@ async function sendJobAlerts(job: any) {
           `<p>Hi ${alert.candidateName},</p>
           <p>A new job has been posted that matches your profile:</p>
           <table style="width:100%; border-collapse:collapse; margin:16px 0;">
-            <tr><td style="padding:8px 12px; font-weight:600; color:#666; width:120px;">Role</td><td style="padding:8px 12px;">${job.title}</td></tr>
+            <tr><td style="padding:8px 12px; font-weight:600; color:#666; width:120px;">Role</td><td style="padding:8px 12px;"><a href="${jobUrl}" style="color:#1a2035; font-weight:600; text-decoration:underline;">${job.title}</a></td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Company</td><td style="padding:8px 12px;">${job.company}</td></tr>
             <tr><td style="padding:8px 12px; font-weight:600; color:#666;">Location</td><td style="padding:8px 12px;">${job.location}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px 12px; font-weight:600; color:#666;">Match Score</td><td style="padding:8px 12px; font-weight:700; color:#4CAF50;">${score}%</td></tr>
           </table>
-          <p>Log in to your AVANA Recruit account to view the full job details and apply.</p>`,
+          <p style="text-align:center; margin:28px 0 8px;">
+            <a href="${jobUrl}" style="display:inline-block; background:#4CAF50; color:#ffffff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:600;">View role &amp; apply</a>
+          </p>
+          <p style="font-size:12px; color:#64748b; text-align:center; margin:4px 0 16px;">
+            Or paste this link into your browser: <a href="${jobUrl}" style="color:#1a2035;">${jobUrl}</a>
+          </p>
+          <p style="text-align:center; margin:0;">
+            <a href="${platformUrl}" style="color:#1a2035; font-size:13px; text-decoration:underline;">Open AVANA Recruit dashboard</a>
+          </p>`,
           "You received this because you have job alerts enabled on AVANA Recruit."
         ),
       });
