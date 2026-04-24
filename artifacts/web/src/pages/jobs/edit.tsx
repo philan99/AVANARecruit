@@ -584,9 +584,9 @@ function EditJobForm({ jobId, job }: { jobId: number; job: Job }) {
                 <FormField control={form.control} name="idealCandidateUseInScore" render={({ field }) => (
                   <FormItem className="flex items-start justify-between rounded-md border border-border p-3 gap-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-sm">Use as a scoring signal</FormLabel>
+                      <FormLabel className="text-sm">Show this section to candidates</FormLabel>
                       <p className="text-xs text-muted-foreground">
-                        When on, candidates whose profile aligns with these traits get a small Fit boost. Skills and experience always weigh more.
+                        When on, candidates viewing this job will see the traits and note above. When off, this section stays private to your team and isn't shown on the public job page.
                       </p>
                     </div>
                     <FormControl>

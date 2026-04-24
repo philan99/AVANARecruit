@@ -232,9 +232,16 @@ export default function JobDetail({ params }: { params: { id: string } }) {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   Ideal candidate
-                  {job.idealCandidateUseInScore === false && (
-                    <span className="text-[10px] font-normal text-muted-foreground uppercase tracking-wide">Display only</span>
-                  )}
+                  <span
+                    className={
+                      "text-[10px] font-normal uppercase tracking-wide " +
+                      (job.idealCandidateUseInScore === false
+                        ? "text-muted-foreground"
+                        : "text-primary")
+                    }
+                  >
+                    {job.idealCandidateUseInScore === false ? "Not visible to candidates" : "Visible to candidates"}
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">

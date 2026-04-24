@@ -923,10 +923,10 @@ export default function CreateJob() {
                     <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-semibold text-foreground mb-0.5">
-                          Use as a scoring signal
+                          Show this section to candidates
                         </div>
                         <p className="text-xs text-muted-foreground leading-relaxed">
-                          Adds a 10% "Fit" dimension to the overall match score. Turn off to keep this section as candidate-facing context only.
+                          When on, candidates viewing this job will see the traits and note above. When off, this section stays private to your team and isn't shown on the public job page.
                         </p>
                       </div>
                       <FormControl>

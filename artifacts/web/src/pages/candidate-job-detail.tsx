@@ -340,7 +340,7 @@ ${name}`
             </CardContent>
           </Card>
 
-          {(job.idealCandidateTraits?.length || job.idealCandidateNote) && (
+          {job.idealCandidateUseInScore !== false && (job.idealCandidateTraits?.length || job.idealCandidateNote) && (
             <Card className="bg-card overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
               <CardHeader className="pb-3">
