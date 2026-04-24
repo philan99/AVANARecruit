@@ -132,7 +132,7 @@ export function Layout({ children }: LayoutProps) {
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
           </Link>
 
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 min-w-0">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 xl:gap-3 2xl:gap-6 min-w-0">
             {navItems.map((item) => {
               const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
               return (
@@ -140,7 +140,7 @@ export function Layout({ children }: LayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                    "flex items-center px-3 xl:px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-primary"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
