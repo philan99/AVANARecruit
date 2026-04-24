@@ -41,7 +41,7 @@ export default function CandidateMatches() {
   const searchString = useSearch();
   const appliedOnly = new URLSearchParams(searchString).get("applied") === "true";
   const [isRunning, setIsRunning] = useState(false);
-  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const [diagnosticTarget, setDiagnosticTarget] = useState<{ jobId: number; jobTitle: string; jobCompany: string } | null>(null);
   const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
