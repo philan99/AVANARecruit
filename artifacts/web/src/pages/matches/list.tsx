@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListJobs, useUpdateMatchStatus } from "@workspace/api-client-react";
@@ -59,6 +59,7 @@ export default function MatchesList() {
   const [allMatches, setAllMatches] = useState<JobGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedJobs, setCollapsedJobs] = useState<Set<number>>(new Set());
+  const didInitCollapseRef = useRef(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("high");
   const [verificationMap, setVerificationMap] = useState<Record<number, VerificationSummary>>({});
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -110,6 +111,10 @@ export default function MatchesList() {
           }
         }
         setAllMatches(groups);
+        if (!didInitCollapseRef.current && groups.length > 0) {
+          setCollapsedJobs(new Set(groups.map(g => g.jobId)));
+          didInitCollapseRef.current = true;
+        }
 
         const candidateIds = new Set<number>();
         for (const g of groups) {
