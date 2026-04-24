@@ -136,6 +136,7 @@ export default function Onboarding() {
   const [location, setLocationField] = useState("");
   const [postcode, setPostcode] = useState("");
   const [postcodeCountry, setPostcodeCountry] = useState("United Kingdom");
+  const [postcodeError, setPostcodeError] = useState<string | null>(null);
   const [currentTitle, setCurrentTitle] = useState("");
   const [experienceYears, setExperienceYears] = useState<string>("");
   const [maxRadiusMiles, setMaxRadiusMiles] = useState<number>(25);
@@ -377,6 +378,15 @@ export default function Onboarding() {
 
   async function handleNext() {
     if (saving) return;
+    if (step === 3 && !postcode.trim()) {
+      setPostcodeError("Postcode is required so we can match you to nearby jobs.");
+      toast({
+        title: "Postcode required",
+        description: "Please enter your postcode before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const dataOk = await saveStepData();
@@ -730,12 +740,23 @@ export default function Onboarding() {
                   <Input value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Postcode<FieldBadge field="location" /></label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                    Postcode <span className="text-red-600" aria-hidden="true">*</span>
+                    <FieldBadge field="location" />
+                  </label>
                   <PostcodeInput
                     value={{ postcode, country: postcodeCountry }}
-                    onChange={(v) => { setPostcode(v.postcode); setPostcodeCountry(v.country); }}
+                    onChange={(v) => {
+                      setPostcode(v.postcode);
+                      setPostcodeCountry(v.country);
+                      if (postcodeError && v.postcode.trim()) setPostcodeError(null);
+                    }}
                     onResolved={(info) => { if (!location) setLocationField(info.town + (info.region && info.region !== info.town ? `, ${info.region}` : "")); }}
+                    className={postcodeError ? "ring-1 ring-red-500 rounded-md p-1 -m-1" : undefined}
                   />
+                  {postcodeError && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">{postcodeError}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
