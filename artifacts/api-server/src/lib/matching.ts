@@ -451,8 +451,8 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate,
 }
 
 export const MATCH_WEIGHTS = {
-  skills: 0.30,
-  experience: 0.20,
+  skills: 0.25,
+  experience: 0.25,
   preferences: 0.15,
   verification: 0.15,
   location: 0.10,
@@ -650,20 +650,20 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
   const { score: preferenceScore, matches: preferenceMatches, mismatches: preferenceMismatches } =
     computePreferenceScore(job, candidate);
 
-  // Weights (sum = 1.00):
-  //   Skills        30%   strongest signal
-  //   Experience    20%
+  // Weights (sum = 1.00) — keep in sync with MATCH_WEIGHTS above:
+  //   Skills        25%
+  //   Experience    25%
   //   Preferences   15%   workplace + job type + industry alignment
   //   Verification  15%
   //   Location      10%
   //   Education     10%
   const overallScore = Math.round(
-    skillScore * 0.30 +
-    experienceScore * 0.20 +
-    preferenceScore * 0.15 +
-    verificationScore * 0.15 +
-    locationScore * 0.10 +
-    educationScore * 0.10
+    skillScore * MATCH_WEIGHTS.skills +
+    experienceScore * MATCH_WEIGHTS.experience +
+    preferenceScore * MATCH_WEIGHTS.preferences +
+    verificationScore * MATCH_WEIGHTS.verification +
+    locationScore * MATCH_WEIGHTS.location +
+    educationScore * MATCH_WEIGHTS.education
   );
 
   const result: MatchResult = {
