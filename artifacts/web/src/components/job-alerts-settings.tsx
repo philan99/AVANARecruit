@@ -172,25 +172,36 @@ export function JobAlertsSettings() {
                 onChange={(v) => { setCenterPostcode(v.postcode); setCenterCountry(v.country); }}
                 onResolved={(r) => setCenterTown(r?.town ?? null)}
               />
-              {centerTown && (
+              {centerTown && centerPostcode.trim() !== "" && (
                 <p className="text-xs text-muted-foreground">Resolved: {centerTown}</p>
               )}
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Radius</Label>
-                <span className="text-sm font-mono font-bold text-primary">{radiusMiles} mi</span>
-              </div>
-              <Slider
-                value={[radiusMiles]}
-                onValueChange={([val]) => setRadiusMiles(val)}
-                min={5}
-                max={100}
-                step={5}
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground">
-                Only alert for jobs within this distance of the postcode (remote jobs always included).
-                Leave the postcode blank to use your profile location.
-              </p>
+              {(() => {
+                const radiusDisabled = centerPostcode.trim() === "";
+                return (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <Label className={`text-sm font-medium ${radiusDisabled ? "text-muted-foreground" : ""}`}>Radius</Label>
+                      <span className={`text-sm font-mono font-bold ${radiusDisabled ? "text-muted-foreground" : "text-primary"}`}>
+                        {radiusDisabled ? "All of UK" : `${radiusMiles} mi`}
+                      </span>
+                    </div>
+                    <Slider
+                      value={[radiusMiles]}
+                      onValueChange={([val]) => setRadiusMiles(val)}
+                      min={5}
+                      max={100}
+                      step={5}
+                      disabled={radiusDisabled}
+                      className={`w-full ${radiusDisabled ? "opacity-50 pointer-events-none" : ""}`}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {radiusDisabled
+                        ? "No postcode set, so you'll receive alerts for matching jobs anywhere in the UK (remote jobs always included)."
+                        : "Only alert for jobs within this distance of the postcode (remote jobs always included). Leave the postcode blank to receive alerts from anywhere in the UK."}
+                    </p>
+                  </>
+                );
+              })()}
             </div>
           </>
         )}
