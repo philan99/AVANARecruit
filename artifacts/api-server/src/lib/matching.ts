@@ -442,8 +442,8 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate)
 }
 
 export const MATCH_WEIGHTS = {
-  skills: 0.25,
-  experience: 0.25,
+  skills: 0.30,
+  experience: 0.20,
   preferences: 0.15,
   verification: 0.15,
   location: 0.10,

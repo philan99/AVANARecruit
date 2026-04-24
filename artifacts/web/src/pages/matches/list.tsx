@@ -11,9 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Network, Check, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, ArrowLeft, ArrowRight, Send, Loader2, Plus, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Network, Check, Target, Briefcase, ChevronDown, ChevronRight, ShieldCheck, ArrowLeft, ArrowRight, Send, Loader2, Plus, ChevronsDownUp, ChevronsUpDown, Microscope } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
+import { MatchDiagnosticPanel, type Diagnostic } from "@/components/match-diagnostic-panel";
 
 interface MatchItem {
   id: number;
@@ -64,6 +66,12 @@ export default function MatchesList() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [diagOpen, setDiagOpen] = useState(false);
+  const [diagJobId, setDiagJobId] = useState<string>("");
+  const [diagCandidateId, setDiagCandidateId] = useState<string>("");
+  const [diagLoading, setDiagLoading] = useState(false);
+  const [diagError, setDiagError] = useState<string | null>(null);
+  const [diagData, setDiagData] = useState<Diagnostic | null>(null);
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const { data: profile } = useCompanyProfile();
@@ -224,6 +232,51 @@ ${companyName}`
     }
   };
 
+  const diagJobOptions = useMemo(
+    () => allMatches.map(g => ({ id: g.jobId, title: g.jobTitle })),
+    [allMatches],
+  );
+
+  const diagCandidateOptions = useMemo(() => {
+    if (!diagJobId) return [];
+    const group = allMatches.find(g => String(g.jobId) === diagJobId);
+    if (!group) return [];
+    return group.matches.map(m => ({ id: m.candidateId, name: m.candidateName, title: m.candidateTitle, score: Math.round(m.overallScore) }));
+  }, [diagJobId, allMatches]);
+
+  useEffect(() => {
+    setDiagCandidateId("");
+  }, [diagJobId]);
+
+  const openDiagnostic = () => {
+    setDiagData(null);
+    setDiagError(null);
+    setDiagJobId("");
+    setDiagCandidateId("");
+    setDiagOpen(true);
+  };
+
+  const runDiagnostic = async () => {
+    if (!diagJobId || !diagCandidateId || !companyProfileId) return;
+    setDiagLoading(true);
+    setDiagError(null);
+    setDiagData(null);
+    try {
+      const url = `${basePath}/matches/diagnostic?jobId=${encodeURIComponent(diagJobId)}&candidateId=${encodeURIComponent(diagCandidateId)}&companyProfileId=${companyProfileId}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Request failed (${res.status})`);
+      }
+      const data: Diagnostic = await res.json();
+      setDiagData(data);
+    } catch (err: any) {
+      setDiagError(err.message || "Failed to run diagnostic.");
+    } finally {
+      setDiagLoading(false);
+    }
+  };
+
   const toggleJob = (jobId: number) => {
     setCollapsedJobs(prev => {
       const next = new Set(prev);
@@ -311,6 +364,19 @@ ${companyName}`
               Showing <span className="font-medium text-foreground">{filteredTotal}</span> of {totalMatches} matches
             </p>
           )}
+
+          <div className="flex items-center justify-between gap-3 flex-wrap rounded-md border border-dashed border-primary/30 bg-primary/5 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <Microscope className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium text-foreground text-sm">Match Insights</p>
+                <p className="text-xs text-muted-foreground">See exactly why a candidate scored the way they did against any of your jobs.</p>
+              </div>
+            </div>
+            <Button onClick={openDiagnostic} className="shrink-0">
+              <Microscope className="w-4 h-4 mr-2" /> Run match diagnostic
+            </Button>
+          </div>
 
           <div className="space-y-6">
             {filteredGroups.map((group) => (
@@ -576,6 +642,70 @@ ${companyName}`
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={diagOpen} onOpenChange={setDiagOpen}>
+        <DialogContent className="sm:max-w-[1100px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <Microscope className="w-5 h-5 text-primary" /> Match Insights
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Pick one of your jobs and a matched candidate to see what's driving their score.
+            </p>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+            <div className="space-y-2">
+              <Label>Job</Label>
+              <Select value={diagJobId} onValueChange={setDiagJobId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={diagJobOptions.length ? "Choose a job…" : "No jobs with matches"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {diagJobOptions.map(j => (
+                    <SelectItem key={j.id} value={String(j.id)}>{j.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Candidate</Label>
+              <Select value={diagCandidateId} onValueChange={setDiagCandidateId} disabled={!diagJobId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={diagJobId ? (diagCandidateOptions.length ? "Choose a candidate…" : "No matched candidates") : "Pick a job first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {diagCandidateOptions.map(c => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name} — {c.score}% {c.title ? `· ${c.title}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pb-2">
+            <Button
+              onClick={runDiagnostic}
+              disabled={!diagJobId || !diagCandidateId || diagLoading}
+            >
+              {diagLoading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running…</>) : (<><Microscope className="w-4 h-4 mr-2" /> Run diagnostic</>)}
+            </Button>
+            {diagError && (
+              <span className="text-sm text-destructive">{diagError}</span>
+            )}
+          </div>
+
+          {diagData ? (
+            <MatchDiagnosticPanel data={diagData} />
+          ) : !diagLoading && (
+            <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              Pick a job and a candidate above, then run the diagnostic to see a detailed breakdown.
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

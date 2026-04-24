@@ -21,7 +21,7 @@ import {
   GetTopCandidatesResponse,
   GetSkillDemandResponse,
 } from "@workspace/api-zod";
-import { computeMatch } from "../lib/matching";
+import { computeMatch, explainMatch } from "../lib/matching";
 import { dispatchCandidateAlerts, type MatchedJob } from "./candidates";
 
 const router: IRouter = Router();
@@ -107,6 +107,105 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
 
   matchResults.sort((a, b) => b.overallScore - a.overallScore);
   res.json(RunJobMatchingResponse.parse(matchResults));
+});
+
+router.get("/matches/diagnostic", async (req, res): Promise<void> => {
+  const candidateId = parseInt(String(req.query.candidateId ?? ""), 10);
+  const jobId = parseInt(String(req.query.jobId ?? ""), 10);
+  const companyProfileId = parseInt(String(req.query.companyProfileId ?? ""), 10);
+
+  if (!Number.isFinite(candidateId) || !Number.isFinite(jobId) || !Number.isFinite(companyProfileId)) {
+    res.status(400).json({ error: "candidateId, jobId, and companyProfileId are required" });
+    return;
+  }
+
+  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+  if (job.companyProfileId !== companyProfileId) {
+    res.status(403).json({ error: "Job does not belong to this company" });
+    return;
+  }
+
+  const [matchRow] = await db
+    .select({ id: matchesTable.id })
+    .from(matchesTable)
+    .where(and(eq(matchesTable.jobId, jobId), eq(matchesTable.candidateId, candidateId)));
+  if (!matchRow) {
+    res.status(404).json({ error: "No match exists for this candidate and job" });
+    return;
+  }
+
+  const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, candidateId));
+  if (!candidate) {
+    res.status(404).json({ error: "Candidate not found" });
+    return;
+  }
+
+  const [verifiedRow] = await db
+    .select({ count: count() })
+    .from(verificationsTable)
+    .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
+  const verifiedCount = verifiedRow?.count || 0;
+
+  const explanation = explainMatch(job, candidate, verifiedCount);
+
+  const importanceFor = (weight: number): "high" | "medium" | "low" => {
+    if (weight >= 0.20) return "high";
+    if (weight >= 0.13) return "medium";
+    return "low";
+  };
+
+  // Strip weights and contribution maths so the wire payload matches the softened UI.
+  const { weights, elements } = explanation;
+  const safeExplanation = {
+    overallScore: explanation.overallScore,
+    assessment: explanation.assessment,
+    elements: {
+      skills: { ...elements.skills, importance: importanceFor(weights.skills) },
+      experience: { ...elements.experience, importance: importanceFor(weights.experience) },
+      education: { ...elements.education, importance: importanceFor(weights.education) },
+      location: { ...elements.location, importance: importanceFor(weights.location) },
+      verification: { ...elements.verification, importance: importanceFor(weights.verification) },
+      preferences: {
+        score: elements.preferences.score,
+        importance: importanceFor(weights.preferences),
+        matches: elements.preferences.matches,
+        mismatches: elements.preferences.mismatches,
+        facets: elements.preferences.facets.map(f => ({
+          label: f.label,
+          jobValue: f.jobValue,
+          candidatePreferences: f.candidatePreferences,
+          outcome: f.outcome,
+        })),
+      },
+    },
+  };
+
+  res.json({
+    candidate: {
+      id: candidate.id,
+      name: candidate.name,
+      currentTitle: candidate.currentTitle,
+      experienceYears: candidate.experienceYears,
+      education: candidate.education,
+      location: candidate.location,
+    },
+    job: {
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      jobType: job.jobType,
+      workplace: job.workplace,
+      industry: job.industry,
+      experienceLevel: job.experienceLevel,
+      educationLevel: job.educationLevel,
+    },
+    explanation: safeExplanation,
+  });
 });
 
 router.get("/jobs/:id/matches", async (req, res): Promise<void> => {

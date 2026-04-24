@@ -44,7 +44,7 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `/jobs/:id` — Job detail, run AI matching, view match results
 - `/candidates` — Candidate listings with search/filter, create new
 - `/candidates/:id` — Candidate detail, view match history
-- `/matches` — All match results management
+- `/matches` — All match results management. Includes a "Run match diagnostic" button (Match Insights) that opens a dialog letting the company pick any of their jobs and any matched candidate to see a detailed breakdown of why they scored as they did. Uses `GET /api/matches/diagnostic?jobId&candidateId&companyProfileId`, gated to the requesting company's own jobs and to candidates with an existing match record. The company-facing version hides raw weight percentages and contribution maths in favour of "Importance: High/Medium/Low" badges (≥0.20 → High, ≥0.13 → Medium, else Low). Shared component: `artifacts/web/src/components/match-diagnostic-panel.tsx`.
 - `/pipeline` — Kanban-style hiring pipeline with drag-and-drop (stages: Applied → Shortlisted → Screened → Interviewed → Offered → Hired)
 - `/company-profile` — Company profile with logo upload (object storage)
 
