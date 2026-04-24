@@ -133,6 +133,24 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <ElementHeader
+            icon={Briefcase}
+            title="Experience"
+            score={e.experience.score}
+            importance={e.experience.importance}
+            rule="Compares total years and role-relevant years (from work history matching the job title or required skills) against the level set on the job. If the candidate has work history but none of it is role-relevant, the score is capped at 25/100 — unrelated tenure cannot carry this element."
+          />
+          <CardContent className="text-xs space-y-1">
+            <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs expected)`} />
+            <KV k="Candidate total" v={`${e.experience.candidateTotalYears} yrs`} />
+            <KV
+              k="Role-relevant years"
+              v={e.experience.candidateRelevantYears == null ? "n/a (no work history captured)" : `${e.experience.candidateRelevantYears} yrs`}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <ElementHeader
             icon={Target}
             title="Skills"
             score={e.skills.score}
@@ -172,24 +190,6 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <ElementHeader
-            icon={Briefcase}
-            title="Experience"
-            score={e.experience.score}
-            importance={e.experience.importance}
-            rule="Compares total years and role-relevant years (from work history matching the job title or required skills) against the level set on the job. If the candidate has work history but none of it is role-relevant, the score is capped at 25/100 — unrelated tenure cannot carry this element."
-          />
-          <CardContent className="text-xs space-y-1">
-            <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs expected)`} />
-            <KV k="Candidate total" v={`${e.experience.candidateTotalYears} yrs`} />
-            <KV
-              k="Role-relevant years"
-              v={e.experience.candidateRelevantYears == null ? "n/a (no work history captured)" : `${e.experience.candidateRelevantYears} yrs`}
-            />
           </CardContent>
         </Card>
 
