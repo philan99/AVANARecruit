@@ -60,8 +60,8 @@ export function Layout({ children }: LayoutProps) {
   const companyNavItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/jobs", label: "Jobs", icon: Briefcase },
-    { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/matches", label: "Matches", icon: Network },
+    { href: "/candidates", label: "Candidates", icon: Users },
     { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
   ];
 
