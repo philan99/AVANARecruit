@@ -273,11 +273,21 @@ export default function AdminDevelopment() {
     total: tasks.filter(t => t.priority === p).length,
     color: priorityConfig[p].color,
   }));
-  const statusCounts = statuses.map(s => ({
-    key: s.value,
-    label: getStatusStyle(s.value).label || s.label,
-    total: tasks.filter(t => t.status === s.value).length,
-  }));
+  const STATUS_ORDER = ["on-hold", "todo", "in-progress", "done"];
+  const statusCounts = statuses
+    .map(s => ({
+      key: s.value,
+      label: getStatusStyle(s.value).label || s.label,
+      total: tasks.filter(t => t.status === s.value).length,
+    }))
+    .sort((a, b) => {
+      const ia = STATUS_ORDER.indexOf(a.key);
+      const ib = STATUS_ORDER.indexOf(b.key);
+      if (ia === -1 && ib === -1) return a.label.localeCompare(b.label);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
 
   const maxCategory = Math.max(1, ...categoryCounts.map(c => c.total));
   const maxPriority = Math.max(1, ...priorityCounts.map(c => c.total));
