@@ -64,6 +64,7 @@ export function TownInput({
     value.town && value.lat != null ? "ok" : "idle",
   );
   const [errorMsg, setErrorMsg] = useState("");
+  const [resolvedMeta, setResolvedMeta] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
   // Seed lastFetched with the initial value so a pre-filled town (e.g. on page load
   // or form hydration) doesn't trigger an autocomplete fetch and dropdown.
@@ -143,6 +144,8 @@ export function TownInput({
     setResults([]);
     setOpen(false);
     setStatus("ok");
+    const meta = [county, region].filter((x) => x && x !== town).join(", ");
+    setResolvedMeta(meta);
     onChange({ town, country, lat: p.latitude, lng: p.longitude });
     onResolved?.({
       town,
@@ -199,6 +202,7 @@ export function TownInput({
             // While the user is typing, the previously-selected place no longer matches the text.
             // Clear the geocoded coords so the parent can't accidentally save a stale lat/lng.
             if (status === "ok") setStatus("idle");
+            if (resolvedMeta) setResolvedMeta("");
             if (next.trim() === "") {
               onChange({ town: "", country: value.country || "United Kingdom", lat: null, lng: null });
             } else {
@@ -251,8 +255,8 @@ export function TownInput({
       {status === "error" && (
         <p className="mt-1 text-xs text-red-600" role="alert">{errorMsg}</p>
       )}
-      {status === "ok" && (
-        <p className="mt-1 text-xs text-muted-foreground">UK only.</p>
+      {status === "ok" && resolvedMeta && (
+        <p className="mt-1 text-xs text-muted-foreground">{resolvedMeta}</p>
       )}
     </div>
   );
