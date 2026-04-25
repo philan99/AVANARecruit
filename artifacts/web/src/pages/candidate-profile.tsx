@@ -708,9 +708,7 @@ export default function CandidateProfile() {
                       setEditForm((prev) => ({ ...prev, lat: v.lat ?? null, lng: v.lng ?? null }));
                     }}
                     onResolved={(info) => {
-                      if (!editForm.location) {
-                        updateField("location", info.town + (info.county && info.county !== info.town ? `, ${info.county}` : ""));
-                      }
+                      updateField("location", info.town + (info.county && info.county !== info.town ? `, ${info.county}` : ""));
                     }}
                   />
                 </div>
