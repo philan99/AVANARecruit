@@ -65,13 +65,16 @@ export function TownInput({
   );
   const [errorMsg, setErrorMsg] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastFetched = useRef<string>("");
+  // Seed lastFetched with the initial value so a pre-filled town (e.g. on page load
+  // or form hydration) doesn't trigger an autocomplete fetch and dropdown.
+  const lastFetched = useRef<string>(value.town || "");
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep local query in sync if parent updates value externally (e.g. form reset).
   useEffect(() => {
     if (value.town !== query) {
       setQuery(value.town || "");
+      lastFetched.current = value.town || "";
       if (value.town && value.lat != null) setStatus("ok");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
