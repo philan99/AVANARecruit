@@ -135,7 +135,9 @@ export function TownInput({
     const region = p.region || "";
     const county = p.county_unitary || "";
     const country = "United Kingdom";
+    lastFetched.current = town;
     setQuery(town);
+    setResults([]);
     setOpen(false);
     setStatus("ok");
     onChange({ town, country, lat: p.latitude, lng: p.longitude });
