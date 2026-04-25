@@ -49,6 +49,7 @@ type StatusStyle = { label: string; icon: typeof Circle; color: string; badgeCla
 const BUILTIN_STATUS_STYLE: Record<string, StatusStyle> = {
   "todo": { label: "To Do", icon: Circle, color: "text-muted-foreground", badgeClass: "bg-muted text-muted-foreground" },
   "in-progress": { label: "In Progress", icon: Clock, color: "text-blue-500", badgeClass: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+  "on-hold": { label: "On Hold", icon: Clock, color: "text-orange-500", badgeClass: "bg-orange-500/10 text-orange-500 border-orange-500/20" },
   "done": { label: "Done", icon: CheckCircle2, color: "text-green-500", badgeClass: "bg-green-500/10 text-green-500 border-green-500/20" },
 };
 const CUSTOM_STATUS_PALETTE: StatusStyle[] = [
