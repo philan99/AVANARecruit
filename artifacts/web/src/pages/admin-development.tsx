@@ -302,6 +302,7 @@ export default function AdminDevelopment() {
   const STATUS_BAR: Record<string, string> = {
     "todo": "bg-muted-foreground/40",
     "in-progress": "bg-blue-500",
+    "on-hold": "bg-orange-500",
     "done": "bg-green-500",
   };
 
