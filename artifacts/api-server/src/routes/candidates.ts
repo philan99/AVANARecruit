@@ -16,7 +16,7 @@ import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { computeMatch } from "../lib/matching";
 import { validatePassword } from "../lib/password-policy";
-import { geocodeUkPostcode, buildLocationDisplay } from "../lib/geocode";
+import { geocodeUkPostcode, geocodeUkTown, buildLocationDisplay } from "../lib/geocode";
 
 const router: IRouter = Router();
 
@@ -166,7 +166,26 @@ router.post("/candidates", async (req, res): Promise<void> => {
 
   const userCountry = insertData.country;
   const country = userCountry || "United Kingdom";
-  if (insertData.postcode && country === "United Kingdom") {
+  const hasTown = typeof insertData.town === "string" && insertData.town.trim() !== "";
+  const hasLatLng = typeof insertData.lat === "number" && typeof insertData.lng === "number";
+  if (hasTown && country === "United Kingdom") {
+    if (!hasLatLng) {
+      const geo = await geocodeUkTown(insertData.town);
+      if (!geo.ok) {
+        res.status(400).json({ error: geo.error });
+        return;
+      }
+      insertData.town = geo.town;
+      insertData.country = userCountry ?? geo.country;
+      insertData.lat = geo.lat;
+      insertData.lng = geo.lng;
+      if (!insertData.location || insertData.location.trim() === "") {
+        insertData.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
+      }
+    } else if (!insertData.location || insertData.location.trim() === "") {
+      insertData.location = insertData.town;
+    }
+  } else if (insertData.postcode && country === "United Kingdom") {
     const geo = await geocodeUkPostcode(insertData.postcode);
     if (!geo.ok) {
       res.status(400).json({ error: geo.error });
@@ -174,10 +193,6 @@ router.post("/candidates", async (req, res): Promise<void> => {
     }
     insertData.postcode = geo.postcode;
     insertData.town = geo.town;
-    // Preserve the user-supplied country (e.g. "United Kingdom"). Only fall
-    // back to the geocoder's country (which postcodes.io reports as
-    // "England" / "Scotland" / "Wales" / "Northern Ireland") if the caller
-    // didn't supply one.
     insertData.country = userCountry ?? geo.country;
     insertData.lat = geo.lat;
     insertData.lng = geo.lng;
@@ -320,29 +335,47 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     updateData.onboardingState = onboardingState;
   }
 
-  if (updateData.postcode !== undefined && updateData.postcode !== null && updateData.postcode !== "") {
-    const userCountry = updateData.country;
-    const country = userCountry || "United Kingdom";
-    if (country === "United Kingdom") {
-      const geo = await geocodeUkPostcode(updateData.postcode);
+  const userCountry = updateData.country;
+  const country = userCountry || "United Kingdom";
+  const hasTownU = typeof updateData.town === "string" && updateData.town.trim() !== "";
+  const hasLatLngU = typeof updateData.lat === "number" && typeof updateData.lng === "number";
+  const hasPostcodeU = typeof updateData.postcode === "string" && updateData.postcode.trim() !== "";
+
+  if (hasTownU && country === "United Kingdom") {
+    if (!hasLatLngU) {
+      const geo = await geocodeUkTown(updateData.town);
       if (!geo.ok) {
         res.status(400).json({ error: geo.error });
         return;
       }
-      updateData.postcode = geo.postcode;
       updateData.town = geo.town;
-      // Preserve the user-supplied country (e.g. "United Kingdom"). Only fall
-      // back to the geocoder's country (which postcodes.io reports as
-      // "England" / "Scotland" / "Wales" / "Northern Ireland") if the caller
-      // didn't supply one.
       updateData.country = userCountry ?? geo.country;
       updateData.lat = geo.lat;
       updateData.lng = geo.lng;
       if (!updateData.location || updateData.location.trim() === "") {
-        updateData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+        updateData.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
       }
+    } else if (!updateData.location || updateData.location.trim() === "") {
+      updateData.location = updateData.town;
     }
-  } else if (updateData.postcode === null || updateData.postcode === "") {
+  } else if (hasPostcodeU && country === "United Kingdom") {
+    const geo = await geocodeUkPostcode(updateData.postcode);
+    if (!geo.ok) {
+      res.status(400).json({ error: geo.error });
+      return;
+    }
+    updateData.postcode = geo.postcode;
+    updateData.town = geo.town;
+    updateData.country = userCountry ?? geo.country;
+    updateData.lat = geo.lat;
+    updateData.lng = geo.lng;
+    if (!updateData.location || updateData.location.trim() === "") {
+      updateData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+    }
+  } else if (
+    (updateData.town === null || updateData.town === "") &&
+    (updateData.postcode === undefined || updateData.postcode === null || updateData.postcode === "")
+  ) {
     updateData.postcode = null;
     updateData.town = null;
     updateData.lat = null;

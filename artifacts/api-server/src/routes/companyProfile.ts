@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
 import { validatePassword } from "../lib/password-policy";
-import { geocodeUkPostcode, buildLocationDisplay } from "../lib/geocode";
+import { geocodeUkPostcode, geocodeUkTown, buildLocationDisplay } from "../lib/geocode";
 
 const router: IRouter = Router();
 
@@ -198,7 +198,25 @@ router.post("/company-profile", async (req, res) => {
 
     const pb = profileBody as Record<string, any>;
     const country = (pb.country as string) || "United Kingdom";
-    if (pb.postcode && country === "United Kingdom") {
+    const hasTown = typeof pb.town === "string" && pb.town.trim() !== "";
+    const hasLatLng = typeof pb.lat === "number" && typeof pb.lng === "number";
+    if (hasTown && country === "United Kingdom") {
+      if (!hasLatLng) {
+        const geo = await geocodeUkTown(pb.town);
+        if (!geo.ok) {
+          return res.status(400).json({ error: geo.error });
+        }
+        pb.town = geo.town;
+        pb.country = geo.country;
+        pb.lat = geo.lat;
+        pb.lng = geo.lng;
+        if (!pb.location || String(pb.location).trim() === "") {
+          pb.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
+        }
+      } else if (!pb.location || String(pb.location).trim() === "") {
+        pb.location = pb.town;
+      }
+    } else if (pb.postcode && country === "United Kingdom") {
       const geo = await geocodeUkPostcode(pb.postcode);
       if (!geo.ok) {
         return res.status(400).json({ error: geo.error });
@@ -264,23 +282,44 @@ router.patch("/company-profile/:id", async (req, res) => {
 
     const { password: _pw, id: _id, createdAt: _ca, email: _em, verified: _v, ...updateFields } = req.body;
 
-    if (updateFields.postcode !== undefined && updateFields.postcode !== null && updateFields.postcode !== "") {
-      const country = updateFields.country || existing.country || "United Kingdom";
-      if (country === "United Kingdom") {
-        const geo = await geocodeUkPostcode(updateFields.postcode);
+    const country = updateFields.country || existing.country || "United Kingdom";
+    const hasTownU = typeof updateFields.town === "string" && updateFields.town.trim() !== "";
+    const hasLatLngU = typeof updateFields.lat === "number" && typeof updateFields.lng === "number";
+    const hasPostcodeU = typeof updateFields.postcode === "string" && updateFields.postcode.trim() !== "";
+
+    if (hasTownU && country === "United Kingdom") {
+      if (!hasLatLngU) {
+        const geo = await geocodeUkTown(updateFields.town);
         if (!geo.ok) {
           return res.status(400).json({ error: geo.error });
         }
-        updateFields.postcode = geo.postcode;
         updateFields.town = geo.town;
         updateFields.country = geo.country;
         updateFields.lat = geo.lat;
         updateFields.lng = geo.lng;
         if (!updateFields.location || String(updateFields.location).trim() === "") {
-          updateFields.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+          updateFields.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
         }
+      } else if (!updateFields.location || String(updateFields.location).trim() === "") {
+        updateFields.location = updateFields.town;
       }
-    } else if (updateFields.postcode === null || updateFields.postcode === "") {
+    } else if (hasPostcodeU && country === "United Kingdom") {
+      const geo = await geocodeUkPostcode(updateFields.postcode);
+      if (!geo.ok) {
+        return res.status(400).json({ error: geo.error });
+      }
+      updateFields.postcode = geo.postcode;
+      updateFields.town = geo.town;
+      updateFields.country = geo.country;
+      updateFields.lat = geo.lat;
+      updateFields.lng = geo.lng;
+      if (!updateFields.location || String(updateFields.location).trim() === "") {
+        updateFields.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+      }
+    } else if (
+      (updateFields.town === null || updateFields.town === "") &&
+      (updateFields.postcode === undefined || updateFields.postcode === null || updateFields.postcode === "")
+    ) {
       updateFields.postcode = null;
       updateFields.town = null;
       updateFields.lat = null;

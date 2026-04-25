@@ -57,6 +57,52 @@ export async function geocodeUkPostcode(rawPostcode: string): Promise<GeocodeRes
   }
 }
 
+interface PlacesIoResult {
+  name_1: string;
+  county_unitary?: string | null;
+  region?: string | null;
+  country?: string | null;
+  latitude: number;
+  longitude: number;
+}
+
+export interface GeocodeTownResult {
+  town: string;
+  county: string | null;
+  region: string | null;
+  country: string;
+  lat: number;
+  lng: number;
+}
+
+export async function geocodeUkTown(rawTown: string): Promise<({ ok: true } & GeocodeTownResult) | GeocodeError> {
+  const q = String(rawTown || "").trim();
+  if (!q) return { ok: false, error: "Town is required" };
+  try {
+    const res = await fetch(`https://api.postcodes.io/places?q=${encodeURIComponent(q)}&limit=10`);
+    if (!res.ok) return { ok: false, error: "Town lookup failed, please try again" };
+    const data = await res.json() as { result?: PlacesIoResult[] | null };
+    const list = data.result ?? [];
+    if (!Array.isArray(list) || list.length === 0) {
+      return { ok: false, error: "Town not found" };
+    }
+    const lower = q.toLowerCase();
+    const exact = list.find((p) => (p.name_1 || "").toLowerCase() === lower);
+    const r = exact ?? list[0];
+    return {
+      ok: true,
+      town: r.name_1,
+      county: r.county_unitary ?? null,
+      region: r.region ?? null,
+      country: r.country || "United Kingdom",
+      lat: r.latitude,
+      lng: r.longitude,
+    };
+  } catch {
+    return { ok: false, error: "Town lookup failed, please try again" };
+  }
+}
+
 export function buildLocationDisplay(town: string | null | undefined, region: string | null | undefined): string {
   const t = (town || "").trim();
   const r = (region || "").trim();

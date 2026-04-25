@@ -9,7 +9,7 @@ import {
 import { useUpload } from "@workspace/object-storage-web";
 import { useRole } from "@/contexts/role-context";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
-import { PostcodeInput } from "@/components/postcode-input";
+import { TownInput } from "@/components/town-input";
 import { useIndustries } from "@/hooks/use-industries";
 import { safeExternalUrl } from "@/lib/safeUrl";
 
@@ -68,8 +68,11 @@ const formSchema = z.object({
   facebookUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
   location: z.string().optional(),
+  town: z.string().optional(),
   postcode: z.string().optional(),
   country: z.string().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
   description: z.string().optional(),
   size: z.string().optional(),
   founded: z.string().optional(),
@@ -189,8 +192,11 @@ export default function CompanyProfile() {
       facebookUrl: "",
       instagramUrl: "",
       location: "",
+      town: "",
       postcode: "",
       country: "United Kingdom",
+      lat: null,
+      lng: null,
       description: "",
       size: "",
       founded: "",
@@ -210,8 +216,11 @@ export default function CompanyProfile() {
         facebookUrl: profile.facebookUrl || "",
         instagramUrl: profile.instagramUrl || "",
         location: profile.location || "",
+        town: ((profile as any).town as string) || "",
         postcode: ((profile as any).postcode as string) || "",
         country: ((profile as any).country as string) || "United Kingdom",
+        lat: ((profile as any).lat as number | null | undefined) ?? null,
+        lng: ((profile as any).lng as number | null | undefined) ?? null,
         description: profile.description || "",
         size: profile.size || "",
         founded: profile.founded || "",
@@ -350,17 +359,30 @@ export default function CompanyProfile() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="postcode" render={({ field }) => (
+                  <FormField control={form.control} name="town" render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Postcode</FormLabel>
+                      <FormLabel>Town or city</FormLabel>
                       <FormControl>
-                        <PostcodeInput
-                          value={{ postcode: field.value ?? "", country: form.watch("country") || "United Kingdom" }}
-                          onChange={(v) => { field.onChange(v.postcode); form.setValue("country", v.country); }}
+                        <TownInput
+                          value={{
+                            town: field.value ?? "",
+                            country: form.watch("country") || "United Kingdom",
+                            lat: form.watch("lat") ?? null,
+                            lng: form.watch("lng") ?? null,
+                          }}
+                          onChange={(v) => {
+                            field.onChange(v.town);
+                            form.setValue("country", v.country);
+                            form.setValue("lat", v.lat ?? null);
+                            form.setValue("lng", v.lng ?? null);
+                          }}
                           onResolved={(info) => {
                             const cur = form.getValues("location");
                             if (!cur || cur.trim() === "") {
-                              form.setValue("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                              form.setValue(
+                                "location",
+                                info.town + (info.county && info.county !== info.town ? `, ${info.county}` : ""),
+                              );
                             }
                           }}
                         />

@@ -19,7 +19,7 @@ import {
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { CITY_SUGGESTIONS } from "@/lib/cities";
 import { CityCombobox } from "@/components/city-combobox";
-import { PostcodeInput } from "@/components/postcode-input";
+import { TownInput } from "@/components/town-input";
 import { useIndustries } from "@/hooks/use-industries";
 
 type ExperienceEntry = {
@@ -134,9 +134,11 @@ export default function Onboarding() {
   // Form state — pre-filled from candidate
   const [phone, setPhone] = useState("");
   const [location, setLocationField] = useState("");
-  const [postcode, setPostcode] = useState("");
+  const [town, setTown] = useState("");
+  const [townLat, setTownLat] = useState<number | null>(null);
+  const [townLng, setTownLng] = useState<number | null>(null);
   const [postcodeCountry, setPostcodeCountry] = useState("United Kingdom");
-  const [postcodeError, setPostcodeError] = useState<string | null>(null);
+  const [townError, setTownError] = useState<string | null>(null);
   const [currentTitle, setCurrentTitle] = useState("");
   const [experienceYears, setExperienceYears] = useState<string>("");
   const [maxRadiusMiles, setMaxRadiusMiles] = useState<number>(25);
@@ -172,7 +174,9 @@ export default function Onboarding() {
       const stripPlaceholder = (v?: string | null) => (v && v !== "Not specified" ? v : "");
       setPhone(candidate.phone || "");
       setLocationField(stripPlaceholder(candidate.location));
-      setPostcode(((candidate as any).postcode as string) || "");
+      setTown(((candidate as any).town as string) || "");
+      setTownLat(((candidate as any).lat as number | null | undefined) ?? null);
+      setTownLng(((candidate as any).lng as number | null | undefined) ?? null);
       setPostcodeCountry(((candidate as any).country as string) || "United Kingdom");
       setCurrentTitle(stripPlaceholder(candidate.currentTitle));
       setExperienceYears(candidate.experienceYears ? String(candidate.experienceYears) : "");
@@ -339,7 +343,9 @@ export default function Onboarding() {
       case 3:
         ok = await patchCandidate({
           location: location || "Not specified",
-          postcode: postcode || null,
+          town: town || null,
+          lat: townLat,
+          lng: townLng,
           country: postcodeCountry || "United Kingdom",
           currentTitle: currentTitle || "Not specified",
           experienceYears: experienceYears ? parseInt(experienceYears, 10) || 0 : 0,
@@ -378,11 +384,11 @@ export default function Onboarding() {
 
   async function handleNext() {
     if (saving) return;
-    if (step === 3 && !postcode.trim()) {
-      setPostcodeError("Postcode is required so we can match you to nearby jobs.");
+    if (step === 3 && (!town.trim() || townLat == null || townLng == null)) {
+      setTownError("Please pick your town or city from the suggestions so we can match you to nearby jobs.");
       toast({
-        title: "Postcode required",
-        description: "Please enter your postcode before continuing.",
+        title: "Town required",
+        description: "Please select your town or city before continuing.",
         variant: "destructive",
       });
       return;
@@ -741,21 +747,23 @@ export default function Onboarding() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">
-                    Postcode <span className="text-red-600" aria-hidden="true">*</span>
+                    Town or city <span className="text-red-600" aria-hidden="true">*</span>
                     <FieldBadge field="location" />
                   </label>
-                  <PostcodeInput
-                    value={{ postcode, country: postcodeCountry }}
+                  <TownInput
+                    value={{ town, country: postcodeCountry, lat: townLat, lng: townLng }}
                     onChange={(v) => {
-                      setPostcode(v.postcode);
+                      setTown(v.town);
                       setPostcodeCountry(v.country);
-                      if (postcodeError && v.postcode.trim()) setPostcodeError(null);
+                      setTownLat(v.lat ?? null);
+                      setTownLng(v.lng ?? null);
+                      if (townError && v.town.trim() && v.lat != null) setTownError(null);
                     }}
-                    onResolved={(info) => { if (!location) setLocationField(info.town + (info.region && info.region !== info.town ? `, ${info.region}` : "")); }}
-                    className={postcodeError ? "ring-1 ring-red-500 rounded-md p-1 -m-1" : undefined}
+                    onResolved={(info) => { if (!location) setLocationField(info.town + (info.county && info.county !== info.town ? `, ${info.county}` : "")); }}
+                    className={townError ? "ring-1 ring-red-500 rounded-md p-1 -m-1" : undefined}
                   />
-                  {postcodeError && (
-                    <p className="mt-1 text-xs text-red-600" role="alert">{postcodeError}</p>
+                  {townError && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">{townError}</p>
                   )}
                 </div>
                 <div>
@@ -768,7 +776,7 @@ export default function Onboarding() {
                     <span className="text-xs font-mono font-bold" style={{ color: "#4CAF50" }}>{maxRadiusMiles} mi</span>
                   </div>
                   <Slider value={[maxRadiusMiles]} onValueChange={([v]) => setMaxRadiusMiles(v)} min={5} max={100} step={5} />
-                  <p className="text-xs text-slate-500 mt-1">Jobs closer to your postcode score higher. Remote jobs always score full marks.</p>
+                  <p className="text-xs text-slate-500 mt-1">Jobs closer to your town score higher. Remote jobs always score full marks.</p>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">

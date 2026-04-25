@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Bell, BellOff, Plus, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRole } from "@/contexts/role-context";
-import { PostcodeInput } from "@/components/postcode-input";
+import { TownInput } from "@/components/town-input";
 
 export function JobAlertsSettings() {
   const { candidateProfileId } = useRole();
@@ -22,9 +22,10 @@ export function JobAlertsSettings() {
   const [minScore, setMinScore] = useState(50);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const [centerPostcode, setCenterPostcode] = useState<string>("");
   const [centerCountry, setCenterCountry] = useState<string>("United Kingdom");
-  const [centerTown, setCenterTown] = useState<string | null>(null);
+  const [centerTown, setCenterTown] = useState<string>("");
+  const [centerLat, setCenterLat] = useState<number | null>(null);
+  const [centerLng, setCenterLng] = useState<number | null>(null);
   const [radiusMiles, setRadiusMiles] = useState<number>(25);
 
   useEffect(() => {
@@ -37,8 +38,9 @@ export function JobAlertsSettings() {
           setEnabled(data.enabled ?? false);
           setMinScore(data.minScore ?? 50);
           setKeywords(data.keywords ?? []);
-          setCenterPostcode(data.centerPostcode ?? "");
-          setCenterTown(data.centerTown ?? null);
+          setCenterTown(data.centerTown ?? "");
+          setCenterLat(data.centerLat ?? null);
+          setCenterLng(data.centerLng ?? null);
           setRadiusMiles(data.radiusMiles ?? 25);
         }
       } catch (err) {
@@ -61,7 +63,9 @@ export function JobAlertsSettings() {
           enabled,
           minScore,
           keywords,
-          centerPostcode: centerPostcode.trim() === "" ? null : centerPostcode,
+          centerTown: centerTown.trim() === "" ? null : centerTown,
+          centerLat,
+          centerLng,
           radiusMiles,
         }),
       });
@@ -167,16 +171,17 @@ export function JobAlertsSettings() {
 
             <div className="space-y-3">
               <Label className="text-sm font-medium">Search area (optional)</Label>
-              <PostcodeInput
-                value={{ postcode: centerPostcode ?? "", country: centerCountry ?? "United Kingdom" }}
-                onChange={(v) => { setCenterPostcode(v.postcode); setCenterCountry(v.country); }}
-                onResolved={(r) => setCenterTown(r?.town ?? null)}
+              <TownInput
+                value={{ town: centerTown, country: centerCountry, lat: centerLat, lng: centerLng }}
+                onChange={(v) => {
+                  setCenterTown(v.town);
+                  setCenterCountry(v.country);
+                  setCenterLat(v.lat ?? null);
+                  setCenterLng(v.lng ?? null);
+                }}
               />
-              {centerTown && centerPostcode.trim() !== "" && (
-                <p className="text-xs text-muted-foreground">Resolved: {centerTown}</p>
-              )}
               {(() => {
-                const radiusDisabled = centerPostcode.trim() === "";
+                const radiusDisabled = centerTown.trim() === "" || centerLat == null || centerLng == null;
                 return (
                   <>
                     <div className="flex items-center justify-between">
@@ -196,8 +201,8 @@ export function JobAlertsSettings() {
                     />
                     <p className="text-xs text-muted-foreground">
                       {radiusDisabled
-                        ? "No postcode set, so you'll receive alerts for matching jobs anywhere in the UK (remote jobs always included)."
-                        : "Only alert for jobs within this distance of the postcode (remote jobs always included). Leave the postcode blank to receive alerts from anywhere in the UK."}
+                        ? "No town set, so you'll receive alerts for matching jobs anywhere in the UK (remote jobs always included)."
+                        : "Only alert for jobs within this distance of the town (remote jobs always included). Leave the town blank to receive alerts from anywhere in the UK."}
                     </p>
                   </>
                 );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { CityCombobox } from "@/components/city-combobox";
-import { PostcodeInput } from "@/components/postcode-input";
+import { TownInput } from "@/components/town-input";
 import { Link, useLocation } from "wouter";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate, getGetCandidateQueryKey, getListCandidatesQueryKey } from "@workspace/api-client-react";
@@ -50,8 +50,11 @@ interface EditFormState {
   education: string;
   educationDetails: string;
   location: string;
+  town: string;
   postcode: string;
   country: string;
+  lat: number | null;
+  lng: number | null;
   linkedinUrl: string;
   facebookUrl: string;
   twitterUrl: string;
@@ -245,7 +248,7 @@ export default function CandidateProfile() {
   const [editForm, setEditForm] = useState<EditFormState>({
     name: "", email: "", phone: "", currentTitle: "",
     summary: "", skills: "", qualifications: "", preferredJobTypes: [], preferredWorkplaces: [], preferredIndustries: [], experienceYears: 0, maxRadiusMiles: 25, education: "", educationDetails: "", location: "",
-    postcode: "", country: "United Kingdom",
+    town: "", postcode: "", country: "United Kingdom", lat: null, lng: null,
     linkedinUrl: "", facebookUrl: "", twitterUrl: "", portfolioUrl: "",
   });
 
@@ -267,8 +270,11 @@ export default function CandidateProfile() {
         education: candidate.education,
         educationDetails: (candidate as any).educationDetails || "",
         location: candidate.location,
+        town: ((candidate as any).town as string) || "",
         postcode: ((candidate as any).postcode as string) || "",
         country: ((candidate as any).country as string) || "United Kingdom",
+        lat: ((candidate as any).lat as number | null | undefined) ?? null,
+        lng: ((candidate as any).lng as number | null | undefined) ?? null,
         linkedinUrl: (candidate as any).linkedinUrl || "",
         facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
@@ -375,8 +381,11 @@ export default function CandidateProfile() {
         education: stripPlaceholder(candidate.education),
         educationDetails: (candidate as any).educationDetails || "",
         location: stripPlaceholder(candidate.location),
+        town: ((candidate as any).town as string) || "",
         postcode: ((candidate as any).postcode as string) || "",
         country: ((candidate as any).country as string) || "United Kingdom",
+        lat: ((candidate as any).lat as number | null | undefined) ?? null,
+        lng: ((candidate as any).lng as number | null | undefined) ?? null,
         linkedinUrl: (candidate as any).linkedinUrl || "",
         facebookUrl: (candidate as any).facebookUrl || "",
         twitterUrl: (candidate as any).twitterUrl || "",
@@ -442,8 +451,11 @@ export default function CandidateProfile() {
       education: editForm.education,
       educationDetails: editForm.educationDetails || null,
       location: editForm.location,
+      town: editForm.town || null,
       postcode: editForm.postcode || null,
       country: editForm.country || "United Kingdom",
+      lat: editForm.lat,
+      lng: editForm.lng,
       experience: experienceList,
       linkedinUrl: normalizeUrl(editForm.linkedinUrl),
       facebookUrl: normalizeUrl(editForm.facebookUrl),
@@ -687,13 +699,17 @@ export default function CandidateProfile() {
                   <Input type="number" min="0" value={editForm.experienceYears} onChange={e => updateField("experienceYears", parseInt(e.target.value) || 0)} />
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground">Postcode</label>
-                  <PostcodeInput
-                    value={{ postcode: editForm.postcode, country: editForm.country }}
-                    onChange={(v) => { updateField("postcode", v.postcode); updateField("country", v.country); }}
+                  <label className="text-xs font-medium text-muted-foreground">Town or city</label>
+                  <TownInput
+                    value={{ town: editForm.town, country: editForm.country, lat: editForm.lat, lng: editForm.lng }}
+                    onChange={(v) => {
+                      updateField("town", v.town);
+                      updateField("country", v.country);
+                      setEditForm((prev) => ({ ...prev, lat: v.lat ?? null, lng: v.lng ?? null }));
+                    }}
                     onResolved={(info) => {
                       if (!editForm.location) {
-                        updateField("location", info.town + (info.region && info.region !== info.town ? `, ${info.region}` : ""));
+                        updateField("location", info.town + (info.county && info.county !== info.town ? `, ${info.county}` : ""));
                       }
                     }}
                   />
@@ -709,7 +725,7 @@ export default function CandidateProfile() {
                     min={5} max={100} step={5}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Jobs closer to your postcode score higher. Remote jobs always score full marks.
+                    Jobs closer to your town score higher. Remote jobs always score full marks.
                   </p>
                 </div>
               </CardContent>

@@ -2,11 +2,51 @@ import { Router, type IRouter } from "express";
 import { eq, ilike, or, sql, count } from "drizzle-orm";
 import { db, jobsTable, matchesTable, candidatesTable, jobAlertsTable } from "@workspace/db";
 import { computeMatch } from "../lib/matching";
-import { geocodeUkPostcode, buildLocationDisplay } from "../lib/geocode";
+import { geocodeUkPostcode, geocodeUkTown, buildLocationDisplay } from "../lib/geocode";
 import { getResendClient } from "../lib/resend";
 
+async function applyLocationFields(d: Record<string, any>): Promise<{ ok: true } | { ok: false; error: string }> {
+  const country = d.country || "United Kingdom";
+  const hasTown = typeof d.town === "string" && d.town.trim() !== "";
+  const hasLatLng = typeof d.lat === "number" && typeof d.lng === "number";
+  const hasPostcode = typeof d.postcode === "string" && d.postcode.trim() !== "";
+
+  if (hasTown && country === "United Kingdom") {
+    if (!hasLatLng) {
+      const geo = await geocodeUkTown(d.town);
+      if (!geo.ok) return { ok: false, error: geo.error };
+      d.town = geo.town;
+      d.country = geo.country;
+      d.lat = geo.lat;
+      d.lng = geo.lng;
+      if (!d.location || String(d.location).trim() === "") {
+        d.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
+      }
+    } else if (!d.location || String(d.location).trim() === "") {
+      d.location = d.town;
+    }
+    return { ok: true };
+  }
+
+  if (hasPostcode && country === "United Kingdom") {
+    const geo = await geocodeUkPostcode(d.postcode);
+    if (!geo.ok) return { ok: false, error: geo.error };
+    d.postcode = geo.postcode;
+    d.town = geo.town;
+    d.country = geo.country;
+    d.lat = geo.lat;
+    d.lng = geo.lng;
+    if (!d.location || String(d.location).trim() === "") {
+      d.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
+    }
+  }
+  return { ok: true };
+}
+
 function maybeClearGeo(d: Record<string, any>) {
-  if (d.postcode === null || d.postcode === "") {
+  const townExplicitlyCleared = d.town === null || d.town === "";
+  const postcodeExplicitlyCleared = d.postcode === null || d.postcode === "";
+  if (townExplicitlyCleared && (d.postcode === undefined || postcodeExplicitlyCleared)) {
     d.postcode = null;
     d.town = null;
     d.lat = null;
@@ -111,21 +151,10 @@ router.post("/jobs", async (req, res): Promise<void> => {
   }
 
   const insertData: any = { ...parsed.data };
-  const country = insertData.country || "United Kingdom";
-  if (insertData.postcode && country === "United Kingdom") {
-    const geo = await geocodeUkPostcode(insertData.postcode);
-    if (!geo.ok) {
-      res.status(400).json({ error: geo.error });
-      return;
-    }
-    insertData.postcode = geo.postcode;
-    insertData.town = geo.town;
-    insertData.country = geo.country;
-    insertData.lat = geo.lat;
-    insertData.lng = geo.lng;
-    if (!insertData.location || insertData.location.trim() === "") {
-      insertData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
-    }
+  const locResult = await applyLocationFields(insertData);
+  if (!locResult.ok) {
+    res.status(400).json({ error: locResult.error });
+    return;
   }
 
   const [job] = await db.insert(jobsTable).values(insertData).returning();
@@ -206,24 +235,15 @@ router.patch("/jobs/:id", async (req, res): Promise<void> => {
   }
 
   const updateData: any = { ...parsed.data };
-  if (updateData.postcode !== undefined && updateData.postcode !== null && updateData.postcode !== "") {
-    const country = updateData.country || "United Kingdom";
-    if (country === "United Kingdom") {
-      const geo = await geocodeUkPostcode(updateData.postcode);
-      if (!geo.ok) {
-        res.status(400).json({ error: geo.error });
-        return;
-      }
-      updateData.postcode = geo.postcode;
-      updateData.town = geo.town;
-      updateData.country = geo.country;
-      updateData.lat = geo.lat;
-      updateData.lng = geo.lng;
-      if (!updateData.location || updateData.location.trim() === "") {
-        updateData.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
-      }
+  const hasTownProvided = typeof updateData.town === "string" && updateData.town.trim() !== "";
+  const hasPostcodeProvided = typeof updateData.postcode === "string" && updateData.postcode.trim() !== "";
+  if (hasTownProvided || hasPostcodeProvided) {
+    const locResult = await applyLocationFields(updateData);
+    if (!locResult.ok) {
+      res.status(400).json({ error: locResult.error });
+      return;
     }
-  } else if (updateData.postcode === null || updateData.postcode === "") {
+  } else {
     maybeClearGeo(updateData);
   }
 
@@ -271,6 +291,9 @@ async function sendJobAlerts(job: any) {
       keywords: jobAlertsTable.keywords,
       locations: jobAlertsTable.locations,
       jobTypes: jobAlertsTable.jobTypes,
+      centerLat: jobAlertsTable.centerLat,
+      centerLng: jobAlertsTable.centerLng,
+      radiusMiles: jobAlertsTable.radiusMiles,
       candidateName: candidatesTable.name,
       candidateEmail: candidatesTable.email,
       candidateSkills: candidatesTable.skills,
@@ -330,6 +353,29 @@ async function sendJobAlerts(job: any) {
       const jobLoc = (job.location || "").toLowerCase();
       const matchesLocation = alert.locations.some((loc: string) => jobLoc.includes(loc.toLowerCase()));
       if (!matchesLocation && jobLoc !== "remote") continue;
+    }
+
+    if (
+      alert.centerLat != null &&
+      alert.centerLng != null &&
+      alert.radiusMiles != null
+    ) {
+      const isRemote = (job.workplace || "").toLowerCase() === "remote"
+        || (job.location || "").toLowerCase() === "remote";
+      if (!isRemote) {
+        if (job.lat == null || job.lng == null) continue;
+        const toRad = (d: number) => (d * Math.PI) / 180;
+        const R = 3958.8;
+        const dLat = toRad(job.lat - alert.centerLat);
+        const dLng = toRad(job.lng - alert.centerLng);
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(alert.centerLat)) *
+            Math.cos(toRad(job.lat)) *
+            Math.sin(dLng / 2) ** 2;
+        const distMiles = 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+        if (distMiles > alert.radiusMiles) continue;
+      }
     }
 
     try {

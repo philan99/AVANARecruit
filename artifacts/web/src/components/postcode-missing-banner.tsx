@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { useRole } from "@/contexts/role-context";
 import { useGetCandidate } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
@@ -18,17 +17,17 @@ export function PostcodeMissingBanner() {
   if (dismissed) return null;
   if (role !== "candidate" && role !== "company") return null;
 
-  let needsPostcode = false;
+  let needsTown = false;
   let editLink = "";
   if (role === "candidate" && candidate) {
-    needsPostcode = !((candidate as any).postcode);
+    needsTown = !((candidate as any).town);
     editLink = "/profile";
   } else if (role === "company" && company) {
-    needsPostcode = !((company as any).postcode);
+    needsTown = !((company as any).town);
     editLink = "/company-profile";
   }
 
-  if (!needsPostcode) return null;
+  if (!needsTown) return null;
 
   return (
     <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5">
@@ -36,7 +35,7 @@ export function PostcodeMissingBanner() {
         <div className="flex items-center gap-2 text-amber-900 min-w-0">
           <MapPin className="w-4 h-4 shrink-0" />
           <span className="truncate">
-            Add a UK postcode to your profile so we can match you on location.{" "}
+            Add a UK town or city to your profile so we can match you on location.{" "}
             <Link href={editLink} className="font-semibold underline">
               Update profile
             </Link>

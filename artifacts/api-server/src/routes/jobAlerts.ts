@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, jobAlertsTable } from "@workspace/db";
-import { geocodeUkPostcode } from "../lib/geocode";
+import { geocodeUkPostcode, geocodeUkTown } from "../lib/geocode";
 
 const router: IRouter = Router();
 
@@ -46,7 +46,7 @@ router.put("/candidates/:candidateId/job-alerts", async (req, res): Promise<void
 
   const {
     enabled, minScore, keywords, jobTypes,
-    centerPostcode, radiusMiles,
+    centerPostcode, centerTown, centerLat, centerLng, radiusMiles,
   } = req.body;
 
   let geoFields: {
@@ -56,22 +56,48 @@ router.put("/candidates/:candidateId/job-alerts", async (req, res): Promise<void
     centerLng: number | null;
   } | null = null;
 
-  if (centerPostcode !== undefined) {
-    if (centerPostcode === null || centerPostcode === "") {
-      geoFields = { centerPostcode: null, centerTown: null, centerLat: null, centerLng: null };
+  const hasTown = typeof centerTown === "string" && centerTown.trim() !== "";
+  const hasLatLng = typeof centerLat === "number" && typeof centerLng === "number";
+  const townExplicitlyCleared = centerTown === null || centerTown === "";
+
+  if (hasTown) {
+    if (hasLatLng) {
+      geoFields = {
+        centerPostcode: null,
+        centerTown,
+        centerLat,
+        centerLng,
+      };
     } else {
-      const geo = await geocodeUkPostcode(centerPostcode);
+      const geo = await geocodeUkTown(centerTown);
       if (!geo.ok) {
         res.status(400).json({ error: geo.error });
         return;
       }
       geoFields = {
-        centerPostcode: geo.postcode,
+        centerPostcode: null,
         centerTown: geo.town,
         centerLat: geo.lat,
         centerLng: geo.lng,
       };
     }
+  } else if (centerPostcode !== undefined && centerPostcode !== null && centerPostcode !== "") {
+    const geo = await geocodeUkPostcode(centerPostcode);
+    if (!geo.ok) {
+      res.status(400).json({ error: geo.error });
+      return;
+    }
+    geoFields = {
+      centerPostcode: geo.postcode,
+      centerTown: geo.town,
+      centerLat: geo.lat,
+      centerLng: geo.lng,
+    };
+  } else if (
+    townExplicitlyCleared &&
+    (centerPostcode === undefined || centerPostcode === null || centerPostcode === "")
+  ) {
+    geoFields = { centerPostcode: null, centerTown: null, centerLat: null, centerLng: null };
   }
 
   const [existing] = await db
