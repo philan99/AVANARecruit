@@ -260,11 +260,13 @@ export default function AdminDevelopment() {
     done: tasks.filter(t => t.status === "done").length,
   };
 
-  const categoryCounts = categories.map(cat => ({
-    key: cat.value,
-    label: cat.label,
-    total: tasks.filter(t => t.category === cat.value).length,
-  }));
+  const categoryCounts = categories
+    .map(cat => ({
+      key: cat.value,
+      label: cat.label,
+      total: tasks.filter(t => t.category === cat.value).length,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
   const priorityCounts = PRIORITIES.map(p => ({
     key: p as string,
     label: priorityConfig[p].label,
