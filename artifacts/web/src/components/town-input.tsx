@@ -95,7 +95,7 @@ export function TownInput({
     const trimmed = query.trim();
     if (trimmed.length < 2) {
       setResults([]);
-      if (status === "loading") setStatus("idle");
+      setStatus((s) => (s === "loading" ? "idle" : s));
       return;
     }
     if (trimmed === lastFetched.current) return;
@@ -128,7 +128,7 @@ export function TownInput({
       }
     }, 250);
     return () => clearTimeout(timer);
-  }, [query, status]);
+  }, [query]);
 
   function selectPlace(p: PlaceResult) {
     const town = p.name_1;
