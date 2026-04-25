@@ -19,10 +19,8 @@ async function applyLocationFields(d: Record<string, any>): Promise<{ ok: true }
       d.country = geo.country;
       d.lat = geo.lat;
       d.lng = geo.lng;
-      if (!d.location || String(d.location).trim() === "") {
-        d.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
-      }
-    } else if (!d.location || String(d.location).trim() === "") {
+      d.location = buildLocationDisplay(geo.town, geo.county || geo.region) || geo.town;
+    } else {
       d.location = d.town;
     }
     return { ok: true };
@@ -36,9 +34,7 @@ async function applyLocationFields(d: Record<string, any>): Promise<{ ok: true }
     d.country = geo.country;
     d.lat = geo.lat;
     d.lng = geo.lng;
-    if (!d.location || String(d.location).trim() === "") {
-      d.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
-    }
+    d.location = buildLocationDisplay(geo.town, geo.region) || geo.postcode;
   }
   return { ok: true };
 }
