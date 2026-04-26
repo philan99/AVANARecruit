@@ -707,11 +707,19 @@ export default function AdminCandidates() {
         const statusCounts = new Map<string, number>();
         const locationCounts = new Map<string, number>();
         const jobTypeCounts = new Map<string, number>();
+        const workplaceCounts = new Map<string, number>();
+        const industryCounts = new Map<string, number>();
         for (const c of candidates) {
           if (c.status) statusCounts.set(c.status, (statusCounts.get(c.status) || 0) + 1);
           if (c.location) locationCounts.set(c.location, (locationCounts.get(c.location) || 0) + 1);
           for (const t of c.preferredJobTypes || []) {
             jobTypeCounts.set(t, (jobTypeCounts.get(t) || 0) + 1);
+          }
+          for (const w of c.preferredWorkplaces || []) {
+            workplaceCounts.set(w, (workplaceCounts.get(w) || 0) + 1);
+          }
+          for (const i of c.preferredIndustries || []) {
+            industryCounts.set(i, (industryCounts.get(i) || 0) + 1);
           }
         }
         const statusOrder = ["active", "passive", "not_looking"];
@@ -720,6 +728,8 @@ export default function AdminCandidates() {
           .map(s => [s, statusCounts.get(s)!] as [string, number]);
         const locationEntries = Array.from(locationCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
         const jobTypeEntries = Array.from(jobTypeCounts.entries()).sort((a, b) => b[1] - a[1]);
+        const workplaceEntries = Array.from(workplaceCounts.entries()).sort((a, b) => b[1] - a[1]);
+        const industryEntries = Array.from(industryCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
         const statusColors: Record<string, string> = {
           active: "bg-green-500",
           passive: "bg-orange-400",
@@ -764,6 +774,8 @@ export default function AdminCandidates() {
         const statusMax = Math.max(1, ...statusEntries.map(([, v]) => v));
         const locationMax = Math.max(1, ...locationEntries.map(([, v]) => v));
         const jobTypeMax = Math.max(1, ...jobTypeEntries.map(([, v]) => v));
+        const workplaceMax = Math.max(1, ...workplaceEntries.map(([, v]) => v));
+        const industryMax = Math.max(1, ...industryEntries.map(([, v]) => v));
 
         return (
           <Card className="bg-card">
@@ -833,6 +845,53 @@ export default function AdminCandidates() {
                         active={jobTypeFilters.has(t)}
                         color="bg-purple-500"
                         onClick={() => toggle(jobTypeFilters, t, setJobTypeFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Monitor className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Preferred Workplaces</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {workplaceEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : workplaceEntries.map(([w, v]) => (
+                      <Bar
+                        key={w}
+                        label={formatWorkplace(w)}
+                        value={v}
+                        max={workplaceMax}
+                        active={workplaceFilters.has(w)}
+                        color="bg-teal-500"
+                        onClick={() => toggle(workplaceFilters, w, setWorkplaceFilters)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Preferred Industries</h3>
+                    {industryCounts.size > 8 && (
+                      <span className="text-[10px] text-muted-foreground">(top 8)</span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    {industryEntries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No data</p>
+                    ) : industryEntries.map(([i, v]) => (
+                      <Bar
+                        key={i}
+                        label={formatIndustry(i)}
+                        value={v}
+                        max={industryMax}
+                        active={industryFilters.has(i)}
+                        color="bg-orange-500"
+                        onClick={() => toggle(industryFilters, i, setIndustryFilters)}
                       />
                     ))}
                   </div>
