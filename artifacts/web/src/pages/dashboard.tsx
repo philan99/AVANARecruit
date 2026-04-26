@@ -234,52 +234,53 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Applicants */}
-        <Card className="col-span-1 lg:col-span-2 bg-card flex flex-col">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4" />
-                Applicants
-              </span>
-              <Link href="/matches?applied=true" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
-                View all <ArrowUpRight className="w-3 h-3 ml-1" />
-              </Link>
-            </CardTitle>
-            <CardDescription>Candidates who have applied for your jobs</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <div className="space-y-3">
-              {applicants.length > 0 ? applicants.map((applicant) => (
-                <div key={applicant.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${applicant.candidateId}`)}>
-                  <div className="overflow-hidden flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{applicant.candidateName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{applicant.candidateTitle || "No title"}</p>
-                    <p className="text-xs text-muted-foreground/70 truncate mt-0.5">Applied for: {applicant.jobTitle}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4 shrink-0">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                      applicant.status === "shortlisted" ? "bg-green-500/10 text-green-500" :
-                      applicant.status === "hired" ? "bg-blue-500/10 text-blue-500" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
-                      {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
-                    </span>
-                    <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded">
-                      {Math.round(applicant.overallScore)}%
-                    </span>
-                  </div>
+      {/* Row 2: Applicants — full width */}
+      <Card className="bg-card flex flex-col">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4" />
+              Applicants
+            </span>
+            <Link href="/matches?applied=true" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+              View all <ArrowUpRight className="w-3 h-3 ml-1" />
+            </Link>
+          </CardTitle>
+          <CardDescription>Candidates who have applied for your jobs</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1">
+          <div className="space-y-3">
+            {applicants.length > 0 ? applicants.map((applicant) => (
+              <div key={applicant.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${applicant.candidateId}`)}>
+                <div className="overflow-hidden flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{applicant.candidateName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{applicant.candidateTitle || "No title"}</p>
+                  <p className="text-xs text-muted-foreground/70 truncate mt-0.5">Applied for: {applicant.jobTitle}</p>
                 </div>
-              )) : (
-                <div className="text-sm text-muted-foreground text-center py-4">No applicants yet</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex items-center gap-2 ml-4 shrink-0">
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                    applicant.status === "shortlisted" ? "bg-green-500/10 text-green-500" :
+                    applicant.status === "hired" ? "bg-blue-500/10 text-blue-500" :
+                    "bg-muted text-muted-foreground"
+                  }`}>
+                    {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
+                  </span>
+                  <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                    {Math.round(applicant.overallScore)}%
+                  </span>
+                </div>
+              </div>
+            )) : (
+              <div className="text-sm text-muted-foreground text-center py-4">No applicants yet</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Row 3: Recent Matches + Top Candidates */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Matches */}
-        <Card className="col-span-1 bg-card flex flex-col">
+        <Card className="bg-card flex flex-col">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <span>Recent Matches</span>
@@ -311,7 +312,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Top Candidates */}
-        <Card className="col-span-1 bg-card flex flex-col">
+        <Card className="bg-card flex flex-col">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <span>Top Candidates</span>
