@@ -23,6 +23,7 @@ import {
   UsersRound,
   Bell,
   Microscope,
+  HelpCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -154,6 +155,14 @@ export function Layout({ children }: LayoutProps) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/faq"
+              title="Frequently asked questions"
+              aria-label="Open FAQ"
+              className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors cursor-pointer">
@@ -282,11 +291,22 @@ export function Layout({ children }: LayoutProps) {
               );
             })}
             <div className="pt-2 border-t border-sidebar-border mt-2 space-y-1">
-              <div className="px-3 pb-1">
-                <p className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">{portalLabel}</p>
-                {userEmail && (
-                  <p className="text-[11px] text-sidebar-foreground/40 truncate">{userEmail}</p>
-                )}
+              <div className="px-3 pb-1 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-mono">{portalLabel}</p>
+                  {userEmail && (
+                    <p className="text-[11px] text-sidebar-foreground/40 truncate">{userEmail}</p>
+                  )}
+                </div>
+                <Link
+                  href="/faq"
+                  onClick={() => setMobileMenuOpen(false)}
+                  title="Frequently asked questions"
+                  aria-label="Open FAQ"
+                  className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </Link>
               </div>
               {settingsItem && (
                 <Link
