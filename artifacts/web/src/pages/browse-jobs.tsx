@@ -516,97 +516,8 @@ export default function BrowseJobs() {
       </div>
 
       {showJobInsights && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Jobs by Job Type — Donut chart */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Open Jobs by Job Type
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">Permanent, contract, part-time and more</p>
-            </CardHeader>
-            <CardContent>
-              {jobInsights.jobTypes.length > 0 ? (
-                <div style={{ height: 240 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={jobInsights.jobTypes.map(([type, count]) => ({ name: JOB_TYPE_LABELS[type] || type, value: count, key: type }))}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={85}
-                        paddingAngle={2}
-                        onClick={(d: any) => d?.key && setJobTypeFilters(new Set([d.key]))}
-                        cursor="pointer"
-                      >
-                        {jobInsights.jobTypes.map((_, i) => (
-                          <Cell key={i} fill={BROWSE_JOBTYPE_COLORS[i % BROWSE_JOBTYPE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip
-                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
-                        itemStyle={{ color: 'hsl(var(--foreground))' }}
-                      />
-                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No open jobs yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Jobs by Workplace — Radial bar chart */}
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Monitor className="w-4 h-4" />
-                Open Jobs by Workplace
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">Office, remote, or hybrid</p>
-            </CardHeader>
-            <CardContent>
-              {jobInsights.workplaces.length > 0 ? (
-                <div style={{ height: 240 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadialBarChart
-                      innerRadius="25%"
-                      outerRadius="95%"
-                      data={jobInsights.workplaces.map(([wp, count], i) => ({
-                        name: WORKPLACE_LABELS[wp] || wp,
-                        value: count,
-                        key: wp,
-                        fill: BROWSE_WORKPLACE_COLORS[i % BROWSE_WORKPLACE_COLORS.length],
-                      }))}
-                      startAngle={90}
-                      endAngle={-270}
-                    >
-                      <RadialBar
-                        background
-                        dataKey="value"
-                        onClick={(d: any) => d?.key && setWorkplaceFilters(new Set([d.key]))}
-                        cursor="pointer"
-                      />
-                      <RechartsTooltip
-                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
-                        itemStyle={{ color: 'hsl(var(--foreground))' }}
-                      />
-                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                    </RadialBarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No open jobs yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Jobs by Industry — Horizontal bar chart */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Row 1, Col 1 — Jobs by Industry — Horizontal bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -617,16 +528,16 @@ export default function BrowseJobs() {
             </CardHeader>
             <CardContent>
               {jobInsights.industries.length > 0 ? (
-                <div style={{ height: Math.max(180, jobInsights.industries.length * 32) }}>
+                <div style={{ height: Math.max(220, jobInsights.industries.length * 28) }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       layout="vertical"
                       data={jobInsights.industries.map(([ind, count]) => ({ name: industryLabelMap[ind] || ind, value: count, key: ind }))}
-                      margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
+                      margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                       <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={100} />
                       <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
                         itemStyle={{ color: 'hsl(var(--foreground))' }}
@@ -651,51 +562,96 @@ export default function BrowseJobs() {
             </CardContent>
           </Card>
 
-          {/* Jobs by Experience Level — Vertical bar chart */}
+          {/* Row 1, Col 2 — Jobs by Job Type — Donut chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Open Jobs by Experience Level
+                <Briefcase className="w-4 h-4" />
+                Open Jobs by Job Type
               </CardTitle>
-              <p className="text-sm text-muted-foreground">Seniority mix across open roles</p>
+              <p className="text-sm text-muted-foreground">Permanent, contract, part-time and more</p>
             </CardHeader>
             <CardContent>
-              {jobInsights.experienceLevels.length > 0 ? (
-                <div style={{ height: 240 }}>
+              {jobInsights.jobTypes.length > 0 ? (
+                <div style={{ height: 260 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={jobInsights.experienceLevels.map(([lvl, count]) => ({ name: EXPERIENCE_LEVEL_LABELS[lvl] || lvl, value: count, key: lvl }))}
-                      margin={{ top: 12, right: 8, left: 0, bottom: 4 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} />
-                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <PieChart>
+                      <Pie
+                        data={jobInsights.jobTypes.map(([type, count]) => ({ name: JOB_TYPE_LABELS[type] || type, value: count, key: type }))}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="45%"
+                        innerRadius={45}
+                        outerRadius={75}
+                        paddingAngle={2}
+                        onClick={(d: any) => d?.key && setJobTypeFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        {jobInsights.jobTypes.map((_, i) => (
+                          <Cell key={i} fill={BROWSE_JOBTYPE_COLORS[i % BROWSE_JOBTYPE_COLORS.length]} />
+                        ))}
+                      </Pie>
                       <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
                         itemStyle={{ color: 'hsl(var(--foreground))' }}
-                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
                       />
-                      <Bar
-                        dataKey="value"
-                        fill="#8b5cf6"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={48}
-                        onClick={(d: any) => d?.key && setLevelFilters(new Set([d.key]))}
-                        cursor="pointer"
-                      >
-                        <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                      </Bar>
-                    </BarChart>
+                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                    </PieChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No experience-level data yet.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">No open jobs yet.</p>
               )}
             </CardContent>
           </Card>
 
-          {/* Open Jobs by Location — Horizontal bar chart */}
+          {/* Row 1, Col 3 — Jobs by Workplace — Radial bar chart */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Monitor className="w-4 h-4" />
+                Open Jobs by Workplace
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Office, remote, or hybrid</p>
+            </CardHeader>
+            <CardContent>
+              {jobInsights.workplaces.length > 0 ? (
+                <div style={{ height: 260 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      innerRadius="25%"
+                      outerRadius="95%"
+                      data={jobInsights.workplaces.map(([wp, count], i) => ({
+                        name: WORKPLACE_LABELS[wp] || wp,
+                        value: count,
+                        key: wp,
+                        fill: BROWSE_WORKPLACE_COLORS[i % BROWSE_WORKPLACE_COLORS.length],
+                      }))}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        onClick={(d: any) => d?.key && setWorkplaceFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No open jobs yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Row 2, Col 1 — Open Jobs by Location — Horizontal bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -706,16 +662,16 @@ export default function BrowseJobs() {
             </CardHeader>
             <CardContent>
               {jobInsights.locations.length > 0 ? (
-                <div style={{ height: Math.max(180, jobInsights.locations.length * 32) }}>
+                <div style={{ height: Math.max(220, jobInsights.locations.length * 28) }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       layout="vertical"
                       data={jobInsights.locations.map(([loc, count]) => ({ name: loc, value: count, key: loc }))}
-                      margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
+                      margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                       <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={100} />
                       <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
                         itemStyle={{ color: 'hsl(var(--foreground))' }}
@@ -740,7 +696,51 @@ export default function BrowseJobs() {
             </CardContent>
           </Card>
 
-          {/* Open Jobs by Skill — Vertical bar chart */}
+          {/* Row 2, Col 2 — Jobs by Experience Level — Vertical bar chart */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Open Jobs by Experience Level
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Seniority mix across open roles</p>
+            </CardHeader>
+            <CardContent>
+              {jobInsights.experienceLevels.length > 0 ? (
+                <div style={{ height: 260 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={jobInsights.experienceLevels.map(([lvl, count]) => ({ name: EXPERIENCE_LEVEL_LABELS[lvl] || lvl, value: count, key: lvl }))}
+                      margin={{ top: 12, right: 8, left: 0, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} />
+                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="#8b5cf6"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={40}
+                        onClick={(d: any) => d?.key && setLevelFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No experience-level data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Row 2, Col 3 — Open Jobs by Skill — Vertical bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -751,14 +751,14 @@ export default function BrowseJobs() {
             </CardHeader>
             <CardContent>
               {jobInsights.skills.length > 0 ? (
-                <div style={{ height: 280 }}>
+                <div style={{ height: 260 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={jobInsights.skills.map(([skill, count]) => ({ name: skill, value: count, key: skill }))}
                       margin={{ top: 12, right: 8, left: 0, bottom: 4 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" height={70} />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} angle={-30} textAnchor="end" height={70} />
                       <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
                       <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
@@ -769,7 +769,7 @@ export default function BrowseJobs() {
                         dataKey="value"
                         fill="#10b981"
                         radius={[4, 4, 0, 0]}
-                        maxBarSize={36}
+                        maxBarSize={28}
                         onClick={(d: any) => d?.key && setSkillFilters(new Set([d.key]))}
                         cursor="pointer"
                       >
