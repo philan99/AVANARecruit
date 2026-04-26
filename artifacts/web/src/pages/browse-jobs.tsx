@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check, Monitor, Factory, FileText, BookmarkPlus, Bookmark, Trash2, BarChart3, TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList, Legend,
+  Tooltip as RechartsTooltip, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList, Legend, Treemap,
 } from "recharts";
 import {
   Dialog,
@@ -396,11 +396,17 @@ export default function BrowseJobs() {
       .filter(k => expCounts[k])
       .map(k => [k, expCounts[k]] as [string, number]);
 
+    const skillCounts: Record<string, number> = {};
+    list.forEach(j => (j.skills || []).forEach(s => { if (s) skillCounts[s] = (skillCounts[s] || 0) + 1; }));
+    const skills = Object.entries(skillCounts).sort((a, b) => b[1] - a[1]).slice(0, 10) as [string, number][];
+
     return {
       jobTypes: freq(list.map(j => (j as any).jobType)),
       workplaces: freq(list.map(j => (j as any).workplace)),
       industries: freq(list.map(j => (j as any).industry)),
       experienceLevels,
+      locations: freq(list.map(j => publicLocation(j))),
+      skills,
     };
   }, [allOpenJobs]);
 
@@ -685,6 +691,90 @@ export default function BrowseJobs() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No experience-level data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Open Jobs by Location — Horizontal bar chart */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Open Jobs by Location
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Top hiring cities and regions</p>
+            </CardHeader>
+            <CardContent>
+              {jobInsights.locations.length > 0 ? (
+                <div style={{ height: Math.max(180, jobInsights.locations.length * 32) }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      layout="vertical"
+                      data={jobInsights.locations.map(([loc, count]) => ({ name: loc, value: count, key: loc }))}
+                      margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="#0ea5e9"
+                        radius={[0, 4, 4, 0]}
+                        maxBarSize={22}
+                        onClick={(d: any) => d?.key && setLocationFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No location data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Open Jobs by Skill — Treemap */}
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Most In-Demand Skills
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Top skills employers are asking for</p>
+            </CardHeader>
+            <CardContent>
+              {jobInsights.skills.length > 0 ? (
+                <div style={{ height: 280 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <Treemap
+                      data={jobInsights.skills.map(([skill, count], i) => ({
+                        name: skill,
+                        size: count,
+                        key: skill,
+                        fill: BROWSE_JOBTYPE_COLORS[i % BROWSE_JOBTYPE_COLORS.length],
+                      }))}
+                      dataKey="size"
+                      stroke="hsl(var(--card))"
+                      isAnimationActive={false}
+                      onClick={(d: any) => d?.key && setSkillFilters(new Set([d.key]))}
+                    >
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        formatter={(value: any, _name: any, props: any) => [`${value} jobs`, props?.payload?.name]}
+                      />
+                    </Treemap>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No skill data yet.</p>
               )}
             </CardContent>
           </Card>
