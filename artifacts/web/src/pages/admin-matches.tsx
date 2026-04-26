@@ -106,6 +106,7 @@ export default function AdminMatches() {
         });
 
         setAllMatches(groups);
+        setCollapsedJobs(new Set(groups.map(g => g.jobId)));
 
         const candidateIds = new Set<number>();
         for (const g of groups) {
