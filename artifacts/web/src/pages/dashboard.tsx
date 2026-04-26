@@ -4,7 +4,7 @@ import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, UserCheck, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList } from "recharts";
 import { Link, useLocation } from "wouter";
 
 function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
@@ -27,6 +27,9 @@ function formatLabel(val: string) {
 function topN(arr: [string, number][], n = 8): [string, number][] {
   return arr.sort((a, b) => b[1] - a[1]).slice(0, n);
 }
+
+const JOB_TYPE_COLORS = ["#06b6d4", "#0891b2", "#22d3ee", "#67e8f9", "#0e7490", "#155e75", "#a5f3fc", "#164e63"];
+const WORKPLACE_COLORS = ["#14b8a6", "#0d9488", "#2dd4bf", "#5eead4"];
 
 interface RawJob {
   id: number;
@@ -323,6 +326,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Job Types — Donut chart */}
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -333,10 +337,34 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {insights.jobTypes.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.jobTypes.map(([type, count]) => (
-                  <InsightBar key={type} label={formatLabel(type)} value={count} max={insights.jobTypes[0][1]} color="bg-cyan-500/70" onClick={() => navigate(`/jobs?jobType=${encodeURIComponent(type)}`)} />
-                ))}
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={insights.jobTypes.map(([type, count]) => ({ name: formatLabel(type), value: count, key: type }))}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      stroke="hsl(var(--card))"
+                      strokeWidth={2}
+                      onClick={(d: any) => d?.payload?.key && navigate(`/jobs?jobType=${encodeURIComponent(d.payload.key)}`)}
+                      cursor="pointer"
+                    >
+                      {insights.jobTypes.map((_, i) => (
+                        <Cell key={i} fill={JOB_TYPE_COLORS[i % JOB_TYPE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">No job type data yet.</p>
@@ -344,6 +372,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Workplaces — Radial bar chart */}
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -354,10 +383,34 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {insights.workplaces.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.workplaces.map(([wp, count]) => (
-                  <InsightBar key={wp} label={formatLabel(wp)} value={count} max={insights.workplaces[0][1]} color="bg-teal-500/70" onClick={() => navigate(`/jobs?workplace=${encodeURIComponent(wp)}`)} />
-                ))}
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    data={insights.workplaces.map(([wp, count], i) => ({
+                      name: formatLabel(wp),
+                      value: count,
+                      key: wp,
+                      fill: WORKPLACE_COLORS[i % WORKPLACE_COLORS.length],
+                    }))}
+                    innerRadius="25%"
+                    outerRadius="100%"
+                    startAngle={90}
+                    endAngle={-270}
+                  >
+                    <RadialBar
+                      dataKey="value"
+                      background={{ fill: 'hsl(var(--secondary))' }}
+                      cornerRadius={6}
+                      onClick={(d: any) => d?.key && navigate(`/jobs?workplace=${encodeURIComponent(d.key)}`)}
+                      cursor="pointer"
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+                  </RadialBarChart>
+                </ResponsiveContainer>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">No workplace data yet.</p>
@@ -365,6 +418,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Industries — Horizontal bar chart */}
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -375,10 +429,33 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {insights.jobIndustries.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.jobIndustries.map(([ind, count]) => (
-                  <InsightBar key={ind} label={formatLabel(ind)} value={count} max={insights.jobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate(`/jobs?industry=${encodeURIComponent(ind)}`)} />
-                ))}
+              <div style={{ height: Math.max(180, insights.jobIndustries.length * 32) }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    layout="vertical"
+                    data={insights.jobIndustries.map(([ind, count]) => ({ name: formatLabel(ind), value: count, key: ind }))}
+                    margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill="#f97316"
+                      radius={[0, 4, 4, 0]}
+                      maxBarSize={22}
+                      onClick={(d: any) => d?.key && navigate(`/jobs?industry=${encodeURIComponent(d.key)}`)}
+                      cursor="pointer"
+                    >
+                      <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
@@ -386,6 +463,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Education — Vertical bar chart */}
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -396,10 +474,32 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {insights.educationReqs.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.educationReqs.map(([edu, count]) => (
-                  <InsightBar key={edu} label={edu} value={count} max={insights.educationReqs[0][1]} color="bg-indigo-500/70" onClick={() => navigate(`/jobs?education=${encodeURIComponent(edu)}`)} />
-                ))}
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={insights.educationReqs.map(([edu, count]) => ({ name: edu, value: count, key: edu }))}
+                    margin={{ top: 16, right: 8, left: -20, bottom: 4 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} angle={-15} textAnchor="end" height={60} />
+                    <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill="#6366f1"
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={48}
+                      onClick={(d: any) => d?.key && navigate(`/jobs?education=${encodeURIComponent(d.key)}`)}
+                      cursor="pointer"
+                    >
+                      <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
