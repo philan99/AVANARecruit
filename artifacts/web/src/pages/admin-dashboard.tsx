@@ -309,11 +309,11 @@ export default function AdminDashboard() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-base">Recent Companies</CardTitle>
-              <CardDescription>Latest companies registered on the platform</CardDescription>
+              <CardDescription>Sorted by created date (newest first)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {companies.length > 0 ? companies.slice(0, 12).map((company) => (
+                {companies.length > 0 ? [...companies].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 12).map((company) => (
                   <Link key={company.id} href={`/companies/${company.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
@@ -340,11 +340,11 @@ export default function AdminDashboard() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-base">Recent Jobs</CardTitle>
-              <CardDescription>Latest jobs across the platform</CardDescription>
+              <CardDescription>Sorted by created date (newest first)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {jobs.length > 0 ? jobs.slice(0, 12).map((job) => (
+                {jobs.length > 0 ? [...jobs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 12).map((job) => (
                   <Link key={job.id} href={`/jobs/${job.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
@@ -369,11 +369,11 @@ export default function AdminDashboard() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-base">Recent Candidates</CardTitle>
-              <CardDescription>Latest candidate profiles on the platform</CardDescription>
+              <CardDescription>Sorted by created date (newest first)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {candidates.length > 0 ? candidates.slice(0, 12).map((candidate) => (
+                {candidates.length > 0 ? [...candidates].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 12).map((candidate) => (
                   <Link key={candidate.id} href={`/candidates/${candidate.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
