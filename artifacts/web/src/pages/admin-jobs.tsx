@@ -898,8 +898,9 @@ export default function AdminJobs() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Industry</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Salary</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Matches</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Updated</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -942,13 +943,16 @@ export default function AdminJobs() {
                       <td className="py-2 px-2">
                         <span className="font-mono font-bold text-primary">{job.matchCount}</span>
                       </td>
+                      <td className="py-2 px-2 text-muted-foreground">
+                        {new Date(job.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-2 px-2 text-muted-foreground">
+                        {job.updatedAt ? new Date(job.updatedAt).toLocaleDateString() : "—"}
+                      </td>
                       <td className="py-2 px-2">
                         <Badge variant={job.status === "open" ? "default" : "secondary"} className="text-[8px] uppercase">
                           {job.status}
                         </Badge>
-                      </td>
-                      <td className="py-2 px-2 text-muted-foreground">
-                        {new Date(job.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
