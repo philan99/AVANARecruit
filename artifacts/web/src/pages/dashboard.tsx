@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, UserCheck, Bookmark } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, TrendingUp, UserCheck, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList } from "recharts";
 import { Link, useLocation } from "wouter";
@@ -31,11 +31,21 @@ function topN(arr: [string, number][], n = 8): [string, number][] {
 const JOB_TYPE_COLORS = ["#06b6d4", "#0891b2", "#22d3ee", "#67e8f9", "#0e7490", "#155e75", "#a5f3fc", "#164e63"];
 const WORKPLACE_COLORS = ["#14b8a6", "#0d9488", "#2dd4bf", "#5eead4"];
 
+const EXPERIENCE_ORDER = ["entry", "mid", "senior", "lead", "executive"];
+const EXPERIENCE_LABEL: Record<string, string> = {
+  entry: "Entry-Level",
+  mid: "Mid-Level",
+  senior: "Senior",
+  lead: "Lead",
+  executive: "Executive",
+};
+
 interface RawJob {
   id: number;
   jobType: string | null;
   workplace: string | null;
   industry: string | null;
+  experienceLevel: string | null;
   educationLevel: string | null;
   companyProfileId: number | null;
 }
@@ -126,10 +136,19 @@ export default function Dashboard() {
       return topN(Object.entries(m));
     };
 
+    const experienceCounts: Record<string, number> = {};
+    companyJobs.forEach(j => {
+      const lvl = (j.experienceLevel || "").toLowerCase();
+      if (lvl) experienceCounts[lvl] = (experienceCounts[lvl] || 0) + 1;
+    });
+    const experienceLevels: [string, number][] = EXPERIENCE_ORDER
+      .filter(k => experienceCounts[k])
+      .map(k => [k, experienceCounts[k]]);
+
     return {
       jobTypes: freq(companyJobs.map(j => j.jobType)),
       workplaces: freq(companyJobs.map(j => j.workplace)),
-      jobIndustries: freq(companyJobs.map(j => j.industry)),
+      experienceLevels,
       educationReqs: freq(companyJobs.map(j => j.educationLevel)),
     };
   }, [companyJobs]);
@@ -418,27 +437,27 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Industries — Horizontal bar chart */}
+        {/* Experience Levels — Horizontal bar chart */}
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Factory className="w-4 h-4" />
-              Your Jobs by Industry
+              <TrendingUp className="w-4 h-4" />
+              Your Jobs by Experience Level
             </CardTitle>
-            <CardDescription>Industry sectors your jobs are posted in</CardDescription>
+            <CardDescription>Seniority mix across your job postings</CardDescription>
           </CardHeader>
           <CardContent>
-            {insights.jobIndustries.length > 0 ? (
-              <div style={{ height: Math.max(180, insights.jobIndustries.length * 32) }}>
+            {insights.experienceLevels.length > 0 ? (
+              <div style={{ height: Math.max(180, insights.experienceLevels.length * 38) }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     layout="vertical"
-                    data={insights.jobIndustries.map(([ind, count]) => ({ name: formatLabel(ind), value: count, key: ind }))}
+                    data={insights.experienceLevels.map(([lvl, count]) => ({ name: EXPERIENCE_LABEL[lvl] || formatLabel(lvl), value: count, key: lvl }))}
                     margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                     <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={100} />
                     <RechartsTooltip
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
                       itemStyle={{ color: 'hsl(var(--foreground))' }}
@@ -446,10 +465,10 @@ export default function Dashboard() {
                     />
                     <Bar
                       dataKey="value"
-                      fill="#f97316"
+                      fill="#f59e0b"
                       radius={[0, 4, 4, 0]}
-                      maxBarSize={22}
-                      onClick={(d: any) => d?.key && navigate(`/jobs?industry=${encodeURIComponent(d.key)}`)}
+                      maxBarSize={26}
+                      onClick={(d: any) => d?.key && navigate(`/jobs?experienceLevel=${encodeURIComponent(d.key)}`)}
                       cursor="pointer"
                     >
                       <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
@@ -458,7 +477,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No experience-level data yet.</p>
             )}
           </CardContent>
         </Card>
