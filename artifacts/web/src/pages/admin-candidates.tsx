@@ -14,6 +14,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 import { Users, Search, X, KeyRound, SlidersHorizontal, ChevronDown, Check, MapPin, Briefcase, Building, GraduationCap, Monitor, LayoutGrid, List, LogIn, ShieldCheck, Calendar, ArrowUp, ArrowDown, Download, FlaskConical, RotateCcw } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -429,9 +431,12 @@ export default function AdminCandidates() {
 
   async function handleResetPassword() {
     if (!resetTarget) return;
-    if (newPassword.length < 6) {
-      toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
-      return;
+    {
+      const { ok, failed } = validatePassword(newPassword);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
     }
     if (newPassword !== confirmPassword) {
       toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
@@ -1109,10 +1114,11 @@ export default function AdminCandidates() {
               <Input
                 id="new-password"
                 type="password"
-                placeholder="Minimum 6 characters"
+                placeholder={`Minimum ${PASSWORD_MIN_LENGTH} characters`}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
+              <PasswordStrength password={newPassword} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>

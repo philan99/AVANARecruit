@@ -35,6 +35,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
+import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
+import { PasswordStrength } from "@/components/password-strength";
 import { Building2, X, KeyRound, LogIn, ChevronsUpDown, Check, Building, MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/contexts/role-context";
@@ -222,9 +224,12 @@ export default function AdminCompanies() {
 
   async function handleResetPassword() {
     if (!resetTarget) return;
-    if (newPassword.length < 6) {
-      toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
-      return;
+    {
+      const { ok, failed } = validatePassword(newPassword);
+      if (!ok) {
+        toast({ title: "Password doesn't meet requirements", description: failed[0].label, variant: "destructive" });
+        return;
+      }
     }
     if (newPassword !== confirmPassword) {
       toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
@@ -691,10 +696,11 @@ export default function AdminCompanies() {
               <Input
                 id="new-password"
                 type="password"
-                placeholder="Minimum 6 characters"
+                placeholder={`Minimum ${PASSWORD_MIN_LENGTH} characters`}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
+              <PasswordStrength password={newPassword} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>
