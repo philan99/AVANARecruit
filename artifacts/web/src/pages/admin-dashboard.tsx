@@ -11,7 +11,6 @@ import {
   MapPin,
   BarChart3,
   Monitor,
-  GraduationCap,
   Factory,
   Heart,
 } from "lucide-react";
@@ -703,49 +702,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                Education Requirements (Jobs)
-              </CardTitle>
-              <CardDescription>Education levels required by job postings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topEducationLevels.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topEducationLevels.map(([edu, count]) => (
-                    <InsightBar key={edu} label={edu} value={count} max={insights.topEducationLevels[0][1]} color="bg-indigo-500/70" onClick={() => navigate(`/jobs?education=${encodeURIComponent(edu)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                Candidate Qualifications
-              </CardTitle>
-              <CardDescription>Professional qualifications held by candidates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topQualifications.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topQualifications.map(([qual, count]) => (
-                    <InsightBar key={qual} label={qual} value={count} max={insights.topQualifications[0][1]} color="bg-sky-500/70" onClick={() => navigate(`/candidates?search=${encodeURIComponent(qual)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No qualification data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
     </div>
