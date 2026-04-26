@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useGetDashboardStats, useGetRecentMatches, useGetSkillDemand, useGetTopCandidates, getGetDashboardStatsQueryKey } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, Heart, UserCheck, Bookmark } from "lucide-react";
+import { Users, Briefcase, Network, Target, ArrowUpRight, Building2, Plus, Monitor, GraduationCap, Factory, UserCheck, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Link, useLocation } from "wouter";
@@ -35,15 +35,6 @@ interface RawJob {
   industry: string | null;
   educationLevel: string | null;
   companyProfileId: number | null;
-}
-
-interface RawCandidate {
-  id: number;
-  preferredJobTypes: string[];
-  preferredWorkplaces: string[];
-  preferredIndustries: string[];
-  qualifications: string[];
-  education: string;
 }
 
 function DashboardLogo({ profile }: { profile?: { name: string; logoUrl?: string | null } | null }) {
@@ -100,7 +91,6 @@ export default function Dashboard() {
 
   const basePath = `${import.meta.env.BASE_URL}api`.replace(/\/\//g, "/");
   const [companyJobs, setCompanyJobs] = useState<RawJob[]>([]);
-  const [allCandidates, setAllCandidates] = useState<RawCandidate[]>([]);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [bookmarkCount, setBookmarkCount] = useState(0);
 
@@ -108,14 +98,12 @@ export default function Dashboard() {
     if (!companyProfileId) return;
     async function fetchInsightData() {
       try {
-        const [jobsRes, candidatesRes, applicantsRes, bookmarksRes] = await Promise.all([
+        const [jobsRes, applicantsRes, bookmarksRes] = await Promise.all([
           fetch(`${basePath}/jobs?companyProfileId=${companyProfileId}`),
-          fetch(`${basePath}/candidates`),
           fetch(`${basePath}/dashboard/applicants?companyProfileId=${companyProfileId}&limit=10`),
           fetch(`${basePath}/companies/${companyProfileId}/bookmarks`),
         ]);
         if (jobsRes.ok) setCompanyJobs(await jobsRes.json());
-        if (candidatesRes.ok) setAllCandidates(await candidatesRes.json());
         if (applicantsRes.ok) setApplicants(await applicantsRes.json());
         if (bookmarksRes.ok) {
           const bookmarks = await bookmarksRes.json();
@@ -134,23 +122,14 @@ export default function Dashboard() {
       arr.forEach(v => { if (v) m[v] = (m[v] || 0) + 1; });
       return topN(Object.entries(m));
     };
-    const freqFlat = (arr: string[][]) => {
-      const m: Record<string, number> = {};
-      arr.forEach(a => (a || []).forEach(v => { if (v) m[v] = (m[v] || 0) + 1; }));
-      return topN(Object.entries(m));
-    };
 
     return {
       jobTypes: freq(companyJobs.map(j => j.jobType)),
       workplaces: freq(companyJobs.map(j => j.workplace)),
       jobIndustries: freq(companyJobs.map(j => j.industry)),
       educationReqs: freq(companyJobs.map(j => j.educationLevel)),
-      prefJobTypes: freqFlat(allCandidates.map(c => c.preferredJobTypes)),
-      prefWorkplaces: freqFlat(allCandidates.map(c => c.preferredWorkplaces)),
-      prefIndustries: freqFlat(allCandidates.map(c => c.preferredIndustries)),
-      candidateEducation: freq(allCandidates.map(c => c.education)),
     };
-  }, [companyJobs, allCandidates]);
+  }, [companyJobs]);
 
   if (!profile || statsLoading) {
     return <div className="p-8 flex justify-center text-muted-foreground font-mono text-sm">Loading telemetry...</div>;
@@ -368,29 +347,6 @@ export default function Dashboard() {
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Candidate Preferred Job Types
-            </CardTitle>
-            <CardDescription>What candidates in the talent pool are looking for</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {insights.prefJobTypes.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.prefJobTypes.map(([type, count]) => (
-                  <InsightBar key={type} label={formatLabel(type)} value={count} max={insights.prefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate(`/candidates?jobType=${encodeURIComponent(type)}`)} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
               <Monitor className="w-4 h-4" />
               Your Jobs by Workplace
             </CardTitle>
@@ -409,29 +365,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Candidate Preferred Workplaces
-            </CardTitle>
-            <CardDescription>Where candidates in the talent pool want to work</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {insights.prefWorkplaces.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.prefWorkplaces.map(([wp, count]) => (
-                  <InsightBar key={wp} label={formatLabel(wp)} value={count} max={insights.prefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate(`/candidates?workplace=${encodeURIComponent(wp)}`)} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -456,29 +389,6 @@ export default function Dashboard() {
         <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Candidate Preferred Industries
-            </CardTitle>
-            <CardDescription>Industries candidates in the talent pool are interested in</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {insights.prefIndustries.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.prefIndustries.map(([ind, count]) => (
-                  <InsightBar key={ind} label={formatLabel(ind)} value={count} max={insights.prefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
               <GraduationCap className="w-4 h-4" />
               Your Education Requirements
             </CardTitle>
@@ -489,27 +399,6 @@ export default function Dashboard() {
               <div className="space-y-2.5">
                 {insights.educationReqs.map(([edu, count]) => (
                   <InsightBar key={edu} label={edu} value={count} max={insights.educationReqs[0][1]} color="bg-indigo-500/70" onClick={() => navigate(`/jobs?education=${encodeURIComponent(edu)}`)} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" />
-              Candidate Education Levels
-            </CardTitle>
-            <CardDescription>Qualifications held by candidates in the talent pool</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {insights.candidateEducation.length > 0 ? (
-              <div className="space-y-2.5">
-                {insights.candidateEducation.map(([edu, count]) => (
-                  <InsightBar key={edu} label={edu} value={count} max={insights.candidateEducation[0][1]} color="bg-sky-500/70" onClick={() => navigate(`/candidates?education=${encodeURIComponent(edu)}`)} />
                 ))}
               </div>
             ) : (

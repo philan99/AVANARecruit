@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useListCandidates, getListCandidatesQueryKey } from "@workspace/api-client-react";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,25 @@ import { publicLocation } from "@/lib/display-location";
 import {
   Users, Search, MapPin, Mail, X, LayoutGrid, List,
   SlidersHorizontal, ChevronDown, Check, Briefcase,
-  Monitor, GraduationCap, Factory, Clock, Bookmark, Plus,
+  Monitor, GraduationCap, Factory, Clock, Bookmark, Plus, Heart, BarChart3,
 } from "lucide-react";
+
+function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return (
+    <div className={`flex items-center gap-3 ${onClick ? "cursor-pointer hover:bg-secondary/40 rounded-md p-1 -m-1 transition-colors" : ""}`} onClick={onClick}>
+      <span className="text-xs text-muted-foreground w-28 truncate shrink-0">{label}</span>
+      <div className="flex-1 h-5 bg-secondary/60 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs font-mono font-semibold w-8 text-right shrink-0">{value}</span>
+    </div>
+  );
+}
+
+function topN(arr: [string, number][], n = 8): [string, number][] {
+  return arr.sort((a, b) => b[1] - a[1]).slice(0, n);
+}
 
 function MultiSelectDropdown({
   label,
@@ -353,6 +370,27 @@ export default function CandidatesList() {
 
   const hasActiveFilters = searchQuery || activeFilterCount > 0;
 
+  const candidateInsights = useMemo(() => {
+    const freq = (arr: (string | null | undefined)[]) => {
+      const m: Record<string, number> = {};
+      arr.forEach(v => { if (v) m[v] = (m[v] || 0) + 1; });
+      return topN(Object.entries(m));
+    };
+    const freqFlat = (arr: (string[] | null | undefined)[]) => {
+      const m: Record<string, number> = {};
+      arr.forEach(a => (a || []).forEach(v => { if (v) m[v] = (m[v] || 0) + 1; }));
+      return topN(Object.entries(m));
+    };
+    return {
+      prefJobTypes: freqFlat(allCandidates.map(c => (c as any).preferredJobTypes)),
+      prefWorkplaces: freqFlat(allCandidates.map(c => (c as any).preferredWorkplaces)),
+      prefIndustries: freqFlat(allCandidates.map(c => (c as any).preferredIndustries)),
+      candidateEducation: freq(allCandidates.map(c => c.education)),
+    };
+  }, [allCandidates]);
+
+  const [showInsights, setShowInsights] = useState(false);
+
   function clearFilters() {
     setSearchQuery("");
     setStatusFilters(new Set());
@@ -380,6 +418,137 @@ export default function CandidatesList() {
           </Button>
         </Link>
       </div>
+
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowInsights(s => !s)}
+          className="gap-2"
+          data-testid="button-toggle-insights"
+        >
+          <BarChart3 className="w-4 h-4" />
+          {showInsights ? "Hide candidate insights" : "Show candidate insights"}
+          <ChevronDown className={`w-4 h-4 transition-transform ${showInsights ? "rotate-180" : ""}`} />
+        </Button>
+      </div>
+
+      {showInsights && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Job Types
+              </CardTitle>
+              <CardDescription>What candidates in the talent pool are looking for</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {candidateInsights.prefJobTypes.length > 0 ? (
+                <div className="space-y-2.5">
+                  {candidateInsights.prefJobTypes.map(([type, count]) => (
+                    <InsightBar
+                      key={type}
+                      label={formatJobType(type)}
+                      value={count}
+                      max={candidateInsights.prefJobTypes[0][1]}
+                      color="bg-pink-500/70"
+                      onClick={() => setJobTypeFilters(new Set([type]))}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Workplaces
+              </CardTitle>
+              <CardDescription>Where candidates in the talent pool want to work</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {candidateInsights.prefWorkplaces.length > 0 ? (
+                <div className="space-y-2.5">
+                  {candidateInsights.prefWorkplaces.map(([wp, count]) => (
+                    <InsightBar
+                      key={wp}
+                      label={formatWorkplace(wp)}
+                      value={count}
+                      max={candidateInsights.prefWorkplaces[0][1]}
+                      color="bg-rose-500/70"
+                      onClick={() => setWorkplaceFilters(new Set([wp]))}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Candidate Preferred Industries
+              </CardTitle>
+              <CardDescription>Industries candidates in the talent pool are interested in</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {candidateInsights.prefIndustries.length > 0 ? (
+                <div className="space-y-2.5">
+                  {candidateInsights.prefIndustries.map(([ind, count]) => (
+                    <InsightBar
+                      key={ind}
+                      label={formatIndustry(ind)}
+                      value={count}
+                      max={candidateInsights.prefIndustries[0][1]}
+                      color="bg-fuchsia-500/70"
+                      onClick={() => setIndustryFilters(new Set([ind]))}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Candidate Education Levels
+              </CardTitle>
+              <CardDescription>Qualifications held by candidates in the talent pool</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {candidateInsights.candidateEducation.length > 0 ? (
+                <div className="space-y-2.5">
+                  {candidateInsights.candidateEducation.map(([edu, count]) => (
+                    <InsightBar
+                      key={edu}
+                      label={edu}
+                      value={count}
+                      max={candidateInsights.candidateEducation[0][1]}
+                      color="bg-sky-500/70"
+                      onClick={() => setEducationFilters(new Set([edu]))}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
