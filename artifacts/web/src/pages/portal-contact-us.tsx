@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 import {
   Send,
   Mail,
@@ -12,6 +13,7 @@ import {
   FileText,
   Search,
   HelpCircle,
+  ArrowRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -291,6 +293,32 @@ export default function PortalContactUs() {
         </div>
 
         <div className="lg:col-span-2 space-y-6">
+          <Link href="/faq">
+            <a className="block rounded-xl p-5 border bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all cursor-pointer">
+              <div className="flex items-start gap-4">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}
+                >
+                  <HelpCircle className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Browse the FAQ first
+                    </h3>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {isCompany
+                      ? "Quick answers about posting jobs, AI matching, verifications and billing."
+                      : "Quick answers about your profile, matches, applications and verifications."}
+                  </p>
+                </div>
+              </div>
+            </a>
+          </Link>
+
           <div className="rounded-xl p-6 bg-card border">
             <div className="flex items-start gap-4">
               <div

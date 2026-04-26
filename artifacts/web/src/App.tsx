@@ -51,6 +51,7 @@ import HowItWorks from "@/pages/how-it-works";
 import ResetPassword from "@/pages/reset-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import PortalContactUs from "@/pages/portal-contact-us";
+import PortalFAQ from "@/pages/portal-faq";
 import FeatureRequest from "@/pages/feature-request";
 import MySettings from "@/pages/my-settings";
 import TeamMembers from "@/pages/team-members";
@@ -87,6 +88,7 @@ function CompanyRoutes() {
         <Route path="/team" component={TeamMembers} />
         <Route path="/candidate-alerts" component={CompanyCandidateAlerts} />
         <Route path="/contact-us" component={PortalContactUs} />
+        <Route path="/faq" component={PortalFAQ} />
         <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
@@ -115,6 +117,7 @@ function CandidateRoutes() {
         <Route path="/my-settings" component={MySettings} />
         <Route path="/job-alerts" component={CandidateJobAlerts} />
         <Route path="/contact-us" component={PortalContactUs} />
+        <Route path="/faq" component={PortalFAQ} />
         <Route path="/feature-request" component={FeatureRequest} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route component={NotFound} />
