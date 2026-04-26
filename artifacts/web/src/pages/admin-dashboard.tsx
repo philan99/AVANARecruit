@@ -334,6 +334,97 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Companies</CardTitle>
+              <CardDescription>Latest companies registered on the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companies.length > 0 ? companies.slice(0, 5).map((company) => (
+                  <Link key={company.id} href={`/companies/${company.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {formatIndustry(company.industry) || "No industry"} {company.location ? `· ${company.location}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
+                      {new Date(company.createdAt).toLocaleDateString()}
+                    </span>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No companies registered yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Jobs</CardTitle>
+              <CardDescription>Latest jobs across the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
+                  <Link key={job.id} href={`/jobs/${job.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {job.company} · {job.location}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={job.status === "open" ? "default" : "secondary"}
+                      className="text-[9px] uppercase shrink-0 ml-2"
+                    >
+                      {job.status}
+                    </Badge>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recent Candidates</CardTitle>
+              <CardDescription>Latest candidate profiles on the platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
+                  <Link key={candidate.id} href={`/candidates/${candidate.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
+                      </div>
+                    </div>
+                    <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
+                      {candidate.status}
+                    </Badge>
+                  </div></Link>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-card">
             <CardHeader className="pb-3">
@@ -652,97 +743,6 @@ export default function AdminDashboard() {
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No qualification data yet.</p>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Recent Companies</CardTitle>
-              <CardDescription>Latest companies registered on the platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {companies.length > 0 ? companies.slice(0, 5).map((company) => (
-                  <Link key={company.id} href={`/companies/${company.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                        {company.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {formatIndustry(company.industry) || "No industry"} {company.location ? `· ${company.location}` : ""}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                      {new Date(company.createdAt).toLocaleDateString()}
-                    </span>
-                  </div></Link>
-                )) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No companies registered yet.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Recent Jobs</CardTitle>
-              <CardDescription>Latest jobs across the platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
-                  <Link key={job.id} href={`/jobs/${job.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {job.company} · {job.location}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={job.status === "open" ? "default" : "secondary"}
-                      className="text-[9px] uppercase shrink-0 ml-2"
-                    >
-                      {job.status}
-                    </Badge>
-                  </div></Link>
-                )) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No jobs posted yet.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Recent Candidates</CardTitle>
-              <CardDescription>Latest candidate profiles on the platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
-                  <Link key={candidate.id} href={`/candidates/${candidate.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                        {candidate.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{candidate.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{candidate.currentTitle}</p>
-                      </div>
-                    </div>
-                    <Badge variant={candidate.status === "active" ? "default" : "secondary"} className="text-[9px] uppercase shrink-0 ml-2">
-                      {candidate.status}
-                    </Badge>
-                  </div></Link>
-                )) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>
