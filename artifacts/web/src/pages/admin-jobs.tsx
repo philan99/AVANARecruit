@@ -896,9 +896,7 @@ export default function AdminJobs() {
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Type</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Workplace</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Industry</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Education</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Salary</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Skills</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Matches</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-left py-2 px-2 font-medium text-muted-foreground">Created</th>
@@ -936,27 +934,10 @@ export default function AdminJobs() {
                       <td className="py-2 px-2 text-muted-foreground text-[11px]">
                         {job.industry ? formatIndustry(job.industry) : "—"}
                       </td>
-                      <td className="py-2 px-2 text-muted-foreground text-[11px]">
-                        {job.educationLevel || "—"}
-                      </td>
                       <td className="py-2 px-2 text-muted-foreground font-mono">
                         {job.salaryMin || job.salaryMax
                           ? `£${(job.salaryMin || 0).toLocaleString()} - £${(job.salaryMax || 0).toLocaleString()}`
                           : "—"}
-                      </td>
-                      <td className="py-2 px-2">
-                        <div className="flex flex-wrap gap-1">
-                          {job.skills.slice(0, 2).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-[8px] px-1 py-0">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {job.skills.length > 2 && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0">
-                              +{job.skills.length - 2}
-                            </Badge>
-                          )}
-                        </div>
                       </td>
                       <td className="py-2 px-2">
                         <span className="font-mono font-bold text-primary">{job.matchCount}</span>
