@@ -7,19 +7,7 @@ import {
   Building2,
   Users,
   Briefcase,
-  TrendingUp,
-  BarChart3,
-  Heart,
 } from "lucide-react";
-
-const JOB_TYPE_LABELS: Record<string, string> = {
-  permanent_full_time: "Permanent (Full Time)", contract: "Contract",
-  fixed_term_contract: "Fixed Term Contract", part_time: "Part-time", temporary: "Temporary",
-};
-
-function formatWorkplaceLabel(val: string) {
-  return val.charAt(0).toUpperCase() + val.slice(1);
-}
 
 interface CompanyProfile {
   id: number;
@@ -72,19 +60,6 @@ interface Job {
   status: string;
   matchCount: number;
   createdAt: string;
-}
-
-function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className={`flex items-center gap-3 ${onClick ? "cursor-pointer hover:bg-secondary/40 rounded-md p-1 -m-1 transition-colors" : ""}`} onClick={onClick}>
-      <span className="text-xs text-muted-foreground w-28 truncate shrink-0">{label}</span>
-      <div className="flex-1 h-5 bg-secondary/60 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-xs font-mono font-semibold w-8 text-right shrink-0">{value}</span>
-    </div>
-  );
 }
 
 export default function AdminDashboard() {
@@ -338,7 +313,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {companies.length > 0 ? companies.slice(0, 5).map((company) => (
+                {companies.length > 0 ? companies.slice(0, 12).map((company) => (
                   <Link key={company.id} href={`/companies/${company.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
@@ -369,7 +344,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {jobs.length > 0 ? jobs.slice(0, 5).map((job) => (
+                {jobs.length > 0 ? jobs.slice(0, 12).map((job) => (
                   <Link key={job.id} href={`/jobs/${job.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
@@ -398,7 +373,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {candidates.length > 0 ? candidates.slice(0, 5).map((candidate) => (
+                {candidates.length > 0 ? candidates.slice(0, 12).map((candidate) => (
                   <Link key={candidate.id} href={`/candidates/${candidate.id}`}><div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 cursor-pointer hover:bg-secondary/80 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
@@ -417,129 +392,6 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground text-center py-4">No candidates registered yet.</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Top Skills (Candidates)
-              </CardTitle>
-              <CardDescription>Most common skills across candidate profiles</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topCandidateSkills.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topCandidateSkills.map(([skill, count]) => (
-                    <InsightBar
-                      key={skill}
-                      label={skill}
-                      value={count}
-                      max={insights.topCandidateSkills[0][1]}
-                      color="bg-primary/70"
-                      onClick={() => navigate(`/candidates?skill=${encodeURIComponent(skill)}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No skill data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Top Skills (Jobs)
-              </CardTitle>
-              <CardDescription>Most requested skills in job postings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topJobSkills.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topJobSkills.map(([skill, count]) => (
-                    <InsightBar
-                      key={skill}
-                      label={skill}
-                      value={count}
-                      max={insights.topJobSkills[0][1]}
-                      color="bg-blue-500/70"
-                      onClick={() => navigate(`/jobs?search=${encodeURIComponent(skill)}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No skill data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Candidate Preferred Job Types
-              </CardTitle>
-              <CardDescription>What candidates are looking for</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topPrefJobTypes.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topPrefJobTypes.map(([type, count]) => (
-                    <InsightBar key={type} label={JOB_TYPE_LABELS[type] || type} value={count} max={insights.topPrefJobTypes[0][1]} color="bg-pink-500/70" onClick={() => navigate(`/candidates?jobType=${encodeURIComponent(type)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Candidate Preferred Workplaces
-              </CardTitle>
-              <CardDescription>Where candidates want to work</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topPrefWorkplaces.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topPrefWorkplaces.map(([wp, count]) => (
-                    <InsightBar key={wp} label={formatWorkplaceLabel(wp)} value={count} max={insights.topPrefWorkplaces[0][1]} color="bg-rose-500/70" onClick={() => navigate(`/candidates?workplace=${encodeURIComponent(wp)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Candidate Preferred Industries
-              </CardTitle>
-              <CardDescription>Industries candidates are interested in</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topPrefIndustries.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topPrefIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={ind === "Unspecified" ? ind : formatIndustry(ind)} value={count} max={insights.topPrefIndustries[0][1]} color="bg-fuchsia-500/70" onClick={() => navigate(`/candidates?industry=${encodeURIComponent(ind)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-              )}
             </CardContent>
           </Card>
         </div>
