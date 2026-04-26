@@ -524,48 +524,6 @@ export default function CandidateDashboard() {
             </CardContent>
           </Card>
         )}
-
-        {matches && matches.length > 0 ? (
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Score Distribution</CardTitle>
-              <CardDescription>How your matches break down by score</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={scoreDistribution} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="range" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={60} />
-                  <RechartsTooltip
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                  />
-                  <Bar
-                    dataKey="count"
-                    name="Matches"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={30}
-                    cursor="pointer"
-                    onClick={(data: any) => {
-                      if (data?.rangeKey) navigate(`/my-matches`);
-                    }}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="bg-card flex flex-col items-center justify-center">
-            <CardContent className="text-center py-12">
-              <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground mb-1">Score Insights</p>
-              <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
-                Score distribution will appear here once you have matches.
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       <Card className="bg-card">
