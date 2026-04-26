@@ -8,10 +8,7 @@ import {
   Users,
   Briefcase,
   TrendingUp,
-  MapPin,
   BarChart3,
-  Monitor,
-  Factory,
   Heart,
 } from "lucide-react";
 
@@ -486,115 +483,6 @@ export default function AdminDashboard() {
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                Industries
-              </CardTitle>
-              <CardDescription>Company distribution by industry</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topIndustries.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topIndustries.map(([ind, count]) => (
-                    <InsightBar
-                      key={ind}
-                      label={ind === "Unspecified" ? ind : formatIndustry(ind)}
-                      value={count}
-                      max={insights.topIndustries[0][1]}
-                      color="bg-emerald-500/70"
-                      onClick={() => navigate(`/companies?industry=${encodeURIComponent(ind)}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Job Locations
-              </CardTitle>
-              <CardDescription>Where jobs are being posted</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topJobLocations.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topJobLocations.map(([loc, count]) => (
-                    <InsightBar
-                      key={loc}
-                      label={loc}
-                      value={count}
-                      max={insights.topJobLocations[0][1]}
-                      color="bg-amber-500/70"
-                      onClick={() => navigate(`/jobs?location=${encodeURIComponent(loc)}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No location data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Experience Levels
-              </CardTitle>
-              <CardDescription>Job distribution by seniority</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {Object.keys(insights.levelFreq).length > 0 ? (
-                <div className="space-y-2.5">
-                  {Object.entries(insights.levelFreq)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([level, count]) => (
-                      <InsightBar
-                        key={level}
-                        label={level.charAt(0).toUpperCase() + level.slice(1)}
-                        value={count}
-                        max={Object.values(insights.levelFreq).reduce((a, b) => Math.max(a, b), 0)}
-                        color="bg-violet-500/70"
-                        onClick={() => navigate(`/jobs?level=${encodeURIComponent(level)}`)}
-                      />
-                    ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No level data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Jobs by Type
-              </CardTitle>
-              <CardDescription>Distribution of job postings by employment type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topJobTypes.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topJobTypes.map(([type, count]) => (
-                    <InsightBar key={type} label={JOB_TYPE_LABELS[type] || type} value={count} max={insights.topJobTypes[0][1]} color="bg-cyan-500/70" onClick={() => navigate(`/jobs?jobType=${encodeURIComponent(type)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No job type data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
                 <Heart className="w-4 h-4" />
                 Candidate Preferred Job Types
               </CardTitle>
@@ -609,29 +497,6 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Monitor className="w-4 h-4" />
-                Jobs by Workplace
-              </CardTitle>
-              <CardDescription>Office, remote, and hybrid job distribution</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topWorkplaces.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topWorkplaces.map(([wp, count]) => (
-                    <InsightBar key={wp} label={formatWorkplaceLabel(wp)} value={count} max={insights.topWorkplaces[0][1]} color="bg-teal-500/70" onClick={() => navigate(`/jobs?workplace=${encodeURIComponent(wp)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No workplace data yet.</p>
               )}
             </CardContent>
           </Card>
@@ -653,29 +518,6 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Factory className="w-4 h-4" />
-                Jobs by Industry
-              </CardTitle>
-              <CardDescription>Industry sectors with the most job postings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {insights.topJobIndustries.length > 0 ? (
-                <div className="space-y-2.5">
-                  {insights.topJobIndustries.map(([ind, count]) => (
-                    <InsightBar key={ind} label={ind === "Unspecified" ? ind : formatIndustry(ind)} value={count} max={insights.topJobIndustries[0][1]} color="bg-orange-500/70" onClick={() => navigate(`/jobs?industry=${encodeURIComponent(ind)}`)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No industry data yet.</p>
               )}
             </CardContent>
           </Card>
