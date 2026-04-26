@@ -12,6 +12,13 @@ import {
   SlidersHorizontal, ChevronDown, Check, Briefcase,
   Monitor, GraduationCap, Factory, Clock, Bookmark, Plus, Heart, BarChart3,
 } from "lucide-react";
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList, Legend,
+} from "recharts";
+
+const PREF_JOBTYPE_COLORS = ["#ec4899", "#db2777", "#f472b6", "#f9a8d4", "#be185d", "#9d174d", "#fbcfe8", "#831843"];
+const PREF_WORKPLACE_COLORS = ["#f43f5e", "#e11d48", "#fb7185", "#fda4af"];
 
 function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
@@ -436,6 +443,7 @@ export default function CandidatesList() {
 
       {showInsights && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Preferred Job Types — Donut chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -446,17 +454,32 @@ export default function CandidatesList() {
             </CardHeader>
             <CardContent>
               {candidateInsights.prefJobTypes.length > 0 ? (
-                <div className="space-y-2.5">
-                  {candidateInsights.prefJobTypes.map(([type, count]) => (
-                    <InsightBar
-                      key={type}
-                      label={formatJobType(type)}
-                      value={count}
-                      max={candidateInsights.prefJobTypes[0][1]}
-                      color="bg-pink-500/70"
-                      onClick={() => setJobTypeFilters(new Set([type]))}
-                    />
-                  ))}
+                <div style={{ height: 240 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={candidateInsights.prefJobTypes.map(([type, count]) => ({ name: formatJobType(type), value: count, key: type }))}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={85}
+                        paddingAngle={2}
+                        onClick={(d: any) => d?.key && setJobTypeFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        {candidateInsights.prefJobTypes.map((_, i) => (
+                          <Cell key={i} fill={PREF_JOBTYPE_COLORS[i % PREF_JOBTYPE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
@@ -464,6 +487,7 @@ export default function CandidatesList() {
             </CardContent>
           </Card>
 
+          {/* Preferred Workplaces — Radial bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -474,17 +498,33 @@ export default function CandidatesList() {
             </CardHeader>
             <CardContent>
               {candidateInsights.prefWorkplaces.length > 0 ? (
-                <div className="space-y-2.5">
-                  {candidateInsights.prefWorkplaces.map(([wp, count]) => (
-                    <InsightBar
-                      key={wp}
-                      label={formatWorkplace(wp)}
-                      value={count}
-                      max={candidateInsights.prefWorkplaces[0][1]}
-                      color="bg-rose-500/70"
-                      onClick={() => setWorkplaceFilters(new Set([wp]))}
-                    />
-                  ))}
+                <div style={{ height: 240 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      innerRadius="25%"
+                      outerRadius="95%"
+                      data={candidateInsights.prefWorkplaces.map(([wp, count], i) => ({
+                        name: formatWorkplace(wp),
+                        value: count,
+                        key: wp,
+                        fill: PREF_WORKPLACE_COLORS[i % PREF_WORKPLACE_COLORS.length],
+                      }))}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        onClick={(d: any) => d?.key && setWorkplaceFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
@@ -492,6 +532,7 @@ export default function CandidatesList() {
             </CardContent>
           </Card>
 
+          {/* Preferred Industries — Horizontal bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -502,17 +543,33 @@ export default function CandidatesList() {
             </CardHeader>
             <CardContent>
               {candidateInsights.prefIndustries.length > 0 ? (
-                <div className="space-y-2.5">
-                  {candidateInsights.prefIndustries.map(([ind, count]) => (
-                    <InsightBar
-                      key={ind}
-                      label={formatIndustry(ind)}
-                      value={count}
-                      max={candidateInsights.prefIndustries[0][1]}
-                      color="bg-fuchsia-500/70"
-                      onClick={() => setIndustryFilters(new Set([ind]))}
-                    />
-                  ))}
+                <div style={{ height: Math.max(180, candidateInsights.prefIndustries.length * 32) }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      layout="vertical"
+                      data={candidateInsights.prefIndustries.map(([ind, count]) => ({ name: formatIndustry(ind), value: count, key: ind }))}
+                      margin={{ top: 4, right: 28, left: 8, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={120} />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="#d946ef"
+                        radius={[0, 4, 4, 0]}
+                        maxBarSize={22}
+                        onClick={(d: any) => d?.key && setIndustryFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No preference data yet.</p>
@@ -520,6 +577,7 @@ export default function CandidatesList() {
             </CardContent>
           </Card>
 
+          {/* Education — Vertical bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -530,17 +588,32 @@ export default function CandidatesList() {
             </CardHeader>
             <CardContent>
               {candidateInsights.candidateEducation.length > 0 ? (
-                <div className="space-y-2.5">
-                  {candidateInsights.candidateEducation.map(([edu, count]) => (
-                    <InsightBar
-                      key={edu}
-                      label={edu}
-                      value={count}
-                      max={candidateInsights.candidateEducation[0][1]}
-                      color="bg-sky-500/70"
-                      onClick={() => setEducationFilters(new Set([edu]))}
-                    />
-                  ))}
+                <div style={{ height: 240 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={candidateInsights.candidateEducation.map(([edu, count]) => ({ name: edu, value: count, key: edu }))}
+                      margin={{ top: 12, right: 8, left: 0, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} angle={-15} textAnchor="end" height={50} />
+                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
+                        itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="#0ea5e9"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={48}
+                        onClick={(d: any) => d?.key && setEducationFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">No education data yet.</p>
