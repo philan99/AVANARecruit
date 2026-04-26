@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PasswordStrength } from "@/components/password-strength";
 import { Link, useLocation } from "wouter";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
+import { useIndustries } from "@/hooks/use-industries";
 
 type SignUpRole = "company" | "candidate";
 
@@ -67,7 +68,8 @@ export default function RoleSelect() {
   const [forgotSent, setForgotSent] = useState(false);
   const [loginErrorMsg, setLoginErrorMsg] = useState<string | null>(null);
   const [signupRole, setSignupRole] = useState<SignUpRole | null>(null);
-  const [companyForm, setCompanyForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [companyForm, setCompanyForm] = useState({ name: "", industry: "", email: "", password: "", confirmPassword: "" });
+  const { data: industries = [] } = useIndustries();
   const [candidateForm, setCandidateForm] = useState({ name: "", email: "", phoneDialCode: "+44", phoneNumber: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [showCompanyPassword, setShowCompanyPassword] = useState(false);
@@ -90,6 +92,10 @@ export default function RoleSelect() {
       toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
+    if (!companyForm.industry) {
+      toast({ title: "Please select an industry", variant: "destructive" });
+      return;
+    }
     if (companyForm.password !== companyForm.confirmPassword) {
       toast({ title: "Passwords do not match", variant: "destructive" });
       return;
@@ -103,7 +109,7 @@ export default function RoleSelect() {
       const res = await fetch(`${basePath}/company-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: companyForm.name.trim(), email: companyForm.email.trim(), password: companyForm.password }),
+        body: JSON.stringify({ name: companyForm.name.trim(), industry: companyForm.industry, email: companyForm.email.trim(), password: companyForm.password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -1010,6 +1016,19 @@ export default function RoleSelect() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
                     <Input placeholder="Acme Inc." value={companyForm.name} onChange={(e) => setCompanyForm(f => ({ ...f, name: e.target.value }))} style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Industry <span style={{ color: "#ef4444" }}>*</span></label>
+                    <Select value={companyForm.industry} onValueChange={(v) => setCompanyForm(f => ({ ...f, industry: v }))}>
+                      <SelectTrigger style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", color: companyForm.industry ? "#1a2035" : "#9ca3af" }} data-testid="select-signup-industry">
+                        <SelectValue placeholder="Select your industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {industries.map((ind) => (
+                          <SelectItem key={ind.value} value={ind.value}>{ind.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Email <span style={{ color: "#ef4444" }}>*</span></label>

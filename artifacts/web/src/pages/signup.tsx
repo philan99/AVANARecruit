@@ -13,7 +13,6 @@ import {
 
 import { useRole, type UserRole } from "@/contexts/role-context";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
-import { useIndustries } from "@/hooks/use-industries";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
@@ -42,13 +41,10 @@ export default function SignUp() {
 
   const [companyForm, setCompanyForm] = useState({
     name: "",
-    industry: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-
-  const { data: industries = [] } = useIndustries();
 
   const [candidateForm, setCandidateForm] = useState({
     name: "",
@@ -66,10 +62,6 @@ export default function SignUp() {
     e.preventDefault();
     if (!companyForm.name.trim() || !companyForm.email.trim() || !companyForm.password) {
       toast({ title: "All fields are required", variant: "destructive" });
-      return;
-    }
-    if (!companyForm.industry) {
-      toast({ title: "Please select an industry", variant: "destructive" });
       return;
     }
     {
@@ -90,7 +82,6 @@ export default function SignUp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: companyForm.name.trim(),
-          industry: companyForm.industry,
           email: companyForm.email.trim(),
           password: companyForm.password,
         }),
@@ -269,25 +260,6 @@ export default function SignUp() {
                     className="bg-card"
                     required
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Industry <span className="text-destructive">*</span>
-                  </label>
-                  <Select
-                    value={companyForm.industry}
-                    onValueChange={(v) => setCompanyForm(f => ({ ...f, industry: v }))}
-                  >
-                    <SelectTrigger className="bg-card" data-testid="select-industry">
-                      <SelectValue placeholder="Select your industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {industries.map((ind) => (
-                        <SelectItem key={ind.value} value={ind.value}>{ind.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 <div className="space-y-2">
