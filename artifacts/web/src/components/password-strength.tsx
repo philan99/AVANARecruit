@@ -12,20 +12,24 @@ const STRENGTH_COLORS = ["#9ca3af", "#ef4444", "#f59e0b", "#eab308", "#84cc16", 
 export function PasswordStrength({ password, className = "" }: Props) {
   const score = passwordStrengthScore(password);
   const pct = (score / PASSWORD_RULES.length) * 100;
-  if (!password) return null;
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, backgroundColor: STRENGTH_COLORS[score] }}
-          />
+      {password && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${pct}%`, backgroundColor: STRENGTH_COLORS[score] }}
+            />
+          </div>
+          <span className="text-[11px] font-medium" style={{ color: STRENGTH_COLORS[score] }}>
+            {STRENGTH_LABELS[score]}
+          </span>
         </div>
-        <span className="text-[11px] font-medium" style={{ color: STRENGTH_COLORS[score] }}>
-          {STRENGTH_LABELS[score]}
-        </span>
-      </div>
+      )}
+      {!password && (
+        <p className="text-[11px] font-medium text-muted-foreground">Your password must include:</p>
+      )}
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
         {PASSWORD_RULES.map((rule) => {
           const passed = rule.test(password);
