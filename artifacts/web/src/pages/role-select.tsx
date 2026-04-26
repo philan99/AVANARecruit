@@ -28,6 +28,7 @@ const PHONE_CODES = [
   { code: "+27", flag: "🇿🇦" }, { code: "+55", flag: "🇧🇷" }, { code: "+52", flag: "🇲🇽" },
 ];
 import { useToast } from "@/hooks/use-toast";
+import { PasswordStrength } from "@/components/password-strength";
 import { Link, useLocation } from "wouter";
 import { useCreateCandidate, useCreateCompanyProfile } from "@workspace/api-client-react";
 
@@ -1022,6 +1023,7 @@ export default function RoleSelect() {
                         {showCompanyPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    <PasswordStrength password={companyForm.password} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
@@ -1085,6 +1087,7 @@ export default function RoleSelect() {
                         {showCandidatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    <PasswordStrength password={candidateForm.password} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" style={{ color: "#1a2035" }}>Confirm Password <span style={{ color: "#ef4444" }}>*</span></label>
