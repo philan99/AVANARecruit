@@ -411,54 +411,50 @@ export default function CandidateDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span>Recent Opportunities</span>
-              <Link href="/browse-jobs" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
-                Browse all <ArrowUpRight className="w-3 h-3 ml-1" />
-              </Link>
-            </CardTitle>
-            <CardDescription>Latest open positions on the platform</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {openJobs && openJobs.length > 0 ? openJobs.slice(0, 5).map((job) => (
-                <Link key={job.id} href={`/jobs/${job.id}`}>
-                  <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
-                    <div className="overflow-hidden flex-1">
-                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                        <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(job.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
-                        {job.title}
-                      </p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <p className="text-xs text-muted-foreground truncate flex items-center">
-                          <Building className="w-3 h-3 mr-1 shrink-0" />
-                          {job.company}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate flex items-center">
-                          <MapPin className="w-3 h-3 mr-1 shrink-0" />
-                          {job.location}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] uppercase shrink-0 ml-2">
-                      {job.experienceLevel}
-                    </Badge>
-                  </div>
-                </Link>
-              )) : (
-                <div className="text-sm text-muted-foreground text-center py-8">
-                  <Briefcase className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-                  No open positions at the moment.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {matches && matches.length > 0 ? (
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Score Distribution</CardTitle>
+              <CardDescription>How your matches break down by score</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={scoreDistribution} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="range" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={60} />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    name="Matches"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={30}
+                    cursor="pointer"
+                    onClick={(data: any) => {
+                      if (data?.rangeKey) navigate(`/my-matches`);
+                    }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card flex flex-col items-center justify-center">
+            <CardContent className="text-center py-12">
+              <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">Score Insights</p>
+              <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
+                Score distribution will appear here once you have matches.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {skillDemandData.length > 0 ? (
           <Card className="bg-card">
             <CardHeader>
@@ -571,6 +567,52 @@ export default function CandidateDashboard() {
           </Card>
         )}
       </div>
+
+      <Card className="bg-card">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center justify-between">
+            <span>Recent Opportunities</span>
+            <Link href="/browse-jobs" className="text-xs font-normal text-muted-foreground hover:text-primary flex items-center">
+              Browse all <ArrowUpRight className="w-3 h-3 ml-1" />
+            </Link>
+          </CardTitle>
+          <CardDescription>Latest open positions on the platform</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {openJobs && openJobs.length > 0 ? openJobs.slice(0, 5).map((job) => (
+              <Link key={job.id} href={`/jobs/${job.id}`}>
+                <div className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-transparent hover:border-border transition-colors cursor-pointer">
+                  <div className="overflow-hidden flex-1">
+                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                      <Heart className={`w-3.5 h-3.5 shrink-0 ${favouriteJobIds.has(job.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                      {job.title}
+                    </p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <p className="text-xs text-muted-foreground truncate flex items-center">
+                        <Building className="w-3 h-3 mr-1 shrink-0" />
+                        {job.company}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate flex items-center">
+                        <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                        {job.location}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] uppercase shrink-0 ml-2">
+                    {job.experienceLevel}
+                  </Badge>
+                </div>
+              </Link>
+            )) : (
+              <div className="text-sm text-muted-foreground text-center py-8">
+                <Briefcase className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                No open positions at the moment.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
     </div>
   );
