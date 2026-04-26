@@ -1,4 +1,5 @@
-import { useState, KeyboardEvent, useRef } from "react";
+import { useState, KeyboardEvent, useRef, useEffect } from "react";
+import { formatIndustry } from "@/lib/industries";
 import { useLocation } from "wouter";
 import { useCreateJob, getListJobsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -197,6 +198,15 @@ export default function CreateJob() {
       idealCandidateUseInScore: true,
     },
   });
+
+  useEffect(() => {
+    if (companyProfile?.industry) {
+      const cur = form.getValues("industry");
+      if (cur !== companyProfile.industry) {
+        form.setValue("industry", companyProfile.industry, { shouldValidate: true });
+      }
+    }
+  }, [companyProfile?.industry, form]);
 
   async function handleAiDraft() {
     if (!aiReady) {
@@ -689,41 +699,18 @@ export default function CreateJob() {
                   <FormField control={form.control} name="industry" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Industry <span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="accounting_finance">Accounting & Finance</SelectItem>
-                          <SelectItem value="agriculture">Agriculture</SelectItem>
-                          <SelectItem value="automotive">Automotive</SelectItem>
-                          <SelectItem value="banking">Banking</SelectItem>
-                          <SelectItem value="construction">Construction</SelectItem>
-                          <SelectItem value="consulting">Consulting</SelectItem>
-                          <SelectItem value="creative_design">Creative & Design</SelectItem>
-                          <SelectItem value="education">Education</SelectItem>
-                          <SelectItem value="energy_utilities">Energy & Utilities</SelectItem>
-                          <SelectItem value="engineering">Engineering</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
-                          <SelectItem value="hospitality_tourism">Hospitality & Tourism</SelectItem>
-                          <SelectItem value="human_resources">Human Resources</SelectItem>
-                          <SelectItem value="insurance">Insurance</SelectItem>
-                          <SelectItem value="legal">Legal</SelectItem>
-                          <SelectItem value="logistics_supply_chain">Logistics & Supply Chain</SelectItem>
-                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                          <SelectItem value="marketing_advertising">Marketing & Advertising</SelectItem>
-                          <SelectItem value="media_entertainment">Media & Entertainment</SelectItem>
-                          <SelectItem value="nonprofit">Non-profit</SelectItem>
-                          <SelectItem value="pharmaceutical">Pharmaceutical</SelectItem>
-                          <SelectItem value="property_real_estate">Property & Real Estate</SelectItem>
-                          <SelectItem value="public_sector">Public Sector</SelectItem>
-                          <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="sales">Sales</SelectItem>
-                          <SelectItem value="science_research">Science & Research</SelectItem>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="telecommunications">Telecommunications</SelectItem>
-                          <SelectItem value="transport">Transport</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          value={field.value ? formatIndustry(field.value) : ""}
+                          placeholder={companyProfile ? "Set industry on your company profile" : "Loading…"}
+                          readOnly
+                          disabled
+                          className="bg-muted cursor-not-allowed"
+                        />
+                      </FormControl>
+                      <p className="text-[11px] text-muted-foreground">
+                        Set on your <a href="/company-profile" className="underline hover:text-primary">company profile</a>.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )} />
