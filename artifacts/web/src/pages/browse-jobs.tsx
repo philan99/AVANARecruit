@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Search, MapPin, Building, Briefcase, PoundSterling, Heart, LayoutGrid, List, SlidersHorizontal, X, GraduationCap, ChevronDown, Check, Monitor, Factory, FileText, BookmarkPlus, Bookmark, Trash2, BarChart3, TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList, Legend, Treemap,
+  Tooltip as RechartsTooltip, PieChart, Pie, Cell, RadialBarChart, RadialBar, LabelList, Legend,
 } from "recharts";
 import {
   Dialog,
@@ -740,7 +740,7 @@ export default function BrowseJobs() {
             </CardContent>
           </Card>
 
-          {/* Open Jobs by Skill — Treemap */}
+          {/* Open Jobs by Skill — Vertical bar chart */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -753,24 +753,29 @@ export default function BrowseJobs() {
               {jobInsights.skills.length > 0 ? (
                 <div style={{ height: 280 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <Treemap
-                      data={jobInsights.skills.map(([skill, count], i) => ({
-                        name: skill,
-                        size: count,
-                        key: skill,
-                        fill: BROWSE_JOBTYPE_COLORS[i % BROWSE_JOBTYPE_COLORS.length],
-                      }))}
-                      dataKey="size"
-                      stroke="hsl(var(--card))"
-                      isAnimationActive={false}
-                      onClick={(d: any) => d?.key && setSkillFilters(new Set([d.key]))}
+                    <BarChart
+                      data={jobInsights.skills.map(([skill, count]) => ({ name: skill, value: count, key: skill }))}
+                      margin={{ top: 12, right: 8, left: 0, bottom: 4 }}
                     >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" height={70} />
+                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
                       <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', fontSize: 12 }}
                         itemStyle={{ color: 'hsl(var(--foreground))' }}
-                        formatter={(value: any, _name: any, props: any) => [`${value} jobs`, props?.payload?.name]}
+                        cursor={{ fill: 'hsl(var(--secondary)/0.4)' }}
                       />
-                    </Treemap>
+                      <Bar
+                        dataKey="value"
+                        fill="#10b981"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={36}
+                        onClick={(d: any) => d?.key && setSkillFilters(new Set([d.key]))}
+                        cursor="pointer"
+                      >
+                        <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      </Bar>
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
