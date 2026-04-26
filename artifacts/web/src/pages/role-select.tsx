@@ -42,7 +42,28 @@ export default function RoleSelect() {
   useEffect(() => {
     const hash = window.location.hash;
     const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
-    if (window.location.pathname !== baseUrl && window.location.pathname !== `${baseUrl}/`) {
+    const currentPath = window.location.pathname;
+    const isAtRoot = currentPath === baseUrl || currentPath === `${baseUrl}/`;
+    if (!isAtRoot) {
+      // Strip base URL to get an app-relative path, then stash it so we can
+      // send the user there after a successful login (deep links from alert
+      // emails, etc.). Skip auth/public paths that have their own flow.
+      let rel = currentPath;
+      if (baseUrl !== "/" && rel.startsWith(baseUrl)) {
+        rel = rel.slice(baseUrl.length) || "/";
+      }
+      if (!rel.startsWith("/")) rel = "/" + rel;
+      const skipPrefixes = ["/verify-email", "/verify/", "/reset-password", "/accept-invite"];
+      const shouldStash =
+        rel !== "/" &&
+        rel.length < 512 &&
+        !skipPrefixes.some(p => rel === p || rel.startsWith(p + "/") || rel.startsWith(p + "?"));
+      if (shouldStash) {
+        try {
+          sessionStorage.setItem("postLoginRedirect", rel + window.location.search);
+          setShowLogin(true);
+        } catch {}
+      }
       window.history.replaceState(null, "", baseUrl);
     }
     if (hash === "#login") {
@@ -235,7 +256,15 @@ export default function RoleSelect() {
           setRole("company");
         }
 
-        setLocation("/");
+        let redirectTo = "/";
+        try {
+          const stashed = sessionStorage.getItem("postLoginRedirect");
+          if (stashed && stashed.startsWith("/")) {
+            redirectTo = stashed;
+            sessionStorage.removeItem("postLoginRedirect");
+          }
+        } catch {}
+        setLocation(redirectTo);
       } else {
         const data = await res.json().catch(() => ({}));
         if (data.unverified) {
