@@ -1023,7 +1023,7 @@ export default function RoleSelect() {
                       <SelectTrigger style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb", color: companyForm.industry ? "#1a2035" : "#9ca3af" }} data-testid="select-signup-industry">
                         <SelectValue placeholder="Select your industry" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[200] max-h-[260px]">
                         {industries.map((ind) => (
                           <SelectItem key={ind.value} value={ind.value}>{ind.label}</SelectItem>
                         ))}
