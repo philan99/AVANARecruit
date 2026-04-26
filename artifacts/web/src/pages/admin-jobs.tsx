@@ -1,10 +1,31 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Briefcase, MapPin, Building, Search, X, SlidersHorizontal, ChevronDown, Check, GraduationCap, Monitor, PoundSterling, LayoutGrid, List } from "lucide-react";
+import { Briefcase, MapPin, Building, Search, X, SlidersHorizontal, ChevronDown, Check, GraduationCap, Monitor, PoundSterling, LayoutGrid, List, Factory, TrendingUp } from "lucide-react";
+
+function formatWorkplaceLabel(val: string) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}
+
+function formatExperienceLabel(val: string) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}
+
+function InsightBar({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return (
+    <div className={`flex items-center gap-3 ${onClick ? "cursor-pointer hover:bg-secondary/40 rounded-md p-1 -m-1 transition-colors" : ""}`} onClick={onClick}>
+      <span className="text-xs text-muted-foreground w-28 truncate shrink-0">{label}</span>
+      <div className="flex-1 h-5 bg-secondary/60 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs font-mono font-semibold w-8 text-right shrink-0">{value}</span>
+    </div>
+  );
+}
 
 function MultiSelectDropdown({
   label,
@@ -359,6 +380,40 @@ export default function AdminJobs() {
   const locationEntries = useMemo(() => tallyTop(j => j.location, 8), [jobs]);
   const jobTypeEntries = useMemo(() => tallyTop(j => j.jobType, 20), [jobs]);
 
+  const industryChart = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const j of filtered) {
+      const k = j.industry || "Unspecified";
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }, [filtered]);
+
+  const workplaceChart = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const j of filtered) {
+      const k = j.workplace || "Unspecified";
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [filtered]);
+
+  const experienceChart = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const j of filtered) {
+      const k = j.experienceLevel || "Unspecified";
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [filtered]);
+
+  function toggleFilter(set: Set<string>, value: string, setter: (s: Set<string>) => void) {
+    const next = new Set(set);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    setter(next);
+  }
+
   function clearFilters() {
     setSearchQuery("");
     setStatusFilters(new Set());
@@ -708,6 +763,92 @@ export default function AdminJobs() {
           </Card>
         );
       })()}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Factory className="w-4 h-4" />
+              Jobs by Industry
+            </CardTitle>
+            <CardDescription>Industry distribution across {hasActiveFilters ? "filtered" : "all"} jobs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {industryChart.length > 0 ? (
+              <div className="space-y-2.5">
+                {industryChart.map(([ind, count]) => (
+                  <InsightBar
+                    key={ind}
+                    label={ind === "Unspecified" ? ind : formatIndustry(ind)}
+                    value={count}
+                    max={industryChart[0][1]}
+                    color="bg-orange-500/70"
+                    onClick={ind === "Unspecified" ? undefined : () => toggleFilter(industryFilters, ind, setIndustryFilters)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No industry data.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Jobs by Workplace
+            </CardTitle>
+            <CardDescription>Office, remote, and hybrid breakdown</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {workplaceChart.length > 0 ? (
+              <div className="space-y-2.5">
+                {workplaceChart.map(([wp, count]) => (
+                  <InsightBar
+                    key={wp}
+                    label={wp === "Unspecified" ? wp : formatWorkplaceLabel(wp)}
+                    value={count}
+                    max={workplaceChart[0][1]}
+                    color="bg-teal-500/70"
+                    onClick={wp === "Unspecified" ? undefined : () => toggleFilter(workplaceFilters, wp, setWorkplaceFilters)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No workplace data.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Jobs by Experience
+            </CardTitle>
+            <CardDescription>Experience levels required by job postings</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {experienceChart.length > 0 ? (
+              <div className="space-y-2.5">
+                {experienceChart.map(([lvl, count]) => (
+                  <InsightBar
+                    key={lvl}
+                    label={lvl === "Unspecified" ? lvl : formatExperienceLabel(lvl)}
+                    value={count}
+                    max={experienceChart[0][1]}
+                    color="bg-violet-500/70"
+                    onClick={lvl === "Unspecified" ? undefined : () => toggleFilter(levelFilters, lvl, setLevelFilters)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No experience data.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {hasActiveFilters && (
         <div className="flex items-center justify-between">
