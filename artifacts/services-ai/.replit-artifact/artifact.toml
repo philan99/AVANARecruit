@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/services-ai/"
+title = "AVANA Services AI"
+version = "1.0.0"
+id = "artifacts/services-ai"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/services-ai/" ]
+localPort = 24435
+
+[services.development]
+run = "pnpm --filter @workspace/services-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/services-ai", "run", "build" ]
+publicDir = "artifacts/services-ai/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24435"
+BASE_PATH = "/services-ai/"
