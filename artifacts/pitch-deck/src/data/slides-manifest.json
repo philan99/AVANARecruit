@@ -1,1 +1,98 @@
-[]
+[
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000001",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide01Title.tsx",
+    "title": "Hiring, matched.",
+    "description": "Title slide — AVANA Recruit, the UK's AI-native job matching platform.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000002",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide02Problem.tsx",
+    "title": "The Problem",
+    "description": "UK hiring is slow, expensive, and miscalibrated.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000003",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide03Solution.tsx",
+    "title": "The Solution",
+    "description": "Six dimensions of fit, one AI engine.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000004",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide04SixDimensions.tsx",
+    "title": "The Six Dimensions",
+    "description": "Skills, experience, preferences, credentials, location, education.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000005",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide05CandidatesFlow.tsx",
+    "title": "How it works · Candidates",
+    "description": "Sign up, upload CV, get matched.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000006",
+    "position": 6,
+    "filepath": "src/pages/slides/Slide06CompaniesFlow.tsx",
+    "title": "How it works · Companies",
+    "description": "Post a role, AI surfaces fit, interview and hire.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000007",
+    "position": 7,
+    "filepath": "src/pages/slides/Slide07Verified.tsx",
+    "title": "Every candidate is verified",
+    "description": "Identity, education, and employment history confirmed before any match.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000008",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide08Metrics.tsx",
+    "title": "Early results",
+    "description": "Pilot metrics — time to interview, match accuracy, cost per hire.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000009",
+    "position": 9,
+    "filepath": "src/pages/slides/Slide09Market.tsx",
+    "title": "Market opportunity",
+    "description": "A £43B UK recruitment market with an £11B SAM.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000010",
+    "position": 10,
+    "filepath": "src/pages/slides/Slide10WhyNow.tsx",
+    "title": "Why now",
+    "description": "Three forces converging in 2026 — AI maturity, labour-market shift, CV trust collapse.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000011",
+    "position": 11,
+    "filepath": "src/pages/slides/Slide11Roadmap.tsx",
+    "title": "2026 roadmap",
+    "description": "Quarterly milestones — pilot, employer dashboard, interview agent, EU expansion.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a25b00-1111-4a01-9001-000000000012",
+    "position": 12,
+    "filepath": "src/pages/slides/Slide12Closing.tsx",
+    "title": "Hiring, finally matched.",
+    "description": "Closing slide with brand mark and contact details.",
+    "speakerNotes": ""
+  }
+]

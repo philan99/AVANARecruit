@@ -106,5 +106,6 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 - `artifacts/web/src/` — React frontend
 - `artifacts/web/src/contexts/role-context.tsx` — Role selection context (company/candidate) with localStorage persistence
 - `artifacts/web/src/pages/role-select.tsx` — Role selection landing page
+- `artifacts/pitch-deck/` — 12-slide investor/customer pitch deck artifact (slides kind, previewPath `/pitch-deck/`). AVANA-branded adaptation of the saas-product-launch template: navy `#1A2035` bg, green `#4CAF50` accents, Inter font, viewport-relative units. Slides live in `src/pages/slides/Slide01..12*.tsx`; manifest at `src/data/slides-manifest.json`; brand tokens in `src/index.css`.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
