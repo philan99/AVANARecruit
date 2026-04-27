@@ -41,7 +41,7 @@ export function SiteHeader() {
               alt="AVANA Services" 
               className="h-8 object-contain block"
             />
-            <span className="absolute bottom-[1px] -right-[19px] text-[#4CAF50] text-sm tracking-tight leading-none">.ai</span>
+            <span className="absolute bottom-[1px] -right-[14px] text-[#4CAF50] text-sm tracking-tight leading-none">.ai</span>
           </div>
         </div>
 
