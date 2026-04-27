@@ -34,13 +34,15 @@ export function SiteHeader() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <img 
-            src={logoUrl} 
-            alt="AVANA Services" 
-            className="h-8 object-contain"
-          />
-          <span className="text-[#4CAF50] font-bold text-xl tracking-tight">.ai</span>
+        <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="relative inline-block">
+            <img 
+              src={logoUrl} 
+              alt="AVANA Services" 
+              className="h-8 object-contain block"
+            />
+            <span className="absolute -bottom-1 -right-3 text-[#4CAF50] font-bold text-sm tracking-tight leading-none">.ai</span>
+          </div>
         </div>
 
         {/* Desktop Nav */}
