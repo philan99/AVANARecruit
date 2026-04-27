@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db, candidatesTable } from "@workspace/db";
 import sanitizeHtml from "sanitize-html";
 import { generateRecruiterPitch, type PitchInputs } from "../lib/recruiterPitch";
@@ -116,52 +116,70 @@ router.post("/candidates/:id/recruiter-pitch", async (req, res): Promise<void> =
     }
 
     // Snapshot the inputs timestamp BEFORE generation so we can detect a
-    // concurrent profile edit that lands while the LLM is running. Without
-    // this, a regenerated pitch built from pre-edit inputs could be marked
-    // as fresh against the post-edit timestamp and silently mislead the UI.
-    const inputsSnapshot = inputsTouchedAt;
+    // concurrent profile edit that lands while the LLM is running. We compare
+    // by epoch-millisecond rather than by SQL `=` on the timestamptz column:
+    // PostgreSQL stores timestamptz at microsecond precision, but the pg
+    // driver serialises it back to JS as a millisecond-precision Date. A SQL
+    // `WHERE pitch_inputs_touched_at = $snapshot` would therefore reliably
+    // mismatch even when the row hasn't changed, producing false-positive
+    // 409s. Re-reading inside a row-locked transaction avoids that entirely.
+    const inputsSnapshotMs = inputsTouchedAt ? inputsTouchedAt.getTime() : null;
 
     const generated = await generateRecruiterPitch(candidateToPitchInputs(candidate));
     const pitch = cleanPitchHtml(generated).slice(0, MAX_PITCH_CHARS);
 
-    // Optimistic concurrency: only commit if pitchInputsTouchedAt hasn't moved
-    // since we read the candidate. If it has, a profile edit raced us and
-    // the just-generated pitch is already stale — discard it and ask the
-    // client to retry. The caller (RecruiterPitchCard) will see a 409 and
-    // can simply re-issue regenerate against the fresh inputs.
-    const updateQuery = db
-      .update(candidatesTable)
-      .set({
-        recruiterPitch: pitch,
-        recruiterPitchSource: "ai",
-        recruiterPitchUpdatedAt: now,
-        // Clear the reviewed marker — this is a fresh AI version that the
-        // candidate has not seen yet. Keeps DB state consistent with badge UI.
-        recruiterPitchReviewedAt: null,
-      })
-      .where(
-        inputsSnapshot
-          ? and(
-              eq(candidatesTable.id, id),
-              eq(candidatesTable.pitchInputsTouchedAt, inputsSnapshot),
-            )
-          : eq(candidatesTable.id, id),
-      )
-      .returning({
-        recruiterPitch: candidatesTable.recruiterPitch,
-        recruiterPitchSource: candidatesTable.recruiterPitchSource,
-        recruiterPitchUpdatedAt: candidatesTable.recruiterPitchUpdatedAt,
-        recruiterPitchReviewedAt: candidatesTable.recruiterPitchReviewedAt,
-      });
-    const [updated] = await updateQuery;
-    if (!updated) {
+    const txResult = await db.transaction(async (tx) => {
+      const [locked] = await tx
+        .select({ pitchInputsTouchedAt: candidatesTable.pitchInputsTouchedAt })
+        .from(candidatesTable)
+        .where(eq(candidatesTable.id, id))
+        .for("update");
+
+      if (!locked) {
+        return { kind: "not_found" as const };
+      }
+
+      const lockedMs = locked.pitchInputsTouchedAt
+        ? locked.pitchInputsTouchedAt.getTime()
+        : null;
+
+      if (inputsSnapshotMs !== null && lockedMs !== inputsSnapshotMs) {
+        return { kind: "conflict" as const };
+      }
+
+      const [updated] = await tx
+        .update(candidatesTable)
+        .set({
+          recruiterPitch: pitch,
+          recruiterPitchSource: "ai",
+          recruiterPitchUpdatedAt: now,
+          // Clear the reviewed marker — this is a fresh AI version that the
+          // candidate has not seen yet. Keeps DB state consistent with badge UI.
+          recruiterPitchReviewedAt: null,
+        })
+        .where(eq(candidatesTable.id, id))
+        .returning({
+          recruiterPitch: candidatesTable.recruiterPitch,
+          recruiterPitchSource: candidatesTable.recruiterPitchSource,
+          recruiterPitchUpdatedAt: candidatesTable.recruiterPitchUpdatedAt,
+          recruiterPitchReviewedAt: candidatesTable.recruiterPitchReviewedAt,
+        });
+
+      return { kind: "ok" as const, updated };
+    });
+
+    if (txResult.kind === "not_found") {
+      res.status(404).json({ error: "Candidate not found" });
+      return;
+    }
+    if (txResult.kind === "conflict") {
       res.status(409).json({
         error: "Your profile changed while the pitch was being generated. Please try again.",
         code: "pitch_inputs_changed",
       });
       return;
     }
-    res.json(updated);
+    res.json(txResult.updated);
   } catch (err) {
     console.error("recruiter-pitch error:", err);
     res.status(500).json({ error: "Failed to update recruiter pitch" });
