@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, ArrowRight, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle } from "lucide-react";
+import { UserCircle, Mail, Phone, MapPin, GraduationCap, Briefcase, Edit, X, Save, Camera, FileText, Upload, Trash2, Plus, Calendar, ArrowUp, ArrowDown, ArrowRight, Linkedin, Facebook, Globe, Twitter, CheckCircle2, Circle, ExternalLink, ShieldCheck, Send, Clock, XCircle, Sparkles, RefreshCw, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -1205,6 +1205,18 @@ export default function CandidateProfile() {
         {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
 
+          {/* Recruiter Pitch */}
+          <RecruiterPitchCard
+            candidateId={candidate.id}
+            pitch={candidate.recruiterPitch ?? null}
+            source={candidate.recruiterPitchSource ?? null}
+            updatedAt={candidate.recruiterPitchUpdatedAt ?? null}
+            reviewedAt={candidate.recruiterPitchReviewedAt ?? null}
+            onChange={() => {
+              queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidate.id) });
+            }}
+          />
+
           {/* Preferences */}
           <Card className="bg-card">
             <CardHeader className="pb-3">
@@ -1463,5 +1475,157 @@ export default function CandidateProfile() {
         </div>
       </div>
     </div>
+  );
+}
+
+interface RecruiterPitchCardProps {
+  candidateId: number;
+  pitch: string | null;
+  source: string | null;
+  updatedAt: string | null;
+  reviewedAt: string | null;
+  onChange: () => void;
+}
+
+function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt, onChange }: RecruiterPitchCardProps) {
+  const { toast } = useToast();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(pitch || "");
+  const [saving, setSaving] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  // Sync local draft when the underlying pitch changes (e.g. after regenerate).
+  useEffect(() => {
+    if (!editing) setDraft(pitch || "");
+  }, [pitch, editing]);
+
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
+  const reviewed = !!reviewedAt;
+  const isAi = source === "ai";
+
+  async function callPitchApi(body: object): Promise<boolean> {
+    const res = await fetch(`/api/candidates/${candidateId}/recruiter-pitch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      toast({ title: "Couldn't update your pitch", description: err.error || "Please try again.", variant: "destructive" });
+      return false;
+    }
+    return true;
+  }
+
+  async function handleRegenerate() {
+    setRegenerating(true);
+    try {
+      const ok = await callPitchApi({ action: "regenerate" });
+      if (ok) {
+        onChange();
+        toast({ title: "Pitch regenerated", description: "Take a moment to review and approve the new version." });
+      }
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const ok = await callPitchApi({ action: "save", pitch: draft });
+      if (ok) {
+        setEditing(false);
+        onChange();
+        toast({ title: "Pitch saved", description: "Recruiters will see your approved version." });
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    setDraft(pitch || "");
+    setEditing(false);
+  }
+
+  return (
+    <Card className="bg-card border-primary/20">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <CardTitle className="text-sm font-medium">How AVANA describes you to recruiters</CardTitle>
+          </div>
+          {pitch ? (
+            reviewed && !isAi ? (
+              <Badge variant="outline" className="text-xs border-green-500/30 text-green-700 dark:text-green-400 bg-green-500/5">
+                <CheckCircle2 className="w-3 h-3 mr-1" /> Reviewed by you
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/5">
+                <Sparkles className="w-3 h-3 mr-1" /> AI-generated · awaiting your review
+              </Badge>
+            )
+          ) : null}
+        </div>
+        <p className="text-xs text-muted-foreground mt-1.5">
+          A short positioning paragraph our recruiters share when introducing you to hiring managers. You can edit it anytime.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {pitch || editing ? (
+          editing ? (
+            <>
+              <Textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={6}
+                maxLength={1500}
+                className="text-sm leading-relaxed"
+                placeholder="Write your own version of the pitch..."
+              />
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-xs text-muted-foreground">{wordCount} words · aim for 80–120</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={saving || !draft.trim()}>
+                    {saving ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Saving</> : <><Save className="w-3.5 h-3.5 mr-1.5" /> Save & approve</>}
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{pitch}</p>
+              <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                <span className="text-xs text-muted-foreground">
+                  {updatedAt ? `Updated ${new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}
+                </span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={regenerating}>
+                    {regenerating ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Regenerating</> : <><RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Regenerate</>}
+                  </Button>
+                  <Button size="sm" onClick={() => setEditing(true)}>
+                    <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit
+                  </Button>
+                </div>
+              </div>
+            </>
+          )
+        ) : (
+          <div className="text-center py-4 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              No pitch yet. Upload your CV to generate one automatically, or create one now from your profile.
+            </p>
+            <Button size="sm" onClick={handleRegenerate} disabled={regenerating}>
+              {regenerating ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Generating</> : <><Sparkles className="w-3.5 h-3.5 mr-1.5" /> Generate pitch</>}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

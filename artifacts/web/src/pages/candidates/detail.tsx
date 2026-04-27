@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   Users, Mail, Phone, MapPin, Briefcase, GraduationCap, ArrowLeft,
   Target, Calendar, FileText, Download, Eye, Clock, CalendarDays,
-  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck, Loader2, Bookmark,
+  Monitor, Building, Award, Send, Linkedin, Facebook, Twitter, Globe, ShieldCheck, Loader2, Bookmark, Sparkles, CheckCircle2,
 } from "lucide-react";
 import { useGetCandidate, getGetCandidateQueryKey } from "@workspace/api-client-react";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
@@ -324,6 +324,13 @@ ${companyName}`
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          <ViewerRecruiterPitchCard
+            pitch={candidate.recruiterPitch ?? null}
+            source={candidate.recruiterPitchSource ?? null}
+            updatedAt={candidate.recruiterPitchUpdatedAt ?? null}
+            reviewedAt={candidate.recruiterPitchReviewedAt ?? null}
+          />
+
           {candidate.summary && (
             <Card className="bg-card">
               <CardHeader>
@@ -726,5 +733,46 @@ ${companyName}`
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+interface ViewerRecruiterPitchCardProps {
+  pitch: string | null;
+  source: string | null;
+  updatedAt: string | null;
+  reviewedAt: string | null;
+}
+
+function ViewerRecruiterPitchCard({ pitch, source, updatedAt, reviewedAt }: ViewerRecruiterPitchCardProps) {
+  if (!pitch) return null;
+  const reviewed = !!reviewedAt && source !== "ai";
+  return (
+    <Card className="bg-card border-primary/20">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Recruiter Pitch
+          </CardTitle>
+          {reviewed ? (
+            <Badge variant="outline" className="text-xs border-green-500/30 text-green-700 dark:text-green-400 bg-green-500/5">
+              <CheckCircle2 className="w-3 h-3 mr-1" /> Reviewed by candidate
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/5">
+              <Sparkles className="w-3 h-3 mr-1" /> AI-generated · not yet reviewed
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{pitch}</p>
+        {updatedAt && (
+          <p className="text-xs text-muted-foreground mt-3">
+            Last updated {new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

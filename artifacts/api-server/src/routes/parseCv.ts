@@ -5,6 +5,7 @@ import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { extractText, getDocumentProxy } from "unpdf";
 import mammoth from "mammoth";
+import { generateRecruiterPitch } from "../lib/recruiterPitch";
 
 const router: IRouter = Router();
 const objectStorage = new ObjectStorageService();
@@ -217,6 +218,57 @@ router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
     };
 
     res.json(result);
+
+    // Fire-and-forget: generate the recruiter pitch and persist it to the
+    // candidate row. Doesn't block the parse response. The frontend will pick
+    // it up next time it loads the candidate (e.g. on the profile page).
+    if (id && Number.isFinite(id)) {
+      (async () => {
+        try {
+          const [existing] = await db
+            .select()
+            .from(candidatesTable)
+            .where(eq(candidatesTable.id, id));
+          if (!existing) return;
+
+          // Don't clobber a pitch the candidate has already reviewed/edited.
+          // They can always click Regenerate manually if they want a fresh one.
+          if (existing.recruiterPitchSource === "candidate") return;
+
+          const merged = {
+            name: result.name || existing.name,
+            currentTitle: result.currentTitle || existing.currentTitle,
+            summary: result.summary || existing.summary,
+            experienceYears: result.experienceYears || existing.experienceYears,
+            location: result.location || existing.location,
+            skills: result.skills?.length ? result.skills : (existing.skills as string[] | null),
+            qualifications: result.qualifications?.length ? result.qualifications : (existing.qualifications as string[] | null),
+            experience: result.experience?.length ? result.experience : (existing.experience as any[] | null),
+            education: result.education || existing.education,
+            educationDetails: result.educationDetails || existing.educationDetails,
+            preferredJobTypes: result.preferredJobTypes?.length ? result.preferredJobTypes : (existing.preferredJobTypes as string[] | null),
+            preferredWorkplaces: result.preferredWorkplaces?.length ? result.preferredWorkplaces : (existing.preferredWorkplaces as string[] | null),
+            preferredIndustries: result.preferredIndustries?.length ? result.preferredIndustries : (existing.preferredIndustries as string[] | null),
+            cvText,
+          };
+
+          const pitch = await generateRecruiterPitch(merged);
+          if (!pitch) return;
+
+          await db
+            .update(candidatesTable)
+            .set({
+              recruiterPitch: pitch,
+              recruiterPitchSource: "ai",
+              recruiterPitchUpdatedAt: new Date(),
+              // Don't mark reviewed — candidate must open and save.
+            })
+            .where(eq(candidatesTable.id, id));
+        } catch (pitchErr) {
+          console.error("recruiter-pitch (post parse-cv) error:", pitchErr);
+        }
+      })();
+    }
   } catch (err) {
     console.error("parse-cv error:", err);
     res.status(500).json({ error: "Failed to parse CV" });

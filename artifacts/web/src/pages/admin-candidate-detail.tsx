@@ -24,6 +24,8 @@ import {
   Facebook,
   Twitter,
   Globe,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
 interface ExperienceEntry {
@@ -258,6 +260,13 @@ export default function AdminCandidateDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          <AdminViewerRecruiterPitchCard
+            pitch={(candidate as any).recruiterPitch ?? null}
+            source={(candidate as any).recruiterPitchSource ?? null}
+            updatedAt={(candidate as any).recruiterPitchUpdatedAt ?? null}
+            reviewedAt={(candidate as any).recruiterPitchReviewedAt ?? null}
+          />
+
           {candidate.summary && (
             <Card className="bg-card">
               <CardHeader>
@@ -517,5 +526,46 @@ export default function AdminCandidateDetail() {
         </div>
       </div>
     </div>
+  );
+}
+
+interface AdminViewerRecruiterPitchCardProps {
+  pitch: string | null;
+  source: string | null;
+  updatedAt: string | null;
+  reviewedAt: string | null;
+}
+
+function AdminViewerRecruiterPitchCard({ pitch, source, updatedAt, reviewedAt }: AdminViewerRecruiterPitchCardProps) {
+  if (!pitch) return null;
+  const reviewed = !!reviewedAt && source !== "ai";
+  return (
+    <Card className="bg-card border-primary/20">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Recruiter Pitch
+          </CardTitle>
+          {reviewed ? (
+            <Badge variant="outline" className="text-xs border-green-500/30 text-green-700 dark:text-green-400 bg-green-500/5">
+              <CheckCircle2 className="w-3 h-3 mr-1" /> Reviewed by candidate
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/5">
+              <Sparkles className="w-3 h-3 mr-1" /> AI-generated · not yet reviewed
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{pitch}</p>
+        {updatedAt && (
+          <p className="text-xs text-muted-foreground mt-3">
+            Last updated {new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

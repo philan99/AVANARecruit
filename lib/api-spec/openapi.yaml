@@ -749,6 +749,16 @@ components:
           enum: [active, passive, not_looking]
         matchCount:
           type: integer
+        recruiterPitch:
+          type: ["string", "null"]
+        recruiterPitchSource:
+          type: ["string", "null"]
+        recruiterPitchUpdatedAt:
+          type: ["string", "null"]
+          format: date-time
+        recruiterPitchReviewedAt:
+          type: ["string", "null"]
+          format: date-time
         createdAt:
           type: string
           format: date-time

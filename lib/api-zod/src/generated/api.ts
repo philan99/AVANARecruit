@@ -226,6 +226,10 @@ export const ListCandidatesResponseItem = zod.object({
   maxRadiusMiles: zod.number().nullish(),
   status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
+  recruiterPitch: zod.string().nullish(),
+  recruiterPitchSource: zod.string().nullish(),
+  recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
+  recruiterPitchReviewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -279,6 +283,10 @@ export const GetCandidateResponse = zod.object({
   maxRadiusMiles: zod.number().nullish(),
   status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
+  recruiterPitch: zod.string().nullish(),
+  recruiterPitchSource: zod.string().nullish(),
+  recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
+  recruiterPitchReviewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -332,6 +340,10 @@ export const UpdateCandidateResponse = zod.object({
   maxRadiusMiles: zod.number().nullish(),
   status: zod.enum(["active", "passive", "not_looking"]),
   matchCount: zod.number(),
+  recruiterPitch: zod.string().nullish(),
+  recruiterPitchSource: zod.string().nullish(),
+  recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
+  recruiterPitchReviewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });

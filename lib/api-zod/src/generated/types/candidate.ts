@@ -33,6 +33,14 @@ export interface Candidate {
   maxRadiusMiles?: number | null;
   status: CandidateStatus;
   matchCount: number;
+  /** @nullable */
+  recruiterPitch?: string | null;
+  /** @nullable */
+  recruiterPitchSource?: string | null;
+  /** @nullable */
+  recruiterPitchUpdatedAt?: Date | null;
+  /** @nullable */
+  recruiterPitchReviewedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
