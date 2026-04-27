@@ -12,7 +12,7 @@ export function SiteFooter() {
               alt="AVANA Services" 
               className="h-6 object-contain opacity-90 block"
             />
-            <span className="absolute -bottom-1 -right-4 text-[#4CAF50] font-bold text-xs tracking-tight leading-none">.ai</span>
+            <span className="absolute bottom-0 -right-4 text-[#4CAF50] font-bold text-xs tracking-tight leading-none">.ai</span>
           </div>
         </div>
 
