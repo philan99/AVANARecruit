@@ -1,4 +1,4 @@
-import logoUrl from "@assets/Color_logo_-_no_background_1777315495981.png";
+import logoUrl from "@assets/GREEN_Color_logo_-_no_background_1777318447100.png";
 
 export function SiteFooter() {
   return (

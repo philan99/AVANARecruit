@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoUrl from "@assets/Color_logo_-_no_background_1777315495981.png";
+import logoUrl from "@assets/GREEN_Color_logo_-_no_background_1777318447100.png";
 
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
