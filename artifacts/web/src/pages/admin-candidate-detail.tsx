@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useRole } from "@/contexts/role-context";
+import { toSafePitchHtml } from "@/lib/recruiter-pitch-html";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -539,6 +540,7 @@ interface AdminViewerRecruiterPitchCardProps {
 function AdminViewerRecruiterPitchCard({ pitch, source, updatedAt, reviewedAt }: AdminViewerRecruiterPitchCardProps) {
   if (!pitch) return null;
   const reviewed = !!reviewedAt && source !== "ai";
+  const html = toSafePitchHtml(pitch);
   return (
     <Card className="bg-card border-primary/20">
       <CardHeader className="pb-3">
@@ -559,7 +561,10 @@ function AdminViewerRecruiterPitchCard({ pitch, source, updatedAt, reviewedAt }:
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{pitch}</p>
+        <div
+          className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-p:my-2 prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
         {updatedAt && (
           <p className="text-xs text-muted-foreground mt-3">
             Last updated {new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}

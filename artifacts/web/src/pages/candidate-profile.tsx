@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { toSafePitchHtml } from "@/lib/recruiter-pitch-html";
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -1499,9 +1501,24 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
     if (!editing) setDraft(pitch || "");
   }, [pitch, editing]);
 
-  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
+  // Strip tags + decode common HTML entities for an honest word count.
+  const draftText = draft
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .trim();
+  const wordCount = draftText ? draftText.split(/\s+/).length : 0;
   const reviewed = !!reviewedAt;
   const isAi = source === "ai";
+
+  // Render-safety rule: only treat the pitch as HTML when it starts with one of
+  // the block tags our server sanitiser is known to emit. Anything else (legacy
+  // plain text, freeform content) is HTML-escaped before wrapping. This stops
+  // legacy data containing tag-like content from being executed as markup.
+  const renderHtml = pitch ? toSafePitchHtml(pitch) : "";
 
   async function callPitchApi(body: object): Promise<boolean> {
     const res = await fetch(`/api/candidates/${candidateId}/recruiter-pitch`, {
@@ -1577,21 +1594,18 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
         {pitch || editing ? (
           editing ? (
             <>
-              <Textarea
+              <RichTextEditor
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                rows={6}
-                maxLength={1500}
-                className="text-sm leading-relaxed"
+                onChange={setDraft}
                 placeholder="Write your own version of the pitch..."
               />
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground">{wordCount} words · aim for 80–120</span>
+                <span className="text-xs text-muted-foreground">{wordCount} words · aim for 100–150</span>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving}>
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={saving || !draft.trim()}>
+                  <Button size="sm" onClick={handleSave} disabled={saving || !draftText}>
                     {saving ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Saving</> : <><Save className="w-3.5 h-3.5 mr-1.5" /> Save & approve</>}
                   </Button>
                 </div>
@@ -1599,7 +1613,10 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
             </>
           ) : (
             <>
-              <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{pitch}</p>
+              <div
+                className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-p:my-2 prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold"
+                dangerouslySetInnerHTML={{ __html: renderHtml }}
+              />
               <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
                 <span className="text-xs text-muted-foreground">
                   {updatedAt ? `Updated ${new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}

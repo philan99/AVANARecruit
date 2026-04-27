@@ -26,19 +26,24 @@ export interface PitchInputs {
   cvText?: string | null;
 }
 
-const SYSTEM_PROMPT = `You are a senior UK recruitment consultant writing a short positioning paragraph about a candidate, the way you would brief a hiring manager you trust at a client company.
+const SYSTEM_PROMPT = `You are a senior UK recruitment consultant writing a short positioning brief about a candidate, the way you would brief a hiring manager you trust at a client company.
 
 Write in British English. Confident, factual, warm but professional. NO marketing fluff, NO superlatives like "world-class" or "rockstar", NO emojis.
 
-Rules:
-- 80–120 words. One paragraph. No headings, no bullet lists.
-- Use the candidate's first name once at the start ("Sarah is…"), then "they" / "them" thereafter.
-- Anchor every claim in something concrete from the CV or profile (numbers, employers, sectors, scope). If you don't have evidence, leave it out.
-- Mirror the writing style of the candidate's CV summary (if present): if the CV is direct and metric-led, be direct and metric-led; if the CV is more narrative, be more narrative.
-- End with one sentence on the kind of role and environment they would suit best, based on their experience and stated preferences.
+Structure (output exactly two short paragraphs as semantic HTML):
+1. <p> — Who they are now and how they got here. Sketch the arc of their career: where they started, the shape of their progression (broadening scope, increasing seniority, shifts of sector or specialism), and what that arc tells you about their professional identity today. Anchor in concrete employers, sectors, scale or numbers.
+2. <p> — What they're looking to do next and what energises them. Read the signals carefully: explicit preferences (job type, workplace, industry), recent investments in themselves (qualifications, certifications, founding/side ventures, sector moves), and the tone of their own profile summary. Convey their intent and the kind of work that clearly engages them, then close with one sentence on the role and environment they would suit best.
+
+Formatting rules:
+- Output VALID HTML only. Use <p>...</p> for paragraphs. You MAY use <strong>...</strong> sparingly (max 3 spans total) to highlight a key role anchor, sector, or specialism. You MAY use <em>...</em> once if it adds clarity. No other tags, no inline styles, no <html>/<body>, no markdown, no code fences.
+- 100–150 words across both paragraphs combined. Keep it tight.
+- Use the candidate's first name once at the start of paragraph 1 ("Sarah is…"), then "they" / "them" thereafter.
+- Mirror the writing style of the candidate's CV summary (if present): direct and metric-led if theirs is, more narrative if theirs is.
+- Convey energy and motivation through evidence and verbs ("has chosen", "moved into", "is now actively pursuing", "invested in"), NOT through adjectives.
+- Do NOT use the words "passionate", "driven", "motivated", "energetic", "enthusiastic", "synergy", "leverage", "rockstar", "guru", "ninja".
+- Anchor every claim in something concrete from the CV or profile. If you don't have evidence for a claim, leave it out.
 - Do NOT promise outcomes ("will deliver…"), do NOT speculate beyond the evidence, do NOT mention salary or notice period.
-- Do NOT use the words "passionate", "driven", "synergy", "leverage", "rockstar", "guru", "ninja".
-- Output ONLY the paragraph. No preface like "Here is the pitch:".`;
+- Output ONLY the HTML. No preface like "Here is the pitch:".`;
 
 function pruneCvText(input: string | null | undefined, max = 8000): string {
   if (!input) return "";
@@ -99,7 +104,7 @@ function buildUserPrompt(c: PitchInputs): string {
 export async function generateRecruiterPitch(inputs: PitchInputs): Promise<string> {
   const completion = await openai.chat.completions.create({
     model: "gpt-4.1-mini",
-    max_completion_tokens: 400,
+    max_completion_tokens: 600,
     temperature: 0.4,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -107,7 +112,14 @@ export async function generateRecruiterPitch(inputs: PitchInputs): Promise<strin
     ],
   });
 
-  const text = completion.choices[0]?.message?.content?.trim() || "";
+  let text = completion.choices[0]?.message?.content?.trim() || "";
+  // Strip ```html ... ``` or ``` ... ``` code fences the model sometimes wraps output in.
+  text = text.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/i, "").trim();
   // Strip wrapping quotes the model sometimes adds.
-  return text.replace(/^["'\u201c\u201d]+|["'\u201c\u201d]+$/g, "").trim();
+  text = text.replace(/^["'\u201c\u201d]+|["'\u201c\u201d]+$/g, "").trim();
+  // If the model returned plain text without any tags, wrap it as a single paragraph.
+  if (text && !/<[a-z][^>]*>/i.test(text)) {
+    text = `<p>${text}</p>`;
+  }
+  return text;
 }

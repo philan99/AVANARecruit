@@ -1,11 +1,31 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, candidatesTable } from "@workspace/db";
+import sanitizeHtml from "sanitize-html";
 import { generateRecruiterPitch, type PitchInputs } from "../lib/recruiterPitch";
 
 const router: IRouter = Router();
 
-const MAX_PITCH_CHARS = 1500;
+const MAX_PITCH_CHARS = 4000;
+
+// Allow only the safe formatting tags the rich-text editor produces.
+// No attributes, no inline styles — keeps the field XSS-safe for recruiter/admin viewers.
+// Inline alignment styles (text-align via TextAlign extension) are intentionally dropped:
+// the trade-off (some formatting may not survive save) is worth keeping the field locked down.
+function cleanPitchHtml(input: string): string {
+  if (typeof input !== "string") return "";
+  const cleaned = sanitizeHtml(input, {
+    allowedTags: ["p", "br", "strong", "em", "u", "s", "ul", "ol", "li", "h1", "h2", "h3", "h4", "mark", "hr"],
+    allowedAttributes: {},
+    disallowedTagsMode: "discard",
+  }).trim();
+  // If after sanitisation we have no block-level wrapper but still have text,
+  // wrap it in a paragraph so it renders correctly inside the prose container.
+  if (cleaned && !/<(p|ul|ol|h1|h2|h3|h4|hr)[\s>]/i.test(cleaned)) {
+    return `<p>${cleaned}</p>`;
+  }
+  return cleaned;
+}
 
 function candidateToPitchInputs(c: any, cvText?: string | null): PitchInputs {
   return {
@@ -54,7 +74,7 @@ router.post("/candidates/:id/recruiter-pitch", async (req, res): Promise<void> =
 
     if (action === "save") {
       const raw = typeof req.body?.pitch === "string" ? req.body.pitch : "";
-      const pitch = raw.trim().slice(0, MAX_PITCH_CHARS);
+      const pitch = cleanPitchHtml(raw).slice(0, MAX_PITCH_CHARS);
       const [updated] = await db
         .update(candidatesTable)
         .set({
@@ -75,7 +95,8 @@ router.post("/candidates/:id/recruiter-pitch", async (req, res): Promise<void> =
     }
 
     // action === "regenerate" — generate from current candidate data.
-    const pitch = await generateRecruiterPitch(candidateToPitchInputs(candidate));
+    const generated = await generateRecruiterPitch(candidateToPitchInputs(candidate));
+    const pitch = cleanPitchHtml(generated).slice(0, MAX_PITCH_CHARS);
     const [updated] = await db
       .update(candidatesTable)
       .set({
