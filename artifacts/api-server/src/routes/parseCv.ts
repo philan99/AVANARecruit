@@ -3,8 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, candidatesTable, industriesTable } from "@workspace/db";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
-import { extractText, getDocumentProxy } from "unpdf";
-import mammoth from "mammoth";
+import { extractCvText, streamToBuffer } from "../lib/cvText";
 import { generateRecruiterPitch } from "../lib/recruiterPitch";
 
 const router: IRouter = Router();
@@ -42,26 +41,6 @@ async function loadIndustryCodes(): Promise<string[]> {
     console.error("Failed to load industry codes:", err);
     return ["other"];
   }
-}
-
-async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array));
-  }
-  return Buffer.concat(chunks);
-}
-
-async function extractCvText(buffer: Buffer, fileName: string): Promise<string> {
-  const lower = fileName.toLowerCase();
-  if (lower.endsWith(".docx")) {
-    const result = await mammoth.extractRawText({ buffer });
-    return result.value || "";
-  }
-  // Default to PDF
-  const pdf = await getDocumentProxy(new Uint8Array(buffer));
-  const { text } = await extractText(pdf, { mergePages: true });
-  return Array.isArray(text) ? text.join("\n") : text;
 }
 
 const buildSystemPrompt = (industryOptions: string[], summaryMode: "verbatim" | "ai" = "verbatim") => `You are an expert CV/resume parser. Extract structured candidate information from the CV text provided. Return ONLY valid JSON matching the schema below — no commentary, no markdown.

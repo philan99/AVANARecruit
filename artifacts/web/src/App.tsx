@@ -13,6 +13,7 @@ import Dashboard from "@/pages/dashboard";
 import CandidateDashboard from "@/pages/candidate-dashboard";
 import CandidateJobAlerts from "@/pages/candidate-job-alerts";
 import CandidateProfile from "@/pages/candidate-profile";
+import CvRewrite from "@/pages/cv-rewrite";
 import CandidateMatches from "@/pages/candidate-matches";
 import CandidateShortlisted from "@/pages/candidate-shortlisted";
 import CandidateVerifications from "@/pages/candidate-verifications";
@@ -106,6 +107,7 @@ function CandidateRoutes() {
           <Switch>
             <Route path="/" component={CandidateDashboard} />
         <Route path="/profile" component={CandidateProfile} />
+        <Route path="/cv-rewrite" component={CvRewrite} />
         <Route path="/my-matches" component={CandidateMatches} />
         <Route path="/demo-matches/:id" component={DemoMatches} />
         <Route path="/shortlisted" component={CandidateShortlisted} />

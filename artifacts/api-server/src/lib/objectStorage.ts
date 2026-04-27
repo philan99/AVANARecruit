@@ -128,6 +128,36 @@ export class ObjectStorageService {
     });
   }
 
+  /**
+   * Upload an in-memory buffer directly to the private object directory and
+   * return a normalised `/objects/...` path that can be stored on a record
+   * and later retrieved with `getObjectEntityFile`.
+   */
+  async uploadBufferToPrivate(
+    buffer: Buffer,
+    contentType: string,
+    extension?: string,
+  ): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    if (!privateObjectDir) {
+      throw new Error(
+        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
+          "tool and set PRIVATE_OBJECT_DIR env var."
+      );
+    }
+    const objectId = randomUUID();
+    const ext = (extension || "").replace(/^\./, "");
+    const fullPath = `${privateObjectDir}/uploads/${objectId}${ext ? `.${ext}` : ""}`;
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+    const file = objectStorageClient.bucket(bucketName).file(objectName);
+    await file.save(buffer, {
+      contentType,
+      resumable: false,
+      metadata: { contentType },
+    });
+    return this.normalizeObjectEntityPath(`https://storage.googleapis.com/${bucketName}/${objectName}`);
+  }
+
   async getObjectEntityFile(objectPath: string): Promise<File> {
     if (!objectPath.startsWith("/objects/")) {
       throw new ObjectNotFoundError();

@@ -24,6 +24,7 @@ import {
   Bell,
   Microscope,
   HelpCircle,
+  Wand2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -71,6 +72,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/my-matches", label: "My Matches", icon: Target },
     { href: "/browse-jobs", label: "Browse Jobs", icon: Search },
     { href: "/browse-companies", label: "Browse Companies", icon: Building2 },
+    { href: "/cv-rewrite", label: "Rewrite CV", icon: Wand2 },
   ];
 
   const adminNavItems = [
