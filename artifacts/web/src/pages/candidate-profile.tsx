@@ -1585,7 +1585,7 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <CardTitle className="text-sm font-medium">How AVANA describes you to recruiters</CardTitle>
+            <CardTitle className="text-sm font-medium">How AVANA Recruit describes you to employers</CardTitle>
           </div>
           {pitch ? (
             reviewed && !isAi ? (
