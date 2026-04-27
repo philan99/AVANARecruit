@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "TI_Bus7JulotY20IANTHv"
+uri = "file://attached_assets/avana-services-ai-standalone.tar.gz"
+type = "unspecified"
+title = "AVANA Services AI — standalone Repl bundle"
