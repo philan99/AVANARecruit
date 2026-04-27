@@ -52,7 +52,7 @@ Users select their role on first visit: **Company**, **Candidate**, or **Admin**
 ### Pages — Candidate Portal
 - `/` — Candidate dashboard with personalized job match overview, job alerts settings
 - Company dashboard also includes candidate alerts settings (notified when new candidates register matching their jobs)
-- `/profile` — Create/select/view candidate profile (includes the editable "How AVANA describes you to recruiters" pitch card — two-paragraph recruiter brief covering identity + career progression and intent + motivation; rich-text/HTML field, edited via the shared `RichTextEditor` and rendered through `toSafePitchHtml` in `lib/recruiter-pitch-html.ts`. Server allowlist + sanitisation lives in `routes/recruiterPitch.ts:cleanPitchHtml`)
+- `/profile` — Create/select/view candidate profile (includes the editable "How AVANA describes you to recruiters" pitch card — two-paragraph recruiter brief covering identity + career progression and intent + motivation; rich-text/HTML field, edited via the shared `RichTextEditor` and rendered through `toSafePitchHtml` in `lib/recruiter-pitch-html.ts`. Server allowlist + sanitisation lives in `routes/recruiterPitch.ts:cleanPitchHtml`. Regenerate button is greyed out when the pitch is up-to-date — gated by comparing `recruiterPitchUpdatedAt` against `pitchInputsTouchedAt`, which is bumped by PATCH /candidates/:id when any pitch-relevant field changes and by parseCv after a fresh CV parse, but never by the recruiter-pitch endpoint itself)
 - `/my-matches` — View AI-generated job matches with detailed scoring breakdown
 - `/browse-jobs` — Browse all open positions
 - `/browse-companies` — Browse all companies on the platform with search/filter (industry, location, size)

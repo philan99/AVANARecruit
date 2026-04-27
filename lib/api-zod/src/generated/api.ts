@@ -230,6 +230,7 @@ export const ListCandidatesResponseItem = zod.object({
   recruiterPitchSource: zod.string().nullish(),
   recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
   recruiterPitchReviewedAt: zod.coerce.date().nullish(),
+  pitchInputsTouchedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -287,6 +288,7 @@ export const GetCandidateResponse = zod.object({
   recruiterPitchSource: zod.string().nullish(),
   recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
   recruiterPitchReviewedAt: zod.coerce.date().nullish(),
+  pitchInputsTouchedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -344,6 +346,7 @@ export const UpdateCandidateResponse = zod.object({
   recruiterPitchSource: zod.string().nullish(),
   recruiterPitchUpdatedAt: zod.coerce.date().nullish(),
   recruiterPitchReviewedAt: zod.coerce.date().nullish(),
+  pitchInputsTouchedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });

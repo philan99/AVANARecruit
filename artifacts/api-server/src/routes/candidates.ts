@@ -270,6 +270,7 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
       recruiterPitchSource: candidatesTable.recruiterPitchSource,
       recruiterPitchUpdatedAt: candidatesTable.recruiterPitchUpdatedAt,
       recruiterPitchReviewedAt: candidatesTable.recruiterPitchReviewedAt,
+      pitchInputsTouchedAt: candidatesTable.pitchInputsTouchedAt,
       matchCount: sql<number>`COALESCE(${matchCountSubquery.cnt}, 0)::int`.as("match_count"),
       createdAt: candidatesTable.createdAt,
       updatedAt: candidatesTable.updatedAt,
@@ -384,6 +385,19 @@ router.patch("/candidates/:id", async (req, res): Promise<void> => {
     updateData.town = null;
     updateData.lat = null;
     updateData.lng = null;
+  }
+
+  // If any pitch-relevant field is being updated, bump pitchInputsTouchedAt
+  // so the UI can mark an existing pitch as stale and re-enable Regenerate.
+  const PITCH_RELEVANT_FIELDS = [
+    "name", "currentTitle", "summary", "skills", "qualifications",
+    "experienceYears", "education", "educationDetails", "experience",
+    "location", "postcode", "town", "country", "lat", "lng",
+    "preferredJobTypes", "preferredWorkplaces", "preferredIndustries",
+    "cvFile", "cvFileName",
+  ];
+  if (PITCH_RELEVANT_FIELDS.some((f) => updateData[f] !== undefined)) {
+    updateData.pitchInputsTouchedAt = new Date();
   }
 
   const [candidate] = await db

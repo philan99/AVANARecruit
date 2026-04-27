@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, candidatesTable } from "@workspace/db";
 import sanitizeHtml from "sanitize-html";
 import { generateRecruiterPitch, type PitchInputs } from "../lib/recruiterPitch";
@@ -95,9 +95,41 @@ router.post("/candidates/:id/recruiter-pitch", async (req, res): Promise<void> =
     }
 
     // action === "regenerate" — generate from current candidate data.
+    // Server-side stale guard: if the existing pitch is already at least as
+    // fresh as the latest pitch-input change, refuse to regenerate. This
+    // backs up the disabled-button UI for any caller that bypasses it
+    // (direct API call, replayed request, etc) and stops accidental AI burn.
+    const existingPitch = candidate.recruiterPitch;
+    const existingUpdatedAt = candidate.recruiterPitchUpdatedAt;
+    const inputsTouchedAt = candidate.pitchInputsTouchedAt;
+    if (
+      existingPitch &&
+      existingUpdatedAt &&
+      inputsTouchedAt &&
+      existingUpdatedAt.getTime() >= inputsTouchedAt.getTime()
+    ) {
+      res.status(409).json({
+        error: "Pitch is already up to date with your profile. Edit your profile or upload a new CV before regenerating.",
+        code: "pitch_already_fresh",
+      });
+      return;
+    }
+
+    // Snapshot the inputs timestamp BEFORE generation so we can detect a
+    // concurrent profile edit that lands while the LLM is running. Without
+    // this, a regenerated pitch built from pre-edit inputs could be marked
+    // as fresh against the post-edit timestamp and silently mislead the UI.
+    const inputsSnapshot = inputsTouchedAt;
+
     const generated = await generateRecruiterPitch(candidateToPitchInputs(candidate));
     const pitch = cleanPitchHtml(generated).slice(0, MAX_PITCH_CHARS);
-    const [updated] = await db
+
+    // Optimistic concurrency: only commit if pitchInputsTouchedAt hasn't moved
+    // since we read the candidate. If it has, a profile edit raced us and
+    // the just-generated pitch is already stale — discard it and ask the
+    // client to retry. The caller (RecruiterPitchCard) will see a 409 and
+    // can simply re-issue regenerate against the fresh inputs.
+    const updateQuery = db
       .update(candidatesTable)
       .set({
         recruiterPitch: pitch,
@@ -107,13 +139,28 @@ router.post("/candidates/:id/recruiter-pitch", async (req, res): Promise<void> =
         // candidate has not seen yet. Keeps DB state consistent with badge UI.
         recruiterPitchReviewedAt: null,
       })
-      .where(eq(candidatesTable.id, id))
+      .where(
+        inputsSnapshot
+          ? and(
+              eq(candidatesTable.id, id),
+              eq(candidatesTable.pitchInputsTouchedAt, inputsSnapshot),
+            )
+          : eq(candidatesTable.id, id),
+      )
       .returning({
         recruiterPitch: candidatesTable.recruiterPitch,
         recruiterPitchSource: candidatesTable.recruiterPitchSource,
         recruiterPitchUpdatedAt: candidatesTable.recruiterPitchUpdatedAt,
         recruiterPitchReviewedAt: candidatesTable.recruiterPitchReviewedAt,
       });
+    const [updated] = await updateQuery;
+    if (!updated) {
+      res.status(409).json({
+        error: "Your profile changed while the pitch was being generated. Please try again.",
+        code: "pitch_inputs_changed",
+      });
+      return;
+    }
     res.json(updated);
   } catch (err) {
     console.error("recruiter-pitch error:", err);

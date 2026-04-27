@@ -37,6 +37,7 @@ export const candidatesTable = pgTable("candidates", {
   recruiterPitchSource: text("recruiter_pitch_source"),
   recruiterPitchUpdatedAt: timestamp("recruiter_pitch_updated_at", { withTimezone: true }),
   recruiterPitchReviewedAt: timestamp("recruiter_pitch_reviewed_at", { withTimezone: true }),
+  pitchInputsTouchedAt: timestamp("pitch_inputs_touched_at", { withTimezone: true }).notNull().defaultNow(),
   verified: boolean("verified").notNull().default(false),
   isDemo: boolean("is_demo").notNull().default(false),
   status: text("status").notNull().default("active"),

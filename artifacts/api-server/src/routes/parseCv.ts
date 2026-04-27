@@ -217,6 +217,13 @@ router.post("/candidates/:id/parse-cv", async (req, res): Promise<void> => {
       lowConfidenceFields: safeArr<string>(parsed.lowConfidenceFields).filter(s => typeof s === "string"),
     };
 
+    // Touch the pitch-inputs timestamp so any existing pitch is correctly
+    // marked as stale relative to the freshly-parsed structured data.
+    await db
+      .update(candidatesTable)
+      .set({ pitchInputsTouchedAt: new Date() })
+      .where(eq(candidatesTable.id, id));
+
     res.json(result);
 
     // Fire-and-forget: generate the recruiter pitch and persist it to the

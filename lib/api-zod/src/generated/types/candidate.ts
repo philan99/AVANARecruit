@@ -41,6 +41,8 @@ export interface Candidate {
   recruiterPitchUpdatedAt?: Date | null;
   /** @nullable */
   recruiterPitchReviewedAt?: Date | null;
+  /** @nullable */
+  pitchInputsTouchedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

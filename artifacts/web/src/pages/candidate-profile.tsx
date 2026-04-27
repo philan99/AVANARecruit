@@ -1209,6 +1209,7 @@ export default function CandidateProfile() {
 
           {/* Recruiter Pitch */}
           <RecruiterPitchCard
+            pitchInputsTouchedAt={(candidate as any).pitchInputsTouchedAt ?? null}
             candidateId={candidate.id}
             pitch={candidate.recruiterPitch ?? null}
             source={candidate.recruiterPitchSource ?? null}
@@ -1486,10 +1487,11 @@ interface RecruiterPitchCardProps {
   source: string | null;
   updatedAt: string | null;
   reviewedAt: string | null;
+  pitchInputsTouchedAt: string | null;
   onChange: () => void;
 }
 
-function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt, onChange }: RecruiterPitchCardProps) {
+function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt, pitchInputsTouchedAt, onChange }: RecruiterPitchCardProps) {
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(pitch || "");
@@ -1513,6 +1515,17 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
   const wordCount = draftText ? draftText.split(/\s+/).length : 0;
   const reviewed = !!reviewedAt;
   const isAi = source === "ai";
+
+  // The pitch is "up to date" when it exists and was generated/saved AFTER
+  // the most recent change to any pitch-relevant input (CV upload, profile
+  // edits, preferences). Regenerating in this state would burn an AI call
+  // for an essentially identical result, so we disable the button.
+  const upToDate = Boolean(
+    pitch &&
+    updatedAt &&
+    pitchInputsTouchedAt &&
+    new Date(updatedAt).getTime() >= new Date(pitchInputsTouchedAt).getTime()
+  );
 
   // Render-safety rule: only treat the pitch as HTML when it starts with one of
   // the block tags our server sanitiser is known to emit. Anything else (legacy
@@ -1620,9 +1633,16 @@ function RecruiterPitchCard({ candidateId, pitch, source, updatedAt, reviewedAt,
               <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
                 <span className="text-xs text-muted-foreground">
                   {updatedAt ? `Updated ${new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}
+                  {upToDate ? <span className="ml-2 text-muted-foreground/80">· Already reflects your latest profile</span> : null}
                 </span>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={regenerating}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRegenerate}
+                    disabled={regenerating || upToDate}
+                    title={upToDate ? "Your pitch already reflects your latest profile. Update your CV or profile fields to enable regeneration." : undefined}
+                  >
                     {regenerating ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Regenerating</> : <><RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Regenerate</>}
                   </Button>
                   <Button size="sm" onClick={() => setEditing(true)}>
