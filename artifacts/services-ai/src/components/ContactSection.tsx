@@ -180,7 +180,7 @@ export function ContactSection() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#F5F0B0] text-[#1A2035] hover:bg-[#e6e1a1] font-semibold py-6 text-base rounded-md border-none no-default-hover-elevate shadow-sm"
+                  className="w-full bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold py-6 text-base rounded-md border-none no-default-hover-elevate shadow-sm"
                 >
                   Request Contact
                 </Button>
