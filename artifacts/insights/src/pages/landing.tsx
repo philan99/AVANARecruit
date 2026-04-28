@@ -5,6 +5,9 @@ interface LandingProps {
   onSignIn: () => void;
 }
 
+const NAVY = "#1a2035";
+const GREEN = "#4CAF50";
+
 export function Landing({ onSignIn }: LandingProps) {
   const features = [
     { icon: Database, title: "Connect Anything", desc: "Plug in databases, APIs, files and SaaS tools — Insights ingests them all." },
@@ -17,17 +20,56 @@ export function Landing({ onSignIn }: LandingProps) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      {/* Top nav */}
-      <nav className="sticky top-0 z-30 border-b" style={{ backgroundColor: "#ffffff", borderColor: "#e5e7eb" }}>
+      {/* Top nav — branded navy */}
+      <nav
+        className="sticky top-0 z-30"
+        style={{
+          backgroundColor: NAVY,
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 1px 0 rgba(76,175,80,0.15)",
+        }}
+        data-testid="brand-navbar"
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <a href="#top" className="flex items-center gap-3 shrink-0">
             <img src={logoUrl} alt="AVANA Insights" className="h-8 w-auto" />
+          </a>
+          <div className="hidden md:flex items-center gap-8 text-sm">
+            <a
+              href="#features"
+              className="font-medium transition-colors"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+            >
+              Features
+            </a>
+            <a
+              href="/services-ai/"
+              className="font-medium transition-colors"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+            >
+              AVANA Services
+            </a>
+            <a
+              href="/"
+              className="font-medium transition-colors"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+            >
+              AVANA Recruit
+            </a>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={onSignIn}
-              className="px-5 py-2 text-sm font-semibold rounded-md hover:opacity-90 transition-all"
-              style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+              className="px-5 py-2 text-sm font-semibold rounded-md transition-all"
+              style={{ backgroundColor: GREEN, color: "#fff", boxShadow: "0 4px 14px rgba(76,175,80,0.35)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.92"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
               data-testid="nav-sign-in"
             >
               Sign In
@@ -35,6 +77,8 @@ export function Landing({ onSignIn }: LandingProps) {
           </div>
         </div>
       </nav>
+      <span id="top" />
+
 
       {/* Hero */}
       <section className="relative overflow-hidden" style={{ backgroundColor: "#1a2035" }}>
@@ -100,17 +144,114 @@ export function Landing({ onSignIn }: LandingProps) {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-10 border-t" style={{ borderColor: "#e5e7eb", backgroundColor: "#fafafa" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <img src={logoUrl} alt="AVANA Insights" className="h-6 w-auto" />
+      {/* Footer — branded navy */}
+      <footer
+        className="relative overflow-hidden"
+        style={{ backgroundColor: NAVY, color: "rgba(255,255,255,0.7)" }}
+        data-testid="brand-footer"
+      >
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute -top-40 right-0 w-[500px] h-[500px] rounded-full opacity-[0.04]"
+            style={{ background: `radial-gradient(circle, ${GREEN} 0%, transparent 70%)` }}
+          />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+            <div className="md:col-span-5">
+              <img src={logoUrl} alt="AVANA Insights" className="h-7 w-auto mb-4" />
+              <p className="text-sm leading-relaxed max-w-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+                AI-native data intelligence — connect your data, ask in plain English, and turn answers into structured decisions.
+              </p>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase mt-6" style={{ color: GREEN }}>
+                Part of the AVANA Suite
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <h4 className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#fff" }}>
+                Product
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li><FooterLink href="#features">Features</FooterLink></li>
+                <li><FooterLink href="#features">Data Sources</FooterLink></li>
+                <li><FooterLink href="#features">Decisions</FooterLink></li>
+                <li><FooterLink href="#features">Dashboards</FooterLink></li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-2">
+              <h4 className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#fff" }}>
+                AVANA Suite
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li><FooterLink href="/">AVANA Recruit</FooterLink></li>
+                <li><FooterLink href="/services-ai/">AVANA Services AI</FooterLink></li>
+                <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-3">
+              <h4 className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#fff" }}>
+                Get Started
+              </h4>
+              <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.6)" }}>
+                Already have an AVANA account? Sign in and your workspace is provisioned automatically.
+              </p>
+              <button
+                onClick={onSignIn}
+                className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-all"
+                style={{ backgroundColor: GREEN, color: "#fff" }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.92"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                data-testid="footer-sign-in"
+              >
+                Sign In
+              </button>
+            </div>
           </div>
-          <p className="text-xs" style={{ color: "#9ca3af" }}>
-            © {new Date().getFullYear()} AVANA. All rights reserved.
-          </p>
+
+          <div
+            className="pt-6 flex flex-col md:flex-row items-center justify-between gap-3"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+              © {new Date().getFullYear()} AVANA. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6 text-xs">
+              <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
+                 onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+                 onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
+                Privacy
+              </a>
+              <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
+                 onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+                 onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
+                Terms
+              </a>
+              <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
+                 onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+                 onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
+                Security
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="transition-colors"
+      style={{ color: "rgba(255,255,255,0.6)" }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}
+    >
+      {children}
+    </a>
   );
 }
