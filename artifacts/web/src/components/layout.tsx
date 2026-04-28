@@ -8,7 +8,6 @@ import {
   Network, 
   LayoutDashboard,
   Settings,
-  TerminalSquare,
   UserCircle,
   Target,
   Search,
