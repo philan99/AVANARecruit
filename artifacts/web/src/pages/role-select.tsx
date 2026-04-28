@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Building2, UserCircle, LogIn, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { RecruitFooter } from "@/components/recruit-footer";
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { MarketingNav } from "@/components/marketing-nav";
 import { Input } from "@/components/ui/input";
@@ -822,31 +823,7 @@ export default function RoleSelect() {
         </div>
       </section>
 
-      <footer style={{ backgroundColor: "#1a2035", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <img src={logoUrl} alt="AVANA Recruit" className="h-6" />
-            <div className="flex items-center gap-4">
-              <Link href="/terms" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Terms & Conditions
-              </Link>
-              <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
-              <Link href="/privacy-policy" className="text-xs hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Privacy Policy
-              </Link>
-              <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                © 2026 AVANA Services Limited. Company Number: 15268633
-              </p>
-            </div>
-          </div>
-          <div className="mt-1 text-right">
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-              Registered Office: 85 Great Portland Street, London, W1W 7LT
-            </p>
-          </div>
-        </div>
-      </footer>
+      <RecruitFooter />
 
       {showLogin && !loginErrorMsg && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
