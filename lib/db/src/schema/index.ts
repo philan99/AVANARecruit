@@ -20,3 +20,4 @@ export * from "./devOptions";
 export * from "./industries";
 export * from "./savedSearches";
 export * from "./userSessions";
+export * from "./insights";
