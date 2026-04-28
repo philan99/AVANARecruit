@@ -23,11 +23,7 @@ export function Landing({ onSignIn }: LandingProps) {
       {/* Top nav — branded navy */}
       <nav
         className="sticky top-0 z-30"
-        style={{
-          backgroundColor: NAVY,
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 1px 0 rgba(76,175,80,0.15)",
-        }}
+        style={{ backgroundColor: NAVY }}
         data-testid="brand-navbar"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
