@@ -182,7 +182,8 @@ export function Landing({ onSignIn }: LandingProps) {
               </h4>
               <ul className="space-y-3 text-sm">
                 <li><FooterLink href="/">AVANA Recruit</FooterLink></li>
-                <li><FooterLink href="/services-ai/">AVANA Services AI</FooterLink></li>
+                <li><FooterLink href="/services-ai/#onboard">AVANA Onboard</FooterLink></li>
+                <li><FooterLink href="/services-ai/#docs">AVANA Docs</FooterLink></li>
                 <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
               </ul>
             </div>
