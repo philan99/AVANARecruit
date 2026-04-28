@@ -56,7 +56,7 @@ export function SiteHeader() {
         <div className="hidden md:block">
           <Button 
             onClick={() => scrollTo("contact")}
-            className="bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-full px-6 transition-all border-none no-default-hover-elevate"
+            className="bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md px-6 transition-all border-none no-default-hover-elevate"
           >
             Partner With Us
           </Button>
@@ -79,7 +79,7 @@ export function SiteHeader() {
           <button onClick={() => scrollTo("faq")} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">FAQ</button>
           <Button 
             onClick={() => scrollTo("contact")}
-            className="w-full mt-4 bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-full border-none"
+            className="w-full mt-4 bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md border-none"
           >
             Partner With Us
           </Button>
