@@ -684,7 +684,7 @@ export default function Onboarding() {
                   <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#4CAF50" }} />
                   <div className="text-sm">
                     <p className="font-semibold" style={{ color: "#1a2035" }}>Reading your CV…</p>
-                    <p className="text-xs text-slate-600">This usually takes 5–15 seconds. We'll pre-fill the next steps for you.</p>
+                    <p className="text-xs text-slate-600">This usually takes 30–60 seconds. We'll pre-fill the next steps for you — feel free to wait or come back in a moment.</p>
                   </div>
                 </div>
               )}
