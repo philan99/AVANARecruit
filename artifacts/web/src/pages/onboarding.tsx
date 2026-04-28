@@ -743,6 +743,10 @@ export default function Onboarding() {
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Current job title<FieldBadge field="currentTitle" /></label>
                   <Input value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" />
                 </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
+                  <Input type="number" min="0" max="60" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 5" />
+                </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">
                     Town or city <span className="text-red-600" aria-hidden="true">*</span>
@@ -763,10 +767,6 @@ export default function Onboarding() {
                   {townError && (
                     <p className="mt-1 text-xs text-red-600" role="alert">{townError}</p>
                   )}
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
-                  <Input type="number" min="0" max="60" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 5" />
                 </div>
                 <div className="sm:col-span-2">
                   <div className="flex items-center justify-between mb-1">
