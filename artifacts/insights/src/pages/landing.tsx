@@ -320,9 +320,9 @@ function IntegrationsStrip() {
     { abbr: "RA", name: "REST API", color: "#1a2035" },
   ];
   return (
-    <section className="py-14 border-b" style={{ backgroundColor: "#ffffff", borderColor: "#eef0f3" }}>
+    <section className="py-14 border-b" style={{ backgroundColor: "#f3f5f8", borderColor: "#e5e9ef" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <p className="text-center text-xs font-semibold tracking-[0.2em] uppercase mb-8" style={{ color: "#6b7280" }}>
+        <p className="text-center text-xs font-semibold tracking-[0.2em] uppercase mb-8" style={{ color: "#4b5563" }}>
           Plugs into the tools you already use
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
@@ -428,7 +428,7 @@ function HowItWorks() {
     },
   ];
   return (
-    <section id="how-it-works" className="py-24" style={{ backgroundColor: "#fafafa" }}>
+    <section id="how-it-works" className="py-24" style={{ backgroundColor: "#f3f5f8" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
@@ -590,7 +590,7 @@ function Comparison() {
   ];
 
   return (
-    <section className="py-24" style={{ backgroundColor: "#fafafa" }}>
+    <section className="py-24" style={{ backgroundColor: "#f3f5f8" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
@@ -599,7 +599,7 @@ function Comparison() {
           <h2 className="text-3xl lg:text-4xl font-bold" style={{ color: NAVY }}>
             The right altitude.
           </h2>
-          <p className="mt-4 text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
+          <p className="mt-4 text-base max-w-2xl mx-auto" style={{ color: "#4b5563" }}>
             Spreadsheets break at scale. Hiring data engineers takes months. AVANA Insights sits in
             between — unified, intelligent, instant.
           </p>
@@ -790,7 +790,7 @@ function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-24" style={{ backgroundColor: "#fafafa" }}>
+    <section id="faq" className="py-24" style={{ backgroundColor: "#f3f5f8" }}>
       <div className="max-w-3xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-12">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
