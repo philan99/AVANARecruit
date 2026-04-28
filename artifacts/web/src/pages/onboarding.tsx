@@ -292,10 +292,8 @@ export default function Onboarding() {
         body: JSON.stringify({ cvFile: response.objectPath, cvFileName: savedName }),
       });
       queryClient.invalidateQueries({ queryKey: getGetCandidateQueryKey(candidateProfileId) });
-      toast({ title: "CV uploaded", description: "Reading your CV with AI…" });
+      toast({ title: "CV uploaded", description: "Confirm your settings above, then click Read my CV with AI." });
       cvFileNameRef.current = "";
-      // Kick off CV parsing in the background
-      parseCv(candidateProfileId);
     },
     onError: () => toast({ title: "Upload failed", description: "Could not upload CV.", variant: "destructive" }),
   });
@@ -708,10 +706,10 @@ export default function Onboarding() {
               )}
 
               {candidate?.cvFile && !parsingCv && (
-                fromCvFlow && prefillCount === 0 && !cvParseError ? (
+                prefillCount === 0 && !cvParseError ? (
                   <div className="mt-3 p-3 rounded-lg border" style={{ backgroundColor: "rgba(76,175,80,0.08)", borderColor: "rgba(76,175,80,0.3)" }}>
                     <p className="text-sm mb-2" style={{ color: "#1a2035" }}>
-                      Choose how you'd like your role descriptions handled above, then read your CV to pre-fill the next steps.
+                      Confirm your role-description choice above and that you've uploaded the right file, then start reading your CV.
                     </p>
                     <Button
                       type="button"
