@@ -213,10 +213,17 @@ export function Landing({ onSignIn }: LandingProps) {
           </div>
 
           <div
-            className="flex flex-col md:flex-row items-center justify-between gap-2 pt-4"
+            className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-4"
             style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
           >
-            <img src={logoUrl} alt="AVANA Insights" className="h-5 w-auto" />
+            <div className="space-y-1">
+              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                © {new Date().getFullYear()} AVANA Services Limited. Company Number: 15268633
+              </p>
+              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Registered Office: 85 Great Portland Street, London, W1W 7LT
+              </p>
+            </div>
             <div className="flex items-center gap-3">
               <a
                 href="/terms"
@@ -241,10 +248,6 @@ export function Landing({ onSignIn }: LandingProps) {
               >
                 Privacy Policy
               </a>
-              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
-              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                © {new Date().getFullYear()} AVANA Services Limited. Company Number: 15268633
-              </p>
             </div>
           </div>
         </div>
