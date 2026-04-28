@@ -1,0 +1,352 @@
+Build me a full-stack web application called AVANA Insights. This is an 
+AI-native data intelligence platform that allows users to connect multiple 
+data sources, interrogate that data using natural language, and make 
+enterprise decisions powered by AI recommendations. Below is the complete 
+specification.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECH STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Frontend: React with Tailwind CSS
+- Backend: Node.js with Express
+- Database: PostgreSQL (via Supabase)
+- AI Layer: Anthropic Claude API (claude-sonnet-4-20250514) for all 
+  natural language processing, querying, and decision intelligence
+- Authentication: Supabase Auth (email/password + Google OAuth)
+- Real-time: Supabase Realtime for live data updates
+- Deployment: Replit autoscale deployment
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BRANDING & DESIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+-  Use the avana-design syste,m for branding and design.
+- Logo: Use the attached file.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 1 — AUTHENTICATION & USER MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build a full authentication system with the following:
+
+1. Use the avana-login skill for login
+2. User profile page — edit name, email, avatar, company name
+3. Workspace system:
+   - Each user belongs to a Workspace (created on sign up)
+   - Workspaces can have multiple members
+   - Roles: Owner, Admin, Viewer
+   - Owners can invite members via email
+   - Each workspace has isolated data — no cross-workspace data leakage
+4. Billing tier stored on workspace: Free, Pro, Business, Enterprise
+5. Settings page with tabs: Profile, Workspace, Members, Billing, API Keys
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 2 — DATA SOURCE MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is the core ingestion layer. Users must be able to connect data 
+sources in three ways, and also build custom connectors themselves.
+
+--- 2A. API CONNECTOR (Pull-based) ---
+
+Allow users to create a custom API data source by configuring:
+
+- Source name (user defined, e.g. "Salesforce Leads")
+- Base URL of the external API
+- Authentication method: None / API Key (header or query param) / 
+  Bearer Token / Basic Auth / OAuth 2.0
+- HTTP method: GET / POST
+- Request headers (key-value pairs, user adds as many as needed)
+- Request body (for POST — JSON editor)
+- Response mapping: user selects which field in the JSON response 
+  contains the data array (e.g. "data.results" or "items")
+- Field mapping: auto-detect fields from a test response, allow user 
+  to rename, include/exclude, and set data types (string, number, 
+  date, boolean)
+- Sync schedule: Manual / Every 15 mins / Hourly / Daily / Weekly
+- On save: run a test pull, show preview of first 5 rows, confirm save
+
+--- 2B. WEBHOOK CONNECTOR (Push-based) ---
+
+Allow users to create a Webhook receiver:
+
+- Source name (user defined)
+- On creation: generate a unique AVANA Insights webhook URL 
+  (e.g. https://avanainsights.app/webhook/{workspace_id}/{source_id})
+- Show the webhook URL with a copy button and instructions for 
+  how to configure it in the sending system
+- Authentication: optionally require a secret token in the header 
+  for verification
+- Payload preview: show last 10 received payloads with timestamp
+- Field mapping: same as API connector — detect fields, rename, 
+  include/exclude, set types
+- Data is stored in real time as payloads arrive
+
+--- 2C. MCP CONNECTOR (Model Context Protocol) ---
+
+Allow users to connect an MCP server as a live data source:
+
+- Source name (user defined)
+- MCP server URL (SSE endpoint)
+- Authentication: Bearer token field
+- On connection: discover available MCP tools and resources, 
+  display them as a list with checkboxes — user selects which 
+  tools/resources to include as data in AVANA Insights
+- Show connection status (connected / disconnected / error) 
+  with last ping timestamp
+- Data from selected MCP tools is queryable in natural language 
+  just like any other source
+
+--- 2D. DATA SOURCES DASHBOARD ---
+
+A page listing all configured data sources with:
+- Source name, type (API / Webhook / MCP), status (Active / Error / 
+  Paused), last synced timestamp, record count
+- Edit, Pause, Delete actions per source
+- A green "Add Data Source" button that opens a modal asking the user 
+  to choose: API / Webhook / MCP, then launches the relevant setup flow
+- A sync log per source — show last 20 sync events with status and 
+  record counts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 3 — UNIFIED DATA LAYER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All ingested data from all sources must be stored in a normalised, 
+queryable format in PostgreSQL. Build the following:
+
+1. A dynamic schema system — each data source creates its own table 
+   in the workspace's data schema, named after the source
+2. A unified metadata table tracking: source name, source type, 
+   field names, field types, record count, last updated
+3. A Data Explorer page:
+   - Shows all data sources as tabs or a left sidebar
+   - Clicking a source shows a paginated table of its data (50 rows 
+     per page) with search and column sorting
+   - A "Refresh" button to trigger a manual sync
+   - Show total record count and last updated timestamp
+4. Data is automatically cleaned on ingestion:
+   - Trim whitespace from strings
+   - Normalise date formats to ISO 8601
+   - Flag and isolate null/empty records in a separate "flagged" view
+   - Deduplicate records based on a user-defined primary key field 
+     per source
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 4 — NATURAL LANGUAGE QUERY ENGINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is the intelligence layer. Users must be able to ask questions 
+about their data in plain English and receive accurate, sourced answers.
+
+Build a Query page with the following:
+
+1. A prominent search/query bar at the top — placeholder text: 
+   "Ask anything about your data..."
+2. A source selector — dropdown or multi-select chips letting the 
+   user choose which data sources to query (defaults to all)
+3. When a query is submitted:
+   a. Send the query + the relevant data schema (field names, types, 
+      sample values) to the Claude API
+   b. Claude generates a structured response containing:
+      - A plain English answer
+      - The specific data points or records that support the answer
+      - A suggested visualisation type (table / bar chart / line 
+        chart / number / pie chart)
+      - A confidence level (High / Medium / Low) with a brief 
+        explanation of why
+   c. Render the answer as a card below the query bar containing 
+      all four elements above
+4. Query history — show the last 20 queries in a collapsible sidebar, 
+   clickable to reload the result
+5. Support follow-up questions — maintain conversation context so 
+   users can ask "now filter that by last month" or "show me just 
+   the top 5" without restating the full question
+6. Export result — button to download the answer data as CSV or copy 
+   as JSON
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 5 — ENTERPRISE DECISION INTELLIGENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is the highest-value layer — AI-powered decision making in 
+natural language. Build a Decisions page with the following:
+
+--- 5A. DECISION BUILDER ---
+
+A structured form where users describe a decision they need to make:
+
+- Decision title (e.g. "Should we expand into the German market?")
+- Decision type: Strategic / Operational / Financial / HR / Other
+- Context field: free text — user describes the background, 
+  constraints, and what a good outcome looks like
+- Data sources to consider: multi-select from connected sources
+- Stakeholders: optional list of names/roles who will see this decision
+- Urgency: Low / Medium / High / Critical
+
+On submit, send everything to Claude with a system prompt instructing 
+it to act as an enterprise decision analyst. Claude must return a 
+structured Decision Report containing:
+
+1. Executive Summary — 2-3 sentence plain English summary of the 
+   recommended decision
+2. Recommendation — a clear, unambiguous recommended action
+3. Confidence Score — 0-100% with explanation
+4. Supporting Evidence — bullet list of specific data points from 
+   the connected sources that support the recommendation
+5. Risks & Considerations — what could go wrong, what data is 
+   missing, what assumptions were made
+6. Alternative Options — 2-3 other possible decisions with pros/cons
+7. Suggested Next Steps — 3-5 actionable steps to implement 
+   the recommendation
+
+--- 5B. DECISION LIBRARY ---
+
+A searchable, filterable list of all decisions made in the workspace:
+- Decision title, type, date created, created by, recommendation 
+  summary, confidence score
+- Filter by: type, date range, confidence level, creator
+- Click any decision to view the full Decision Report
+- Status field: Draft / Under Review / Approved / Rejected / 
+  Implemented — manually updated by the user
+- Export decision as PDF
+
+--- 5C. DECISION ALERTS ---
+
+Allow users to set up automated decision triggers:
+- User defines a condition in natural language 
+  (e.g. "Alert me when monthly revenue drops below £50,000")
+- System checks this condition on each data sync
+- When triggered: send an email notification + create a draft 
+  Decision Report automatically in the Decision Library
+- Show active alerts on a simple management page with 
+  on/off toggles
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 6 — DASHBOARDS & VISUALISATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build a Dashboards page with the following:
+
+1. Users can create multiple named dashboards 
+   (e.g. "Sales Overview", "HR Metrics")
+2. Each dashboard contains widgets. Widget types:
+   - Number / KPI card (single metric with label and trend arrow)
+   - Bar chart
+   - Line chart
+   - Pie / donut chart
+   - Data table (paginated)
+   - Text / markdown note block
+3. Adding a widget:
+   - User types what they want in natural language 
+     (e.g. "Show me total revenue by month for the last 6 months")
+   - Claude interprets the request, selects the right data source 
+     and fields, generates the query, and renders the widget
+   - User can then edit the title and resize the widget
+4. Dashboard layout: drag-and-drop grid (use react-grid-layout)
+5. Dashboards auto-refresh on a configurable interval 
+   (off / 5 mins / 15 mins / 1 hour)
+6. Share dashboard: generate a read-only public link or share 
+   with specific workspace members
+7. Export dashboard as PDF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 7 — NAVIGATION & GLOBAL UI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build a persistent left sidebar navigation with:
+
+- AVANA Insights logo at the top
+- Nav items: Home / Data Sources / Data Explorer / Query / 
+  Decisions / Dashboards / Settings
+- Active state highlighted in green
+- Workspace name and user avatar at the bottom with a dropdown 
+  for: Switch Workspace / Profile / Logout
+- Collapsed/expanded toggle for the sidebar
+
+Home / Dashboard page should show:
+- Welcome message with user's first name
+- Summary cards: Total Data Sources, Total Records, Queries 
+  This Week, Decisions Made
+- Recent activity feed: last 10 queries and decisions with 
+  timestamps
+- Quick action buttons: Add Data Source / Ask a Question / 
+  New Decision
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULE 8 — API & ENVIRONMENT CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Environment variables required (set in Replit Secrets):
+- ANTHROPIC_API_KEY — for all Claude API calls
+- SUPABASE_URL — Supabase project URL
+- SUPABASE_ANON_KEY — Supabase anon key
+- SUPABASE_SERVICE_KEY — Supabase service role key
+- WEBHOOK_SECRET — default secret for webhook verification
+
+All Claude API calls must use model: claude-sonnet-4-20250514
+All Claude API calls must include a well-structured system prompt 
+that gives Claude full context of the workspace's data schema 
+before any user query is processed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DATABASE SCHEMA (PostgreSQL via Supabase)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create the following core tables:
+
+workspaces: id, name, owner_id, billing_tier, created_at
+users: id, email, full_name, avatar_url, company, created_at
+workspace_members: workspace_id, user_id, role, invited_at, 
+  accepted_at
+data_sources: id, workspace_id, name, type (api/webhook/mcp), 
+  config (jsonb), status, last_synced_at, record_count, created_at
+sync_logs: id, source_id, status, records_synced, error_message, 
+  created_at
+queries: id, workspace_id, user_id, question, sources_used, 
+  response (jsonb), created_at
+decisions: id, workspace_id, user_id, title, type, context, 
+  status, report (jsonb), confidence_score, created_at
+dashboards: id, workspace_id, name, layout (jsonb), created_by, 
+  created_at
+widgets: id, dashboard_id, type, title, config (jsonb), 
+  position (jsonb)
+alerts: id, workspace_id, condition_text, is_active, 
+  last_triggered_at, created_at
+
+Each workspace's ingested data lives in dynamically created 
+tables named: ws_{workspace_id}_{source_name}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUILD ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build in this order to ensure each layer works before the next:
+
+1. Database schema and Supabase setup
+2. Authentication and user management
+3. Workspace system and settings
+4. Data Sources — API connector first, then Webhook, then MCP
+5. Unified data layer and Data Explorer
+6. Natural language query engine
+7. Dashboards and visualisations
+8. Decision Intelligence module
+9. Decision Alerts
+10. Global navigation, Home page, and polish
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPORTANT CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Never expose API keys or secrets in the frontend
+- All Claude API calls must be made server-side via the Express 
+  backend — never directly from the React frontend
+- All data must be scoped to the workspace — no user should ever 
+  see another workspace's data
+- Every page must be fully responsive (mobile + desktop)
+- Use loading states and skeleton loaders on all async operations
+- Use toast notifications for success/error feedback throughout
+- Include error boundaries on all major React components
+- Write clear inline comments throughout the codebase explaining 
+  what each section does
