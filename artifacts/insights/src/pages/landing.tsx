@@ -42,6 +42,8 @@ export function Landing({ onSignIn }: LandingProps) {
             </a>
             <a
               href="/services-ai/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium transition-colors"
               style={{ color: "rgba(255,255,255,0.7)" }}
               onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
@@ -51,6 +53,8 @@ export function Landing({ onSignIn }: LandingProps) {
             </a>
             <a
               href="/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium transition-colors"
               style={{ color: "rgba(255,255,255,0.7)" }}
               onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
@@ -181,9 +185,9 @@ export function Landing({ onSignIn }: LandingProps) {
                 AVANA Suite
               </h4>
               <ul className="space-y-3 text-sm">
-                <li><FooterLink href="/">AVANA Recruit</FooterLink></li>
-                <li><FooterLink href="/services-ai/#onboard">AVANA Onboard</FooterLink></li>
-                <li><FooterLink href="/services-ai/#docs">AVANA Docs</FooterLink></li>
+                <li><FooterLink href="/" external>AVANA Recruit</FooterLink></li>
+                <li><FooterLink href="/services-ai/#onboard" external>AVANA Onboard</FooterLink></li>
+                <li><FooterLink href="/services-ai/#docs" external>AVANA Docs</FooterLink></li>
                 <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
               </ul>
             </div>
@@ -216,6 +220,8 @@ export function Landing({ onSignIn }: LandingProps) {
             <div className="flex items-center gap-3">
               <a
                 href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[11px] transition-colors"
                 style={{ color: "rgba(255,255,255,0.3)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
@@ -226,6 +232,8 @@ export function Landing({ onSignIn }: LandingProps) {
               <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
               <a
                 href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[11px] transition-colors"
                 style={{ color: "rgba(255,255,255,0.3)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
@@ -245,10 +253,11 @@ export function Landing({ onSignIn }: LandingProps) {
   );
 }
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+function FooterLink({ href, children, external }: { href: string; children: React.ReactNode; external?: boolean }) {
   return (
     <a
       href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className="transition-colors"
       style={{ color: "rgba(255,255,255,0.6)" }}
       onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
