@@ -36,10 +36,9 @@ export function MarketingNav({ active = null, onSignIn, onGetStarted, onPricing 
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 border-b"
+      className="fixed top-0 left-0 right-0 z-50"
       style={{
         backgroundColor: "rgba(26, 32, 53, 0.97)",
-        borderColor: "rgba(255,255,255,0.08)",
         backdropFilter: "blur(12px)",
       }}
     >
