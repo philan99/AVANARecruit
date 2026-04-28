@@ -391,6 +391,19 @@ export default function Onboarding() {
       });
       return;
     }
+    if (
+      step === 8 &&
+      preferredJobTypes.length === 0 &&
+      preferredWorkplaces.length === 0 &&
+      preferredIndustries.length === 0
+    ) {
+      toast({
+        title: "Make a choice or skip",
+        description: "Pick at least one Job Type, Workplace or Industry — or hit Skip to do this later.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const dataOk = await saveStepData();
