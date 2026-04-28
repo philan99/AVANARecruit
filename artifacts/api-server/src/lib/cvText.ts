@@ -1,5 +1,6 @@
 import { extractText, getDocumentProxy } from "unpdf";
 import mammoth from "mammoth";
+import WordExtractor from "word-extractor";
 
 export async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -16,7 +17,9 @@ export async function extractCvText(buffer: Buffer, fileName: string): Promise<s
     return result.value || "";
   }
   if (lower.endsWith(".doc")) {
-    throw new Error("Legacy .doc format is not supported. Please save as .docx or PDF.");
+    const extractor = new WordExtractor();
+    const doc = await extractor.extract(buffer);
+    return doc.getBody() || "";
   }
   if (lower.endsWith(".txt")) {
     return buffer.toString("utf8");

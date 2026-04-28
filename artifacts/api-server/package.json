@@ -28,7 +28,8 @@
     "pino-http": "^10",
     "resend": "4.0.0",
     "sanitize-html": "^2.17.3",
-    "unpdf": "^1.6.0"
+    "unpdf": "^1.6.0",
+    "word-extractor": "^1.0.4"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
