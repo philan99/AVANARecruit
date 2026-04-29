@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, UserCircle, LogIn, ArrowRight, Lightbulb, TrendingUp, Heart, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Building2, UserCircle, LogIn, ArrowRight, ChevronRight, Sparkles, Target, Users, BarChart3, Globe, Lock, Check, UserPlus, ShieldCheck, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { RecruitFooter } from "@/components/recruit-footer";
 import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
 import { MarketingNav } from "@/components/marketing-nav";
@@ -324,24 +324,6 @@ export default function RoleSelect() {
       title: "Analytics",
       subtitle: "Recruitment Intelligence",
       description: "Real-time dashboards and reporting to track performance, identify trends, and optimise your hiring strategy.",
-    },
-  ];
-
-  const values = [
-    {
-      icon: Lightbulb,
-      title: "Innovation",
-      description: "We drive strategic recruitment innovation by harnessing the latest in AI and data science.",
-    },
-    {
-      icon: TrendingUp,
-      title: "Value Driven",
-      description: "Our approach delivers tangible results — faster hires, better matches, and reduced recruitment costs.",
-    },
-    {
-      icon: Heart,
-      title: "People First",
-      description: "Every solution is built around people, ensuring candidates and companies find their perfect match.",
     },
   ];
 
@@ -675,31 +657,6 @@ export default function RoleSelect() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 lg:py-28" style={{ backgroundColor: "#1a2035" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
-              Our Core Values
-            </p>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight" style={{ color: "#ffffff" }}>
-              Everything We Do is Underpinned
-              <br className="hidden lg:block" />by Our Core Values
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {values.map((value) => (
-              <div key={value.title} className="text-center">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.12)" }}>
-                  <value.icon className="w-6 h-6" style={{ color: "#4CAF50" }} />
-                </div>
-                <h3 className="text-lg font-bold mb-2" style={{ color: "#ffffff" }}>{value.title}</h3>
-                <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>{value.description}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
