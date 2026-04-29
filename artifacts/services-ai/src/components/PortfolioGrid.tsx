@@ -43,7 +43,7 @@ const portfolioItems = [
 
 export function PortfolioGrid() {
   return (
-    <section id="services" className="py-24 bg-background">
+    <section id="services" className="py-24 bg-[#f3f5f8]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6 text-foreground">
