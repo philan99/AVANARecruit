@@ -89,27 +89,32 @@ export function SiteFooter() {
         </div>
 
         <div
-          className="pt-6 flex flex-col md:flex-row items-center justify-between gap-3"
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-4"
           style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-            © {new Date().getFullYear()} AVANA. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6 text-xs">
-            <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
-               onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
-               onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
-              Privacy
+          <div className="space-y-1">
+            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+              © {new Date().getFullYear()} AVANA Services Limited. Company Number: 15268633
+            </p>
+            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+              Registered Office: 85 Great Portland Street, London, W1W 7LT
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="/terms"
+              className="text-[11px] transition-colors hover:text-white/50"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              Terms &amp; Conditions
             </a>
-            <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
-               onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
-               onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
-              Terms
-            </a>
-            <a href="#" className="transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
-               onMouseEnter={(e) => { e.currentTarget.style.color = GREEN; }}
-               onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}>
-              Security
+            <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
+            <a
+              href="/privacy-policy"
+              className="text-[11px] transition-colors hover:text-white/50"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              Privacy Policy
             </a>
           </div>
         </div>
