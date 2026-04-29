@@ -10,7 +10,7 @@ const portfolioItems = [
     subtitle: "AI-Powered Talent Matching",
     description: "Matches candidates and companies across six weighted dimensions with verified credentials and bias-free screening.",
     icon: Users,
-    href: "#recruit"
+    href: "/services-ai/our-portfolio#recruit"
   },
   {
     id: "onboard",
@@ -19,7 +19,7 @@ const portfolioItems = [
     subtitle: "AI-Powered Employee Onboarding",
     description: "Picks up the moment a candidate is hired — automating documents, training and 30/60/90-day check-ins.",
     icon: ShieldCheck,
-    href: "#onboard"
+    href: "/services-ai/our-portfolio#onboard"
   },
   {
     id: "docs",
@@ -28,7 +28,7 @@ const portfolioItems = [
     subtitle: "AI Document & Knowledge Assistant",
     description: "Upload contracts, policies or job specs and ask questions in plain English. Talk to your documents.",
     icon: FileText,
-    href: "#docs"
+    href: "/services-ai/our-portfolio#docs"
   },
   {
     id: "insights",
@@ -37,7 +37,7 @@ const portfolioItems = [
     subtitle: "AI Data Consolidation Platform",
     description: "Connect any data source and query unified, AI-cleaned data in plain English. No SQL required.",
     icon: BarChart3,
-    href: "#insights"
+    href: "/services-ai/our-portfolio#insights"
   }
 ];
 
@@ -63,10 +63,6 @@ export function PortfolioGrid() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              onClick={(e) => {
-                e.preventDefault();
-                document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' });
-              }}
               className="block group relative bg-card border border-card-border p-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30"
             >
               <div className="flex justify-between items-start mb-6">

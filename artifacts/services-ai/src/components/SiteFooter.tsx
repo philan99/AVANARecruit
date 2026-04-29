@@ -49,10 +49,10 @@ export function SiteFooter() {
               Product
             </h4>
             <ul className="space-y-3 text-sm">
-              <li><FooterLink href="#recruit">Recruit</FooterLink></li>
-              <li><FooterLink href="#onboard">Onboard</FooterLink></li>
-              <li><FooterLink href="#docs">Docs Chat</FooterLink></li>
-              <li><FooterLink href="#insights">Insights</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#recruit">Recruit</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#onboard">Onboard</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#docs">Docs Chat</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#insights">Insights</FooterLink></li>
             </ul>
           </div>
 
@@ -62,8 +62,8 @@ export function SiteFooter() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><FooterLink href="https://avanarecruit.ai/">AVANA Recruit</FooterLink></li>
-              <li><FooterLink href="#onboard">AVANA Onboard</FooterLink></li>
-              <li><FooterLink href="#docs">AVANA Docs</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#onboard">AVANA Onboard</FooterLink></li>
+              <li><FooterLink href="/services-ai/our-portfolio#docs">AVANA Docs</FooterLink></li>
               <li><FooterLink href="https://avana-talent-match.replit.app/insights/">AVANA Insights</FooterLink></li>
             </ul>
           </div>
