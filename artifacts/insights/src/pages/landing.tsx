@@ -853,19 +853,13 @@ function FAQ() {
 
 function FinalCTA({ onSignIn }: { onSignIn: () => void }) {
   return (
-    <section className="relative overflow-hidden" style={{ backgroundColor: NAVY }}>
-      <div className="absolute inset-0">
-        <div
-          className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full opacity-[0.07]"
-          style={{ background: `radial-gradient(circle, ${GREEN} 0%, transparent 70%)` }}
-        />
-      </div>
-      <div className="relative max-w-4xl mx-auto px-6 lg:px-10 py-24 text-center">
-        <Compass className="w-10 h-10 mx-auto mb-5" style={{ color: GREEN }} />
-        <h2 className="text-3xl lg:text-5xl font-bold mb-4" style={{ color: "#fff" }}>
+    <section style={{ backgroundColor: NAVY }}>
+      <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14 text-center">
+        <Compass className="w-9 h-9 mx-auto mb-4" style={{ color: GREEN }} />
+        <h2 className="text-3xl lg:text-4xl font-bold mb-3" style={{ color: "#fff" }}>
           Stop guessing. Start asking.
         </h2>
-        <p className="text-base lg:text-lg mb-8 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.65)" }}>
+        <p className="text-base mb-7 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.65)" }}>
           Connect your first source in two minutes. We'll handle the rest.
         </p>
         <button
