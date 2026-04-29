@@ -963,7 +963,7 @@ function Footer({ onSignIn }: { onSignIn: () => void }) {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/services-ai/terms"
+              href="/insights/terms"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
@@ -971,7 +971,7 @@ function Footer({ onSignIn }: { onSignIn: () => void }) {
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
             <a
-              href="/services-ai/privacy-policy"
+              href="/insights/privacy-policy"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >

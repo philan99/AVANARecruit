@@ -10,6 +10,8 @@ import { Landing } from "@/pages/landing";
 import Home from "@/pages/home";
 import Settings from "@/pages/settings";
 import { ComingSoon } from "@/pages/coming-soon";
+import Terms from "@/pages/terms";
+import PrivacyPolicy from "@/pages/privacy-policy";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -74,16 +76,22 @@ function AppRouter() {
   const { role } = useRole();
   const [showLogin, setShowLogin] = useState(false);
 
-  if (!role) {
-    return (
-      <>
-        <Landing onSignIn={() => setShowLogin(true)} />
-        <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
-      </>
-    );
-  }
-
-  return <AuthedRoutes />;
+  return (
+    <Switch>
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route>
+        {!role ? (
+          <>
+            <Landing onSignIn={() => setShowLogin(true)} />
+            <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
+          </>
+        ) : (
+          <AuthedRoutes />
+        )}
+      </Route>
+    </Switch>
+  );
 }
 
 function App() {

@@ -47,6 +47,8 @@ import AdminSettings from "@/pages/admin-settings";
 import AdminDevelopment from "@/pages/admin-development";
 import VerifyPage from "@/pages/verify";
 import HowItWorks from "@/pages/how-it-works";
+import Terms from "@/pages/terms";
+import PrivacyPolicy from "@/pages/privacy-policy";
 import ResetPassword from "@/pages/reset-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import PortalContactUs from "@/pages/portal-contact-us";
@@ -161,11 +163,22 @@ function AppRouter() {
     pathname.endsWith("/verify-email") ||
     pathname.includes("/verify/") ||
     pathname.endsWith("/reset-password");
+  const isLegalPath = /^\/(?:terms|privacy-policy)\/?$/.test(pathname);
 
   if (isAcceptInvite) {
     return (
       <Switch>
         <Route path="/accept-invite" component={AcceptInvite} />
+      </Switch>
+    );
+  }
+
+  if (isLegalPath) {
+    return (
+      <Switch>
+        <Route path="/terms" component={Terms} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route component={NotFound} />
       </Switch>
     );
   }

@@ -87,7 +87,7 @@ export function RecruitFooter() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/services-ai/terms"
+              href="/terms"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
@@ -95,7 +95,7 @@ export function RecruitFooter() {
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
             <a
-              href="/services-ai/privacy-policy"
+              href="/privacy-policy"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
@@ -128,7 +128,7 @@ export function RecruitFooterCompact() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/services-ai/terms"
+              href="/terms"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
@@ -136,7 +136,7 @@ export function RecruitFooterCompact() {
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
             <a
-              href="/services-ai/privacy-policy"
+              href="/privacy-policy"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
