@@ -49,7 +49,7 @@ function TopNav({ onSignIn }: { onSignIn: () => void }) {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-3 shrink-0">
-          <img src={logoUrl} alt="AVANA Insights" className="h-8 w-auto" />
+          <img src={logoUrl} alt="AVANA Insights" className="h-7 w-auto" />
         </a>
         <div className="hidden md:flex items-center gap-8 text-sm">
           <NavLink href="#capabilities">Capabilities</NavLink>
