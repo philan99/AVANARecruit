@@ -369,13 +369,13 @@ function Capabilities() {
     },
   ];
   return (
-    <section id="capabilities" className="py-24" style={{ backgroundColor: "#ffffff" }}>
+    <section id="capabilities" className="py-24" style={{ backgroundColor: NAVY }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
             Capabilities
           </p>
-          <h2 className="text-3xl lg:text-4xl font-bold" style={{ color: NAVY }}>
+          <h2 className="text-3xl lg:text-4xl font-bold" style={{ color: "#ffffff" }}>
             From scattered to single source of truth.
           </h2>
         </div>
@@ -384,16 +384,16 @@ function Capabilities() {
             <div
               key={title}
               className="rounded-xl p-6 border transition-all hover:shadow-md"
-              style={{ borderColor: "#e5e7eb", backgroundColor: "#fafafa" }}
+              style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.04)" }}
             >
               <div
                 className="w-11 h-11 rounded-md flex items-center justify-center mb-4"
-                style={{ backgroundColor: "rgba(76,175,80,0.12)" }}
+                style={{ backgroundColor: "rgba(76,175,80,0.15)" }}
               >
                 <Icon className="w-5 h-5" style={{ color: GREEN }} />
               </div>
-              <h3 className="text-base font-semibold mb-2" style={{ color: NAVY }}>{title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{desc}</p>
+              <h3 className="text-base font-semibold mb-2" style={{ color: "#ffffff" }}>{title}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -479,16 +479,16 @@ function TrustLineage() {
   ];
   const lineage = ["HubSpot", "Stripe", "Shopify", "AI Clean", "Customers", "Dashboard"];
   return (
-    <section className="py-24" style={{ backgroundColor: "#ffffff" }}>
+    <section className="py-24" style={{ backgroundColor: NAVY }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-6">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
             Trust by lineage
           </p>
-          <h2 className="text-3xl lg:text-4xl font-bold mb-5" style={{ color: NAVY }}>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-5" style={{ color: "#ffffff" }}>
             Every answer traces back to its source.
           </h2>
-          <p className="text-base leading-relaxed mb-6" style={{ color: "#6b7280" }}>
+          <p className="text-base leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.65)" }}>
             See exactly where each number comes from — which sources fed it, which AI transformations
             cleaned it, which dashboards depend on it. No more "where did this come from?" Slack
             threads at 11pm.
@@ -498,11 +498,11 @@ function TrustLineage() {
               <li key={b} className="flex items-start gap-3">
                 <span
                   className="mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full shrink-0"
-                  style={{ backgroundColor: "rgba(76,175,80,0.15)" }}
+                  style={{ backgroundColor: "rgba(76,175,80,0.18)" }}
                 >
                   <Check className="w-3 h-3" style={{ color: GREEN }} />
                 </span>
-                <span className="text-sm" style={{ color: NAVY }}>{b}</span>
+                <span className="text-sm" style={{ color: "#ffffff" }}>{b}</span>
               </li>
             ))}
           </ul>
@@ -510,9 +510,9 @@ function TrustLineage() {
         <div className="lg:col-span-6">
           <div
             className="relative rounded-xl border p-6"
-            style={{ borderColor: "#e5e7eb", backgroundColor: "#fafafa" }}
+            style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.04)" }}
           >
-            <div className="flex items-center gap-2 mb-5 text-xs" style={{ color: "#9ca3af" }}>
+            <div className="flex items-center gap-2 mb-5 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
               <ScanSearch className="w-4 h-4" style={{ color: GREEN }} />
               Lineage trace
             </div>
@@ -522,15 +522,15 @@ function TrustLineage() {
                   <span
                     className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium border"
                     style={{
-                      backgroundColor: i === lineage.length - 1 ? "rgba(76,175,80,0.12)" : "#fff",
-                      borderColor: i === lineage.length - 1 ? "rgba(76,175,80,0.4)" : "#e5e7eb",
-                      color: i === lineage.length - 1 ? GREEN : NAVY,
+                      backgroundColor: i === lineage.length - 1 ? "rgba(76,175,80,0.15)" : "rgba(255,255,255,0.06)",
+                      borderColor: i === lineage.length - 1 ? "rgba(76,175,80,0.4)" : "rgba(255,255,255,0.12)",
+                      color: i === lineage.length - 1 ? GREEN : "#ffffff",
                     }}
                   >
                     {node}
                   </span>
                   {i < lineage.length - 1 && (
-                    <span style={{ color: "#cbd5e1" }}>→</span>
+                    <span style={{ color: "rgba(255,255,255,0.3)" }}>→</span>
                   )}
                 </span>
               ))}
@@ -541,11 +541,11 @@ function TrustLineage() {
                 { label: "Avg quality", value: "94.2" },
                 { label: "Open issues", value: "3" },
               ].map((m) => (
-                <div key={m.label} className="rounded-md border p-3" style={{ borderColor: "#e5e7eb", backgroundColor: "#fff" }}>
-                  <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#9ca3af" }}>
+                <div key={m.label} className="rounded-md border p-3" style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.04)" }}>
+                  <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.6)" }}>
                     {m.label}
                   </p>
-                  <p className="text-base font-bold mt-1" style={{ color: NAVY }}>{m.value}</p>
+                  <p className="text-base font-bold mt-1" style={{ color: "#ffffff" }}>{m.value}</p>
                 </div>
               ))}
             </div>
@@ -685,13 +685,13 @@ function Pricing({ onSignIn }: { onSignIn: () => void }) {
   ];
 
   return (
-    <section id="pricing" className="py-24" style={{ backgroundColor: "#ffffff" }}>
+    <section id="pricing" className="py-24" style={{ backgroundColor: NAVY }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: GREEN }}>
             Pricing
           </p>
-          <h2 className="text-3xl lg:text-4xl font-bold" style={{ color: NAVY }}>
+          <h2 className="text-3xl lg:text-4xl font-bold" style={{ color: "#ffffff" }}>
             Honest, simple, flat fees.
           </h2>
         </div>
