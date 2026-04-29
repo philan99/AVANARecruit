@@ -102,7 +102,7 @@ export function SiteFooter() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/terms"
+              href="/services-ai/terms"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >
@@ -110,7 +110,7 @@ export function SiteFooter() {
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
             <a
-              href="/privacy-policy"
+              href="/services-ai/privacy-policy"
               className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
             >

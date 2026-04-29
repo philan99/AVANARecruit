@@ -46,8 +46,6 @@ import AdminCandidateMatches from "@/pages/admin-candidate-matches";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDevelopment from "@/pages/admin-development";
 import VerifyPage from "@/pages/verify";
-import Terms from "@/pages/terms";
-import PrivacyPolicy from "@/pages/privacy-policy";
 import HowItWorks from "@/pages/how-it-works";
 import ResetPassword from "@/pages/reset-password";
 import VerifyEmailPage from "@/pages/verify-email";
@@ -190,8 +188,6 @@ function AppRouter() {
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/contact-us" component={ContactUs} />
         <Route path="/how-it-works" component={HowItWorks} />
-        <Route path="/terms" component={Terms} />
-        <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route component={RoleSelect} />
       </Switch>
     );

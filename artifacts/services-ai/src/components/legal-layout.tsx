@@ -63,7 +63,7 @@ function LegalFooter() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/terms"
+              href="/services-ai/terms"
               className="text-[11px] transition-colors hover:text-white/70"
               style={{ color: "rgba(255,255,255,0.5)" }}
             >
@@ -71,7 +71,7 @@ function LegalFooter() {
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
             <a
-              href="/privacy-policy"
+              href="/services-ai/privacy-policy"
               className="text-[11px] transition-colors hover:text-white/70"
               style={{ color: "rgba(255,255,255,0.5)" }}
             >
