@@ -1,16 +1,11 @@
-import logoUrl from "@assets/Full_Logo_-_GREEN_1776492081935.png";
-import { Link } from "wouter";
-import { RecruitFooter } from "@/components/recruit-footer";
 import { useEffect } from "react";
-import { MarketingNav } from "@/components/marketing-nav";
+import { LegalLayout } from "@/components/legal-layout";
 
 export default function PrivacyPolicy() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      <MarketingNav />
-
-      <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-[120px] pb-20">
+    <LegalLayout>
+      <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-16 pb-20">
         <h1 className="text-3xl lg:text-4xl font-bold mb-2" style={{ color: "#1a2035" }}>Privacy Policy</h1>
         <p className="text-sm mb-10" style={{ color: "#6b7280" }}>Last updated: April 2026</p>
 
@@ -18,33 +13,40 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>1. Introduction</h2>
             <p>
-              AVANA Services Limited ("we", "us", "our"), a company registered in England and Wales (Company Number: 15268633), is committed to protecting and respecting your privacy.
+              AVANA Services Limited ("AVANA", "we", "us", "our"), a company registered in England and Wales (Company Number: 15268633), is committed to protecting and respecting your privacy.
             </p>
             <p className="mt-3">
-              This Privacy Policy explains how we collect, use, store, and share your personal data when you use the AVANA Recruit platform ("Platform"), and your rights in relation to that data. This policy applies to all Users of the Platform, including Candidates, Companies, and visitors.
+              This Privacy Policy explains how we collect, use, store, and share your personal data when you use any platform in the AVANA Suite — currently AVANA Recruit, AVANA Onboard, AVANA Docs and AVANA Insights, together with the parent AVANA Services site (each a "Platform" and together the "Platforms") — and your rights in relation to that data. It applies to all Users, including individual end users, customer organisations, and visitors.
             </p>
             <p className="mt-3">
-              We act as the Data Controller for the personal data processed through the Platform, in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+              We act as the Data Controller for personal data we collect directly through the Platforms (for example, account, contact and usage data), and as a Data Processor for personal data processed on behalf of a customer organisation (for example, candidate data inside AVANA Recruit, employee data inside AVANA Onboard or business data ingested by AVANA Insights), in each case in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>2. Information We Collect</h2>
-            <p>We may collect and process the following categories of personal data:</p>
-            <h3 className="font-semibold mt-4 mb-2" style={{ color: "#1a2035" }}>2.1 Information You Provide</h3>
+            <p>The categories of personal data we may collect and process depend on which Platform(s) you use.</p>
+
+            <h3 className="font-semibold mt-4 mb-2" style={{ color: "#1a2035" }}>2.1 Information Common to All Platforms</h3>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Account Information:</strong> Name, email address, and role selection (Candidate or Company).</li>
-              <li><strong>Candidate Profile Data:</strong> Current job title, skills, experience, education history, salary expectations, location preferences, availability, work authorisation status, LinkedIn and social media URLs, and any other information you choose to include in your profile.</li>
-              <li><strong>Company Profile Data:</strong> Company name, industry, size, location, website, description, and contact details.</li>
-              <li><strong>Job Listing Data:</strong> Job titles, descriptions, requirements, salary ranges, and workplace preferences.</li>
-              <li><strong>Verification Data:</strong> Names and email addresses of individuals you request to verify your employment history, and the responses provided by those individuals.</li>
-              <li><strong>Contact Form Data:</strong> Name, email address, and message content submitted through our Contact Us form.</li>
+              <li><strong>Account Information:</strong> name, email address, organisation, role, and authentication data.</li>
+              <li><strong>Contact Form Data:</strong> name, email address, company, the Platform of interest, and message content submitted through any "Contact Us" or "Partner With Us" form.</li>
+              <li><strong>Communications:</strong> records of correspondence between you and AVANA (e.g. support emails).</li>
             </ul>
-            <h3 className="font-semibold mt-4 mb-2" style={{ color: "#1a2035" }}>2.2 Information Collected Automatically</h3>
+
+            <h3 className="font-semibold mt-4 mb-2" style={{ color: "#1a2035" }}>2.2 Platform-Specific Information</h3>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Usage Data:</strong> Information about how you interact with the Platform, including pages visited, features used, and actions taken.</li>
-              <li><strong>Technical Data:</strong> Browser type, operating system, IP address, and device information.</li>
-              <li><strong>Cookies:</strong> We may use essential cookies to maintain session state and Platform functionality.</li>
+              <li><strong>AVANA Recruit:</strong> candidate profile data (job title, skills, experience, education, salary expectations, location preferences, availability, work authorisation, profile and social URLs); company profile and job listing data; verification requests and responses.</li>
+              <li><strong>AVANA Onboard:</strong> new-hire profile data, onboarding plan progress, document pack contents, e-signature events, and check-in / sentiment responses.</li>
+              <li><strong>AVANA Docs:</strong> documents and files you upload, the questions you ask of those documents, and the AI-generated answers and annotations.</li>
+              <li><strong>AVANA Insights:</strong> the metadata, schemas and records ingested from data sources you connect (e.g. HubSpot, Salesforce, Xero, Shopify, Sheets, PostgreSQL), and the questions you ask of that data.</li>
+            </ul>
+
+            <h3 className="font-semibold mt-4 mb-2" style={{ color: "#1a2035" }}>2.3 Information Collected Automatically</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Usage Data:</strong> information about how you interact with a Platform, including pages visited, features used, and actions taken.</li>
+              <li><strong>Technical Data:</strong> browser type, operating system, IP address, and device information.</li>
+              <li><strong>Cookies:</strong> we use essential cookies to maintain session state and core Platform functionality.</li>
             </ul>
           </section>
 
@@ -52,12 +54,12 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>3. How We Use Your Information</h2>
             <p>We process your personal data for the following purposes:</p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Providing Our Services:</strong> To operate the Platform, create and manage your account, and deliver our AI-powered job matching services.</li>
-              <li><strong>Matching:</strong> To use our artificial intelligence algorithms to match Candidates with suitable job opportunities based on skills, experience, education, and location preferences.</li>
-              <li><strong>Verification:</strong> To facilitate employment verification requests between Candidates and their nominated verifiers.</li>
-              <li><strong>Communication:</strong> To send transactional emails related to your use of the Platform, respond to contact form enquiries, and send verification request emails.</li>
-              <li><strong>Platform Improvement:</strong> To analyse usage patterns and improve the Platform's features, functionality, and user experience.</li>
-              <li><strong>Legal Compliance:</strong> To comply with applicable laws, regulations, and legal processes.</li>
+              <li><strong>Providing the Services:</strong> to operate the Platforms, create and manage your account, and deliver the AI-powered features specific to each Platform (matching, onboarding, document Q&amp;A, analytics, etc.).</li>
+              <li><strong>Facilitating Specific Features:</strong> to facilitate employment verification requests (AVANA Recruit), onboarding document and check-in workflows (AVANA Onboard), document analysis (AVANA Docs) and natural-language data querying (AVANA Insights).</li>
+              <li><strong>Communication:</strong> to send transactional emails related to your use of the Platforms, respond to contact form enquiries, and send verification or notification emails.</li>
+              <li><strong>Platform Improvement:</strong> to analyse aggregated usage patterns and improve the Platforms' features, performance and user experience. We do not use your Customer Content to train generalised public AI models.</li>
+              <li><strong>Security and Fraud Prevention:</strong> to detect, investigate and prevent unauthorised access, abuse and security incidents.</li>
+              <li><strong>Legal Compliance:</strong> to comply with applicable laws, regulations and legal processes.</li>
             </ul>
           </section>
 
@@ -65,10 +67,10 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>4. Legal Basis for Processing</h2>
             <p>We process your personal data on the following legal bases under the UK GDPR:</p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Contract Performance (Article 6(1)(b)):</strong> Processing necessary to provide our Services to you, including account management, job matching, and verification facilitation.</li>
-              <li><strong>Legitimate Interests (Article 6(1)(f)):</strong> Processing necessary for our legitimate interests, including improving our Platform, ensuring security, and analysing usage patterns, where these interests are not overridden by your rights.</li>
-              <li><strong>Consent (Article 6(1)(a)):</strong> Where you have given specific consent to the processing of your personal data, such as when submitting a contact form enquiry.</li>
-              <li><strong>Legal Obligation (Article 6(1)(c)):</strong> Processing necessary to comply with a legal obligation to which we are subject.</li>
+              <li><strong>Contract Performance (Article 6(1)(b)):</strong> processing necessary to provide the Services to you, including account management and the Platform-specific features you use.</li>
+              <li><strong>Legitimate Interests (Article 6(1)(f)):</strong> processing necessary for our legitimate interests, including improving and securing the Platforms and analysing usage patterns, where these interests are not overridden by your rights.</li>
+              <li><strong>Consent (Article 6(1)(a)):</strong> where you have given specific consent, such as when submitting a contact form enquiry or opting in to a non-essential communication.</li>
+              <li><strong>Legal Obligation (Article 6(1)(c)):</strong> processing necessary to comply with a legal obligation to which we are subject.</li>
             </ul>
           </section>
 
@@ -76,11 +78,11 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>5. How We Share Your Information</h2>
             <p>We may share your personal data in the following circumstances:</p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Recruitment Matching:</strong> Candidate profile information (including name, skills, experience, and qualifications) may be shared with Companies that have active job listings on the Platform, for the purpose of recruitment matching.</li>
-              <li><strong>Company Visibility:</strong> Company profile information may be visible to Candidates browsing the Platform.</li>
-              <li><strong>Employment Verification:</strong> When a Candidate initiates a verification request, the verifier's name and email will be used solely to send the verification request. Verification responses will be associated with the Candidate's profile.</li>
-              <li><strong>Service Providers:</strong> We may share data with trusted third-party service providers who assist us in operating the Platform, such as email delivery services (e.g., Resend) and hosting providers, subject to appropriate data processing agreements.</li>
-              <li><strong>Legal Requirements:</strong> We may disclose your data if required by law, regulation, or legal process, or if we believe disclosure is necessary to protect our rights, your safety, or the safety of others.</li>
+              <li><strong>Within the Platform You Use:</strong> some Platforms are designed to share information between participants — for example, AVANA Recruit shares candidate profile information with companies that have active job listings, and AVANA Onboard shares new-hire information with the employing organisation. We share this information only as required to deliver the feature you are using.</li>
+              <li><strong>Employment Verification (AVANA Recruit):</strong> when a candidate initiates a verification request, the verifier's name and email are used solely to send the verification request. Verification responses are associated with the candidate's profile.</li>
+              <li><strong>Connected Data Sources (AVANA Insights and others):</strong> where you connect a third-party data source, we access only the data exposed by your authorised connection. We do not push your AVANA data back into those third-party services unless you explicitly enable it.</li>
+              <li><strong>Service Providers:</strong> we may share data with trusted third-party service providers who help us operate the Platforms — e.g. cloud hosting, email delivery (Resend), database providers and AI infrastructure — subject to appropriate data processing agreements.</li>
+              <li><strong>Legal Requirements:</strong> we may disclose your data if required by law, regulation or legal process, or if we believe disclosure is necessary to protect our rights, your safety or the safety of others.</li>
             </ul>
             <p className="mt-3">
               We do not sell your personal data to third parties. We do not share your data for marketing purposes without your explicit consent.
@@ -88,15 +90,15 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>6. AI-Powered Matching and Automated Decision-Making</h2>
+            <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>6. AI Features and Automated Decision-Making</h2>
             <p>
-              Our Platform uses artificial intelligence to generate match scores between Candidates and job opportunities. You should be aware that:
+              Several of our Platforms use artificial intelligence to generate scores, plans, summaries, answers or analytics — for example, candidate match scores (AVANA Recruit), 30/60/90-day onboarding plans and sentiment indicators (AVANA Onboard), document summaries and conversational answers (AVANA Docs) and natural-language analytics (AVANA Insights). You should be aware that:
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li>Match scores are generated algorithmically based on the data you provide in your profile and job listings.</li>
-              <li>No solely automated decisions with legal or similarly significant effects are made about you. Match scores are provided as guidance to assist Companies and Candidates in their recruitment decisions.</li>
-              <li>Hiring decisions are always made by humans (Companies), not by our AI algorithms.</li>
-              <li>You have the right to request human review of any automated assessment and to understand the logic involved in the matching process.</li>
+              <li>AI-generated outputs are produced algorithmically based on the data you and your organisation provide.</li>
+              <li>No solely automated decisions with legal or similarly significant effects are made about you. AI outputs are provided as guidance to assist humans (Customers, hiring managers, analysts, etc.) in their decisions.</li>
+              <li>Final hiring, onboarding, contractual and operational decisions are always made by humans, not by our AI features.</li>
+              <li>You have the right to request human review of any automated assessment that materially affects you, and to understand the logic involved at a high level.</li>
             </ul>
           </section>
 
@@ -104,10 +106,12 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>7. Data Retention</h2>
             <p>We retain your personal data for as long as necessary to fulfil the purposes for which it was collected, including:</p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Active Accounts:</strong> Your data is retained for as long as your account remains active on the Platform.</li>
-              <li><strong>Closed Accounts:</strong> Following account termination, we may retain certain data for up to 12 months to comply with legal obligations, resolve disputes, and enforce our agreements.</li>
-              <li><strong>Verification Records:</strong> Verification request and response data is retained for as long as the associated Candidate account is active.</li>
-              <li><strong>Contact Enquiries:</strong> Contact form submissions are retained for up to 24 months.</li>
+              <li><strong>Active Accounts:</strong> your data is retained for as long as your account remains active on a Platform.</li>
+              <li><strong>Closed Accounts:</strong> following account termination, we may retain certain data for up to 12 months to comply with legal obligations, resolve disputes and enforce our agreements.</li>
+              <li><strong>Verification Records:</strong> verification request and response data is retained for as long as the associated candidate account is active.</li>
+              <li><strong>Onboarding and Document Records:</strong> documents and onboarding records are retained for the duration of the customer's subscription, plus any retention period required by law.</li>
+              <li><strong>Connected-Source Data:</strong> data ingested from connected sources is retained while the connection remains active and for a short period thereafter to allow safe disconnection.</li>
+              <li><strong>Contact Enquiries:</strong> contact form submissions are retained for up to 24 months.</li>
             </ul>
             <p className="mt-3">
               After the applicable retention period, your personal data will be securely deleted or anonymised.
@@ -121,8 +125,8 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
               <li>Encryption of data in transit using TLS/SSL.</li>
-              <li>Secure database storage with access controls.</li>
-              <li>Use of unique, time-limited tokens for verification requests rather than exposing personal data.</li>
+              <li>Per-tenant data isolation and access controls.</li>
+              <li>Use of unique, time-limited tokens for sensitive flows (e.g. verification, password reset).</li>
               <li>Regular review and updating of security practices.</li>
             </ul>
             <p className="mt-3">
@@ -134,23 +138,23 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>9. Your Rights</h2>
             <p>Under the UK GDPR, you have the following rights in relation to your personal data:</p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Right of Access:</strong> You have the right to request a copy of the personal data we hold about you.</li>
-              <li><strong>Right to Rectification:</strong> You have the right to request that we correct any inaccurate or incomplete personal data.</li>
-              <li><strong>Right to Erasure:</strong> You have the right to request the deletion of your personal data, subject to certain legal exceptions.</li>
-              <li><strong>Right to Restriction of Processing:</strong> You have the right to request that we restrict the processing of your personal data in certain circumstances.</li>
-              <li><strong>Right to Data Portability:</strong> You have the right to receive your personal data in a structured, commonly used, and machine-readable format.</li>
-              <li><strong>Right to Object:</strong> You have the right to object to the processing of your personal data where we are relying on legitimate interests.</li>
-              <li><strong>Right to Withdraw Consent:</strong> Where processing is based on consent, you have the right to withdraw that consent at any time.</li>
+              <li><strong>Right of Access:</strong> to request a copy of the personal data we hold about you.</li>
+              <li><strong>Right to Rectification:</strong> to request that we correct any inaccurate or incomplete personal data.</li>
+              <li><strong>Right to Erasure:</strong> to request the deletion of your personal data, subject to certain legal exceptions.</li>
+              <li><strong>Right to Restriction of Processing:</strong> to request that we restrict the processing of your personal data in certain circumstances.</li>
+              <li><strong>Right to Data Portability:</strong> to receive your personal data in a structured, commonly used and machine-readable format.</li>
+              <li><strong>Right to Object:</strong> to object to processing where we are relying on legitimate interests.</li>
+              <li><strong>Right to Withdraw Consent:</strong> where processing is based on consent, to withdraw that consent at any time.</li>
             </ul>
             <p className="mt-3">
-              To exercise any of these rights, please contact us using the details provided in Section 13 below. We will respond to your request within one month, as required by law.
+              Where AVANA acts as a Data Processor on behalf of a customer organisation, requests to exercise these rights should be made to that organisation, which acts as the Data Controller. To exercise any of these rights with AVANA directly, please contact us using the details in Section 13 below. We will respond to your request within one month, as required by law.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>10. Cookies</h2>
             <p>
-              Our Platform uses essential cookies that are strictly necessary for the operation of the Platform. These cookies enable core functionality such as maintaining your session and remembering your role selection.
+              The Platforms use essential cookies that are strictly necessary for their operation. These cookies enable core functionality such as maintaining your session and remembering your role or workspace selection.
             </p>
             <p className="mt-3">
               We do not use advertising or tracking cookies. We do not use third-party analytics cookies without your consent.
@@ -172,10 +176,10 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>12. Changes to This Policy</h2>
             <p>
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the updated policy on the Platform with a revised "Last updated" date. We encourage you to review this policy periodically.
+              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the updated policy with a revised "Last updated" date. We encourage you to review this policy periodically.
             </p>
             <p className="mt-3">
-              Your continued use of the Platform after any changes to this Privacy Policy constitutes your acceptance of the updated policy.
+              Your continued use of any Platform after any changes to this Privacy Policy constitutes your acceptance of the updated policy.
             </p>
           </section>
 
@@ -185,11 +189,9 @@ export default function PrivacyPolicy() {
             <div className="mt-3 p-4 rounded-lg" style={{ backgroundColor: "#f8f9fb", border: "1px solid #e5e7eb" }}>
               <p className="font-semibold" style={{ color: "#1a2035" }}>AVANA Services Limited</p>
               <p>Company Number: 15268633</p>
+              <p>Registered Office: 85 Great Portland Street, London, W1W 7LT</p>
               <p className="mt-2">
-                Email: <a href="mailto:enquiries@avanarecruit.ai" style={{ color: "#4CAF50" }}>enquiries@avanarecruit.ai</a>
-              </p>
-              <p className="mt-1">
-                Or use our <Link href="/contact-us" style={{ color: "#4CAF50" }}>Contact Us</Link> form.
+                Email: <a href="mailto:enquiries@avanaservices.com" style={{ color: "#4CAF50" }}>enquiries@avanaservices.com</a>
               </p>
             </div>
           </section>
@@ -209,8 +211,6 @@ export default function PrivacyPolicy() {
           </section>
         </div>
       </div>
-
-      <RecruitFooter />
-    </div>
+    </LegalLayout>
   );
 }
