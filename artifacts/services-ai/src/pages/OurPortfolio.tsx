@@ -31,16 +31,16 @@ export default function OurPortfolio() {
       {/* Page Hero */}
       <section
         className="relative"
-        style={{ backgroundColor: "#1a2035", paddingTop: "72px" }}
+        style={{ backgroundColor: "#f3f5f8", paddingTop: "72px" }}
         data-testid="portfolio-hero"
       >
         <div className="absolute inset-0 overflow-hidden" style={{ paddingTop: "72px" }}>
           <div
-            className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04]"
+            className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-[0.06]"
             style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }}
           />
           <div
-            className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]"
+            className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.04]"
             style={{ background: "radial-gradient(circle, #4CAF50 0%, transparent 70%)" }}
           />
         </div>
@@ -61,14 +61,14 @@ export default function OurPortfolio() {
 
             <h1
               className="text-4xl lg:text-[52px] font-bold leading-[1.1] mb-6"
-              style={{ color: "#ffffff" }}
+              style={{ color: "#1a2035" }}
             >
               The <span style={{ color: "#4CAF50" }}>AVANA</span> Suite — explored in depth.
             </h1>
 
             <p
               className="text-lg leading-relaxed max-w-2xl mx-auto"
-              style={{ color: "rgba(255,255,255,0.6)" }}
+              style={{ color: "#374151" }}
             >
               A closer look at the four enterprise-grade AI products that make up the AVANA portfolio — what they do, who they're for, and how they work together.
             </p>

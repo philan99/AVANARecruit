@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoUrl from "@assets/GREEN_Color_logo_-_no_background_1777318447100.png";
@@ -7,6 +7,18 @@ import logoUrl from "@assets/GREEN_Color_logo_-_no_background_1777318447100.png"
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [location, setLocation] = useLocation();
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (location === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      e.preventDefault();
+      setLocation("/");
+      window.scrollTo({ top: 0 });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,7 +46,13 @@ export function SiteHeader() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
         {/* Logo */}
-        <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <a
+          href="/services-ai/"
+          onClick={handleLogoClick}
+          aria-label="AVANA Services — Home"
+          className="cursor-pointer inline-block"
+          data-testid="site-logo"
+        >
           <div className="relative inline-block">
             <img 
               src={logoUrl} 
@@ -43,7 +61,7 @@ export function SiteHeader() {
             />
             <span className="absolute bottom-[1px] -right-[14px] text-[#4CAF50] text-sm tracking-tight leading-none">.ai</span>
           </div>
-        </div>
+        </a>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
