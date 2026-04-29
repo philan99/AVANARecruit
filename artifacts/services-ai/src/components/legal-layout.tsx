@@ -27,9 +27,19 @@ function LegalHeader() {
       style={{ backgroundColor: NAVY, borderBottom: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-        <div className="inline-flex items-center" aria-label="AVANA" data-testid="legal-logo">
-          <img src={logoUrl} alt="AVANA" className="h-7 object-contain block" />
-        </div>
+        <a
+          href="/services-ai/"
+          aria-label="AVANA Services — Home"
+          data-testid="legal-logo"
+          className="inline-flex items-center transition-opacity hover:opacity-80 cursor-pointer"
+        >
+          <div className="relative inline-block">
+            <img src={logoUrl} alt="AVANA Services" className="h-7 object-contain block" />
+            <span className="absolute bottom-[1px] -right-[14px] text-[#4CAF50] text-sm tracking-tight leading-none">
+              .ai
+            </span>
+          </div>
+        </a>
         <button
           type="button"
           onClick={handleBack}
