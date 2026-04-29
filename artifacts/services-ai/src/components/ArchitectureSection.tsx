@@ -28,18 +28,18 @@ export function ArchitectureSection() {
   ];
 
   return (
-    <section id="approach" className="py-24 bg-[#f3f5f8] relative overflow-hidden">
+    <section id="approach" className="py-24 bg-[#1a2035] relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#4CAF50]/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#4CAF50]/5 rounded-full blur-[100px]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6 text-[#1a2035]">
+          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6 text-white">
             The AVANA Architecture
           </h2>
-          <p className="text-lg text-[#4b5563] leading-relaxed">
+          <p className="text-lg text-white/60 leading-relaxed">
             We don't build generic wrappers around APIs. We engineer vertical-specific data pipelines that yield deterministic results.
           </p>
         </div>
@@ -52,13 +52,13 @@ export function ArchitectureSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#e5e7eb] rounded-xl p-8 shadow-sm"
+              className="bg-white/5 border border-white/10 rounded-xl p-8 backdrop-blur-sm"
             >
               <div className="w-12 h-12 rounded-lg bg-[#4CAF50]/10 flex items-center justify-center text-[#4CAF50] mb-6">
                 <card.icon size={24} />
               </div>
-              <h3 className="text-xl font-bold text-[#1a2035] mb-4">{card.title}</h3>
-              <p className="text-[#4b5563] leading-relaxed text-sm">
+              <h3 className="text-xl font-bold text-white mb-4">{card.title}</h3>
+              <p className="text-white/60 leading-relaxed text-sm">
                 {card.desc}
               </p>
             </motion.div>
@@ -66,7 +66,7 @@ export function ArchitectureSection() {
         </div>
 
         {/* Stats Row */}
-        <div className="border-t border-[#e5e7eb] pt-16">
+        <div className="border-t border-white/10 pt-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
               <motion.div
@@ -77,7 +77,7 @@ export function ArchitectureSection() {
                 transition={{ duration: 0.4, delay: 0.2 + (i * 0.1) }}
                 className="text-center"
               >
-                <div className="text-4xl font-bold text-[#1a2035] mb-2">{stat.value}</div>
+                <div className="text-4xl font-bold text-white mb-2">{stat.value}</div>
                 <div className="text-sm font-medium text-[#4CAF50] uppercase tracking-wider">{stat.label}</div>
               </motion.div>
             ))}

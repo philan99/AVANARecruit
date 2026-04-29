@@ -17,6 +17,7 @@ interface ProductSectionProps {
   ctaHref?: string;
   footerText?: string;
   reversed?: boolean;
+  dark?: boolean;
   children: React.ReactNode; // For the custom side panel
 }
 
@@ -31,9 +32,10 @@ export function ProductSection({
   ctaHref,
   footerText,
   reversed = false,
+  dark = false,
   children
 }: ProductSectionProps) {
-  const isDark = reversed; // Alternate dark/light sections
+  const isDark = dark;
   const bgClass = isDark ? "bg-[#1a2035]" : "bg-background";
   const textClass = isDark ? "text-white" : "text-foreground";
   const subClass = isDark ? "text-white/60" : "text-muted-foreground";

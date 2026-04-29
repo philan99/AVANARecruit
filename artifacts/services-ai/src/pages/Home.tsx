@@ -94,6 +94,7 @@ export default function Home() {
         ctaText="Visit AVANA Recruit"
         ctaHref="https://avanarecruit.ai/"
         reversed={false}
+        dark={true}
       >
         <MatchReportPanel />
       </ProductSection>
@@ -113,6 +114,7 @@ export default function Home() {
         ]}
         footerText="Visit avanaonboard.ai"
         reversed={true}
+        dark={false}
       >
         <OnboardingTimelinePanel />
       </ProductSection>
@@ -132,6 +134,7 @@ export default function Home() {
         ]}
         footerText="Visit avanadocs.ai"
         reversed={false}
+        dark={true}
       >
         <DocsChatPanel />
       </ProductSection>
@@ -152,6 +155,7 @@ export default function Home() {
         ctaText="Visit AVANA Insights"
         ctaHref="https://avana-talent-match.replit.app/insights/"
         reversed={true}
+        dark={false}
       >
         <InsightsPanel />
       </ProductSection>
