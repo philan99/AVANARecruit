@@ -42,9 +42,6 @@ export function SiteFooter() {
             <p className="text-sm leading-relaxed max-w-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
               AI-native services for modern teams — recruit faster, onboard smarter, and turn your documentation into answers.
             </p>
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mt-6" style={{ color: GREEN }}>
-              Part of the AVANA Suite
-            </p>
           </div>
 
           <div className="md:col-span-2">
@@ -64,9 +61,10 @@ export function SiteFooter() {
               AVANA Suite
             </h4>
             <ul className="space-y-3 text-sm">
-              <li><FooterLink href="/">AVANA Recruit</FooterLink></li>
-              <li><FooterLink href="/services-ai/">AVANA Services AI</FooterLink></li>
-              <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
+              <li><FooterLink href="https://avanarecruit.ai/">AVANA Recruit</FooterLink></li>
+              <li><FooterLink href="#onboard">AVANA Onboard</FooterLink></li>
+              <li><FooterLink href="#docs">AVANA Docs</FooterLink></li>
+              <li><FooterLink href="https://avana-talent-match.replit.app/insights/">AVANA Insights</FooterLink></li>
             </ul>
           </div>
 
