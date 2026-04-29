@@ -46,30 +46,30 @@ export function ContactSection() {
   ];
 
   return (
-    <section id="contact" className="py-24 bg-[#1a2035] border-t border-white/5">
+    <section id="contact" className="py-24 bg-[#f3f5f8]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           
           {/* Left Column */}
           <div>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6 text-white">
+            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6 text-[#1a2035]">
               Ready to elevate your operations?
             </h2>
-            <p className="text-lg text-white/60 leading-relaxed mb-12">
+            <p className="text-lg text-[#4b5563] leading-relaxed mb-12">
               Whether you want to deploy AVANA Recruit today or discuss custom enterprise AI integration, our team is ready.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {products.map((p, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-5">
+                <div key={i} className="bg-white border border-[#e5e7eb] rounded-lg p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <p.icon size={20} className="text-[#4CAF50]" />
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${p.status === 'Live' ? 'bg-[#4CAF50]/20 text-[#4CAF50]' : 'bg-white/10 text-white/60'}`}>
+                    <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${p.status === 'Live' ? 'bg-[#4CAF50]/15 text-[#2e7d32]' : 'bg-[#e5e7eb] text-[#4b5563]'}`}>
                       {p.status}
                     </span>
                   </div>
-                  <h4 className="text-white font-bold mb-1">{p.name}</h4>
-                  <p className="text-white/50 text-xs">{p.desc}</p>
+                  <h4 className="text-[#1a2035] font-bold mb-1">{p.name}</h4>
+                  <p className="text-[#4b5563] text-xs">{p.desc}</p>
                 </div>
               ))}
             </div>
