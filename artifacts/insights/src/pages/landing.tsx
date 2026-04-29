@@ -970,24 +970,16 @@ function Footer({ onSignIn }: { onSignIn: () => void }) {
           <div className="flex items-center gap-3">
             <a
               href="/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] transition-colors"
+              className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}
             >
               Terms &amp; Conditions
             </a>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.15)" }}>|</span>
             <a
               href="/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] transition-colors"
+              className="text-[11px] transition-colors hover:text-white/50"
               style={{ color: "rgba(255,255,255,0.3)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}
             >
               Privacy Policy
             </a>

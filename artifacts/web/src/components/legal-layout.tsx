@@ -23,23 +23,18 @@ function LegalHeader() {
 
   return (
     <header
-      className="border-b sticky top-0 z-30"
-      style={{ borderColor: "#e5e7eb", backgroundColor: "#ffffff" }}
+      className="sticky top-0 z-30"
+      style={{ backgroundColor: NAVY, borderBottom: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-        <a
-          href="/services-ai/"
-          className="inline-flex items-center"
-          aria-label="AVANA Suite"
-          data-testid="legal-logo-home"
-        >
+        <div className="inline-flex items-center" aria-label="AVANA" data-testid="legal-logo">
           <img src={logoUrl} alt="AVANA" className="h-7 object-contain block" />
-        </a>
+        </div>
         <button
           type="button"
           onClick={handleBack}
-          className="text-sm font-medium hover:opacity-80 transition-opacity"
-          style={{ color: NAVY }}
+          className="text-sm font-medium transition-opacity hover:opacity-80"
+          style={{ color: "#ffffff" }}
           data-testid="legal-back"
         >
           ← Back
