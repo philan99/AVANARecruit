@@ -150,7 +150,7 @@ export default function Home() {
           { title: "Data lineage tracking", description: "Always know exactly where each data point originated." }
         ]}
         ctaText="Visit AVANA Insights"
-        ctaHref="https://avana-insights.replit.app/"
+        ctaHref="https://avana-talent-match.replit.app/insights/"
         reversed={true}
       >
         <InsightsPanel />
