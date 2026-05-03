@@ -26,21 +26,21 @@ export function FAQSection() {
   ];
 
   return (
-    <section id="faq" className="py-24 bg-[#1a2035]">
+    <section id="faq" className="py-24" style={{ backgroundColor: "#f3f5f8" }}>
       <div className="max-w-3xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4 text-white">
+          <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
             Frequently Asked Questions
           </h2>
         </div>
 
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`item-${i}`} className="border-white/10">
-              <AccordionTrigger className="text-left text-lg font-semibold text-white hover:text-[#4CAF50] hover:no-underline transition-colors py-6">
+            <AccordionItem key={i} value={`item-${i}`} className="border-[#1a2035]/10">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:text-[#4CAF50] hover:no-underline transition-colors py-6" style={{ color: "#1a2035" }}>
                 {faq.q}
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 text-base leading-relaxed pb-6">
+              <AccordionContent className="text-base leading-relaxed pb-6" style={{ color: "#4b5563" }}>
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
