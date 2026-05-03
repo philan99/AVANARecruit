@@ -75,16 +75,18 @@ export function SiteHeader() {
         <nav className="hidden md:flex items-center gap-8">
           <a href="/services-ai/#services" onClick={handlePortfolioClick} className="text-white/80 hover:text-white text-sm font-medium transition-colors">Portfolio</a>
           <button onClick={() => scrollTo("faq")} className="text-white/80 hover:text-white text-sm font-medium transition-colors">FAQ</button>
+          <a href="/services-ai/contact-us" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Contact Us</a>
         </nav>
 
         {/* Right CTA */}
         <div className="hidden md:block">
-          <Button 
-            onClick={() => scrollTo("contact")}
-            className="bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md px-6 transition-all border-none no-default-hover-elevate"
-          >
-            Partner With Us
-          </Button>
+          <a href="/services-ai/contact-us">
+            <Button
+              className="bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md px-6 transition-all border-none no-default-hover-elevate"
+            >
+              Partner With Us
+            </Button>
+          </a>
         </div>
 
         {/* Mobile Toggle */}
@@ -101,12 +103,14 @@ export function SiteHeader() {
         <div className="md:hidden absolute top-full left-0 right-0 bg-[#1A2035] border-b border-white/10 p-6 flex flex-col gap-4 shadow-xl">
           <a href="/services-ai/#services" onClick={handlePortfolioClick} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">Portfolio</a>
           <button onClick={() => scrollTo("faq")} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">FAQ</button>
-          <Button 
-            onClick={() => scrollTo("contact")}
-            className="w-full mt-4 bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md border-none"
-          >
-            Partner With Us
-          </Button>
+          <a href="/services-ai/contact-us" className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">Contact Us</a>
+          <a href="/services-ai/contact-us" className="block mt-4">
+            <Button
+              className="w-full bg-[#4CAF50] text-white hover:bg-[#43a047] font-semibold rounded-md border-none"
+            >
+              Partner With Us
+            </Button>
+          </a>
         </div>
       )}
     </header>

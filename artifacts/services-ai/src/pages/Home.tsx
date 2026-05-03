@@ -8,7 +8,6 @@ import { DocsChatPanel } from "@/components/DocsChatPanel";
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { CoreValuesSection } from "@/components/CoreValuesSection";
 import { FAQSection } from "@/components/FAQSection";
-import { ContactSection } from "@/components/ContactSection";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export default function Home() {
@@ -79,13 +78,13 @@ export default function Home() {
               >
                 Explore Our Portfolio →
               </button>
-              <button
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-white/5"
+              <a
+                href="/services-ai/contact-us"
+                className="px-8 py-3.5 text-sm font-semibold rounded-md border transition-all cursor-pointer hover:bg-white/5 inline-block"
                 style={{ borderColor: "rgba(255,255,255,0.2)", color: "#fff", backgroundColor: "transparent" }}
               >
                 Partner With Us
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>
@@ -224,8 +223,6 @@ export default function Home() {
       <CoreValuesSection />
 
       <FAQSection />
-
-      <ContactSection />
 
       <SiteFooter />
     </div>

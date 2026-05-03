@@ -76,7 +76,7 @@ export function SiteFooter() {
               Want to see AVANA Services AI in action? Get in touch and we'll set up a tailored walkthrough.
             </p>
             <a
-              href="#contact"
+              href="/services-ai/contact-us"
               className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-all"
               style={{ backgroundColor: GREEN, color: "#fff" }}
               onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.92"; }}
