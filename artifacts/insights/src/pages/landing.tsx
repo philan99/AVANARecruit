@@ -1020,6 +1020,8 @@ function Footer({ onSignIn }: { onSignIn: () => void }) {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><FooterLink href="/" external>AVANA Recruit</FooterLink></li>
+              <li><span style={{ color: "rgba(255,255,255,0.7)" }}>AVANA Onboard</span></li>
+              <li><span style={{ color: "rgba(255,255,255,0.7)" }}>AVANA Docs</span></li>
               <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
             </ul>
           </div>
