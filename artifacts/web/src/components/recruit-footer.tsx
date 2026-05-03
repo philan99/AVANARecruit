@@ -51,7 +51,7 @@ export function RecruitFooter() {
               <li><FooterInternalLink href="/">AVANA Recruit</FooterInternalLink></li>
               <li><span style={{ color: "rgba(255,255,255,0.7)" }}>AVANA Onboard</span></li>
               <li><span style={{ color: "rgba(255,255,255,0.7)" }}>AVANA Docs</span></li>
-              <li><span style={{ color: "rgba(255,255,255,0.7)" }}>AVANA Insights</span></li>
+              <li><FooterExternalLink href="https://avana-insights.replit.app/">AVANA Insights</FooterExternalLink></li>
             </ul>
           </div>
 
