@@ -12,3 +12,21 @@ id = "VVoPBfWqltDuau7S3zFGl"
 uri = "file://.local/exports/avana-services-palette.svg"
 type = "image"
 title = "AVANA Services — Colour Palette"
+
+[[outputs]]
+id = "kvPRF0zEymonVZzwrJPRJ"
+uri = "file://attached_assets/Full_Logo_-_GREEN_1776492081935.png"
+type = "image"
+title = "AVANA Recruit logo (used in navbar + footer of the web app)"
+
+[[outputs]]
+id = "AHJ8670RebxA6LPs6nWNv"
+uri = "file://attached_assets/AVANA_Insights_Logo_1777405980691.png"
+type = "image"
+title = "AVANA Insights logo (used in Insights sidebar + landing + login)"
+
+[[outputs]]
+id = "bZjNOXYswwao5941uLxPU"
+uri = "file://attached_assets/Color_logo_-_no_background_1777315495981.png"
+type = "image"
+title = "AVANA Services cream logo"
