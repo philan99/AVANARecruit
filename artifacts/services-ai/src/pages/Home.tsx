@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { ArrowRight, Users, FileText, BarChart3, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProductSection } from "@/components/ProductSection";
 import { MatchReportPanel } from "@/components/MatchReportPanel";
@@ -137,6 +139,49 @@ export default function Home() {
               Meet the AVANA Suite — four enterprise-grade AI products built to streamline mission-critical operations across talent, onboarding, knowledge and decision intelligence.
             </p>
           </motion.div>
+
+          <div className="relative mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { id: "recruit", status: "LIVE", title: "AVANA Recruit", subtitle: "AI-Powered Talent Matching", icon: Users },
+              { id: "onboard", status: "COMING SOON", title: "AVANA Onboard", subtitle: "AI-Powered Employee Onboarding", icon: ShieldCheck },
+              { id: "docs", status: "COMING SOON", title: "AVANA Docs", subtitle: "AI Document & Knowledge Assistant", icon: FileText },
+              { id: "insights", status: "LIVE", title: "AVANA Insights", subtitle: "AI Data Consolidation Platform", icon: BarChart3 },
+            ].map((item, i) => (
+              <motion.a
+                key={item.id}
+                href={`#${item.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="block group bg-card border border-card-border p-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30"
+                data-testid={`portfolio-card-${item.id}`}
+              >
+                <div className="flex justify-between items-start mb-5">
+                  <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+                    <item.icon size={22} />
+                  </div>
+                  <Badge
+                    variant={item.status === "LIVE" ? "default" : "secondary"}
+                    className={item.status === "LIVE" ? "bg-primary text-primary-foreground hover:bg-primary" : "bg-muted text-muted-foreground hover:bg-muted"}
+                  >
+                    {item.status}
+                  </Badge>
+                </div>
+
+                <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
+                <p className="text-xs font-medium text-primary mb-4">{item.subtitle}</p>
+
+                <div className="flex items-center text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                  Learn more <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.a>
+            ))}
+          </div>
         </div>
       </section>
 
