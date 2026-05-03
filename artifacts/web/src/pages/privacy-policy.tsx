@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
               This is a supplemental privacy notice for <strong>AVANA Recruit</strong>, our AI-powered talent matching platform operated by AVANA Services Limited ("AVANA", "we", "us", "our"), a company registered in England and Wales (Company Number: 15268633).
             </p>
             <p className="mt-3">
-              It describes how we collect, use and share personal data specifically through AVANA Recruit. It applies alongside the master <a href="/services-ai/privacy-policy" style={{ color: "#4CAF50" }}>AVANA Services Privacy Policy</a>, which covers shared topics including legal basis for processing, data security, your rights under the UK GDPR, cookies, international data transfers, complaints to the ICO and our company contact details. Where this Recruit notice addresses a topic specifically, it takes precedence; otherwise the master AVANA Services Privacy Policy applies unchanged.
+              It describes how we collect, use and share personal data specifically through AVANA Recruit. It applies alongside the master AVANA Privacy Policy, which covers shared topics including legal basis for processing, data security, your rights under the UK GDPR, cookies, international data transfers, complaints to the ICO and our company contact details. Where this Recruit notice addresses a topic specifically, it takes precedence; otherwise the master AVANA Services Privacy Policy applies unchanged.
             </p>
           </section>
 
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>8. Other Privacy Topics (Defer to Master)</h2>
             <p>
-              For information about our legal basis for processing under the UK GDPR, data security, your rights (access, rectification, erasure, restriction, portability, objection, withdrawal of consent), cookies, international data transfers, our use of service providers, and how to lodge a complaint with the Information Commissioner's Office, please see the <a href="/services-ai/privacy-policy" style={{ color: "#4CAF50" }}>master AVANA Services Privacy Policy</a>. It applies to AVANA Recruit and forms part of this notice.
+              For information about our legal basis for processing under the UK GDPR, data security, your rights (access, rectification, erasure, restriction, portability, objection, withdrawal of consent), cookies, international data transfers, our use of service providers, and how to lodge a complaint with the Information Commissioner's Office, please see the master AVANA Privacy Policy. It applies to AVANA Recruit and forms part of this notice.
             </p>
           </section>
 

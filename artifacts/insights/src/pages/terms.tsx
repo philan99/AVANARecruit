@@ -16,7 +16,7 @@ export default function Terms() {
               These supplemental Terms and Conditions ("Insights Terms") govern your use of <strong>AVANA Insights</strong> — our AI-native data intelligence platform — operated by AVANA Services Limited, a company registered in England and Wales (Company Number: 15268633) ("AVANA", "we", "us", "our").
             </p>
             <p className="mt-3">
-              The Insights Terms apply alongside the master <a href="/services-ai/terms" style={{ color: "#4CAF50" }}>AVANA Services Terms and Conditions</a>, which cover account registration, acceptable use, intellectual property, fees, limitation of liability, termination, governing law, and other shared provisions. Where the Insights Terms address a topic specifically, they take precedence; otherwise the master AVANA Services Terms apply unchanged.
+              The Insights Terms apply alongside the master AVANA Recruit Terms and Conditions, which cover account registration, acceptable use, intellectual property, fees, limitation of liability, termination, governing law, and other shared provisions. Where the Insights Terms address a topic specifically, they take precedence; otherwise the master AVANA Services Terms apply unchanged.
             </p>
             <p className="mt-3">
               By using AVANA Insights, you confirm that you have read and accept both these Insights Terms and the master AVANA Services Terms.
@@ -86,7 +86,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-bold mb-3" style={{ color: "#1a2035" }}>8. Other Terms (Defer to Master)</h2>
             <p>
-              All other matters — including account registration, acceptable use, intellectual property in the Platforms themselves, fees and payment, limitation of liability, termination, changes to terms and governing law — are governed by the <a href="/services-ai/terms" style={{ color: "#4CAF50" }}>master AVANA Services Terms and Conditions</a>. Please read them in conjunction with this document.
+              All other matters — including account registration, acceptable use, intellectual property in the Platforms themselves, fees and payment, limitation of liability, termination, changes to terms and governing law — are governed by the master AVANA Recruit Terms and Conditions. Please read them in conjunction with this document.
             </p>
           </section>
 

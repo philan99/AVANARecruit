@@ -49,8 +49,6 @@ export function RecruitFooter() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><FooterInternalLink href="/">AVANA Recruit</FooterInternalLink></li>
-              <li><FooterExternalLink href="/services-ai/#onboard">AVANA Onboard</FooterExternalLink></li>
-              <li><FooterExternalLink href="/services-ai/#docs">AVANA Docs</FooterExternalLink></li>
               <li><FooterExternalLink href="/insights/">AVANA Insights</FooterExternalLink></li>
             </ul>
           </div>

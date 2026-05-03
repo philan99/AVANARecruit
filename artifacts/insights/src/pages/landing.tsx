@@ -1020,8 +1020,6 @@ function Footer({ onSignIn }: { onSignIn: () => void }) {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><FooterLink href="/" external>AVANA Recruit</FooterLink></li>
-              <li><FooterLink href="/services-ai/#onboard" external>AVANA Onboard</FooterLink></li>
-              <li><FooterLink href="/services-ai/#docs" external>AVANA Docs</FooterLink></li>
               <li><FooterLink href="/insights/">AVANA Insights</FooterLink></li>
             </ul>
           </div>
