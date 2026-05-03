@@ -6,3 +6,9 @@ id = "TI_Bus7JulotY20IANTHv"
 uri = "file://attached_assets/avana-services-ai-standalone.tar.gz"
 type = "unspecified"
 title = "AVANA Services AI — standalone Repl bundle"
+
+[[outputs]]
+id = "VVoPBfWqltDuau7S3zFGl"
+uri = "file://.local/exports/avana-services-palette.svg"
+type = "image"
+title = "AVANA Services — Colour Palette"
