@@ -127,14 +127,14 @@ export default function Home() {
               className="text-3xl lg:text-[44px] font-bold leading-[1.1] mb-6"
               style={{ color: "#1a2035" }}
             >
-              The <span style={{ color: "#4CAF50" }}>AVANA</span> Suite — explored in depth.
+              The <span style={{ color: "#4CAF50" }}>AVANA</span> Portfolio
             </h2>
 
             <p
               className="text-lg leading-relaxed max-w-2xl mx-auto"
               style={{ color: "#374151" }}
             >
-              A closer look at the four enterprise-grade AI products that make up the AVANA portfolio — what they do, who they're for, and how they work together.
+              Meet the AVANA Suite — four enterprise-grade AI products built to streamline mission-critical operations across talent, onboarding, knowledge and decision intelligence.
             </p>
           </motion.div>
         </div>
