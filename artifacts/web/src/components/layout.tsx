@@ -133,7 +133,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="flex items-center justify-between gap-4 h-14 px-4 sm:px-6">
           <Link href="/" className="flex items-center cursor-pointer shrink-0">
             <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
-            <span className="text-xl font-semibold leading-none -ml-1" style={{ color: "#4CAF50" }}>.ai</span>
+            <span className="text-sm font-semibold leading-none -ml-2" style={{ color: "#4CAF50" }}>.ai</span>
           </Link>
 
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 xl:gap-3 2xl:gap-6 min-w-0">
