@@ -45,7 +45,6 @@ export function MarketingNav({ active = null, onSignIn, onGetStarted, onPricing 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
         <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer">
           <img src={logoUrl} alt="AVANA Recruit" className="h-7" />
-          <span className="text-sm font-semibold leading-none -ml-3 self-end pb-[5px]" style={{ color: "#4CAF50" }}>.ai</span>
         </a>
 
         <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
