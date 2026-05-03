@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { SiteHeader } from "@/components/SiteHeader";
 import { PortfolioGrid } from "@/components/PortfolioGrid";
-import { ArchitectureSection } from "@/components/ArchitectureSection";
 import { CoreValuesSection } from "@/components/CoreValuesSection";
 import { FAQSection } from "@/components/FAQSection";
 import { ContactSection } from "@/components/ContactSection";
@@ -76,8 +75,6 @@ export default function Home() {
       </section>
 
       <PortfolioGrid />
-
-      <ArchitectureSection />
 
       <CoreValuesSection />
 

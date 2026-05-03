@@ -74,7 +74,6 @@ export function SiteHeader() {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
           <a href="/services-ai/#services" onClick={handlePortfolioClick} className="text-white/80 hover:text-white text-sm font-medium transition-colors">Portfolio</a>
-          <button onClick={() => scrollTo("approach")} className="text-white/80 hover:text-white text-sm font-medium transition-colors">Approach</button>
           <button onClick={() => scrollTo("faq")} className="text-white/80 hover:text-white text-sm font-medium transition-colors">FAQ</button>
         </nav>
 
@@ -101,7 +100,6 @@ export function SiteHeader() {
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-[#1A2035] border-b border-white/10 p-6 flex flex-col gap-4 shadow-xl">
           <a href="/services-ai/#services" onClick={handlePortfolioClick} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">Portfolio</a>
-          <button onClick={() => scrollTo("approach")} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">Approach</button>
           <button onClick={() => scrollTo("faq")} className="text-left text-white/90 text-lg font-medium py-2 border-b border-white/5">FAQ</button>
           <Button 
             onClick={() => scrollTo("contact")}
