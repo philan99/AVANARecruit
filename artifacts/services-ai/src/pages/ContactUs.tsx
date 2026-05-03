@@ -30,7 +30,7 @@ export default function ContactUs() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-14 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -38,21 +38,21 @@ export default function ContactUs() {
             className="max-w-3xl mx-auto text-center"
           >
             <p
-              className="text-xs font-semibold tracking-[0.2em] uppercase mb-6"
+              className="text-xs font-semibold tracking-[0.2em] uppercase mb-4"
               style={{ color: "#4CAF50" }}
             >
               CONTACT US
             </p>
 
             <h1
-              className="text-4xl lg:text-[56px] font-bold leading-[1.08] mb-6"
+              className="text-5xl lg:text-[64px] font-bold leading-[1.05] mb-5"
               style={{ color: "#ffffff" }}
             >
               Get in Touch
             </h1>
 
             <p
-              className="text-lg leading-relaxed max-w-2xl mx-auto"
+              className="text-base lg:text-lg leading-relaxed max-w-xl mx-auto"
               style={{ color: "rgba(255,255,255,0.55)" }}
             >
               Have a question or want to learn more about how the AVANA Suite can help your organisation? We'd love to hear from you.
