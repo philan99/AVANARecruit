@@ -45,14 +45,14 @@ export default function ContactUs() {
             </p>
 
             <h1
-              className="text-5xl lg:text-[64px] font-bold leading-[1.05] mb-5"
+              className="text-4xl lg:text-5xl font-bold leading-[1.1] mb-5"
               style={{ color: "#ffffff" }}
             >
               Get in Touch
             </h1>
 
             <p
-              className="text-base lg:text-lg leading-relaxed max-w-xl mx-auto"
+              className="text-base leading-relaxed max-w-xl mx-auto"
               style={{ color: "rgba(255,255,255,0.55)" }}
             >
               Have a question or want to learn more about how the AVANA Suite can help your organisation? We'd love to hear from you.
