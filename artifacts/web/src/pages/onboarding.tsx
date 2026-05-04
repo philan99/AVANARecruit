@@ -106,6 +106,9 @@ export default function Onboarding() {
 
   const [step, setStep] = useState<number>(1);
   const [saving, setSaving] = useState(false);
+  const [complementarySkills, setComplementarySkills] = useState<string[]>([]);
+  const [loadingComplementary, setLoadingComplementary] = useState(false);
+  const complementaryFetchRef = useRef<string>("");
   const [obState, setObState] = useState<OnboardingState>({
     currentStep: 1, completedSteps: [], skippedSteps: [], completedAt: null,
   });
@@ -266,6 +269,52 @@ export default function Onboarding() {
     }
   }
 
+  useEffect(() => {
+    if (step !== 4) return;
+    if (skills.length === 0) {
+      setComplementarySkills([]);
+      setLoadingComplementary(false);
+      complementaryFetchRef.current = "";
+      return;
+    }
+    const sortedSkills = [...skills].map(s => s.toLowerCase().trim()).sort().join("|");
+    const titleKey = currentTitle.trim().toLowerCase();
+    const fetchKey = `${sortedSkills}::${titleKey}`;
+    if (complementaryFetchRef.current === fetchKey) return;
+    complementaryFetchRef.current = fetchKey;
+
+    let cancelled = false;
+    setLoadingComplementary(true);
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/candidates/suggest-complementary-skills`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ skills, currentTitle }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled) return;
+        const next: string[] = Array.isArray(data?.skills)
+          ? data.skills.filter((s: unknown): s is string => typeof s === "string" && s.trim().length > 0)
+          : [];
+        setComplementarySkills(next);
+      } catch (err) {
+        if (cancelled) return;
+        console.error("suggest-complementary-skills failed", err);
+        setComplementarySkills([]);
+        complementaryFetchRef.current = "";
+      } finally {
+        if (!cancelled) setLoadingComplementary(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      setLoadingComplementary(false);
+    };
+  }, [step, skills, currentTitle, apiBase]);
+
   const [fromCvFlow, setFromCvFlow] = useState(false);
   const cvFlowChecked = useRef(false);
   useEffect(() => {
@@ -398,8 +447,8 @@ export default function Onboarding() {
       preferredIndustries.length === 0
     ) {
       toast({
-        title: "Make a choice or skip",
-        description: "Pick at least one Job Type, Workplace or Industry — or hit Skip to do this later.",
+        title: "Make a choice",
+        description: "Pick at least one Job Type, Workplace or Industry to continue.",
         variant: "destructive",
       });
       return;
@@ -413,24 +462,6 @@ export default function Onboarding() {
       if (!persisted) return;
       if (nextStep > TOTAL_STEPS) {
         toast({ title: "All set!", description: "Your profile is ready." });
-        setLocation("/my-matches");
-      } else {
-        setStep(nextStep);
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleSkip() {
-    if (saving) return;
-    setSaving(true);
-    try {
-      const nextStep = step + 1;
-      const persisted = await persistOnboarding(nextStep, { skipped: true, finishNow: nextStep > TOTAL_STEPS });
-      if (!persisted) return;
-      if (nextStep > TOTAL_STEPS) {
-        toast({ title: "All set!", description: "You can finish anytime from your dashboard." });
         setLocation("/my-matches");
       } else {
         setStep(nextStep);
@@ -833,14 +864,28 @@ export default function Onboarding() {
               )}
 
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Popular skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {POPULAR_SKILLS.filter(s => !skills.some(x => x.toLowerCase() === s.toLowerCase())).map((s) => (
-                    <button key={s} onClick={() => addSkill(s)} className="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 hover:border-[#4CAF50] hover:text-[#4CAF50] text-sm px-3 py-1.5 rounded-full transition-colors">
-                      <Plus className="w-3.5 h-3.5" /> {s}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                  {skills.length > 0 ? "Complementary skills" : "Popular skills"}
+                </p>
+                {loadingComplementary ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-500 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Finding skills that complement yours…
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {(skills.length > 0 && complementarySkills.length > 0
+                      ? complementarySkills
+                      : POPULAR_SKILLS
+                    )
+                      .filter(s => !skills.some(x => x.toLowerCase() === s.toLowerCase()))
+                      .map((s) => (
+                        <button key={s} onClick={() => addSkill(s)} className="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 hover:border-[#4CAF50] hover:text-[#4CAF50] text-sm px-3 py-1.5 rounded-full transition-colors">
+                          <Plus className="w-3.5 h-3.5" /> {s}
+                        </button>
+                      ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
@@ -1187,12 +1232,13 @@ export default function Onboarding() {
           ) : <div />}
 
           <div className="flex items-center gap-3">
-            {step < TOTAL_STEPS && step > 1 && (
-              <button onClick={handleSkip} disabled={saving || parsingCv} className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">Skip</button>
-            )}
-            {step === 1 && (
-              <button onClick={handleSkip} disabled={saving || parsingCv} className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">Skip for now</button>
-            )}
+            <button
+              onClick={() => setLocation("/profile")}
+              disabled={saving || parsingCv}
+              className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
             {step < TOTAL_STEPS ? (
               <Button onClick={handleNext} disabled={saving || parsingCv} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
                 {parsingCv ? "Reading your CV…" : step === 1 ? "Let's get started" : "Continue"} <ArrowRight className="w-4 h-4 ml-1" />

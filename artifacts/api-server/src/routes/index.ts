@@ -28,6 +28,7 @@ import industriesRouter from "./industries";
 import jobsAiRouter from "./jobsAi";
 import savedSearchesRouter from "./savedSearches";
 import sessionsRouter from "./sessions";
+import suggestSkillsRouter from "./suggestSkills";
 
 const router: IRouter = Router();
 
@@ -60,5 +61,6 @@ router.use(industriesRouter);
 router.use(jobsAiRouter);
 router.use(savedSearchesRouter);
 router.use(sessionsRouter);
+router.use(suggestSkillsRouter);
 
 export default router;
