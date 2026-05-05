@@ -4,7 +4,7 @@ import { eq, and, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
-import { explainMatch } from "../lib/matching";
+import { explainMatch, prefetchRelevanceCache } from "../lib/matching";
 import { isPasswordReused, recordPasswordHistory, PASSWORD_REUSE_ERROR } from "../lib/password-history";
 
 const router: IRouter = Router();
@@ -428,7 +428,8 @@ router.get("/admin/match-diagnostic", async (req, res) => {
     .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow?.count || 0;
 
-  const explanation = explainMatch(job, candidate, verifiedCount);
+  const aiRelevanceMap = await prefetchRelevanceCache({ jobIds: [job.id], candidateIds: [candidate.id] });
+  const explanation = explainMatch(job, candidate, verifiedCount, { aiRelevanceMap });
 
   res.json({
     candidate: {

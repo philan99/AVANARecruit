@@ -21,7 +21,7 @@ import {
   GetTopCandidatesResponse,
   GetSkillDemandResponse,
 } from "@workspace/api-zod";
-import { computeMatch, explainMatch } from "../lib/matching";
+import { computeMatch, explainMatch, prefetchRelevanceCache, warmStaleRelevanceCacheAsync, warmRelevanceCacheAsync } from "../lib/matching";
 import { dispatchCandidateAlerts, type MatchedJob } from "./candidates";
 
 const router: IRouter = Router();
@@ -55,9 +55,18 @@ router.post("/jobs/:id/run-matching", async (req, res): Promise<void> => {
     .groupBy(verificationsTable.candidateId);
   const verifiedMap = new Map(verifiedCounts.map(v => [v.candidateId, v.count]));
 
+  const aiRelevanceMap = await prefetchRelevanceCache({
+    jobIds: [job.id],
+    candidateIds: activeCandidates.map(c => c.id),
+  });
+  warmStaleRelevanceCacheAsync(
+    activeCandidates.map(candidate => ({ job, candidate })),
+    aiRelevanceMap,
+  );
+
   const matchResults = [];
   for (const candidate of activeCandidates) {
-    const result = computeMatch(job, candidate, verifiedMap.get(candidate.id) || 0);
+    const result = computeMatch(job, candidate, verifiedMap.get(candidate.id) || 0, { aiRelevanceMap });
     const existing = existingMap.get(candidate.id);
     if (existing) {
       const [updated] = await db
@@ -128,7 +137,9 @@ async function buildSoftenedDiagnostic(jobId: number, candidateId: number) {
     .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow?.count || 0;
 
-  const explanation = explainMatch(job, candidate, verifiedCount);
+  const aiRelevanceMap = await prefetchRelevanceCache({ jobIds: [job.id], candidateIds: [candidate.id] });
+  warmRelevanceCacheAsync(job, candidate);
+  const explanation = explainMatch(job, candidate, verifiedCount, { aiRelevanceMap });
   const { weights, elements } = explanation;
   const safeExplanation = {
     overallScore: explanation.overallScore,
@@ -313,10 +324,16 @@ async function refreshScoresForJob<T extends {
     .groupBy(verificationsTable.candidateId);
   const verifiedMap = new Map(verifiedCounts.map(v => [v.candidateId, v.count]));
 
+  const aiRelevanceMap = await prefetchRelevanceCache({ jobIds: [job.id], candidateIds });
+  warmStaleRelevanceCacheAsync(
+    Array.from(candidateMap.values()).map(candidate => ({ job, candidate })),
+    aiRelevanceMap,
+  );
+
   return rows.map(r => {
     const candidate = candidateMap.get(r.candidateId);
     if (!candidate) return r;
-    const result = computeMatch(job, candidate, verifiedMap.get(r.candidateId) ?? 0);
+    const result = computeMatch(job, candidate, verifiedMap.get(r.candidateId) ?? 0, { aiRelevanceMap });
     return {
       ...r,
       overallScore: result.overallScore,
@@ -353,7 +370,9 @@ router.post("/candidates/:candidateId/match-job/:jobId", async (req, res): Promi
     .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow?.count || 0;
 
-  const result = computeMatch(job, candidate, verifiedCount);
+  const aiRelevanceMap = await prefetchRelevanceCache({ jobIds: [jobId], candidateIds: [candidateId] });
+  warmRelevanceCacheAsync(job, candidate);
+  const result = computeMatch(job, candidate, verifiedCount, { aiRelevanceMap });
 
   const existing = await db.select().from(matchesTable)
     .where(sql`${matchesTable.candidateId} = ${candidateId} AND ${matchesTable.jobId} = ${jobId}`);
@@ -423,8 +442,17 @@ router.get("/candidates/:id/preview-matches", async (req, res): Promise<void> =>
     .where(and(eq(verificationsTable.candidateId, candidate.id), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow?.count || 0;
 
+  const aiRelevanceMap = await prefetchRelevanceCache({
+    jobIds: openJobs.map(j => j.id),
+    candidateIds: [candidate.id],
+  });
+  warmStaleRelevanceCacheAsync(
+    openJobs.map(job => ({ job, candidate })),
+    aiRelevanceMap,
+  );
+
   const previews = openJobs.map(job => {
-    const result = computeMatch(job, candidate, verifiedCount);
+    const result = computeMatch(job, candidate, verifiedCount, { aiRelevanceMap });
     return {
       jobId: job.id,
       jobTitle: job.title,
@@ -484,12 +512,21 @@ router.post("/candidates/:id/run-matching", async (req, res): Promise<void> => {
     .where(and(eq(verificationsTable.candidateId, candidate.id), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow?.count || 0;
 
+  const aiRelevanceMap = await prefetchRelevanceCache({
+    jobIds: openJobs.map(j => j.id),
+    candidateIds: [candidate.id],
+  });
+  warmStaleRelevanceCacheAsync(
+    openJobs.map(job => ({ job, candidate })),
+    aiRelevanceMap,
+  );
+
   const matchResults = [];
   // Track jobs whose new score crossed up through the per-job alert threshold
   // so we can fire candidate alerts for them after the response is sent.
   const crossedAlerts: MatchedJob[] = [];
   for (const job of openJobs) {
-    const result = computeMatch(job, candidate, verifiedCount);
+    const result = computeMatch(job, candidate, verifiedCount, { aiRelevanceMap });
     const existing = existingMap.get(job.id);
     const newScore = Math.round(result.overallScore);
     const previousScore = existing ? Math.round(existing.overallScore) : null;
@@ -644,10 +681,16 @@ async function refreshScoresForCandidate<T extends {
     .where(and(eq(verificationsTable.candidateId, candidateId), eq(verificationsTable.status, "verified")));
   const verifiedCount = verifiedRow[0]?.count ?? 0;
 
+  const aiRelevanceMap = await prefetchRelevanceCache({ jobIds, candidateIds: [candidateId] });
+  warmStaleRelevanceCacheAsync(
+    Array.from(jobMap.values()).map(job => ({ job, candidate })),
+    aiRelevanceMap,
+  );
+
   return rows.map(r => {
     const job = jobMap.get(r.jobId);
     if (!job) return r;
-    const result = computeMatch(job, candidate, verifiedCount);
+    const result = computeMatch(job, candidate, verifiedCount, { aiRelevanceMap });
     return {
       ...r,
       overallScore: result.overallScore,

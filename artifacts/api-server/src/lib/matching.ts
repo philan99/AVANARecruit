@@ -1,4 +1,8 @@
-import type { Job, Candidate } from "@workspace/db";
+import { createHash } from "crypto";
+import { eq, and, inArray } from "drizzle-orm";
+import { db, experienceRelevanceCacheTable, type Job, type Candidate } from "@workspace/db";
+import { openai } from "@workspace/integrations-openai-ai-server";
+import { logger } from "./logger";
 
 interface MatchResult {
   overallScore: number;
@@ -79,37 +83,86 @@ const experienceLevelMap: Record<string, number> = {
   executive: 12,
 };
 
-function scoreYearsAgainstRequirement(years: number, requiredYears: number): number {
+/**
+ * Smooth years-vs-requirement curve. Replaces the old hard cliffs at the
+ * threshold with a graceful ramp on either side:
+ *   - At required years exactly: 90.
+ *   - Each extra year above the requirement: +2 (capped at 100), so a
+ *     candidate ~5 years above gets 100.
+ *   - Each year below the requirement: a graduated penalty (steeper for
+ *     bigger deficits) so 1y short ≈ 78, 2y short ≈ 65, 3y short ≈ 53,
+ *     5y short ≈ 32, 7+y short floors at 15.
+ *   - Junior over-qualification penalty is opt-in per job
+ *     (job.acceptOverqualified === false). Default behaviour is to NOT
+ *     penalise over-qualification.
+ */
+function scoreYearsAgainstRequirement(
+  years: number,
+  requiredYears: number,
+  opts: { penaliseOverqualification?: boolean } = {},
+): number {
   if (years >= requiredYears) {
-    // Only penalise over-qualification for junior roles. For mid+ roles,
-    // having more experience than required is always treated as a full match.
-    const isJunior = requiredYears <= 1;
-    if (!isJunior) return 100;
-    const overQualification = years - requiredYears;
-    if (overQualification <= 3) return 100;
-    if (overQualification <= 6) return 85;
-    return 70;
+    if (opts.penaliseOverqualification && requiredYears <= 1) {
+      const over = years - requiredYears;
+      if (over <= 3) return 100;
+      if (over <= 6) return 85;
+      return 70;
+    }
+    const surplus = years - requiredYears;
+    return Math.min(100, 90 + surplus * 2);
   }
   const deficit = requiredYears - years;
-  if (deficit <= 1) return 80;
-  if (deficit <= 2) return 60;
-  return Math.max(20, 100 - deficit * 15);
+  // Quadratic-ish penalty: small gaps barely matter, large gaps are harsh
+  // but never zero (a self-taught candidate with strong skills shouldn't
+  // be eliminated outright).
+  const score = 90 - 12 * deficit - 1.5 * deficit * deficit;
+  return Math.max(15, Math.round(score));
 }
 
+// Words to ignore when comparing job titles. The list is deliberately
+// broad: it includes generic role nouns ("manager", "engineer",
+// "developer", …) so that a "Marketing Manager" doesn't trivially match
+// a "Project Manager" purely on the word "manager". The AI scorer
+// downstream is responsible for the nuanced semantic match — token
+// overlap is now used only as a fast pre-filter.
 const EXPERIENCE_STOP_WORDS = new Set([
+  // Conjunctions / determiners / generic English
   "the", "and", "for", "with", "our", "your", "their", "from", "into", "this",
-  "that", "are", "was", "you", "all", "any", "but", "not", "off", "out",
-  "senior", "junior", "lead", "principal", "head", "staff",
+  "that", "are", "was", "you", "all", "any", "but", "not", "off", "out", "of",
+  "in", "on", "at", "to", "by", "as", "an", "or",
+  // Seniority modifiers
+  "senior", "junior", "jr", "sr", "lead", "principal", "head", "staff",
+  "chief", "associate", "assistant", "trainee", "intern", "graduate",
+  // Generic role nouns (would otherwise produce false positives)
+  "manager", "engineer", "developer", "designer", "analyst", "consultant",
+  "specialist", "officer", "executive", "coordinator", "administrator",
+  "director", "supervisor", "representative", "agent", "advisor",
+  "professional", "worker", "operator", "technician",
 ]);
 
 function tokenizeForExperience(s: string): Set<string> {
   return new Set(
     (s ?? "")
       .toLowerCase()
-      .replace(/[^a-z0-9 ]+/g, " ")
+      .replace(/[^a-z0-9+#./ ]+/g, " ")
       .split(/\s+/)
-      .filter((t) => t.length > 2 && !EXPERIENCE_STOP_WORDS.has(t)),
+      // Keep tokens of length ≥ 2 so QA/UX/BI/AI/ML/HR/PM count.
+      .filter((t) => t.length >= 2 && !EXPERIENCE_STOP_WORDS.has(t)),
   );
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Word-boundary substring match. "go" matches "go developer" but NOT
+ * "google"; "aws" matches "aws lambda" but NOT "awsome".
+ */
+function containsWord(haystack: string, needle: string): boolean {
+  if (!needle) return false;
+  const re = new RegExp(`(?:^|[^a-z0-9+#])${escapeRegExp(needle.toLowerCase())}(?:$|[^a-z0-9+#])`, "i");
+  return re.test(haystack);
 }
 
 function entryDurationYears(entry: any): number {
@@ -128,67 +181,427 @@ function entryDurationYears(entry: any): number {
 }
 
 /**
- * Sum the years from work-history entries that look relevant to this job.
- * An entry counts as relevant when its job title shares a meaningful token
- * with the posted role's title, or when its description mentions any of the
- * required skills. Returns null if the candidate hasn't entered any work
- * history (so callers can fall back to total years).
+ * Apply a recency multiplier to an entry's duration. Years from an entry
+ * that ended in the last 10 years count at full weight; older years
+ * decay linearly to 0.5× by 20 years ago. Currently-held roles always
+ * count at full weight.
  */
-function computeRelevantYears(experience: any, job: Job): number | null {
-  if (!Array.isArray(experience) || experience.length === 0) return null;
-  const jobTitleTokens = tokenizeForExperience(job.title ?? "");
-  const jobSkillsLower = (job.skills ?? [])
-    .map((s) => (s ?? "").toLowerCase().trim())
-    .filter((s) => s.length > 1);
-  let total = 0;
-  for (const entry of experience) {
-    const titleTokens = tokenizeForExperience(entry?.jobTitle ?? "");
-    let relevant = false;
-    for (const t of titleTokens) {
-      if (jobTitleTokens.has(t)) {
-        relevant = true;
-        break;
-      }
-    }
-    if (!relevant) {
-      const desc = (entry?.description ?? "").toLowerCase();
-      if (desc) {
-        for (const skill of jobSkillsLower) {
-          if (desc.includes(skill)) {
-            relevant = true;
-            break;
-          }
-        }
-      }
-    }
-    if (relevant) total += entryDurationYears(entry);
-  }
-  return total;
+function recencyWeight(entry: any): number {
+  if (entry?.current) return 1;
+  const endStr = entry?.endDate;
+  if (!endStr) return 1;
+  const end = new Date(endStr);
+  if (Number.isNaN(end.getTime())) return 1;
+  const yearsAgo = (Date.now() - end.getTime()) / (365.25 * 24 * 3600 * 1000);
+  if (yearsAgo <= 10) return 1;
+  if (yearsAgo >= 20) return 0.5;
+  return 1 - 0.05 * (yearsAgo - 10);
 }
 
-function computeExperienceScore(job: Job, candidate: Candidate): number {
-  const requiredYears = experienceLevelMap[job.experienceLevel] ?? 3;
-  const totalScore = scoreYearsAgainstRequirement(candidate.experienceYears, requiredYears);
+function entryEffectiveYears(entry: any): number {
+  return entryDurationYears(entry) * recencyWeight(entry);
+}
 
-  const relevantYears = computeRelevantYears((candidate as any).experience, job);
-  if (relevantYears == null) {
+/**
+ * Heuristic relevance for a single work-history entry against a job.
+ * Returns a value in [0, 1] used as the multiplier on the entry's
+ * recency-weighted duration when the AI cache is cold.
+ *
+ *   1.0 → strong title-token overlap (after stop-word filter)
+ *   0.6 → no title overlap but description mentions ≥ 2 required skills
+ *   0.4 → description mentions exactly one required skill
+ *   0.0 → no overlap at all (transferable, but credited via the
+ *         total-years floor downstream)
+ */
+function heuristicEntryRelevance(entry: any, job: Job): number {
+  const jobTitleTokens = tokenizeForExperience(job.title ?? "");
+  const titleTokens = tokenizeForExperience(entry?.jobTitle ?? "");
+  for (const t of titleTokens) {
+    if (jobTitleTokens.has(t)) return 1;
+  }
+  const desc = ((entry?.description ?? "") + " " + (entry?.jobTitle ?? "")).toLowerCase();
+  if (!desc.trim()) return 0;
+  let skillHits = 0;
+  for (const skill of job.skills ?? []) {
+    const norm = (skill ?? "").toLowerCase().trim();
+    if (norm.length < 2) continue;
+    if (containsWord(desc, norm)) {
+      skillHits += 1;
+      if (skillHits >= 2) return 0.6;
+    }
+  }
+  return skillHits === 1 ? 0.4 : 0;
+}
+
+export interface PerEntryRelevance {
+  jobTitle: string;
+  durationYears: number;
+  weightedYears: number; // duration × recency
+  relevance: number; // 0..1
+  reason?: string;
+}
+
+export interface ExperienceRelevanceResult {
+  effectiveRelevantYears: number;
+  perEntryScores: PerEntryRelevance[];
+  source: "ai-cache" | "heuristic";
+}
+
+/**
+ * Compute effective relevant years from a candidate's work history. If a
+ * cached AI relevance entry is available it is used; otherwise this
+ * falls back to the heuristic. Returns null when the candidate has no
+ * work history at all.
+ */
+function computeEffectiveRelevantYears(
+  job: Job,
+  candidate: Candidate,
+  cacheMap?: RelevanceCacheMap,
+  opts: { skipAutoWarm?: boolean } = {},
+): ExperienceRelevanceResult | null {
+  const experience = (candidate as any).experience;
+  if (!Array.isArray(experience) || experience.length === 0) return null;
+
+  const cached = cacheMap?.get(makeCacheKey(job.id, candidate.id));
+  if (cached
+    && cached.jobHash === hashJobForRelevance(job)
+    && cached.candidateExperienceHash === hashCandidateExperience(candidate)
+  ) {
+    return {
+      effectiveRelevantYears: cached.effectiveRelevantYears,
+      perEntryScores: (cached.perEntryScores as PerEntryRelevance[]) ?? [],
+      source: "ai-cache",
+    };
+  }
+
+  // Cache miss (or stale hash): warm in the background so the next
+  // request gets the AI-quality score. Routes that prefetch in batches
+  // and use warmStaleRelevanceCacheAsync (concurrency-limited) can pass
+  // skipAutoWarm to opt out, but the in-flight Set means we still
+  // wouldn't double-fire even if both pathways triggered.
+  if (!opts.skipAutoWarm && job.id && candidate.id) {
+    warmRelevanceCacheAsync(job, candidate);
+  }
+
+  const perEntryScores: PerEntryRelevance[] = experience.map((entry: any) => {
+    const duration = entryDurationYears(entry);
+    const weighted = entryEffectiveYears(entry);
+    const relevance = heuristicEntryRelevance(entry, job);
+    return {
+      jobTitle: String(entry?.jobTitle ?? ""),
+      durationYears: Math.round(duration * 10) / 10,
+      weightedYears: Math.round(weighted * 10) / 10,
+      relevance,
+    };
+  });
+  const effective = perEntryScores.reduce((sum, e) => sum + e.weightedYears * e.relevance, 0);
+  return { effectiveRelevantYears: effective, perEntryScores, source: "heuristic" };
+}
+
+interface ExperienceScoreOptions {
+  aiRelevanceMap?: RelevanceCacheMap;
+}
+
+function computeExperienceScore(
+  job: Job,
+  candidate: Candidate,
+  opts: ExperienceScoreOptions = {},
+): number {
+  const requiredYears = experienceLevelMap[job.experienceLevel] ?? 3;
+  const overqualOpts = {
+    penaliseOverqualification: (job as any).acceptOverqualified === false,
+  };
+  const totalScore = scoreYearsAgainstRequirement(
+    candidate.experienceYears,
+    requiredYears,
+    overqualOpts,
+  );
+
+  const relevance = computeEffectiveRelevantYears(job, candidate, opts.aiRelevanceMap);
+  if (relevance == null) {
     // No work-history entries to draw on — fall back to total years only.
     return totalScore;
   }
 
-  if (relevantYears === 0) {
-    // Candidate has work history but none of it appears relevant to this role.
-    // Apply a strong cap so unrelated tenure cannot carry the experience score;
-    // allow only a small transferable-tenure credit (max 25/100).
-    return Math.min(25, Math.round(totalScore * 0.25));
+  if (relevance.effectiveRelevantYears <= 0.1) {
+    // Candidate has work history but nothing reads as relevant. Soften
+    // the old 25-point cap to a 40-point cap so transferable tenure
+    // still carries weight — the recruiter can read the assessment to
+    // see why the score is low.
+    return Math.min(40, Math.round(totalScore * 0.4));
   }
 
-  const relevantScore = scoreYearsAgainstRequirement(relevantYears, requiredYears);
-  // Weight role-relevant years more heavily than raw total tenure: a candidate
-  // with the right kind of experience should outscore one with the same total
-  // years in unrelated roles, but we don't want to zero-out transferable
-  // experience either.
-  return Math.round(relevantScore * 0.80 + totalScore * 0.20);
+  const relevantScore = scoreYearsAgainstRequirement(
+    relevance.effectiveRelevantYears,
+    requiredYears,
+    overqualOpts,
+  );
+  return Math.round(relevantScore * 0.8 + totalScore * 0.2);
+}
+
+// ---------------------------------------------------------------------------
+// AI-scored experience relevance cache
+// ---------------------------------------------------------------------------
+//
+// We treat the AI's "is this work entry relevant to this job?" judgement as
+// the canonical signal, but we never block a match calculation waiting for
+// it. The pipeline is:
+//
+//   1. Each (job, candidate) pair has at most one row in
+//      `experience_relevance_cache`.
+//   2. Routes that match in batches call `prefetchRelevanceCache(...)` once
+//      and pass the resulting Map into `computeMatch` / `explainMatch`.
+//   3. Inside the per-pair scorer, a cache hit (whose hashes match the
+//      current job + candidate state) wins. A miss falls back to the
+//      heuristic score AND triggers a fire-and-forget AI call that
+//      writes the result back into the cache, so the next request is
+//      AI-quality.
+//   4. Hashing the job (title + skills + level) and the candidate's
+//      experience array means edits on either side automatically
+//      invalidate the cache.
+
+export type RelevanceCacheKey = string;
+export type RelevanceCacheMap = Map<RelevanceCacheKey, {
+  jobHash: string;
+  candidateExperienceHash: string;
+  effectiveRelevantYears: number;
+  perEntryScores: PerEntryRelevance[];
+}>;
+
+export function makeCacheKey(jobId: number, candidateId: number): RelevanceCacheKey {
+  return `${jobId}:${candidateId}`;
+}
+
+function md5(s: string): string {
+  return createHash("md5").update(s).digest("hex");
+}
+
+export function hashJobForRelevance(job: Job): string {
+  const skills = (job.skills ?? []).map((s) => (s ?? "").toLowerCase().trim()).filter(Boolean).sort();
+  const payload = JSON.stringify({
+    title: (job.title ?? "").toLowerCase().trim(),
+    skills,
+    level: (job.experienceLevel ?? "").toLowerCase().trim(),
+    // Include requirements because it's part of the AI prompt and a
+    // recruiter editing it should invalidate cached relevance scores.
+    requirements: (job.requirements ?? "").toLowerCase().trim(),
+  });
+  return md5(payload);
+}
+
+// In-flight de-duplication: while one warm is running for a given
+// (job, candidate) pair, additional misses won't spawn duplicates.
+const inFlightWarms = new Set<RelevanceCacheKey>();
+
+export function hashCandidateExperience(candidate: Candidate): string {
+  const experience = (candidate as any).experience;
+  if (!Array.isArray(experience)) return md5("[]");
+  const normalized = experience.map((e: any) => ({
+    t: (e?.jobTitle ?? "").toLowerCase().trim(),
+    c: (e?.company ?? "").toLowerCase().trim(),
+    s: e?.startDate ?? "",
+    e: e?.endDate ?? "",
+    cur: !!e?.current,
+    d: (e?.description ?? "").toLowerCase().trim(),
+  }));
+  return md5(JSON.stringify(normalized));
+}
+
+/**
+ * Bulk-fetch cached relevance rows for a set of (job, candidate) pairs.
+ * Routes call this once before iterating so the per-pair scorer never
+ * touches the database.
+ */
+export async function prefetchRelevanceCache(args: {
+  jobIds: number[];
+  candidateIds: number[];
+}): Promise<RelevanceCacheMap> {
+  const map: RelevanceCacheMap = new Map();
+  if (args.jobIds.length === 0 || args.candidateIds.length === 0) return map;
+  const rows = await db
+    .select()
+    .from(experienceRelevanceCacheTable)
+    .where(and(
+      inArray(experienceRelevanceCacheTable.jobId, args.jobIds),
+      inArray(experienceRelevanceCacheTable.candidateId, args.candidateIds),
+    ));
+  for (const r of rows) {
+    map.set(makeCacheKey(r.jobId, r.candidateId), {
+      jobHash: r.jobHash,
+      candidateExperienceHash: r.candidateExperienceHash,
+      effectiveRelevantYears: r.effectiveRelevantYears,
+      perEntryScores: (r.perEntryScores as PerEntryRelevance[]) ?? [],
+    });
+  }
+  return map;
+}
+
+/**
+ * Score every work-history entry for a single (job, candidate) pair using
+ * GPT, then write the result to the cache. Safe to call repeatedly: the
+ * UPSERT means the latest AI judgement always wins.
+ */
+export async function scoreExperienceRelevanceAI(
+  job: Job,
+  candidate: Candidate,
+): Promise<ExperienceRelevanceResult | null> {
+  const experience = (candidate as any).experience;
+  if (!Array.isArray(experience) || experience.length === 0) return null;
+
+  const entriesPayload = experience.map((e: any, i: number) => ({
+    index: i,
+    jobTitle: e?.jobTitle ?? "",
+    company: e?.company ?? "",
+    startDate: e?.startDate ?? null,
+    endDate: e?.current ? "present" : (e?.endDate ?? null),
+    description: (e?.description ?? "").slice(0, 800),
+  }));
+
+  const systemPrompt = "You are a recruiting analyst. Rate how relevant each of a candidate's past work-history entries is to a target job. Consider title overlap, transferable skills, and adjacent role families (e.g. data engineer ↔ data scientist are highly relevant; sales ↔ engineering are not). Return ONLY a JSON object: { entries: [{ index: number, relevance: number, reason: string }] } where relevance is between 0 and 1 (1 = directly relevant, 0.6-0.8 = adjacent role family, 0.3-0.5 = some transferable skills, 0 = unrelated). Reason should be one short sentence.";
+
+  const userPrompt = JSON.stringify({
+    job: {
+      title: job.title,
+      skills: job.skills ?? [],
+      experienceLevel: job.experienceLevel,
+      requirements: (job.requirements ?? "").slice(0, 800),
+    },
+    workHistory: entriesPayload,
+  });
+
+  let aiEntries: Array<{ index: number; relevance: number; reason: string }> = [];
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0,
+    });
+    const parsed = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+    if (Array.isArray(parsed.entries)) {
+      aiEntries = parsed.entries
+        .filter((e: any) => typeof e?.index === "number" && typeof e?.relevance === "number")
+        .map((e: any) => ({
+          index: e.index,
+          relevance: Math.max(0, Math.min(1, e.relevance)),
+          reason: typeof e.reason === "string" ? e.reason : "",
+        }));
+    }
+  } catch (err) {
+    logger.warn({ err, jobId: job.id, candidateId: candidate.id }, "AI relevance scoring failed");
+    return null;
+  }
+
+  const aiByIndex = new Map(aiEntries.map((e) => [e.index, e]));
+  const perEntryScores: PerEntryRelevance[] = experience.map((entry: any, i: number) => {
+    const ai = aiByIndex.get(i);
+    const relevance = ai ? ai.relevance : heuristicEntryRelevance(entry, job);
+    const duration = entryDurationYears(entry);
+    const weighted = entryEffectiveYears(entry);
+    return {
+      jobTitle: String(entry?.jobTitle ?? ""),
+      durationYears: Math.round(duration * 10) / 10,
+      weightedYears: Math.round(weighted * 10) / 10,
+      relevance: Math.round(relevance * 100) / 100,
+      reason: ai?.reason,
+    };
+  });
+  const effective = perEntryScores.reduce((s, e) => s + e.weightedYears * e.relevance, 0);
+
+  try {
+    await db
+      .insert(experienceRelevanceCacheTable)
+      .values({
+        jobId: job.id,
+        candidateId: candidate.id,
+        jobHash: hashJobForRelevance(job),
+        candidateExperienceHash: hashCandidateExperience(candidate),
+        effectiveRelevantYears: effective,
+        perEntryScores: perEntryScores as any,
+      })
+      .onConflictDoUpdate({
+        target: [experienceRelevanceCacheTable.jobId, experienceRelevanceCacheTable.candidateId],
+        set: {
+          jobHash: hashJobForRelevance(job),
+          candidateExperienceHash: hashCandidateExperience(candidate),
+          effectiveRelevantYears: effective,
+          perEntryScores: perEntryScores as any,
+          computedAt: new Date(),
+        },
+      });
+  } catch (err) {
+    logger.warn({ err, jobId: job.id, candidateId: candidate.id }, "Failed to persist relevance cache");
+  }
+
+  return { effectiveRelevantYears: effective, perEntryScores, source: "ai-cache" };
+}
+
+/**
+ * Fire-and-forget AI scoring. Does NOT throw or return a Promise the
+ * caller is expected to await: it runs in the background and warms the
+ * cache for next time.
+ */
+export function warmRelevanceCacheAsync(job: Job, candidate: Candidate): void {
+  const key = makeCacheKey(job.id, candidate.id);
+  if (inFlightWarms.has(key)) return;
+  inFlightWarms.add(key);
+  void scoreExperienceRelevanceAI(job, candidate)
+    .catch((err) => {
+      logger.warn({ err, jobId: job.id, candidateId: candidate.id }, "Background AI relevance scoring rejected");
+    })
+    .finally(() => {
+      inFlightWarms.delete(key);
+    });
+}
+
+/**
+ * For a batch of (job, candidate) pairs, identify which ones either have
+ * no cache row or have a stale one (hashes don't match current state),
+ * and warm them in the background. Concurrency-limited so we don't
+ * stampede the OpenAI endpoint.
+ */
+export function warmStaleRelevanceCacheAsync(
+  pairs: Array<{ job: Job; candidate: Candidate }>,
+  cacheMap: RelevanceCacheMap,
+  opts: { concurrency?: number; maxWarms?: number } = {},
+): void {
+  const concurrency = opts.concurrency ?? 3;
+  const maxWarms = opts.maxWarms ?? 25;
+  const stale: Array<{ job: Job; candidate: Candidate }> = [];
+  for (const { job, candidate } of pairs) {
+    const experience = (candidate as any).experience;
+    if (!Array.isArray(experience) || experience.length === 0) continue;
+    const cached = cacheMap.get(makeCacheKey(job.id, candidate.id));
+    if (
+      cached
+      && cached.jobHash === hashJobForRelevance(job)
+      && cached.candidateExperienceHash === hashCandidateExperience(candidate)
+    ) {
+      continue; // fresh cache hit
+    }
+    stale.push({ job, candidate });
+    if (stale.length >= maxWarms) break;
+  }
+  if (stale.length === 0) return;
+
+  void (async () => {
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(concurrency, stale.length) }, async () => {
+      while (cursor < stale.length) {
+        const i = cursor++;
+        const item = stale[i];
+        try {
+          await scoreExperienceRelevanceAI(item.job, item.candidate);
+        } catch (err) {
+          logger.warn({ err, jobId: item.job.id, candidateId: item.candidate.id }, "Background relevance warm failed");
+        }
+      }
+    });
+    await Promise.all(workers);
+  })();
 }
 
 // Ranking of the controlled education enum values used across the app.
@@ -480,6 +893,8 @@ export interface MatchExplanation {
       candidateRelevantYears: number | null;
       totalYearsScore: number;
       relevantYearsScore: number | null;
+      relevanceSource: "ai-cache" | "heuristic" | "no-history";
+      perEntryScores: PerEntryRelevance[];
     };
     education: {
       score: number;
@@ -518,14 +933,21 @@ export interface MatchExplanation {
   assessment: string;
 }
 
-export function explainMatch(job: Job, candidate: Candidate, verifiedCount: number = 0): MatchExplanation {
+export function explainMatch(
+  job: Job,
+  candidate: Candidate,
+  verifiedCount: number = 0,
+  opts: { aiRelevanceMap?: RelevanceCacheMap } = {},
+): MatchExplanation {
   const skill = computeSkillScore(job.skills, candidate.skills);
 
   const requiredYears = experienceLevelMap[job.experienceLevel] ?? 3;
-  const totalYearsScore = scoreYearsAgainstRequirement(candidate.experienceYears, requiredYears);
-  const relevantYears = computeRelevantYears((candidate as any).experience, job);
-  const relevantYearsScore = relevantYears != null ? scoreYearsAgainstRequirement(relevantYears, requiredYears) : null;
-  const experienceScore = computeExperienceScore(job, candidate);
+  const overqualOpts = { penaliseOverqualification: (job as any).acceptOverqualified === false };
+  const totalYearsScore = scoreYearsAgainstRequirement(candidate.experienceYears, requiredYears, overqualOpts);
+  const relevance = computeEffectiveRelevantYears(job, candidate, opts.aiRelevanceMap);
+  const relevantYears = relevance ? relevance.effectiveRelevantYears : null;
+  const relevantYearsScore = relevantYears != null ? scoreYearsAgainstRequirement(relevantYears, requiredYears, overqualOpts) : null;
+  const experienceScore = computeExperienceScore(job, candidate, { aiRelevanceMap: opts.aiRelevanceMap });
 
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
   const locationDetail = computeLocationScoreDetailed(job, candidate);
@@ -582,7 +1004,7 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
     preferenceMismatches: pref.mismatches,
   };
   const assessment = generateAssessment(partial, job, candidate, {
-    hasNoRelevantExperience: relevantYears === 0,
+    hasNoRelevantExperience: relevantYears != null && relevantYears <= 0.1,
   });
 
   return {
@@ -604,6 +1026,8 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
         candidateRelevantYears: relevantYears == null ? null : Math.round(relevantYears * 10) / 10,
         totalYearsScore: Math.round(totalYearsScore),
         relevantYearsScore: relevantYearsScore == null ? null : Math.round(relevantYearsScore),
+        relevanceSource: relevance ? relevance.source : "no-history",
+        perEntryScores: relevance ? relevance.perEntryScores : [],
       },
       education: {
         score: Math.round(educationScore),
@@ -636,14 +1060,20 @@ export function explainMatch(job: Job, candidate: Candidate, verifiedCount: numb
   };
 }
 
-export function computeMatch(job: Job, candidate: Candidate, verifiedCount: number = 0): MatchResult {
+export function computeMatch(
+  job: Job,
+  candidate: Candidate,
+  verifiedCount: number = 0,
+  opts: { aiRelevanceMap?: RelevanceCacheMap } = {},
+): MatchResult {
   const { score: skillScore, matched: matchedSkills, missing: missingSkills } = computeSkillScore(
     job.skills,
     candidate.skills
   );
 
-  const experienceScore = computeExperienceScore(job, candidate);
-  const relevantYearsForAssessment = computeRelevantYears((candidate as any).experience, job);
+  const experienceScore = computeExperienceScore(job, candidate, { aiRelevanceMap: opts.aiRelevanceMap });
+  const relevanceForAssessment = computeEffectiveRelevantYears(job, candidate, opts.aiRelevanceMap);
+  const relevantYearsForAssessment = relevanceForAssessment ? relevanceForAssessment.effectiveRelevantYears : null;
   const educationScore = computeEducationScore(job.educationLevel, job.requirements, candidate.education);
   const locationScore = computeLocationScore(job, candidate);
   const verificationScore = computeVerificationScore(verifiedCount);
@@ -682,7 +1112,7 @@ export function computeMatch(job: Job, candidate: Candidate, verifiedCount: numb
   };
 
   result.assessment = generateAssessment(result, job, candidate, {
-    hasNoRelevantExperience: relevantYearsForAssessment === 0,
+    hasNoRelevantExperience: relevantYearsForAssessment != null && relevantYearsForAssessment <= 0.1,
   });
   return result;
 }

@@ -14,7 +14,7 @@ import {
 } from "@workspace/api-zod";
 import { getResendClient } from "../lib/resend";
 import { brandedEmail } from "../lib/emailTemplate";
-import { computeMatch } from "../lib/matching";
+import { computeMatch, prefetchRelevanceCache } from "../lib/matching";
 import { validatePassword } from "../lib/password-policy";
 import { geocodeUkPostcode, geocodeUkTown, buildLocationDisplay } from "../lib/geocode";
 
@@ -641,9 +641,14 @@ async function sendCandidateAlerts(candidate: any) {
 
   if (alertJobs.length === 0) return;
 
+  const aiRelevanceMap = await prefetchRelevanceCache({
+    jobIds: alertJobs.map(j => j.id),
+    candidateIds: [candidate.id],
+  });
+
   const matched: MatchedJob[] = [];
   for (const job of alertJobs) {
-    const result = computeMatch(job, candidate);
+    const result = computeMatch(job as any, candidate, 0, { aiRelevanceMap });
     const score = Math.round(result.overallScore);
     if (score < job.candidateAlertMinScore) continue;
     matched.push({
