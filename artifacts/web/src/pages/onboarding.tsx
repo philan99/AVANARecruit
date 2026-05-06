@@ -142,6 +142,7 @@ export default function Onboarding() {
   const [townLng, setTownLng] = useState<number | null>(null);
   const [postcodeCountry, setPostcodeCountry] = useState("United Kingdom");
   const [townError, setTownError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [currentTitle, setCurrentTitle] = useState("");
   const [experienceYears, setExperienceYears] = useState<string>("");
   const [maxRadiusMiles, setMaxRadiusMiles] = useState<number>(25);
@@ -431,14 +432,25 @@ export default function Onboarding() {
 
   async function handleNext() {
     if (saving) return;
-    if (step === 3 && (!town.trim() || townLat == null || townLng == null)) {
-      setTownError("Please pick your town or city from the suggestions so we can match you to nearby jobs.");
-      toast({
-        title: "Town required",
-        description: "Please select your town or city before continuing.",
-        variant: "destructive",
-      });
-      return;
+    if (step === 3) {
+      const missingTitle = !currentTitle.trim();
+      const missingTown = !town.trim() || townLat == null || townLng == null;
+      if (missingTitle) {
+        setTitleError("Please enter your current job title so we can match you to similar roles.");
+      }
+      if (missingTown) {
+        setTownError("Please pick your town or city from the suggestions so we can match you to nearby jobs.");
+      }
+      if (missingTitle || missingTown) {
+        toast({
+          title: missingTitle && missingTown ? "Job title and town required" : missingTitle ? "Job title required" : "Town required",
+          description: missingTitle
+            ? "Please enter your current job title before continuing."
+            : "Please select your town or city before continuing.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     if (
       step === 8 &&
@@ -784,8 +796,22 @@ export default function Onboarding() {
               <p className="text-sm text-slate-600 mb-5">These help us match you on location and seniority.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Current job title<FieldBadge field="currentTitle" /></label>
-                  <Input value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" />
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                    Current job title <span className="text-red-600" aria-hidden="true">*</span>
+                    <FieldBadge field="currentTitle" />
+                  </label>
+                  <Input
+                    value={currentTitle}
+                    onChange={(e) => {
+                      setCurrentTitle(e.target.value);
+                      if (titleError && e.target.value.trim()) setTitleError(null);
+                    }}
+                    placeholder="e.g. Senior Software Engineer"
+                    className={titleError ? "ring-1 ring-red-500" : undefined}
+                  />
+                  {titleError && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">{titleError}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1 block">Years of experience<FieldBadge field="experienceYears" /></label>
