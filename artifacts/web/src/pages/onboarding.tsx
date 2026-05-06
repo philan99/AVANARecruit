@@ -1241,17 +1241,19 @@ export default function Onboarding() {
             </button>
             {step < TOTAL_STEPS ? (
               (() => {
-                const cvUploadedNotRead =
+                const cvNotReadYet =
                   step === 2 &&
-                  !!candidate?.cvFile &&
                   !parsingCv &&
                   prefillCount === 0 &&
                   !cvParseError;
-                const continueDisabled = saving || parsingCv || isCvUploading || cvUploadedNotRead;
+                const cvAwaitingRead = cvNotReadYet && !!candidate?.cvFile;
+                const continueDisabled = saving || parsingCv || isCvUploading || cvNotReadYet;
                 const label = parsingCv
                   ? "Reading your CV…"
-                  : cvUploadedNotRead
+                  : cvAwaitingRead
                   ? "Read your CV with AI to continue"
+                  : cvNotReadYet
+                  ? "Upload your CV to continue"
                   : step === 1
                   ? "Let's get started"
                   : "Continue";
