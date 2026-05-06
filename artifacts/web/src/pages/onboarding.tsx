@@ -1240,9 +1240,27 @@ export default function Onboarding() {
               Cancel
             </button>
             {step < TOTAL_STEPS ? (
-              <Button onClick={handleNext} disabled={saving || parsingCv} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
-                {parsingCv ? "Reading your CV…" : step === 1 ? "Let's get started" : "Continue"} <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
+              (() => {
+                const cvUploadedNotRead =
+                  step === 2 &&
+                  !!candidate?.cvFile &&
+                  !parsingCv &&
+                  prefillCount === 0 &&
+                  !cvParseError;
+                const continueDisabled = saving || parsingCv || isCvUploading || cvUploadedNotRead;
+                const label = parsingCv
+                  ? "Reading your CV…"
+                  : cvUploadedNotRead
+                  ? "Read your CV with AI to continue"
+                  : step === 1
+                  ? "Let's get started"
+                  : "Continue";
+                return (
+                  <Button onClick={handleNext} disabled={continueDisabled} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
+                    {label} <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                );
+              })()
             ) : (
               <Button onClick={finish} className="font-semibold" style={{ backgroundColor: "#4CAF50" }}>
                 <Sparkles className="w-4 h-4 mr-1" /> View my matches <ArrowRight className="w-4 h-4 ml-1" />
