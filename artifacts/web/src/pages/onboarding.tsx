@@ -435,27 +435,50 @@ export default function Onboarding() {
     if (step === 3) {
       const missingTitle = !currentTitle.trim();
       const townEmpty = !town.trim();
-      const townUnmatched = !townEmpty && (townLat == null || townLng == null);
-      const missingTown = townEmpty || townUnmatched;
+      const townMissingCoords = !townEmpty && (townLat == null || townLng == null);
+
+      // Even if lat/lng are populated (e.g. server fuzzy-matched a typo on a
+      // previous save), require the displayed town text to exactly match a
+      // known place so the user can't slip an unrecognised town through.
+      let townNotExactMatch = false;
+      if (!townEmpty && !townMissingCoords) {
+        try {
+          const r = await fetch(
+            `https://api.postcodes.io/places?q=${encodeURIComponent(town.trim())}&limit=10`,
+          );
+          if (r.ok) {
+            const data = await r.json() as { result?: Array<{ name_1?: string }> | null };
+            const list = data?.result ?? [];
+            const lower = town.trim().toLowerCase();
+            const exact = Array.isArray(list)
+              && list.some((p) => (p?.name_1 || "").toLowerCase() === lower);
+            townNotExactMatch = !exact;
+          }
+        } catch {
+          // Network failure shouldn't block — fall through to the lat/lng check.
+        }
+      }
+
+      const townInvalid = townEmpty || townMissingCoords || townNotExactMatch;
       if (missingTitle) {
         setTitleError("Please enter your current job title so we can match you to similar roles.");
       }
       if (townEmpty) {
         setTownError("Please pick your town or city from the suggestions so we can match you to nearby jobs.");
-      } else if (townUnmatched) {
+      } else if (townMissingCoords || townNotExactMatch) {
         setTownError(`"${town.trim()}" isn't a recognised town. Please choose one from the dropdown suggestions.`);
       }
-      if (missingTitle || missingTown) {
+      if (missingTitle || townInvalid) {
         const titleMsg = "Please enter your current job title before continuing.";
-        const townMsg = townUnmatched
+        const townMsg = (townMissingCoords || townNotExactMatch)
           ? "Pick your town or city from the dropdown suggestions — free text isn't enough."
           : "Please select your town or city before continuing.";
         toast({
-          title: missingTitle && missingTown
+          title: missingTitle && townInvalid
             ? "Job title and town required"
             : missingTitle
             ? "Job title required"
-            : townUnmatched
+            : (townMissingCoords || townNotExactMatch)
             ? "Town not recognised"
             : "Town required",
           description: missingTitle ? titleMsg : townMsg,
