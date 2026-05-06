@@ -434,19 +434,31 @@ export default function Onboarding() {
     if (saving) return;
     if (step === 3) {
       const missingTitle = !currentTitle.trim();
-      const missingTown = !town.trim() || townLat == null || townLng == null;
+      const townEmpty = !town.trim();
+      const townUnmatched = !townEmpty && (townLat == null || townLng == null);
+      const missingTown = townEmpty || townUnmatched;
       if (missingTitle) {
         setTitleError("Please enter your current job title so we can match you to similar roles.");
       }
-      if (missingTown) {
+      if (townEmpty) {
         setTownError("Please pick your town or city from the suggestions so we can match you to nearby jobs.");
+      } else if (townUnmatched) {
+        setTownError(`"${town.trim()}" isn't a recognised town. Please choose one from the dropdown suggestions.`);
       }
       if (missingTitle || missingTown) {
+        const titleMsg = "Please enter your current job title before continuing.";
+        const townMsg = townUnmatched
+          ? "Pick your town or city from the dropdown suggestions — free text isn't enough."
+          : "Please select your town or city before continuing.";
         toast({
-          title: missingTitle && missingTown ? "Job title and town required" : missingTitle ? "Job title required" : "Town required",
-          description: missingTitle
-            ? "Please enter your current job title before continuing."
-            : "Please select your town or city before continuing.",
+          title: missingTitle && missingTown
+            ? "Job title and town required"
+            : missingTitle
+            ? "Job title required"
+            : townUnmatched
+            ? "Town not recognised"
+            : "Town required",
+          description: missingTitle ? titleMsg : townMsg,
           variant: "destructive",
         });
         return;
