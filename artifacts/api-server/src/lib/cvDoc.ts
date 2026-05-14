@@ -126,6 +126,12 @@ export async function renderCvToDocxBuffer(cv: RewrittenCv): Promise<Buffer> {
     children.push(paraText(cv.summary));
   }
 
+  // Skills (placed immediately after Profile, before Experience)
+  if (cv.skills.length > 0) {
+    children.push(sectionHeading("Skills"));
+    children.push(paraText(cv.skills.join("  ·  ")));
+  }
+
   // Experience
   if (cv.experience.length > 0) {
     children.push(sectionHeading("Experience"));
@@ -154,12 +160,6 @@ export async function renderCvToDocxBuffer(cv: RewrittenCv): Promise<Buffer> {
       );
       if (ed.details) children.push(paraText(ed.details, { size: 20, color: "555555" }));
     }
-  }
-
-  // Skills
-  if (cv.skills.length > 0) {
-    children.push(sectionHeading("Skills"));
-    children.push(paraText(cv.skills.join("  ·  ")));
   }
 
   // Qualifications
@@ -413,6 +413,14 @@ export async function renderCvToPdfBuffer(cv: RewrittenCv): Promise<Buffer> {
       }
 
       // ============================================================
+      // Skills (placed immediately after Profile, before Experience)
+      // ============================================================
+      if (cv.skills.length > 0) {
+        heading("Skills");
+        paragraph(cv.skills.join("  ·  "));
+      }
+
+      // ============================================================
       // Experience
       // ============================================================
       if (cv.experience.length > 0) {
@@ -451,14 +459,6 @@ export async function renderCvToPdfBuffer(cv: RewrittenCv): Promise<Buffer> {
           }
           if (i < cv.education.length - 1) doc.moveDown(0.2);
         }
-      }
-
-      // ============================================================
-      // Skills
-      // ============================================================
-      if (cv.skills.length > 0) {
-        heading("Skills");
-        paragraph(cv.skills.join("  ·  "));
       }
 
       // ============================================================

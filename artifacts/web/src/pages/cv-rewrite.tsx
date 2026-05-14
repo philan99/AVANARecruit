@@ -664,6 +664,17 @@ function CvPreview({ cv }: { cv: RewrittenCv }) {
           </div>
         )}
 
+        {cv.skills.length > 0 && (
+          <div className="mt-6">
+            <SectionHeading>Skills</SectionHeading>
+            <div className="flex flex-wrap gap-1.5">
+              {cv.skills.map((s, i) => (
+                <Badge key={i} variant="secondary" className="font-normal">{s}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {cv.experience.length > 0 && (
           <div className="mt-6">
             <SectionHeading>Experience</SectionHeading>
@@ -703,17 +714,6 @@ function CvPreview({ cv }: { cv: RewrittenCv }) {
                   </div>
                   {ed.details && <p className="text-xs text-muted-foreground">{ed.details}</p>}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {cv.skills.length > 0 && (
-          <div className="mt-6">
-            <SectionHeading>Skills</SectionHeading>
-            <div className="flex flex-wrap gap-1.5">
-              {cv.skills.map((s, i) => (
-                <Badge key={i} variant="secondary" className="font-normal">{s}</Badge>
               ))}
             </div>
           </div>
