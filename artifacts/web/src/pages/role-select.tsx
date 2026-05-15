@@ -682,7 +682,7 @@ export default function RoleSelect() {
               </div>
               <p className="text-sm mb-8" style={{ color: "#6b7280" }}>Unlock premium AI matching to land your ideal role faster</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Full candidate profile with CV upload", "AI-powered job matching & scoring", "AI CV rewrite to refresh style, tone and structure", "Run match diagnostics to see why you scored", "Priority visibility to employers", "Save & track favourite jobs", "Application status notifications", "Verified profile badge"].map((f) => (
+                {["Full candidate profile with CV upload", "AI-powered job matching & scoring", "AI CV rewrite to refresh style, tone and structure", "Detailed match diagnostics for deeper insight into every score", "Priority visibility to employers", "Save & track favourite jobs", "Application status notifications", "Verified profile badge"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
