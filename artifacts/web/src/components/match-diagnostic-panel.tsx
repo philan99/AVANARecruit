@@ -139,13 +139,22 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
             importance={e.experience.importance}
             rule="Driven entirely by role-relevant years from work history (each entry's recency-weighted duration multiplied by how relevant the role is to this job) measured against the level set on the job. Unrelated tenure does not contribute — a long career in a different field scores no better than no career at all if none of it is relevant. Total declared years are only used as a fallback when the candidate has no work-history entries on file."
           />
-          <CardContent className="text-xs space-y-1">
+          <CardContent className="text-xs space-y-2">
             <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs expected)`} />
-            <KV k="Candidate total" v={`${e.experience.candidateTotalYears} yrs`} />
+            <div className="flex items-baseline justify-between gap-2">
+              <KV k="Candidate total" v={`${e.experience.candidateTotalYears} yrs`} />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">Not scored</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed -mt-1 pl-0">
+              Total years are shown for context only. They do not feed into the experience score unless the candidate has no work history on file at all.
+            </p>
             <KV
               k="Role-relevant years"
               v={e.experience.candidateRelevantYears == null ? "n/a (no work history captured)" : `${e.experience.candidateRelevantYears} yrs`}
             />
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <span className="font-medium text-foreground">How this is calculated:</span> each work-history entry's duration is weighted by how recent it is, then multiplied by how relevant the role is to this job (a directly matching role counts in full, an adjacent role counts partially, an unrelated role counts as zero). The totals are summed and compared against the years expected for the job level — meeting the requirement scores around 90, with bonuses above and a graduated penalty below.
+            </p>
           </CardContent>
         </Card>
 
