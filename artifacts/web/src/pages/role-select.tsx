@@ -460,17 +460,46 @@ export default function RoleSelect() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service) => (
+            {services.map((service, idx) => (
               <div
                 key={service.title}
-                className="group rounded-xl p-7 transition-all hover:-translate-y-1"
-                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+                className="group relative rounded-2xl p-8 overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", boxShadow: "0 4px 16px rgba(26, 32, 53, 0.04)" }}
               >
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style={{ backgroundColor: "rgba(76, 175, 80, 0.1)" }}>
-                  <service.icon className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                {/* Top accent bar — appears on hover */}
+                <div
+                  aria-hidden
+                  className="absolute top-0 left-0 right-0 h-[3px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                  style={{ background: "linear-gradient(90deg, #4CAF50 0%, #66bb6a 100%)" }}
+                />
+                {/* Decorative corner glow */}
+                <div
+                  aria-hidden
+                  className="absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: "radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, transparent 70%)" }}
+                />
+                {/* Number badge */}
+                <span
+                  className="absolute top-6 right-6 text-xs font-bold tracking-wider transition-colors group-hover:text-[#4CAF50]"
+                  style={{ color: "#d1d5db" }}
+                >
+                  0{idx + 1}
+                </span>
+                {/* Icon tile */}
+                <div
+                  className="relative w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]"
+                  style={{ background: "linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, rgba(76, 175, 80, 0.04) 100%)", border: "1px solid rgba(76, 175, 80, 0.2)" }}
+                >
+                  <service.icon className="w-6 h-6" style={{ color: "#4CAF50" }} strokeWidth={2.25} />
+                  {/* Tiny corner dot */}
+                  <span
+                    aria-hidden
+                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: "#4CAF50", boxShadow: "0 0 0 3px #ffffff" }}
+                  />
                 </div>
-                <h3 className="text-base font-bold mb-1" style={{ color: "#1a2035" }}>{service.title}</h3>
-                <p className="text-xs font-medium mb-3" style={{ color: "#4CAF50" }}>{service.subtitle}</p>
+                <h3 className="text-lg font-bold mb-1.5 tracking-tight" style={{ color: "#1a2035" }}>{service.title}</h3>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-4" style={{ color: "#4CAF50" }}>{service.subtitle}</p>
                 <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{service.description}</p>
               </div>
             ))}
