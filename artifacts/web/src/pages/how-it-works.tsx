@@ -43,7 +43,7 @@ export default function HowItWorks() {
     {
       icon: Sparkles,
       title: "Run AI Matching",
-      description: "Our AI engine analyses every candidate in the system against your job requirements, scoring them across six weighted dimensions: Skills (30%), Experience (20%), Preferences (15%), Verification (15%), Location (10%) and Education (10%).",
+      description: "Our AI engine analyses every candidate in the system against your job requirements, scoring them across six weighted dimensions: Skills (25%), Experience (25%), Preferences (15%), Verification (15%), Location (10%) and Education (10%).",
     },
     {
       icon: BarChart3,
