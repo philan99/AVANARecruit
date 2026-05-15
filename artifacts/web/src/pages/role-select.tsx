@@ -447,14 +447,16 @@ export default function RoleSelect() {
       <section id="services" className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+            <p className="inline-flex items-center justify-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "#4CAF50" }}>
+              <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
               Platform Capabilities
+              <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
             </p>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+            <h2 className="text-4xl lg:text-[52px] font-bold tracking-tight leading-[1.1] mb-5" style={{ color: "#1a2035" }}>
               Expertise That Transforms
             </h2>
-            <p className="text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
-              Tailored AI-powered recruitment solutions for real results
+            <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#6b7280" }}>
+              Tailored AI-powered recruitment solutions built for real results.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -480,14 +482,15 @@ export default function RoleSelect() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
             <div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+              <p className="inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "#4CAF50" }}>
+                <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
                 Built For Everyone
               </p>
-              <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6" style={{ color: "#1a2035" }}>
+              <h2 className="text-4xl lg:text-[52px] font-bold tracking-tight leading-[1.1] mb-6" style={{ color: "#1a2035" }}>
                 Your Strategic Partner in Talent Acquisition
               </h2>
-              <p className="text-base leading-relaxed mb-10" style={{ color: "#6b7280" }}>
-                Whether you're looking to hire top talent or find your next career move, AVANA Recruit's AI engine works for both sides of the recruitment equation.
+              <p className="text-lg leading-relaxed mb-10" style={{ color: "#6b7280" }}>
+                Whether you're hiring top talent or finding your next career move, AVANA Recruit's AI engine works for both sides of the recruitment equation.
               </p>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
@@ -574,14 +577,15 @@ export default function RoleSelect() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
             <div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+              <p className="inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "#4CAF50" }}>
+                <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
                 Trusted Verification
               </p>
-              <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-6" style={{ color: "#1a2035" }}>
+              <h2 className="text-4xl lg:text-[52px] font-bold tracking-tight leading-[1.05] mb-6" style={{ color: "#1a2035" }}>
                 Verified Candidates,
                 <br />Confident Hiring
               </h2>
-              <p className="text-base leading-relaxed mb-10" style={{ color: "#6b7280" }}>
+              <p className="text-lg leading-relaxed mb-10" style={{ color: "#6b7280" }}>
                 Our built-in employment verification system lets candidates request references directly through the platform. Verifiers receive a secure email link to confirm employment history — giving companies the confidence they need.
               </p>
               <div className="space-y-5">
@@ -664,14 +668,16 @@ export default function RoleSelect() {
       <section id="pricing" className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: "#4CAF50" }}>
+            <p className="inline-flex items-center justify-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "#4CAF50" }}>
+              <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
               Pricing
+              <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
             </p>
-            <h2 className="text-3xl lg:text-[40px] font-bold leading-tight mb-4" style={{ color: "#1a2035" }}>
+            <h2 className="text-4xl lg:text-[52px] font-bold tracking-tight leading-[1.1] mb-5" style={{ color: "#1a2035" }}>
               Simple, Transparent Pricing
             </h2>
-            <p className="text-base max-w-2xl mx-auto" style={{ color: "#6b7280" }}>
-              Choose a plan that fits your recruitment needs. No hidden fees.
+            <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#6b7280" }}>
+              Choose a plan that fits your recruitment needs. No hidden fees, no surprises.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
