@@ -650,43 +650,84 @@ export default function RoleSelect() {
             <div className="flex justify-center lg:order-0 lg:mt-[140px]">
               <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
                 <div className="flex items-center gap-3 pb-5 mb-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}>
-                    <ShieldCheck className="w-5 h-5" style={{ color: "#4CAF50" }} />
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)", color: "#4CAF50" }}>
+                    SH
                   </div>
-                  <div>
-                    <div className="text-sm font-semibold" style={{ color: "#ffffff" }}>Employment Verification</div>
-                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Sample verification status</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: "#ffffff" }}>Sarah Hughes</div>
+                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Senior Developer · 8 years experience</div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" style={{ color: "#4CAF50" }} />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#4CAF50" }}>3 of 4</span>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {[
-                    { role: "Senior Developer", company: "Acme Corp", verifier: "J. Smith", status: "Verified" },
-                    { role: "Tech Lead", company: "Nova Tech", verifier: "S. Williams", status: "Verified" },
-                    { role: "Full Stack Engineer", company: "StartupXYZ", verifier: "M. Johnson", status: "Pending" },
-                  ].map((item) => (
-                    <div key={item.role} className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
-                      <div className="shrink-0">
-                        {item.status === "Verified" ? (
-                          <CheckCircle2 className="w-5 h-5" style={{ color: "#4CAF50" }} />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full border-2 animate-pulse" style={{ borderColor: "rgba(251, 191, 36, 0.6)" }} />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium truncate" style={{ color: "#ffffff" }}>{item.role}</div>
-                        <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{item.company} &middot; {item.verifier}</div>
-                      </div>
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
-                        style={{
-                          backgroundColor: item.status === "Verified" ? "rgba(76, 175, 80, 0.15)" : "rgba(251, 191, 36, 0.15)",
-                          color: item.status === "Verified" ? "#4CAF50" : "#FBBF24",
-                        }}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                  ))}
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Employment History
+                </div>
+                <div className="relative">
+                  {/* Timeline rail */}
+                  <span aria-hidden className="absolute left-[7px] top-2 bottom-2 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+                  <div className="space-y-4">
+                    {[
+                      { role: "Senior Developer", company: "Acme Corp", period: "2022 — Present", verifier: "J. Smith, CTO", status: "Verified" },
+                      { role: "Tech Lead", company: "Nova Tech", period: "2019 — 2022", verifier: "S. Williams, VP Eng", status: "Verified" },
+                      { role: "Full Stack Engineer", company: "StartupXYZ", period: "2017 — 2019", verifier: "M. Johnson, Founder", status: "Pending" },
+                      { role: "Junior Developer", company: "Beta Labs", period: "2016 — 2017", verifier: "—", status: "Unverified" },
+                    ].map((item) => {
+                      const isVerified = item.status === "Verified";
+                      const isPending = item.status === "Pending";
+                      const dotColor = isVerified ? "#4CAF50" : isPending ? "#FBBF24" : "rgba(255,255,255,0.25)";
+                      const ringColor = isVerified ? "rgba(76,175,80,0.25)" : isPending ? "rgba(251,191,36,0.25)" : "rgba(255,255,255,0.08)";
+                      return (
+                        <div key={item.role} className="relative flex items-start gap-4 pl-1">
+                          {/* Timeline dot */}
+                          <div className="relative z-10 shrink-0 mt-1">
+                            {isVerified ? (
+                              <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ backgroundColor: dotColor, boxShadow: `0 0 0 4px ${ringColor}, 0 0 0 6px #1a2035` }}>
+                                <CheckCircle2 className="w-2.5 h-2.5" style={{ color: "#1a2035" }} strokeWidth={3} />
+                              </div>
+                            ) : isPending ? (
+                              <div className="w-3.5 h-3.5 rounded-full border-2 animate-pulse" style={{ borderColor: dotColor, backgroundColor: "transparent", boxShadow: `0 0 0 4px ${ringColor}, 0 0 0 6px #1a2035` }} />
+                            ) : (
+                              <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: "transparent", border: `1.5px dashed ${dotColor}`, boxShadow: `0 0 0 4px ${ringColor}, 0 0 0 6px #1a2035` }} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0 pb-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium truncate" style={{ color: "#ffffff" }}>{item.role}</div>
+                                <div className="text-xs truncate" style={{ color: "rgba(255,255,255,0.55)" }}>{item.company}</div>
+                              </div>
+                              <span
+                                className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                                style={{
+                                  backgroundColor: isVerified ? "rgba(76, 175, 80, 0.15)" : isPending ? "rgba(251, 191, 36, 0.15)" : "rgba(255,255,255,0.06)",
+                                  color: isVerified ? "#4CAF50" : isPending ? "#FBBF24" : "rgba(255,255,255,0.5)",
+                                }}
+                              >
+                                {item.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                              <span>{item.period}</span>
+                              {item.verifier !== "—" ? (
+                                <>
+                                  <span aria-hidden>·</span>
+                                  <span className="truncate">Verifier: {item.verifier}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span aria-hidden>·</span>
+                                  <span className="italic">No verifier added</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
