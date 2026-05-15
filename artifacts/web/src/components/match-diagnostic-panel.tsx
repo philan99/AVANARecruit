@@ -164,9 +164,13 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
               const counted = (e.experience.perEntryScores ?? []).filter(entry => entry.relevance >= 0.5);
               if (counted.length === 0) return null;
               return (
-                <div className="pt-2 mt-1 border-t">
-                  <p className="font-medium mb-1 text-foreground">Relevant years from candidate's work history</p>
-                  <p className="text-[11px] text-muted-foreground mb-2">Only directly relevant and adjacent-role entries are counted. Weakly transferable or unrelated roles are excluded from the score and from this list.</p>
+                <details className="pt-2 mt-1 border-t group">
+                  <summary className="cursor-pointer list-none flex items-center justify-between gap-2 select-none">
+                    <span className="font-medium text-foreground">Relevant years from candidate's work history ({counted.length})</span>
+                    <span className="text-[11px] text-muted-foreground group-open:hidden">Show</span>
+                    <span className="text-[11px] text-muted-foreground hidden group-open:inline">Hide</span>
+                  </summary>
+                  <p className="text-[11px] text-muted-foreground mt-2 mb-2">Only directly relevant and adjacent-role entries are counted. Weakly transferable or unrelated roles are excluded from the score and from this list.</p>
                   <div className="space-y-2">
                     {counted.map((entry, idx) => {
                       const contributed = Math.round(entry.weightedYears * entry.relevance * 10) / 10;
@@ -191,7 +195,7 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
                       );
                     })}
                   </div>
-                </div>
+                </details>
               );
             })()}
           </CardContent>
