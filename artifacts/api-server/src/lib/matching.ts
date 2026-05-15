@@ -311,32 +311,27 @@ function computeExperienceScore(
   const overqualOpts = {
     penaliseOverqualification: (job as any).acceptOverqualified === false,
   };
-  const totalScore = scoreYearsAgainstRequirement(
-    candidate.experienceYears,
-    requiredYears,
-    overqualOpts,
-  );
 
   const relevance = computeEffectiveRelevantYears(job, candidate, opts.aiRelevanceMap);
   if (relevance == null) {
-    // No work-history entries to draw on — fall back to total years only.
-    return totalScore;
+    // No work-history entries on file — we have no signal to assess
+    // relevance, so fall back to declared total years only. This is the
+    // ONLY path where total years influence the score.
+    return scoreYearsAgainstRequirement(
+      candidate.experienceYears,
+      requiredYears,
+      overqualOpts,
+    );
   }
 
-  if (relevance.effectiveRelevantYears <= 0.1) {
-    // Candidate has work history but nothing reads as relevant. Soften
-    // the old 25-point cap to a 40-point cap so transferable tenure
-    // still carries weight — the recruiter can read the assessment to
-    // see why the score is low.
-    return Math.min(40, Math.round(totalScore * 0.4));
-  }
-
-  const relevantScore = scoreYearsAgainstRequirement(
+  // Score is driven entirely by role-relevant years. Unrelated tenure
+  // does not contribute — a 20-year career in another field scores the
+  // same as no career at all if none of it is relevant to this job.
+  return scoreYearsAgainstRequirement(
     relevance.effectiveRelevantYears,
     requiredYears,
     overqualOpts,
   );
-  return Math.round(relevantScore * 0.8 + totalScore * 0.2);
 }
 
 // ---------------------------------------------------------------------------
@@ -836,7 +831,7 @@ function generateAssessment(result: MatchResult, job: Job, candidate: Candidate,
   }
 
   if (opts.hasNoRelevantExperience) {
-    parts.push(`Work history shows no role-relevant experience for this position, which significantly limits the experience score.`);
+    parts.push(`Work history shows no role-relevant experience for this position. Total years in unrelated roles do not contribute to the experience score.`);
   } else if (result.experienceScore >= 80) {
     parts.push(`Experience level aligns well with requirements.`);
   } else if (result.experienceScore >= 60) {

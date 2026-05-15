@@ -137,7 +137,7 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
             title="Experience"
             score={e.experience.score}
             importance={e.experience.importance}
-            rule="Compares total years and role-relevant years (from work history matching the job title or required skills) against the level set on the job. If the candidate has work history but none of it is role-relevant, the score is capped at 25/100 — unrelated tenure cannot carry this element."
+            rule="Driven entirely by role-relevant years from work history (each entry's recency-weighted duration multiplied by how relevant the role is to this job) measured against the level set on the job. Unrelated tenure does not contribute — a long career in a different field scores no better than no career at all if none of it is relevant. Total declared years are only used as a fallback when the candidate has no work-history entries on file."
           />
           <CardContent className="text-xs space-y-1">
             <KV k="Job level" v={`${e.experience.jobExperienceLevel} (≈${e.experience.requiredYears} yrs expected)`} />
