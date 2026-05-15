@@ -678,12 +678,11 @@ export default function RoleSelect() {
             <div className="rounded-xl p-8 flex flex-col" style={{ backgroundColor: "#eef6ee", border: "1px solid #c8e6c9" }}>
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2" style={{ color: "#4CAF50" }}>Candidate</p>
               <div className="mb-1">
-                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>£10</span>
-                <span className="text-sm" style={{ color: "#6b7280" }}>/year</span>
+                <span className="text-4xl font-bold" style={{ color: "#1a2035" }}>Free</span>
               </div>
               <p className="text-sm mb-8" style={{ color: "#6b7280" }}>Unlock premium AI matching to land your ideal role faster</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Full candidate profile with CV upload", "AI-powered job matching & scoring", "Priority visibility to employers", "Save & track favourite jobs", "Application status notifications", "Verified profile badge"].map((f) => (
+                {["Full candidate profile with CV upload", "AI-powered job matching & scoring", "AI CV rewrite tailored to your target role", "Run match diagnostics to see why you scored", "Priority visibility to employers", "Save & track favourite jobs", "Application status notifications", "Verified profile badge"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#374151" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
