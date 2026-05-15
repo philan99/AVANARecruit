@@ -219,18 +219,41 @@ function heuristicEntryRelevance(entry: any, job: Job): number {
   for (const t of titleTokens) {
     if (jobTitleTokens.has(t)) return 1;
   }
-  const desc = ((entry?.description ?? "") + " " + (entry?.jobTitle ?? "")).toLowerCase();
-  if (!desc.trim()) return 0;
+  // Build a haystack from the candidate entry AND the job's free-text
+  // requirements / description so a CV that quotes the JD's wording (or
+  // vice versa) gets credit even without title overlap.
+  const candidateText = ((entry?.description ?? "") + " " + (entry?.jobTitle ?? "")).toLowerCase();
+  const jobText = ((job.requirements ?? "") + " " + (job.description ?? "")).toLowerCase();
+  if (!candidateText.trim()) return 0;
   let skillHits = 0;
   for (const skill of job.skills ?? []) {
     const norm = (skill ?? "").toLowerCase().trim();
     if (norm.length < 2) continue;
-    if (containsWord(desc, norm)) {
+    // The skill must appear on the candidate side (we're rating the
+    // candidate's relevance, not the job's). Job-side scanning is used
+    // as a tie-breaker below for skills the job emphasises in prose.
+    if (containsWord(candidateText, norm)) {
       skillHits += 1;
       if (skillHits >= 2) return 0.6;
     }
   }
-  return skillHits === 1 ? 0.4 : 0;
+  if (skillHits === 1) return 0.4;
+  // Last resort: scan the candidate entry for any non-trivial keyword
+  // that the job description / requirements emphasises (≥ 2 hits → 0.4).
+  // This catches domain matches like "renewables", "fintech", "claims"
+  // that aren't in the structured skills list.
+  if (jobText.trim()) {
+    const jobKeywords = tokenizeForExperience(jobText);
+    let prosehits = 0;
+    for (const kw of jobKeywords) {
+      if (kw.length < 4) continue;
+      if (containsWord(candidateText, kw)) {
+        prosehits += 1;
+        if (prosehits >= 2) return 0.4;
+      }
+    }
+  }
+  return 0;
 }
 
 export interface PerEntryRelevance {
@@ -473,17 +496,18 @@ export async function scoreExperienceRelevanceAI(
     company: e?.company ?? "",
     startDate: e?.startDate ?? null,
     endDate: e?.current ? "present" : (e?.endDate ?? null),
-    description: (e?.description ?? "").slice(0, 800),
+    description: (e?.description ?? "").slice(0, 2000),
   }));
 
-  const systemPrompt = "You are a recruiting analyst. Rate how relevant each of a candidate's past work-history entries is to a target job. Consider title overlap, transferable skills, and adjacent role families (e.g. data engineer ↔ data scientist are highly relevant; sales ↔ engineering are not). Return ONLY a JSON object: { entries: [{ index: number, relevance: number, reason: string }] } where relevance is between 0 and 1 (1 = directly relevant, 0.6-0.8 = adjacent role family, 0.3-0.5 = some transferable skills, 0 = unrelated). Reason should be one short sentence.";
+  const systemPrompt = "You are a recruiting analyst. Rate how relevant each of a candidate's past work-history entries is to a target job. Consider title overlap, transferable skills, adjacent role families (e.g. data engineer ↔ data scientist are highly relevant; sales ↔ engineering are not), and industry context (a software role in fintech is more relevant to another fintech role than to a healthcare role). Return ONLY a JSON object: { entries: [{ index: number, relevance: number, reason: string }] } where relevance is between 0 and 1 (1 = directly relevant, 0.6-0.8 = adjacent role family, 0.3-0.5 = some transferable skills, 0 = unrelated). Reason should be one short sentence.";
 
   const userPrompt = JSON.stringify({
     job: {
       title: job.title,
+      industry: job.industry ?? null,
       skills: job.skills ?? [],
       experienceLevel: job.experienceLevel,
-      requirements: (job.requirements ?? "").slice(0, 800),
+      requirements: (job.requirements ?? "").slice(0, 2000),
     },
     workHistory: entriesPayload,
   });
