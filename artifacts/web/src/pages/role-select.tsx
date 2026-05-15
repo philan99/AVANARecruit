@@ -605,7 +605,7 @@ export default function RoleSelect() {
       <section className="py-20 lg:py-28" style={{ backgroundColor: "#f8f9fb" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
-            <div>
+            <div className="lg:order-1">
               <p className="inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "#4CAF50" }}>
                 <span aria-hidden className="inline-block w-6 h-px" style={{ backgroundColor: "#4CAF50" }} />
                 Trusted Verification
@@ -647,7 +647,7 @@ export default function RoleSelect() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center lg:mt-[140px]">
+            <div className="flex justify-center lg:order-0 lg:mt-[140px]">
               <div className="rounded-2xl p-8 w-full max-w-md" style={{ backgroundColor: "#1a2035" }}>
                 <div className="flex items-center gap-3 pb-5 mb-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(76, 175, 80, 0.15)" }}>
