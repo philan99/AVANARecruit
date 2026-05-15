@@ -706,7 +706,7 @@ export default function RoleSelect() {
               </div>
               <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For growing businesses hiring regularly</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Up to 10 active job listings", "AI candidate matching & scoring", "Candidate pipeline management", "Skills-based shortlisting engine", "Priority email support", "Branded company profile page"].map((f) => (
+                {["Up to 10 active job listings", "AI candidate matching & scoring", "Detailed match diagnostics for every shortlisted candidate", "Real-time alerts when new matching candidates register", "Employment verification requests built in", "Candidate pipeline management", "Skills-based shortlisting engine", "Priority email support", "Branded company profile page"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
@@ -729,7 +729,7 @@ export default function RoleSelect() {
               </div>
               <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>For large organisations with high-volume hiring needs</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {["Unlimited job listings", "Advanced AI matching algorithms", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
+                {["Unlimited job listings", "Advanced AI matching algorithms", "Detailed match diagnostics across every role and candidate", "Bulk employment verification at scale", "Multi-team collaboration with role-based access", "Dedicated account manager", "Custom integrations & API access", "Analytics & reporting dashboard", "SLA-backed support"].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
                     <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#4CAF50" }} />
                     {f}
