@@ -248,6 +248,26 @@ export interface ExperienceRelevanceResult {
 }
 
 /**
+ * Minimum per-entry relevance for a work-history entry to count toward
+ * effective relevant years. Anything below this is treated as
+ * non-contributing — i.e. only directly relevant or adjacent-role work
+ * counts; weak "some transferable skills" entries are excluded so
+ * scores reflect genuinely relevant tenure.
+ *
+ *   ≥ 0.85 → directly relevant
+ *   ≥ 0.50 → adjacent role family (still counts)
+ *   < 0.50 → some transferable / unrelated (excluded)
+ */
+export const RELEVANCE_THRESHOLD = 0.5;
+
+function sumEffectiveYears(perEntryScores: PerEntryRelevance[]): number {
+  return perEntryScores.reduce(
+    (sum, e) => (e.relevance >= RELEVANCE_THRESHOLD ? sum + e.weightedYears * e.relevance : sum),
+    0,
+  );
+}
+
+/**
  * Compute effective relevant years from a candidate's work history. If a
  * cached AI relevance entry is available it is used; otherwise this
  * falls back to the heuristic. Returns null when the candidate has no
@@ -267,9 +287,13 @@ function computeEffectiveRelevantYears(
     && cached.jobHash === hashJobForRelevance(job)
     && cached.candidateExperienceHash === hashCandidateExperience(candidate)
   ) {
+    const perEntryScores = (cached.perEntryScores as PerEntryRelevance[]) ?? [];
+    // Recompute from per-entry scores so the active RELEVANCE_THRESHOLD
+    // is applied even to historical cache rows whose stored
+    // effectiveRelevantYears was summed under an older threshold.
     return {
-      effectiveRelevantYears: cached.effectiveRelevantYears,
-      perEntryScores: (cached.perEntryScores as PerEntryRelevance[]) ?? [],
+      effectiveRelevantYears: sumEffectiveYears(perEntryScores),
+      perEntryScores,
       source: "ai-cache",
     };
   }
@@ -294,7 +318,7 @@ function computeEffectiveRelevantYears(
       relevance,
     };
   });
-  const effective = perEntryScores.reduce((sum, e) => sum + e.weightedYears * e.relevance, 0);
+  const effective = sumEffectiveYears(perEntryScores);
   return { effectiveRelevantYears: effective, perEntryScores, source: "heuristic" };
 }
 
@@ -504,7 +528,7 @@ export async function scoreExperienceRelevanceAI(
       reason: ai?.reason,
     };
   });
-  const effective = perEntryScores.reduce((s, e) => s + e.weightedYears * e.relevance, 0);
+  const effective = sumEffectiveYears(perEntryScores);
 
   try {
     await db
