@@ -29,7 +29,15 @@ export type Diagnostic = {
     assessment: string;
     elements: {
       skills: { score: number; importance: Importance; jobSkills: string[]; candidateSkills: string[]; matched: string[]; missing: string[] };
-      experience: { score: number; importance: Importance; jobExperienceLevel: string; requiredYears: number; candidateTotalYears: number; candidateRelevantYears: number | null };
+      experience: {
+        score: number;
+        importance: Importance;
+        jobExperienceLevel: string;
+        requiredYears: number;
+        candidateTotalYears: number;
+        candidateRelevantYears: number | null;
+        perEntryScores?: Array<{ jobTitle: string; durationYears: number; weightedYears: number; relevance: number; reason?: string }>;
+      };
       education: { score: number; importance: Importance; jobEducationLevel: string | null; candidateEducation: string };
       location: { score: number; importance: Importance; jobLocation: string; candidateLocation: string };
       verification: { score: number; importance: Importance; verifiedCount: number };
@@ -152,9 +160,36 @@ export function MatchDiagnosticPanel({ data }: { data: Diagnostic }) {
               k="Role-relevant years"
               v={e.experience.candidateRelevantYears == null ? "n/a (no work history captured)" : `${e.experience.candidateRelevantYears} yrs`}
             />
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              <span className="font-medium text-foreground">How this is calculated:</span> each work-history entry's duration is weighted by how recent it is, then multiplied by how relevant the role is to this job (a directly matching role counts in full, an adjacent role counts partially, an unrelated role counts as zero). The totals are summed and compared against the years expected for the job level — meeting the requirement scores around 90, with bonuses above and a graduated penalty below.
-            </p>
+            {e.experience.perEntryScores && e.experience.perEntryScores.length > 0 ? (
+              <div className="pt-2 mt-1 border-t">
+                <p className="font-medium mb-2 text-foreground">Relevant years from candidate's work history</p>
+                <div className="space-y-2">
+                  {e.experience.perEntryScores.map((entry, idx) => {
+                    const contributed = Math.round(entry.weightedYears * entry.relevance * 10) / 10;
+                    const relevancePct = Math.round(entry.relevance * 100);
+                    const tag =
+                      entry.relevance >= 0.85 ? { label: "Directly relevant", className: "bg-green-100 text-green-800 border-green-200" }
+                      : entry.relevance >= 0.5 ? { label: "Adjacent role", className: "bg-amber-100 text-amber-800 border-amber-200" }
+                      : entry.relevance > 0 ? { label: "Some transferable", className: "bg-amber-50 text-amber-700 border-amber-200" }
+                      : { label: "Unrelated", className: "bg-gray-100 text-gray-600 border-gray-200" };
+                    return (
+                      <div key={idx} className="rounded border p-2 bg-muted/30">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <span className="font-medium text-foreground truncate">{entry.jobTitle || "Untitled role"}</span>
+                          <Badge variant="outline" className={`shrink-0 text-[10px] ${tag.className}`}>{tag.label}</Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                          <div><span className="block text-[10px] uppercase tracking-wider">Duration</span><span className="text-foreground">{entry.durationYears} yrs</span></div>
+                          <div><span className="block text-[10px] uppercase tracking-wider">Relevance</span><span className="text-foreground">{relevancePct}%</span></div>
+                          <div><span className="block text-[10px] uppercase tracking-wider">Counted</span><span className="text-foreground">{contributed} yrs</span></div>
+                        </div>
+                        {entry.reason ? <p className="text-[11px] text-muted-foreground mt-1 italic">{entry.reason}</p> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
